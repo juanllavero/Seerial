@@ -1,0 +1,134 @@
+.transparent{
+    -fx-background-color: transparent;
+}
+
+.selected{
+    -fx-background-color: #b8b8b8;
+}
+
+.roundButton{
+    
+}
+
+.darkerBackground{
+    -fx-background-color: #202124;
+}
+
+.greyGradient{
+    -fx-background-color: linear-gradient(to top right, rgba(61,61,66,1) 0%, rgba(50,50,55,1) 19%, rgba(47,47,51,1) 35%, rgba(45,45,48,1) 53%, rgba(41,41,43,1) 70%, rgba(33,33,33,1) 100%);
+}
+
+.blurredBackground{
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+}
+
+.roundedMenu{
+    -fx-background-radius: 15px;
+}
+
+.seeButton{
+    -fx-background-color: rgb(246, 246, 246);
+    -fx-background-radius: 35px;
+}
+
+.seeButton:hover{
+    -fx-background-color: rgb(189, 189, 189);
+}
+
+.optionsButton {
+    -fx-background-image: url("img/icons/options.png");
+    -fx-background-color: rgba(37, 37, 37, 0.66);
+    -fx-background-radius: 50px;
+}
+
+.optionsButton:hover {
+    -fx-background-color: #252525;
+}
+
+.imageCover{
+    -fx-background-color: transparent;
+}
+
+.imageCover:pressed {
+    -fx-background-color: transparent;
+    -fx-border-color:
+            linear-gradient(#686868 0%, #a9a9a9 25%, #5e5e5e 75%, #3d3d3d 100%),
+            linear-gradient(#9d9e9d 0%, #6b6a6b 20%, #343534 80%, #242424 100%),
+            linear-gradient(#8a8a8a 0%, #6b6a6b 20%, #343534 80%, #262626 100%),
+            linear-gradient(#777777 0%, #606060 50%, #505250 51%, #2a2b2a 100%);
+    -fx-border-width: 3 3 3 3;
+    -fx-border-radius: 4, 3, 2;
+}
+
+.textButton {
+    -fx-text-fill: rgba(210, 210, 210, 0.66);
+}
+
+.textButton:hover {
+    -fx-text-fill: rgb(255, 255, 255);
+}
+
+.buttonGradient {
+    -fx-background-color: transparent;
+}
+
+.buttonGradient:hover {
+    -fx-background-color: transparent;
+    -fx-border-width: 2 2 2 2;
+    -fx-border-color: linear-gradient(to top, rgba(176,176,176,1) 0%, rgba(186,186,186,1) 31%, rgba(65,65,65,1) 63%, rgba(65,65,65,1) 100%);
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track{
+    -fx-background-color :transparent;
+    -fx-border-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-border-radius :2.0em;
+}
+
+
+.scroll-bar:horizontal .increment-button ,
+.scroll-bar:horizontal .decrement-button {
+    -fx-background-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-padding :0.0 0.0 10.0 0.0;
+
+}
+
+.scroll-bar:vertical .increment-button ,
+.scroll-bar:vertical .decrement-button {
+    -fx-background-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-padding :0.0 10.0 0.0 0.0;
+
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow{
+    -fx-shape : " ";
+    -fx-padding :0.15em 0.0;
+}
+
+.scroll-bar:vertical .increment-arrow,
+.scroll-bar:vertical .decrement-arrow{
+    -fx-shape : " ";
+    -fx-padding :0.0 0.15em;
+}
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color :derive(black,90.0%);
+    -fx-background-insets : 2.0, 0.0, 0.0;
+    -fx-background-radius : 2.0em;
+}
+
+.scroll-bar:horizontal .thumb:hover,
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color :derive(#4D4C4F,10.0%);
+    -fx-background-insets : 2.0, 0.0, 0.0;
+    -fx-background-radius : 2.0em;
+}

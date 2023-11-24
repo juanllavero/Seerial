@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="500.0" prefWidth="600.0" styleClass="transparent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddSeasonController">
+    <children>
+        <BorderPane prefHeight="500.0" prefWidth="600.0" styleClass="darkerBackground" stylesheets="@styles.css">
+            <center>
+                <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+                    <children>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                              <Label text="Name" textFill="WHITE">
+                                  <opaqueInsets>
+                                      <Insets />
+                                  </opaqueInsets>
+                           <HBox.margin>
+                              <Insets left="50.0" />
+                           </HBox.margin>
+                              </Label>
+                        <Label text="Year" textFill="WHITE">
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <HBox.margin>
+                              <Insets left="330.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                              <TextField fx:id="nameField" prefHeight="25.0" prefWidth="526.0">
+                           <HBox.margin>
+                              <Insets left="50.0" />
+                           </HBox.margin>
+                              </TextField>
+                        <TextField fx:id="yearField" prefHeight="25.0" prefWidth="315.0">
+                           <HBox.margin>
+                              <Insets left="20.0" right="50.0" />
+                           </HBox.margin>
+                        </TextField>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label fx:id="errorName" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="662.0" textFill="#c30606">
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <HBox.margin>
+                              <Insets left="50.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label fx:id="errorYear" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="17.0" prefWidth="662.0" textFill="#c30606">
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <HBox.margin>
+                              <Insets left="50.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                        <Label text="Logo (Optional)" textFill="#fcfcfc">
+                            <VBox.margin>
+                                <Insets left="50.0" top="5.0" />
+                            </VBox.margin>
+                        </Label>
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                            <children>
+                                <TextField fx:id="logoField" HBox.hgrow="ALWAYS">
+                                    <HBox.margin>
+                                        <Insets left="50.0" right="10.0" top="5.0" />
+                                    </HBox.margin>
+                                </TextField>
+                                <Button mnemonicParsing="false" onMouseClicked="#loadLogo" text="Load">
+                                    <HBox.margin>
+                                        <Insets right="50.0" />
+                                    </HBox.margin>
+                                </Button>
+                            </children>
+                        </HBox>
+                  <Label fx:id="errorLogo" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="662.0" textFill="#c30606">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Label text="Background Image" textFill="#fcfcfc">
+                     <VBox.margin>
+                        <Insets left="50.0" top="5.0" />
+                     </VBox.margin>
+                  </Label>
+                  <HBox alignment="CENTER" layoutX="10.0" layoutY="175.0" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <TextField fx:id="backgroundField" HBox.hgrow="ALWAYS">
+                           <HBox.margin>
+                              <Insets left="50.0" right="10.0" />
+                           </HBox.margin>
+                        </TextField>
+                        <Button mnemonicParsing="false" onMouseClicked="#loadBackground" text="Load">
+                           <HBox.margin>
+                              <Insets right="50.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                  </HBox>
+                  <Label fx:id="errorBackground" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="161.0" prefHeight="17.0" prefWidth="662.0" textFill="#c30606">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Label layoutX="60.0" layoutY="153.0" text="Background Video (Optional)" textFill="#fcfcfc">
+                     <VBox.margin>
+                        <Insets left="50.0" top="5.0" />
+                     </VBox.margin>
+                  </Label>
+                  <HBox alignment="CENTER" layoutX="10.0" layoutY="161.0" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <TextField fx:id="videoField" HBox.hgrow="ALWAYS">
+                           <HBox.margin>
+                              <Insets left="50.0" right="10.0" />
+                           </HBox.margin>
+                        </TextField>
+                        <Button mnemonicParsing="false" onMouseClicked="#loadVideo" text="Load">
+                           <HBox.margin>
+                              <Insets right="50.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <Label fx:id="errorVideo" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="200.0" prefHeight="17.0" prefWidth="662.0" textFill="#c30606">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Label layoutX="60.0" layoutY="222.0" text="Background Music (Optional)" textFill="#fcfcfc">
+                     <VBox.margin>
+                        <Insets left="50.0" top="5.0" />
+                     </VBox.margin>
+                  </Label>
+                  <HBox alignment="CENTER" layoutX="10.0" layoutY="244.0" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <TextField fx:id="musicField" HBox.hgrow="ALWAYS">
+                           <HBox.margin>
+                              <Insets left="50.0" right="10.0" />
+                           </HBox.margin>
+                        </TextField>
+                        <Button mnemonicParsing="false" onMouseClicked="#loadMusic" text="Load">
+                           <HBox.margin>
+                              <Insets right="50.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <Label fx:id="errorMusic" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="274.0" prefHeight="17.0" prefWidth="662.0" textFill="#c30606">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <VBox.margin>
+                        <Insets top="5.0" />
+                     </VBox.margin>
+                  </Label>
+                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                            <center>
+                                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                    <children>
+                                        <Button mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Add">
+                                            <HBox.margin>
+                                                <Insets right="50.0" />
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+                                    </children>
+                           <BorderPane.margin>
+                              <Insets bottom="20.0" top="10.0" />
+                           </BorderPane.margin>
+                                </HBox>
+                            </center>
+                        </BorderPane>
+                    </children>
+                    <BorderPane.margin>
+                        <Insets top="20.0" />
+                    </BorderPane.margin>
+                </VBox>
+            </center>
+            <top>
+                <BorderPane prefHeight="55.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+                    <right>
+                        <ImageView fitHeight="30.0" fitWidth="30.0" onMouseClicked="#cancelImage" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+                            <image>
+                                <Image url="@../../../img/icons/close.png" />
+                            </image>
+                            <BorderPane.margin>
+                                <Insets right="15.0" />
+                            </BorderPane.margin>
+                        </ImageView>
+                    </right>
+                    <center>
+                        <Label text="ADD SEASON" textFill="#f8f8f8" BorderPane.alignment="CENTER">
+                            <font>
+                                <Font size="22.0" />
+                            </font>
+                            <BorderPane.margin>
+                                <Insets left="40.0" />
+                            </BorderPane.margin>
+                        </Label>
+                    </center>
+                </BorderPane>
+            </top>
+        </BorderPane>
+    </children>
+</AnchorPane>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="200.0" styleClass="transparent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DiscController">
+   <children>
+      <ImageView fx:id="image" fitHeight="200.0" fitWidth="200.0" onMouseClicked="#onMouseClick" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../img/DBZDisc1.jpg" />
+         </image>
+      </ImageView>
+      <Label fx:id="name" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="200.0" text="Series Name" textFill="#e8e8e8">
+         <font>
+            <Font size="20.0" />
+         </font>
+         <VBox.margin>
+            <Insets top="5.0" />
+         </VBox.margin>
+         <effect>
+            <DropShadow offsetY="2.5" />
+         </effect>
+      </Label>
+   </children>
+</VBox>

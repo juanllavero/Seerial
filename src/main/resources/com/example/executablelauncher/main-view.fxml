@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<HBox fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.Controller">
+   <children>
+      <StackPane fx:id="firstPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+         <children>
+            <ImageView fx:id="backgroundImage" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../img/backgroundDefault.jpeg" />
+               </image>
+               <effect>
+                  <GaussianBlur radius="27.79" />
+               </effect>
+            </ImageView>
+            <BorderPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" styleClass="transparent" stylesheets="@styles.css">
+               <top>
+                  <HBox fx:id="topBar" prefHeight="60.0" prefWidth="1280.0" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="TOP_CENTER">
+                     <children>
+                        <BorderPane fx:id="topBorderPane" prefHeight="93.0" prefWidth="1276.0">
+                           <right>
+                              <ImageView fx:id="menuButton" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+                                 <image>
+                                    <Image url="@../../../img/icons/menu.png" />
+                                 </image>
+                                 <BorderPane.margin>
+                                    <Insets right="50.0" top="10.0" />
+                                 </BorderPane.margin>
+                              </ImageView>
+                           </right>
+                           <padding>
+                              <Insets top="5.0" />
+                           </padding>
+                           <HBox.margin>
+                              <Insets top="5.0" />
+                           </HBox.margin>
+                        </BorderPane>
+                     </children>
+                     <BorderPane.margin>
+                        <Insets />
+                     </BorderPane.margin>
+                     <padding>
+                        <Insets left="25.0" right="30.0" />
+                     </padding>
+                  </HBox>
+               </top>
+               <center>
+                  <StackPane BorderPane.alignment="CENTER">
+                     <children>
+                        <HBox fx:id="hBox" styleClass="transparent" stylesheets="@styles.css">
+                           <children>
+                              <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" prefHeight="655.0" prefWidth="1281.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS">
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                                 <padding>
+                                    <Insets right="5.0" top="5.0" />
+                                 </padding>
+                                 <content>
+                                    <FlowPane fx:id="cardContainer" hgap="20.0" prefHeight="640.0" prefWidth="1169.0" styleClass="transparent" stylesheets="@styles.css" vgap="20.0">
+                                       <padding>
+                                          <Insets bottom="10.0" left="50.0" right="10.0" top="10.0" />
+                                       </padding>
+                                    </FlowPane>
+                                 </content>
+                              </ScrollPane>
+                           </children>
+                        </HBox>
+                     </children>
+                  </StackPane>
+               </center>
+            </BorderPane>
+            <StackPane fx:id="slideMenuParent" styleClass="blurredBackground" stylesheets="@styles.css" StackPane.alignment="CENTER">
+               <children>
+                  <AnchorPane StackPane.alignment="CENTER">
+                     <children>
+                        <FlowPane fx:id="contextMenuParent" alignment="CENTER" columnHalignment="CENTER" prefHeight="720.0" prefWidth="1280.0">
+                           <children>
+                              <VBox fx:id="contextMenu" alignment="CENTER" fillWidth="false" prefHeight="180.0" prefWidth="280.0" styleClass="greyGradient" stylesheets="@styles.css">
+                                 <children>
+                                    <HBox fillHeight="false" prefHeight="25.0" prefWidth="280.0" styleClass="darkerBackground" stylesheets="@styles.css">
+                                       <children>
+                                          <Label fx:id="contextMenuLabel" prefHeight="17.0" prefWidth="280.0" text="Name of the series" textFill="WHITE">
+                                             <font>
+                                                <Font size="15.0" />
+                                             </font>
+                                             <padding>
+                                                <Insets bottom="5.0" left="10.0" top="5.0" />
+                                             </padding>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets top="5.0" />
+                                       </padding>
+                                    </HBox>
+                                    <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#editSeries" prefHeight="50.0" prefWidth="280.0" styleClass="buttonGradient" stylesheets="@styles.css" text="Edit" textFill="#e1e1e1">
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                       </VBox.margin>
+                                       <padding>
+                                          <Insets left="10.0" />
+                                       </padding>
+                                       <graphic>
+                                          <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/edit.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
+                                    <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#addSeason" prefHeight="50.0" prefWidth="280.0" styleClass="buttonGradient" stylesheets="@styles.css" text="Add Season" textFill="#e1e1e1">
+                                       <padding>
+                                          <Insets left="10.0" />
+                                       </padding>
+                                       <graphic>
+                                          <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/add.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" left="2.0" right="2.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#Remove" prefHeight="50.0" prefWidth="280.0" styleClass="buttonGradient" stylesheets="@styles.css" text="Remove" textFill="#e1e1e1">
+                                       <padding>
+                                          <Insets left="10.0" />
+                                       </padding>
+                                       <graphic>
+                                          <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/remove.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" left="2.0" right="2.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                    <Button alignment="BASELINE_LEFT" graphicTextGap="12.0" mnemonicParsing="false" onMouseClicked="#hideContextMenu" prefHeight="50.0" prefWidth="280.0" styleClass="buttonGradient" stylesheets="@styles.css" text="Cancel" textFill="#e1e1e1">
+                                       <padding>
+                                          <Insets left="10.0" />
+                                       </padding>
+                                       <graphic>
+                                          <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/close.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" left="2.0" right="2.0" />
+                                       </VBox.margin>
+                                    </Button>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </FlowPane>
+                        <AnchorPane layoutX="975.0" prefHeight="720.0" prefWidth="300.0" AnchorPane.rightAnchor="50.0">
+                           <children>
+                              <VBox fx:id="sideMenu" fillWidth="false" prefHeight="556.0" prefWidth="249.0" stylesheets="@styles.css" AnchorPane.bottomAnchor="144.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+                                 <children>
+                                    <Label prefHeight="34.0" prefWidth="247.0" text="ExecutableLauncher" textFill="WHITE">
+                                       <font>
+                                          <Font size="23.0" />
+                                       </font>
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" left="15.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#addCollection" prefHeight="44.0" prefWidth="303.0" stylesheets="@styles.css" text="Add Collection" textFill="WHITE">
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                       <styleClass>
+                                          <String fx:value="transparent" />
+                                          <String fx:value="buttonGradient" />
+                                       </styleClass>
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                       </VBox.margin>
+                                       <graphic>
+                                          <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/add.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
+                                    <Button alignment="BASELINE_LEFT" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" mnemonicParsing="false" onMouseClicked="#close" prefHeight="44.0" prefWidth="302.0" stylesheets="@styles.css" text="Close" textFill="WHITE">
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                       <styleClass>
+                                          <String fx:value="transparent" />
+                                          <String fx:value="buttonGradient" />
+                                       </styleClass>
+                                       <VBox.margin>
+                                          <Insets bottom="2.0" left="2.0" right="2.0" />
+                                       </VBox.margin>
+                                       <graphic>
+                                          <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/close.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
+                                 </children>
+                                 <padding>
+                                    <Insets top="10.0" />
+                                 </padding>
+                                 <styleClass>
+                                    <String fx:value="greyGradient" />
+                                    <String fx:value="roundedMenu" />
+                                 </styleClass>
+                              </VBox>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </AnchorPane>
+               </children>
+            </StackPane>
+         </children>
+      </StackPane>
+   </children>
+</HBox>

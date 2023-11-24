@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane fx:id="fisrtAnchor" prefHeight="720.0" prefWidth="1280.0" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageCropper">
+   <children>
+      <VBox fx:id="mainBox" prefHeight="200.0" prefWidth="100.0" styleClass="darkerBackground" stylesheets="@styles.css">
+         <children>
+            <HBox prefHeight="48.0" prefWidth="1280.0" styleClass="darkerBackground" stylesheets="@styles.css">
+               <children>
+                  <TextField fx:id="urlText" prefHeight="25.0" prefWidth="197.0" promptText="Paste url">
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Button mnemonicParsing="false" onAction="#downloadImage" text="Download">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Button>
+                  <TextField fx:id="imageText" prefHeight="25.0" prefWidth="192.0">
+                     <HBox.margin>
+                        <Insets right="5.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Button mnemonicParsing="false" onAction="#loadImage" text="Load File">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#cropImage" text="Crop Image">
+                     <HBox.margin>
+                        <Insets left="10.0" />
+                     </HBox.margin>
+                  </Button>
+               </children>
+               <padding>
+                  <Insets left="50.0" top="10.0" />
+               </padding>
+            </HBox>
+            <Group fx:id="selectionGroup" styleClass="darkerBackground" stylesheets="@styles.css">
+               <children>
+                  <ScrollPane fx:id="rootPane" fitToHeight="true" fitToWidth="true" prefHeight="720.0" prefWidth="1280.0" styleClass="darkerBackground" stylesheets="@styles.css">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="720.0" prefWidth="1280.0" styleClass="darkerBackground" stylesheets="@styles.css">
+                           <children>
+                              <ImageView fx:id="mainImageView" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </ScrollPane>
+               </children>
+            </Group>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
