@@ -98,11 +98,11 @@
                            <children>
                               <StackPane>
                                  <children>
-                                    <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" prefHeight="300.0" prefWidth="1282.0" styleClass="transparent" stylesheets="@styles.css">
+                                    <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" styleClass="transparent" stylesheets="@styles.css">
                                        <content>
-                                          <HBox fx:id="cardContainer" prefHeight="300.0" prefWidth="1280.0" stylesheets="@styles.css">
+                                          <HBox fx:id="cardContainer" prefHeight="300.0" prefWidth="1278.0" stylesheets="@styles.css">
                                              <padding>
-                                                <Insets left="40.0" right="60.0" top="20.0" />
+                                                <Insets left="40.0" right="60.0" top="25.0" />
                                              </padding>
                                              <styleClass>
                                                 <String fx:value="greyGradient" />
@@ -250,7 +250,7 @@
                   </BorderPane>
                </center>
             </BorderPane>
-            <FlowPane fx:id="contextMenu" alignment="CENTER" columnHalignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="blurredBackground" stylesheets="@styles.css">
+            <FlowPane fx:id="contextMenu" alignment="CENTER" columnHalignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="blurredBackground" stylesheets="@styles.css" visible="false">
                <children>
                   <VBox alignment="CENTER" fillWidth="false" styleClass="greyGradient" stylesheets="@styles.css">
                      <children>

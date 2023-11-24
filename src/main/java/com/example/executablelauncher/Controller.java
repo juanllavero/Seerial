@@ -1,6 +1,7 @@
 package com.example.executablelauncher;
 
 import javafx.animation.FadeTransition;
+import javafx.scene.Node;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
@@ -55,13 +56,25 @@ public class Controller implements Initializable {
     private VBox sideMenu;
 
     @FXML
-    private StackPane slideMenuParent;
+    private AnchorPane sideMenuBox;
+
+    @FXML
+    private StackPane sideMenuParent;
 
     @FXML
     private FlowPane contextMenuParent;
 
     @FXML
     private VBox contextMenu;
+
+    @FXML
+    private Button addColButton;
+
+    @FXML
+    private Button addCatButton;
+
+    @FXML
+    private Button closeButton;
 
     @FXML
     private HBox topBar;
@@ -95,7 +108,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         cardContainer.setPadding(new Insets(15, 15, 15, 100));
-        slideMenuParent.setVisible(false);
+        sideMenuParent.setVisible(false);
 
         playBackgroundSound();
 
@@ -104,7 +117,7 @@ public class Controller implements Initializable {
         contextMenu.setVisible(false);
         menuButton.setOnMouseClicked(mouseEvent -> {
             playInteractionSound();
-            slideMenuParent.setVisible(true);
+            sideMenuParent.setVisible(true);
             sideMenu.setVisible(true);
         });
 
@@ -144,6 +157,14 @@ public class Controller implements Initializable {
         backgroundImage.setPreserveRatio(false);
         contextMenuParent.prefHeightProperty().bind(mainBox.heightProperty());
         contextMenuParent.prefWidthProperty().bind(mainBox.widthProperty());
+        
+        sideMenuBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+        sideMenuBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth() / 4.5);
+        sideMenu.prefHeightProperty().bind(sideMenuBox.prefHeightProperty());
+        sideMenu.prefWidthProperty().bind(sideMenuBox.prefWidthProperty());
+        addColButton.prefWidthProperty().bind(sideMenu.prefWidthProperty());
+        addCatButton.prefWidthProperty().bind(sideMenu.prefWidthProperty());
+        closeButton.prefWidthProperty().bind(sideMenu.prefWidthProperty());
 
         //Remove horizontal and vertical scroll
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -172,6 +193,13 @@ public class Controller implements Initializable {
 
     public void selectSeries(Series s){
         playInteractionSound();
+
+        //Clear selection
+        for (Node node : cardContainer.getChildren()){
+            node.getStyleClass().clear();
+            node.getStyleClass().add("coverNotSelected");
+        }
+
         if (s.getName().equals(contextMenuLabel.getText())){
             contextMenuLabel.setText("");
             showSeason(s);
@@ -183,6 +211,10 @@ public class Controller implements Initializable {
                     backgroundImage.setImage(image);
                 }
             }
+
+            Node node = cardContainer.getChildren().get(collectionList.indexOf(s));
+            node.getStyleClass().clear();
+            node.getStyleClass().add("coverSelected");
 
             //Fade out effect
             FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), backgroundImage);
@@ -215,10 +247,9 @@ public class Controller implements Initializable {
             cardController.setData(s);
 
             VBox cardVBox = new VBox();
-            cardVBox.setPrefHeight(354);
-            cardVBox.setPrefWidth(237);
+            cardVBox.setPrefHeight(364);
+            cardVBox.setPrefWidth(247);
             cardVBox.setAlignment(Pos.CENTER);
-            cardVBox.getStyleClass().add("imageCover");
             cardVBox.getChildren().add(cardBox);
 
             cardContainer.getChildren().add(cardVBox);
@@ -308,7 +339,7 @@ public class Controller implements Initializable {
         seriesToEdit = s;
         seriesToEditController = seriesController;
         contextMenu.setVisible(true);
-        slideMenuParent.setVisible(true);
+        sideMenuParent.setVisible(true);
     }
 
     @FXML
@@ -316,7 +347,7 @@ public class Controller implements Initializable {
         playInteractionSound();
         seriesToEdit = null;
         contextMenu.setVisible(false);
-        slideMenuParent.setVisible(false);
+        sideMenuParent.setVisible(false);
         sideMenu.setVisible(false);
     }
 
@@ -372,5 +403,10 @@ public class Controller implements Initializable {
 
     public void stopBackground(){
         backgroundMusicPlayer.stop();
+    }
+
+    @FXML
+    void addCategory(MouseEvent event){
+
     }
 }

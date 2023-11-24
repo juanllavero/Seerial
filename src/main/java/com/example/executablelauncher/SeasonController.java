@@ -5,6 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -17,6 +18,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -114,6 +116,10 @@ public class SeasonController {
     Timeline alertTimer = new Timeline(new KeyFrame(Duration.seconds(3), event ->{
         playVideo();
     }));
+
+    int pos = 0;
+    final int minPos = 0;
+    final int maxPos = 100;
 
     public void setParent(Controller c){
         controllerParent = c;
@@ -228,7 +234,20 @@ public class SeasonController {
         cardContainer.prefHeightProperty().bind(episodeScroll.heightProperty());
         cardContainer.prefWidthProperty().bind(episodeScroll.widthProperty());
 
-        //Remove vertical scroll
+
+        episodeScroll.setOnScroll(new EventHandler<>() {
+            @Override
+            public void handle(ScrollEvent event) {
+
+                if (event.getDeltaY() > 0)
+                    episodeScroll.setHvalue(pos == minPos ? minPos : pos--);
+                else
+                    episodeScroll.setHvalue(pos == maxPos ? maxPos : pos++);
+            }
+        });
+
+        //Remove horizontal and vertical scroll
+        episodeScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         episodeScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
         assert seasons != null;

@@ -8,15 +8,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="200.0" styleClass="transparent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DiscController">
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="300.0" styleClass="transparent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DiscController">
    <children>
       <ImageView fx:id="image" fitHeight="200.0" fitWidth="200.0" onMouseClicked="#onMouseClick" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../img/DBZDisc1.jpg" />
+            <Image url="@../../../img/discCovers/Tengen%20Toppa%20Gurren-Laggan_0_discCover.png" />
          </image>
       </ImageView>
-      <Label fx:id="name" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="200.0" text="Series Name" textFill="#e8e8e8">
+      <Label fx:id="name" alignment="CENTER" contentDisplay="CENTER" prefHeight="44.0" prefWidth="298.0" text="Episode Name" textFill="#e8e8e8">
          <font>
             <Font size="20.0" />
          </font>
