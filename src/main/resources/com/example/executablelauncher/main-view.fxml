@@ -176,7 +176,7 @@
                            <children>
                               <VBox fx:id="sideMenu" fillWidth="false" layoutX="-70.0" stylesheets="@styles.css" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
                                  <children>
-                                    <Label prefHeight="34.0" prefWidth="247.0" text="ExecutableLauncher" textFill="WHITE">
+                                    <Label prefHeight="34.0" prefWidth="247.0" text="VideoLauncher" textFill="WHITE">
                                        <font>
                                           <Font size="23.0" />
                                        </font>
@@ -219,7 +219,23 @@
                                           </ImageView>
                                        </graphic>
                                     </Button>
-                                    <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" mnemonicParsing="false" onMouseClicked="#close" prefHeight="44.0" prefWidth="302.0" stylesheets="@styles.css" text="Close" textFill="WHITE">
+                                    <Button fx:id="addCatButton1" alignment="BASELINE_LEFT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#switchToDesktop" prefHeight="44.0" prefWidth="303.0" stylesheets="@styles.css" text="Switch to Desktop Mode" textFill="WHITE">
+                                       <font>
+                                          <Font size="20.0" />
+                                       </font>
+                                       <styleClass>
+                                          <String fx:value="transparent" />
+                                          <String fx:value="buttonGradient" />
+                                       </styleClass>
+                                       <graphic>
+                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/back.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
+                                    <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" mnemonicParsing="false" onMouseClicked="#close" prefHeight="44.0" prefWidth="302.0" stylesheets="@styles.css" text="Exit VideoLauncher" textFill="WHITE">
                                        <font>
                                           <Font size="20.0" />
                                        </font>

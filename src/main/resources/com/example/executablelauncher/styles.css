@@ -61,6 +61,15 @@
     -fx-border-radius: 4, 3, 2;
 }
 
+.desktopButton{
+    -fx-background-color: #3f3f3f;
+    -fx-background-radius: 4 3 2;
+}
+
+.desktopButton:hover{
+    -fx-background-color: #5b5b5b;
+}
+
 .textButton {
     -fx-text-fill: rgba(210, 210, 210, 0.66);
 }
@@ -85,19 +94,17 @@
 
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track{
-    -fx-background-color :transparent;
+    -fx-background-color :#252525;
     -fx-border-color :transparent;
     -fx-background-radius : 0.0em;
     -fx-border-radius :2.0em;
 }
-
 
 .scroll-bar:horizontal .increment-button ,
 .scroll-bar:horizontal .decrement-button {
     -fx-background-color :transparent;
     -fx-background-radius : 0.0em;
     -fx-padding :0.0 0.0 10.0 0.0;
-
 }
 
 .scroll-bar:vertical .increment-button ,

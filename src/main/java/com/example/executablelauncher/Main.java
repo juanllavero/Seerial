@@ -27,7 +27,7 @@ public class Main extends Application {
         LoadData();
 
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("main-view.fxml")));
-        stage.setTitle("ExecutableLauncher");
+        stage.setTitle("VideoLauncher");
         stage.initStyle(StageStyle.UNDECORATED);
         Scene scene = new Scene(root);
         stage.setScene(scene);

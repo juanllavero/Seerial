@@ -409,4 +409,31 @@ public class Controller implements Initializable {
     void addCategory(MouseEvent event){
 
     }
+
+    @FXML
+    void switchToDesktop(MouseEvent event){
+        playInteractionSound();
+        try {
+            Main.SaveData();
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
+            Parent root = fxmlLoader.load();
+            DesktopViewController desktopViewController = fxmlLoader.getController();
+            desktopViewController.initValues();
+            Stage stage = new Stage();
+            stage.setTitle("Desktop Mode");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(false);
+            stage.setMinHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+            stage.setMinWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
+            stage.initStyle(StageStyle.DECORATED);
+            stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
+            stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+            stage.show();
+
+            Stage thisStage = (Stage) ((Button)event.getSource()).getScene().getWindow();
+            thisStage.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

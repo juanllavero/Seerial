@@ -15,7 +15,8 @@ public class DiscController {
     private Label name;
 
     private Disc disc;
-    private SeasonController parentController;
+    private SeasonController parentController = null;
+    private DesktopViewController desktopController = null;
 
     public void setData(Disc d){
         Image image = new Image(d.getCoverSrc());
@@ -23,8 +24,6 @@ public class DiscController {
         this.image.setImage(image);
         this.image.setPreserveRatio(true);
         this.image.setSmooth(true);
-        //Rectangle2D rectagle2D = new Rectangle2D(20, 0, 200, 200);
-        //this.image.setViewport(rectagle2D);
 
         name.setText(d.getName());
 
@@ -35,12 +34,22 @@ public class DiscController {
         parentController = col;
     }
 
+    public void setDesktopParent(DesktopViewController col){
+        desktopController = col;
+    }
+
     @FXML
     private void onMouseClick(MouseEvent event) {
         if (event.getButton() == MouseButton.SECONDARY) {
-            parentController.showDiscMenu(disc);
+            if (parentController != null)
+                parentController.showDiscMenu(disc);
+            else
+                desktopController.openDiscMenu(disc);
         }else{
-            parentController.playEpisode(disc);
+            if (parentController != null)
+                parentController.playEpisode(disc);
+            else
+                desktopController.selectDisc(disc);
         }
     }
 }
