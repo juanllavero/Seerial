@@ -239,7 +239,7 @@
                         <Font size="15.0" />
                      </font>
                   </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#switchToFullScreen" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Switch to Fullscreen Mode" textFill="WHITE">
+                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#switchFullscreen" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Switch to Fullscreen Mode" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
