@@ -17,6 +17,8 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
@@ -24,7 +26,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -37,30 +38,6 @@ import java.util.Objects;
 
 public class SeasonController {
     @FXML
-    private HBox mainHBox;
-
-    @FXML
-    private StackPane secondBox;
-
-    @FXML
-    private VBox bottomBox;
-
-    @FXML
-    private HBox episodeBox;
-
-    @FXML
-    private ScrollPane episodeScroll;
-
-    @FXML
-    private HBox cardContainer;
-
-    @FXML
-    private Button lastSeasonButton;
-
-    @FXML
-    private Button nextSeasonButton;
-
-    @FXML
     private ImageView backgroundImage;
 
     @FXML
@@ -70,10 +47,28 @@ public class SeasonController {
     private MediaView backgroundVideo;
 
     @FXML
-    private ImageView showEpisodesButton;
+    private HBox cardContainer;
 
     @FXML
     private FlowPane contextMenu;
+
+    @FXML
+    private Label contextMenuLabel;
+
+    @FXML
+    private HBox episodeBox;
+
+    @FXML
+    private VBox episodeSection;
+
+    @FXML
+    private ScrollPane episodeScroll;
+
+    @FXML
+    private VBox infoBox;
+
+    @FXML
+    private Button lastSeasonButton;
 
     @FXML
     private ImageView logoImage;
@@ -82,25 +77,16 @@ public class SeasonController {
     private Label nameField;
 
     @FXML
-    private VBox infoBox;
+    private Button nextSeasonButton;
 
     @FXML
-    private Label contextMenuLabel;
+    private StackPane mainBox;
 
     @FXML
-    private BorderPane infoBorderPane;
+    private ImageView showEpisodesButton;
 
     @FXML
     private Label yearField;
-
-    @FXML
-    private FlowPane discContextMenu;
-
-    @FXML
-    private Label discContextMLabel;
-
-    @FXML
-    private Button removeEpisodeButton;
 
     private Controller controllerParent;
 
@@ -188,17 +174,15 @@ public class SeasonController {
         if (season.getDiscs().size() <= 1){
             showEpisodesButton.setVisible(false);
             if (!season.getDiscs().isEmpty()){
-                removeEpisodeButton.setDisable(false);
                 discToEdit = Main.findDisc(season.getDiscs().get(0));
             }
         }else{
-            removeEpisodeButton.setDisable(true);
+            showEpisodesButton.setVisible(true);
         }
 
         contextMenu.setVisible(false);
-        discContextMenu.setVisible(false);
-        bottomBox.setTranslateY(episodeBox.getPrefHeight());
-        infoBorderPane.setTranslateY(episodeBox.getPrefHeight() / 2);
+        episodeSection.setTranslateY(episodeBox.getPrefHeight());
+        infoBox.setTranslateY(episodeBox.getPrefHeight() / 2);
     }
 
     private void updateButtons(){
@@ -213,27 +197,33 @@ public class SeasonController {
             }
         }
 
+        mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (KeyCode.ESCAPE == event.getCode()) {
+                goBack(event);
+            }
+        });
+
         //Set buttons for next and last season
         updateButtons();
 
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+
         //Fit all elements to screen size
-        mainHBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth());
-        mainHBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight());
-        secondBox.prefWidthProperty().bind(mainHBox.widthProperty());
-        secondBox.prefHeightProperty().bind(mainHBox.heightProperty());
-        backgroundImage.setFitWidth(Screen.getPrimary().getBounds().getWidth());
-        backgroundImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
-        backgroundVideo.setFitHeight(Screen.getPrimary().getBounds().getHeight());
-        backgroundVideo.setFitWidth(Screen.getPrimary().getBounds().getWidth());
-        backgroundShadow.setFitWidth(Screen.getPrimary().getBounds().getWidth());
-        backgroundShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
-        //bottomBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight() * 0.4);
-        bottomBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth());
-        episodeScroll.prefHeightProperty().bind(bottomBox.heightProperty());
-        episodeScroll.prefWidthProperty().bind(bottomBox.widthProperty());
+        mainBox.setPrefWidth(screenWidth);
+        mainBox.setPrefHeight(screenHeight);
+        backgroundImage.setFitWidth(screenWidth);
+        backgroundImage.setFitHeight(screenHeight);
+        backgroundVideo.setFitHeight(screenHeight);
+        backgroundVideo.setFitWidth(screenWidth);
+        backgroundShadow.setFitWidth(screenWidth);
+        backgroundShadow.setFitHeight(screenHeight);
+        episodeSection.setPrefHeight(screenHeight * 0.2);
+        episodeBox.setPrefHeight(episodeSection.getPrefHeight() - 50);
+        episodeScroll.prefHeightProperty().bind(episodeBox.heightProperty());
+        episodeScroll.setPrefWidth(screenWidth);
         cardContainer.prefHeightProperty().bind(episodeScroll.heightProperty());
         cardContainer.prefWidthProperty().bind(episodeScroll.widthProperty());
-
 
         episodeScroll.setOnScroll(new EventHandler<>() {
             @Override
@@ -369,13 +359,13 @@ public class SeasonController {
     }
 
     @FXML
-    void goBack(MouseEvent event){
+    void goBack(KeyEvent event){
         if (mp != null)
             mp.stop();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
-            Stage stage = (Stage) ((ImageView)event.getSource()).getScene().getWindow();
+            Stage stage = (Stage) mainBox.getScene().getWindow();
             stage.setTitle("ExecutableLauncher");
             stage.setScene(new Scene(root));
             stage.setMaximized(true);
@@ -400,53 +390,13 @@ public class SeasonController {
     }
 
     @FXML
-    void addDisc(MouseEvent event){
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addDisc-view.fxml"));
-            Parent root1 = fxmlLoader.load();
-            AddDiscController addDiscController = fxmlLoader.getController();
-            addDiscController.setParentController(this);
-            addDiscController.InitValues();
-            Stage stage = new Stage();
-            stage.setTitle("Add Discs/Episodes");
-            stage.initStyle(StageStyle.UNDECORATED);
-            stage.setScene(new Scene(root1));
-            stage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        contextMenu.setVisible(false);
-    }
-
-    @FXML
     void openMenu(MouseEvent event){
         contextMenu.setVisible(true);
     }
 
     @FXML
-    void editSeason(MouseEvent event){
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addSeason-view.fxml"));
-            Parent root1 = (Parent) fxmlLoader.load();
-            AddSeasonController addSeasonController = fxmlLoader.getController();
-            addSeasonController.setSeason(seasons.get(currentSeason));
-            Stage stage = new Stage();
-            stage.setTitle("Add Season");
-            stage.initStyle(StageStyle.UNDECORATED);
-            stage.setScene(new Scene(root1));
-            stage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        contextMenu.setVisible(false);
-    }
-
-    @FXML
     void cancelButton(MouseEvent event){
         contextMenu.setVisible(false);
-        discContextMenu.setVisible(false);
     }
 
     @FXML
@@ -475,21 +425,16 @@ public class SeasonController {
     void showEpisodes(MouseEvent event){
         if (showEpisodes) {
             showEpisodesButton.setImage(new Image("file:src/main/resources/img/icons/arrowDown.png"));
-            //bottomBox.setVisible(false);
-            //cardContainer.setEffect(null);
         }else {
             showEpisodesButton.setImage(new Image("file:src/main/resources/img/icons/arrowUp.png"));
-            //bottomBox.setVisible(true);
-            //Apply blur to background
-            //cardContainer.setEffect(new GaussianBlur());
         }
 
         TranslateTransition slide = new TranslateTransition();
         TranslateTransition slideInfo = new TranslateTransition();
         slide.setDuration(Duration.seconds(0.25));
         slideInfo.setDuration(Duration.seconds(0.25));
-        slide.setNode(bottomBox);
-        slideInfo.setNode(infoBorderPane);
+        slide.setNode(episodeSection);
+        slideInfo.setNode(infoBox);
 
         if (showEpisodes) {
             slide.setToY(episodeBox.getPrefHeight());
@@ -503,11 +448,11 @@ public class SeasonController {
         slide.play();
 
         if (showEpisodes) {
-            bottomBox.setTranslateY(0);
-            infoBorderPane.setTranslateY(episodeBox.getPrefHeight() / 2);
+            episodeSection.setTranslateY(0);
+            infoBox.setTranslateY(episodeBox.getPrefHeight() / 2);
         }else {
-            bottomBox.setTranslateY(episodeBox.getPrefHeight());
-            infoBorderPane.setTranslateY(0);
+            episodeSection.setTranslateY(episodeBox.getPrefHeight());
+            infoBox.setTranslateY(0);
         }
         showEpisodes = !showEpisodes;
     }
@@ -526,47 +471,7 @@ public class SeasonController {
     }
 
     @FXML
-    void editDisc(MouseEvent event){
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addDisc-view.fxml"));
-            Parent root1 = fxmlLoader.load();
-            AddDiscController addDiscController = fxmlLoader.getController();
-            addDiscController.setParentController(this);
-            addDiscController.setDisc(discToEdit);
-            Stage stage = new Stage();
-            stage.setTitle("Add Discs/Episodes");
-            stage.initStyle(StageStyle.UNDECORATED);
-            stage.setScene(new Scene(root1));
-            stage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        discContextMenu.setVisible(false);
-    }
-
-    @FXML
-    void removeDisc(MouseEvent event) {
-        if (discToEdit != null){
-            discs.remove(discToEdit);
-            Main.removeDisc(discToEdit);
-            seasons.get(currentSeason).removeDisc(discToEdit);
-            discToEdit = null;
-
-            if (discContextMenu.isVisible())
-                showEpisodes(event);
-            updateInfo(seasons.get(currentSeason));
-        }
-
-        if (seasons.get(currentSeason).getDiscs().isEmpty())
-            removeEpisodeButton.setDisable(true);
-
-        discContextMenu.setVisible(false);
-    }
-
-    public void showDiscMenu(Disc disc) {
-        discContextMLabel.setText(disc.getName());
-        discContextMenu.setVisible(true);
-        discToEdit = disc;
+    void editSeason(MouseEvent event){
+        //Edit "sorting order"
     }
 }

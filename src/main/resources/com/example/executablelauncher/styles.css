@@ -10,6 +10,20 @@
     
 }
 
+.desktopMenuButtons{
+    -fx-background-color: transparent;
+}
+
+.desktopMenuButtons:hover{
+    -fx-background-radius: 15px;
+    -fx-background-color: #4d4d4d;
+}
+
+.roundButton:hover{
+    -fx-border-width: 1 1 1 1;
+    -fx-border-color: rgba(169, 169, 169, 0.07);
+}
+
 .darkerBackground{
     -fx-background-color: #202124;
 }
@@ -68,6 +82,11 @@
 
 .desktopButton:hover{
     -fx-background-color: #5b5b5b;
+}
+
+.borderLines{
+    -fx-border-color: #A9A9A9FF;
+    -fx-border-width: 0 0 0 0.5;
 }
 
 .textButton {

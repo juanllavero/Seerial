@@ -162,8 +162,6 @@ public class Controller implements Initializable {
         sideMenuBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth() / 4.5);
         sideMenu.prefHeightProperty().bind(sideMenuBox.prefHeightProperty());
         sideMenu.prefWidthProperty().bind(sideMenuBox.prefWidthProperty());
-        addColButton.prefWidthProperty().bind(sideMenu.prefWidthProperty());
-        addCatButton.prefWidthProperty().bind(sideMenu.prefWidthProperty());
         closeButton.prefWidthProperty().bind(sideMenu.prefWidthProperty());
 
         //Remove horizontal and vertical scroll
@@ -232,11 +230,6 @@ public class Controller implements Initializable {
         }
     }
 
-    public void addSeries(Series s){
-        collectionList.add(s);
-        addCard(s);
-    }
-
     private void addCard(Series s){
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
@@ -271,67 +264,6 @@ public class Controller implements Initializable {
             defaultSelection();
         }
         hideContextMenu();
-    }
-
-    @FXML
-    void addCollection(){
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCollection-view.fxml"));
-            Parent root1 = fxmlLoader.load();
-            AddCollectionController addColController = fxmlLoader.getController();
-            addColController.setParentController(this);
-            Stage stage = new Stage();
-            stage.initStyle(StageStyle.TRANSPARENT);
-            stage.setTitle("Add Series");
-            stage.initStyle(StageStyle.UNDECORATED);
-            Scene scene = new Scene(root1);
-            scene.setFill(Color.TRANSPARENT);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        hideContextMenu();
-    }
-
-    @FXML
-    void addSeason(){
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addSeason-view.fxml"));
-            Parent root1 = (Parent) fxmlLoader.load();
-            AddSeasonController addSeasonController = fxmlLoader.getController();
-            addSeasonController.setCollection(seriesToEdit);
-            Stage stage = new Stage();
-            stage.setTitle("Add Season");
-            stage.initStyle(StageStyle.UNDECORATED);
-            stage.setScene(new Scene(root1));
-            stage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        hideContextMenu();
-    }
-
-    @FXML
-    void editSeries(){
-        if (seriesToEdit != null && seriesToEditController != null){
-            try{
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCollection-view.fxml"));
-                Parent root1 = (Parent) fxmlLoader.load();
-                AddCollectionController addColController = fxmlLoader.getController();
-                addColController.setParentController(this);
-                addColController.setParentCardController(seriesToEditController);
-                addColController.setSeries(seriesToEdit);
-                Stage stage = new Stage();
-                stage.setTitle("Edit Series");
-                stage.initStyle(StageStyle.UNDECORATED);
-                stage.setScene(new Scene(root1));
-                stage.show();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            hideContextMenu();
-        }
     }
 
     public void showContextMenu(Series s, CardController seriesController){
@@ -406,19 +338,12 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    void addCategory(MouseEvent event){
-
-    }
-
-    @FXML
     void switchToDesktop(MouseEvent event){
         playInteractionSound();
         try {
             Main.SaveData();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
             Parent root = fxmlLoader.load();
-            DesktopViewController desktopViewController = fxmlLoader.getController();
-            desktopViewController.initValues();
             Stage stage = new Stage();
             stage.setTitle("Desktop Mode");
             stage.setScene(new Scene(root));
@@ -428,6 +353,9 @@ public class Controller implements Initializable {
             stage.initStyle(StageStyle.DECORATED);
             stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
             stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+
+            DesktopViewController desktopViewController = fxmlLoader.getController();
+            desktopViewController.initValues();
             stage.show();
 
             Stage thisStage = (Stage) ((Button)event.getSource()).getScene().getWindow();
@@ -435,5 +363,10 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @FXML
+    void editSeries(MouseEvent event){
+        //Edit "sorting order" and "category"
     }
 }

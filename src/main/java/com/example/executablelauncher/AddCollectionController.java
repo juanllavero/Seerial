@@ -5,9 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -24,16 +24,26 @@ public class AddCollectionController {
     private TextField nameField;
 
     @FXML
-    private Button saveButton;
+    private TextField orderField;
+
+    @FXML
+    private ChoiceBox<String> categoryField;
+
+    @FXML
+    private Label errorCategory;
 
     @FXML
     private Label imageError;
+
     @FXML
     private Label nameError;
 
+    @FXML
+    private Label orderError;
+
     public Series seriesToEdit = null;
     private CardController cardControllerParent;
-    private Controller controllerParent;
+    private DesktopViewController controllerParent;
     private File selectedFile = null;
     private String name;
 
@@ -43,20 +53,24 @@ public class AddCollectionController {
         name = s.getName();
         nameField.setText(s.getName());
         coverField.setText(s.getCoverSrc());
+
+        categoryField.getItems().addAll(Main.getCategories());
+        categoryField.setValue(s.getCategory());
+
+        if (s.getOrder() > 0)
+            orderField.setText(Integer.toString(s.getOrder()));
+    }
+
+    public void initializeCategories(){
+        categoryField.getItems().addAll(Main.getCategories());
     }
 
     public void setParentCardController(CardController cardController){
         cardControllerParent = cardController;
     }
 
-    public void setParentController(Controller controller){
+    public void setParentController(DesktopViewController controller){
         controllerParent = controller;
-    }
-
-    @FXML
-    void cancelImage(MouseEvent event) {
-        Stage stage = (Stage) ((ImageView)event.getSource()).getScene().getWindow();
-        stage.close();
     }
 
     @FXML
@@ -94,6 +108,20 @@ public class AddCollectionController {
     }
 
     @FXML
+    void addCategory(MouseEvent event){
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCategory-view.fxml"));
+            Parent root1 = fxmlLoader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Add Category");
+            stage.setScene(new Scene(root1));
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @FXML
     void save(MouseEvent event) {
         File image = new File(coverField.getText());
         boolean save = true;
@@ -121,6 +149,13 @@ public class AddCollectionController {
             }else{
                 imageError.setText("");
             }
+        }
+
+        if (!orderField.getText().isEmpty() && orderField.getText().matches("\\d{3,}")){
+            save = false;
+            orderError.setText("Sorting order has to be a number");
+        }else{
+            orderError.setText("");
         }
 
         if (save){
@@ -151,6 +186,10 @@ public class AddCollectionController {
 
             series.setName(nameField.getText());
             series.setCoverSrc(newCover.getAbsolutePath());
+
+            if (!orderField.getText().isEmpty() && !orderField.getText().equals("0")){
+                series.setOrder(Integer.parseInt(orderField.getText()));
+            }
 
             if (seriesToEdit != null){
                 cardControllerParent.setData(series);

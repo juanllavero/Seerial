@@ -51,6 +51,11 @@ public class AddSeasonController {
     @FXML
     private TextField yearField;
 
+    @FXML
+    private TextField orderField;
+
+    @FXML
+    private Label orderError;
 
     private Series collection = null;
     public Season seasonToEdit = null;
@@ -69,6 +74,9 @@ public class AddSeasonController {
         videoField.setText(s.getVideoSrc());
         musicField.setText(s.getMusicSrc());
         collection = Main.findSeriesByName(s.getCollectionName());
+
+        if (s.getOrder() > 0)
+            orderField.setText(Integer.toString(s.getOrder()));
     }
 
     public void setCollection(Series s){
@@ -226,6 +234,13 @@ public class AddSeasonController {
             }
         }
 
+        if (!orderField.getText().isEmpty() && orderField.getText().matches("\\d{3,}")){
+            save = false;
+            orderError.setText("Sorting order has to be a number");
+        }else{
+            orderError.setText("");
+        }
+
         //Save the season
         if (save){
             Season season;
@@ -315,6 +330,10 @@ public class AddSeasonController {
             season.setYear(yearField.getText());
             season.setBackgroundSrc(newBackground.getAbsolutePath());
             season.setCollectionName(collection.getName());
+
+            if (!orderField.getText().isEmpty() && !orderField.getText().equals("0")){
+                season.setOrder(Integer.parseInt(orderField.getText()));
+            }
 
             Main.addSeason(season, season.getCollectionName());
 

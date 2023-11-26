@@ -14,6 +14,7 @@ public class Season implements Serializable {
     public String videoSrc;
     public String musicSrc;
     public String collectionName;
+    public int order = 0;
     public final List<Integer> discs = new ArrayList<>();
 
     public Season() {
@@ -78,6 +79,14 @@ public class Season implements Serializable {
 
     public void setMusicSrc(String musicSrc) {
         this.musicSrc = musicSrc;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     public List<Integer> getDiscs() {

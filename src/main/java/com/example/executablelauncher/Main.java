@@ -21,19 +21,25 @@ public class Main extends Application {
     public static List<Series> series = new ArrayList<>();
     public static List<Season> seasons = new ArrayList<>();
     public static List<Disc> discs = new ArrayList<>();
+    public static List<String> categories = new ArrayList<>();
     public static Stage primaryStage;
     @Override
     public void start(Stage stage) throws IOException {
         LoadData();
 
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("main-view.fxml")));
-        stage.setTitle("VideoLauncher");
-        stage.initStyle(StageStyle.UNDECORATED);
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
+        Parent root = fxmlLoader.load();
+        stage.setTitle("VideoLauncher Desktop");
+        //stage.initStyle(StageStyle.UNDECORATED);
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.setMaximized(true);
-        stage.setWidth(Screen.getPrimary().getBounds().getWidth());
-        stage.setHeight(Screen.getPrimary().getBounds().getHeight());
+        //stage.setMaximized(true);
+        stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
+        stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+        stage.setMinWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
+        stage.setMinHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+        DesktopViewController desktopViewController = fxmlLoader.getController();
+        desktopViewController.initValues();
         primaryStage = stage;
         stage.show();
     }
@@ -42,6 +48,7 @@ public class Main extends Application {
         String collectionsFile = "Collections.json";
         String seasonsFile = "Seasons.json";
         String discsFile = "Discs.json";
+        String catFile = "Categories.json";
 
         Gson gson = new Gson();
 
@@ -57,6 +64,10 @@ public class Main extends Application {
             reader = new JsonReader(new FileReader(discsFile));
             Disc[] dList = gson.fromJson(reader, Disc[].class);
             discs.addAll(List.of(dList));
+
+            reader = new JsonReader(new FileReader(catFile));
+            String[] catList = gson.fromJson(reader, String[].class);
+            categories.addAll(List.of(catList));
         } catch (FileNotFoundException e) {
             System.err.println("Json files not found");
         }
@@ -66,6 +77,7 @@ public class Main extends Application {
         String collectionsFile = "Collections.json";
         String seasonsFile = "Seasons.json";
         String discsFile = "Discs.json";
+        String catFile = "Categories.json";
 
         try (Writer writer = new FileWriter(collectionsFile)) {
             Gson gson = new GsonBuilder().create();
@@ -80,6 +92,11 @@ public class Main extends Application {
         try (Writer writer = new FileWriter(discsFile)) {
             Gson gson = new GsonBuilder().create();
             gson.toJson(discs, writer);
+        }
+
+        try (Writer writer = new FileWriter(catFile)) {
+            Gson gson = new GsonBuilder().create();
+            gson.toJson(categories, writer);
         }
     }
 
@@ -104,6 +121,32 @@ public class Main extends Application {
         }
 
         return -1;
+    }
+
+    public static List<Series> getSeriesFromCategory(String cat){
+        List<Series> seriesList = new ArrayList<>();
+        for (Series s : series){
+            if (s.getCategory().equals(cat)){
+                seriesList.add(s);
+            }
+        }
+        return seriesList;
+    }
+
+    public static List<String> getCategories(){
+        return categories;
+    }
+
+    public static void addCategory(String c){
+        categories.add(c);
+    }
+
+    public static boolean categoryExist(String cat){
+        for (String c : categories){
+            if (c.equals(cat))
+                return true;
+        }
+        return false;
     }
 
     public static void addCollection(Series col){

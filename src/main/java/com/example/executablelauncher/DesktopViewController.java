@@ -1,5 +1,7 @@
 package com.example.executablelauncher;
 
+import javafx.animation.FadeTransition;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -22,6 +24,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -36,6 +39,9 @@ public class DesktopViewController {
 
     @FXML
     private ScrollPane episodeScroll;
+
+    @FXML
+    private RowConstraints centralBoxTop;
 
     @FXML
     private VBox leftBox;
@@ -56,6 +62,9 @@ public class DesktopViewController {
     private ImageView seasonBackground;
 
     @FXML
+    private ImageView globalBackgroundShadow;
+
+    @FXML
     private VBox seasonContainer;
 
     @FXML
@@ -66,6 +75,9 @@ public class DesktopViewController {
 
     @FXML
     private ImageView seasonLogo;
+
+    @FXML
+    private ImageView globalBackground;
 
     @FXML
     private Label seasonName;
@@ -85,6 +97,9 @@ public class DesktopViewController {
     @FXML
     private ScrollPane seriesScrollPane;
 
+    @FXML
+    private ChoiceBox<String> categorySelector;
+
     private List<Series> seriesList = new ArrayList<>();
     private List<Season> seasonList = new ArrayList<>();
     private List<Disc> discList = new ArrayList<>();
@@ -92,10 +107,9 @@ public class DesktopViewController {
     private Series selectedSeries = null;
     private Season selectedSeason = null;
     private Disc selectedDisc = null;
+    private String currentCategory;
 
-    public void initValues(){
-        seriesList = Main.getCollection();
-
+    public void showSeries(){
         for (Series s : seriesList){
             Button seriesButton = new Button();
             seriesButton.setText(s.getName());
@@ -112,12 +126,34 @@ public class DesktopViewController {
         }
 
         blankSelection();
+    }
+
+    public void selectCategory(String category){
+        currentCategory = category;
+        seriesList = Main.getSeriesFromCategory(category);
+        showSeries();
+    }
+
+    public void initValues(){
+        categorySelector.getItems().addAll(Main.getCategories());
+
+        seriesList = Main.getCollection();
+        showSeries();
+
+        categorySelector.getSelectionModel()
+                .selectedItemProperty()
+                .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectCategory(newValue) );
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (KeyCode.F11 == event.getCode()) {
-                switchToFullScreen(event);
+                fullScreen();
             }
         });
+
+        mainBox.getScene().getWindow().setOnCloseRequest(e -> closeWindow());
+
+        menuParentPane.setVisible(false);
+        mainMenu.setVisible(false);
 
         //Elements size
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -126,15 +162,35 @@ public class DesktopViewController {
         seriesScrollPane.setPrefHeight(screenHeight);
         seriesContainer.setPrefHeight(screenHeight);
         seasonScroll.setPrefHeight(screenHeight);
-        seasonContainer.setPrefHeight(screenHeight);
         discContainer.setPrefHeight(screenHeight);
 
-        seasonInfoPane.prefWidthProperty().bind(centralBox.widthProperty());
-
-        seasonBackground.fitWidthProperty().bind(seasonInfoPane.widthProperty());
-        seasonBackground.fitHeightProperty().bind(seasonInfoPane.heightProperty());
+        seasonBackground.fitWidthProperty().bind(centralBox.widthProperty());
+        seasonBackground.fitHeightProperty().bind(centralBox.heightProperty().multiply(0.6));
         seasonBackground.setPreserveRatio(false);
 
+        globalBackground.fitWidthProperty().bind(mainBox.widthProperty());
+        globalBackground.fitHeightProperty().bind(mainBox.heightProperty());
+        globalBackground.setPreserveRatio(false);
+
+        globalBackgroundShadow.fitWidthProperty().bind(mainBox.widthProperty());
+        globalBackgroundShadow.fitHeightProperty().bind(mainBox.heightProperty());
+        globalBackgroundShadow.setPreserveRatio(false);
+    }
+
+    @FXML
+    void close(MouseEvent e) throws IOException {
+        closeWindow();
+    }
+
+    private void closeWindow(){
+        try{
+            Main.SaveData();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        Stage stage = (Stage) mainBox.getScene().getWindow();
+        stage.close();
     }
 
     private void openSeriesMenu(MouseEvent event) {
@@ -176,8 +232,19 @@ public class DesktopViewController {
         }
     }
 
+    private void fadeInTransition(ImageView imageV){
+        //Fade In Transition
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), imageV);
+        fadeIn.setFromValue(0.5);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+    }
+
     private void fillSeasonInfo() {
+        globalBackground.setImage(new Image(selectedSeason.getBackgroundSrc()));
         seasonBackground.setImage(new Image(selectedSeason.getBackgroundSrc()));
+        fadeInTransition(globalBackground);
+        fadeInTransition(seasonBackground);
         if (selectedSeason.getLogoSrc().equals("NO_LOGO")){
             seasonCoverLogoBox.getChildren().remove(1);
             Label seasonLogoText = new Label(selectedSeries.getName());
@@ -185,6 +252,7 @@ public class DesktopViewController {
             seasonLogoText.setStyle("-fx-font-weight: bold");
             seasonLogoText.setTextFill(Color.color(1, 1, 1));
             seasonLogoText.setEffect(new DropShadow());
+            seasonLogoText.setPadding(new Insets(0, 0, 0, 15));
             seasonCoverLogoBox.getChildren().add(seasonLogoText);
         }else{
             seasonCoverLogoBox.getChildren().remove(1);
@@ -207,7 +275,7 @@ public class DesktopViewController {
 
             seasonButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
                 if (event.getButton() == MouseButton.SECONDARY) {
-                    openSasonMenu(event);
+                    openSeasonMenu(event);
                 }else{
                     selectSeasonButton(event);
                 }
@@ -246,7 +314,7 @@ public class DesktopViewController {
         }
     }
 
-    private void openSasonMenu(MouseEvent event) {
+    private void openSeasonMenu(MouseEvent event) {
 
     }
 
@@ -265,12 +333,15 @@ public class DesktopViewController {
                 try {
                     FXMLLoader fxmlLoader = new FXMLLoader();
                     fxmlLoader.setLocation(getClass().getResource("discCard.fxml"));
-                    Pane cardBox = fxmlLoader.load();
+                    VBox cardBox = fxmlLoader.load();
                     DiscController discController = fxmlLoader.getController();
                     discController.setDesktopParent(this);
                     discController.setData(d);
 
-                    HBox.setMargin(cardBox, new Insets(0, 0, 0, 50));
+                    cardBox.setPadding(new Insets(10, 10, 10, 10));
+
+                    //cardBox.setPadding(new Insets(10, 10, 10, 10));
+                    //VBox.setMargin(cardBox, new Insets(10, 10, 10, 10));
 
                     discContainer.getChildren().add(cardBox);
                 } catch (IOException e) {
@@ -299,21 +370,33 @@ public class DesktopViewController {
 
     @FXML
     void addCategory(MouseEvent event) {
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCategory-view.fxml"));
+            Parent root1 = fxmlLoader.load();
+            Stage stage = new Stage();
+            stage.setTitle("Add Category");
+            stage.setScene(new Scene(root1));
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-    }
-
-    @FXML
-    void editSeason(MouseEvent event) {
-
+        categorySelector.getItems().clear();
+        categorySelector.getItems().addAll(Main.getCategories());
     }
 
     @FXML
     void openMenu(MouseEvent event) {
-
+        menuParentPane.setVisible(true);
+        mainMenu.setVisible(true);
     }
 
     @FXML
-    void switchToFullScreen(KeyEvent event){
+    void switchToFullScreen(MouseEvent event){
+        fullScreen();
+    }
+
+    private void fullScreen(){
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
@@ -326,7 +409,7 @@ public class DesktopViewController {
             stage.setHeight(Screen.getPrimary().getBounds().getHeight());
             stage.show();
 
-            Stage thisStage = (Stage) ((Button)event.getSource()).getScene().getWindow();
+            Stage thisStage = (Stage) mainBox.getScene().getWindow();
             thisStage.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -338,7 +421,7 @@ public class DesktopViewController {
     }
 
     public void selectDisc(Disc disc){
-        if (selectedDisc.getId() == disc.getId()){
+        if (selectedDisc != null && selectedDisc.getId() == disc.getId()){
             playEpisode(disc);
         }else{
             selectedDisc = disc;
@@ -399,5 +482,171 @@ public class DesktopViewController {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    void addCollection(MouseEvent event){
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCollection-view.fxml"));
+            Parent root1 = fxmlLoader.load();
+            AddCollectionController addColController = fxmlLoader.getController();
+            addColController.setParentController(this);
+            Stage stage = new Stage();
+            stage.initStyle(StageStyle.TRANSPARENT);
+            stage.setTitle("Add Series");
+            stage.initStyle(StageStyle.UNDECORATED);
+            Scene scene = new Scene(root1);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        hideMenu();
+    }
+
+    public void addSeries(Series s){
+        seriesList.add(s);
+        selectCategory(currentCategory);
+    }
+
+    @FXML
+    void editSeries(){
+        /*if (seriesToEdit != null && seriesToEditController != null){
+            try{
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCollection-view.fxml"));
+                Parent root1 = (Parent) fxmlLoader.load();
+                AddCollectionController addColController = fxmlLoader.getController();
+                addColController.setParentController(this);
+                addColController.setParentCardController(seriesToEditController);
+                addColController.setSeries(seriesToEdit);
+                Stage stage = new Stage();
+                stage.setTitle("Edit Series");
+                stage.initStyle(StageStyle.UNDECORATED);
+                stage.setScene(new Scene(root1));
+                stage.show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            hideMenu();
+        }*/
+    }
+
+    @FXML
+    void addSeason(){
+        /*try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addSeason-view.fxml"));
+            Parent root1 = (Parent) fxmlLoader.load();
+            AddSeasonController addSeasonController = fxmlLoader.getController();
+            addSeasonController.setCollection(seriesToEdit);
+            Stage stage = new Stage();
+            stage.setTitle("Add Season");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(new Scene(root1));
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        hideContextMenu();*/
+    }
+
+    @FXML
+    void addDisc(MouseEvent event){
+        /*try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addDisc-view.fxml"));
+            Parent root1 = fxmlLoader.load();
+            AddDiscController addDiscController = fxmlLoader.getController();
+            addDiscController.setParentController(this);
+            addDiscController.InitValues();
+            Stage stage = new Stage();
+            stage.setTitle("Add Discs/Episodes");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(new Scene(root1));
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        contextMenu.setVisible(false);*/
+    }
+
+    @FXML
+    void editSeason(MouseEvent event){
+        /*try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addSeason-view.fxml"));
+            Parent root1 = (Parent) fxmlLoader.load();
+            AddSeasonController addSeasonController = fxmlLoader.getController();
+            addSeasonController.setSeason(seasons.get(currentSeason));
+            Stage stage = new Stage();
+            stage.setTitle("Add Season");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(new Scene(root1));
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        contextMenu.setVisible(false);*/
+    }
+
+    @FXML
+    void removeSeason(MouseEvent event){
+        /*int currentID = seasons.get(currentSeason).getId();
+
+        seasons.remove(seasons.get(currentSeason));
+        Main.removeSeason(currentID);
+
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
+            Parent root = fxmlLoader.load();
+            Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
+            stage.setTitle("ExecutableLauncher");
+            stage.setScene(new Scene(root));
+            stage.setMaximized(true);
+            stage.setWidth(Screen.getPrimary().getBounds().getWidth());
+            stage.setHeight(Screen.getPrimary().getBounds().getHeight());
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }*/
+    }
+
+    @FXML
+    void editDisc(MouseEvent event){
+        /*try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addDisc-view.fxml"));
+            Parent root1 = fxmlLoader.load();
+            AddDiscController addDiscController = fxmlLoader.getController();
+            addDiscController.setParentController(this);
+            addDiscController.setDisc(discToEdit);
+            Stage stage = new Stage();
+            stage.setTitle("Add Discs/Episodes");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(new Scene(root1));
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }*/
+    }
+
+    @FXML
+    void removeDisc(MouseEvent event) {
+        /*if (discToEdit != null){
+            discs.remove(discToEdit);
+            Main.removeDisc(discToEdit);
+            seasons.get(currentSeason).removeDisc(discToEdit);
+            discToEdit = null;
+            updateInfo(seasons.get(currentSeason));
+        }*/
+    }
+
+    @FXML
+    void openSettings(MouseEvent event){
+
+    }
+
+    private void hideMenu(){
+        mainMenu.setVisible(false);
+        menuParentPane.setVisible(false);
     }
 }

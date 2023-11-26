@@ -33,23 +33,32 @@
                               <Insets />
                            </opaqueInsets>
                            <HBox.margin>
-                              <Insets left="330.0" />
+                              <Insets left="265.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label text="Sorting Order" textFill="WHITE">
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <HBox.margin>
+                              <Insets left="90.0" />
                            </HBox.margin>
                         </Label>
                      </children>
                   </HBox>
                   <HBox prefHeight="100.0" prefWidth="200.0">
                      <children>
-                              <TextField fx:id="nameField" prefHeight="25.0" prefWidth="526.0">
+                              <TextField fx:id="nameField" prefHeight="25.0" prefWidth="276.0">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
                               </TextField>
-                        <TextField fx:id="yearField" prefHeight="25.0" prefWidth="315.0">
+                        <TextField fx:id="yearField" prefHeight="25.0" prefWidth="95.0">
                            <HBox.margin>
-                              <Insets left="20.0" right="50.0" />
+                              <Insets left="20.0" right="20.0" />
                            </HBox.margin>
                         </TextField>
+                        <TextField fx:id="orderField" prefHeight="25.0" prefWidth="89.0" />
                      </children>
                      <VBox.margin>
                         <Insets top="5.0" />
@@ -70,8 +79,13 @@
                               <Insets />
                            </opaqueInsets>
                            <HBox.margin>
-                              <Insets left="50.0" />
+                              <Insets />
                            </HBox.margin>
+                        </Label>
+                        <Label fx:id="orderError" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="662.0" textFill="#c30606">
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
                         </Label>
                      </children>
                   </HBox>

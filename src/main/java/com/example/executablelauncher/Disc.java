@@ -6,6 +6,7 @@ public class Disc implements Serializable {
     public static int NextID = 0;
     public final int id;
     public String name;
+    public float episodeNumber;
     public String coverSrc;
     public String executableSrc;
     public String type;    //Folder or File
