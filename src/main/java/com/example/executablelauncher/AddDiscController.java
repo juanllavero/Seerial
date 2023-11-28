@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class AddDiscController {
-    @FXML
-    private TextField coverField;
 
     @FXML
     private TextField executableField;
@@ -30,14 +28,10 @@ public class AddDiscController {
     private ChoiceBox<String> typeField;
 
     @FXML
-    private Label errorCover;
-
-    @FXML
     private Label errorLoad;
 
     public Disc discToEdit = null;
-    private SeasonController controllerParent;
-    private File selectedCover = null;
+    private DesktopViewController controllerParent;
     private List<File> selectedFiles = null;
     private File selectedFolder = null;
 
@@ -48,24 +42,13 @@ public class AddDiscController {
 
     public void setDisc(Disc d){
         discToEdit = d;
-        coverField.setText(d.getCoverSrc());
         executableField.setText(d.getExecutableSrc());
         typeField.setValue(d.getType());
         InitValues();
     }
 
-    public void setParentController(SeasonController controller){
+    public void setParentController(DesktopViewController controller){
         controllerParent = controller;
-    }
-
-    @FXML
-    void loadCover(MouseEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select an image");
-        fileChooser.setInitialDirectory(new File("C:\\"));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All images", "*.jpg", "*.png", "*.jpeg"));
-        selectedCover = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
-        coverField.setText(selectedCover.getPath());
     }
 
     @FXML
@@ -90,12 +73,6 @@ public class AddDiscController {
     }
 
     @FXML
-    void cancelImage(MouseEvent event) {
-        Stage stage = (Stage) ((ImageView)event.getSource()).getScene().getWindow();
-        stage.close();
-    }
-
-    @FXML
     void cancelButton(MouseEvent event) {
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
         stage.close();
@@ -104,25 +81,6 @@ public class AddDiscController {
     @FXML
     void save(MouseEvent event) {
         boolean save = true;
-
-        //Get image cover
-        File cover = new File(coverField.getText());
-        if (!coverField.getText().isEmpty() && !cover.exists()) {
-            save = false;
-            errorCover.setText("Image not found");
-        }else if (!coverField.getText().isEmpty()){
-            String imageExtension = coverField.getText().substring(coverField.getText().length() - 4);
-            imageExtension = imageExtension.toLowerCase();
-
-            if (!imageExtension.equals(".jpg") && !imageExtension.equals(".png") && !imageExtension.equals("jpeg")){
-                save = false;
-                errorCover.setText("Image has to be '.jpg', '.png' or '.jpeg'");
-            }else{
-                errorCover.setText("");
-            }
-        }else{
-            errorCover.setText("");
-        }
 
         //Get file/files
         File exe = new File(executableField.getText());
@@ -145,35 +103,6 @@ public class AddDiscController {
         }
 
         if (save){
-            if (selectedCover == null)
-                selectedCover = new File(coverField.getText());
-
-            if (!coverField.getText().isEmpty()){
-                String extension = "";
-                int i = selectedCover.getName().lastIndexOf('.');
-                if (i > 0) {
-                    extension = selectedCover.getName().substring(i+1);
-                }
-
-                File newCover = new File("src/main/resources/img/discCovers/"+ controllerParent.getCurrentSeason().getCollectionName() + "_" + controllerParent.getCurrentSeason().getDiscs().size() + "_discCover." + extension);
-
-                try{
-                    Files.copy(selectedCover.toPath(), newCover.toPath());
-                }catch (IOException e){
-                    System.err.println("Image not copied");
-                }
-            }else{
-                File newCover = new File("src/main/resources/img/discCovers/"+ controllerParent.getCurrentSeason().getCollectionName() + "_" + controllerParent.getCurrentSeason().getDiscs().size() + "_discCover.png");
-
-                try{
-                    Files.copy(Path.of("src/main/resources/img/icons/disc.png"), newCover.toPath());
-                }catch (IOException e){
-                    System.err.println("Image not copied");
-                }
-
-                coverField.setText(newCover.getAbsolutePath());
-            }
-
             Disc disc;
 
             disc = Objects.requireNonNullElseGet(discToEdit, Disc::new);
@@ -204,10 +133,9 @@ public class AddDiscController {
             newDisc.setName("Disc " + Objects.requireNonNull(Main.findSeason(newDisc.getSeasonID())).getDiscs().size() + 1);
 
         newDisc.setType(typeField.getValue());
-        newDisc.setCoverSrc(coverField.getText());
         newDisc.setExecutableSrc(file.getAbsolutePath());
 
         Main.addDisc(newDisc);
-        controllerParent.addEpisodeCard(newDisc);
+        controllerParent.addDiscToCurrentSeason(newDisc);
     }
 }

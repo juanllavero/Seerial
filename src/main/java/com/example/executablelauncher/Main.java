@@ -12,6 +12,8 @@ import javafx.stage.StageStyle;
 import com.google.gson.Gson;
 
 import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -126,10 +128,13 @@ public class Main extends Application {
     public static List<Series> getSeriesFromCategory(String cat){
         List<Series> seriesList = new ArrayList<>();
         for (Series s : series){
-            if (s.getCategory().equals(cat)){
+            if (s != null && s.getCategory().equals(cat)){
                 seriesList.add(s);
             }
         }
+
+        seriesList.sort(new Utils.SeriesComparator());
+
         return seriesList;
     }
 
@@ -193,30 +198,31 @@ public class Main extends Application {
     }
 
     public static void removeCollection(Series col) throws IOException {
-        List<Integer> sList = col.getSeasons();
-        for (int i : sList){
-            Season s = findSeason(i);
-            List<Integer> dList = s.getDiscs();
-            for (int j : dList){
-                discs.remove(discs.get(j));
-            }
-            int index = -1;
-            for (Season season : seasons){
-                if (season.getId() == i) {
-                    index = seasons.indexOf(season);
-                    break;
-                }
-            }
-            if (index != -1)
-                seasons.remove(index);
-        }
-        series.remove(col);
+        Series s = findSeries(col);
+        assert s != null;
 
+        Files.delete(FileSystems.getDefault().getPath(s.getCoverSrc()));
+        s.clearSeasons();
+        series.remove(s);
         SaveData();
     }
 
     public static void removeSeason(int id){
         Season s = findSeason(id);
+        assert s != null;
+
+        try{
+            Files.delete(FileSystems.getDefault().getPath(s.getBackgroundSrc()));
+            if (!s.getLogoSrc().equals("NO_LOGO"))
+                Files.delete(FileSystems.getDefault().getPath(s.getLogoSrc()));
+            if (!s.getMusicSrc().equals("NO_MUSIC"))
+                Files.delete(FileSystems.getDefault().getPath(s.getMusicSrc()));
+            if (!s.getVideoSrc().equals("NO_VIDEO"))
+                Files.delete(FileSystems.getDefault().getPath(s.getVideoSrc()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         List<Integer> dList = s.getDiscs();
         for (int i : dList){
             discs.remove(findDisc(i));
@@ -224,7 +230,7 @@ public class Main extends Application {
 
         for (Series serie: series){
             if (serie.getSeasons().contains(s.getId())) {
-                serie.getSeasons().remove(s.getId());
+                serie.removeSeason(s.getId());
                 break;
             }
         }
@@ -248,6 +254,7 @@ public class Main extends Application {
     }
 
     public static List<Series> getCollection(){
+        series.sort(new Utils.SeriesComparator());
         return series;
     }
 

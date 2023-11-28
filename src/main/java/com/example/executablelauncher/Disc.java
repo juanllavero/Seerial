@@ -7,7 +7,6 @@ public class Disc implements Serializable {
     public final int id;
     public String name;
     public float episodeNumber;
-    public String coverSrc;
     public String executableSrc;
     public String type;    //Folder or File
     public int seasonID = -1;
@@ -44,19 +43,19 @@ public class Disc implements Serializable {
         this.seasonID = seasonID;
     }
 
-    public String getCoverSrc() {
-        return coverSrc;
-    }
-
-    public void setCoverSrc(String coverSrc) {
-        this.coverSrc = coverSrc;
-    }
-
     public String getExecutableSrc() {
         return executableSrc;
     }
 
     public void setExecutableSrc(String executableSrc) {
         this.executableSrc = executableSrc;
+    }
+
+    public float getEpisodeNumber() {
+        return episodeNumber;
+    }
+
+    public void setEpisodeNumber(float episodeNumber) {
+        this.episodeNumber = episodeNumber;
     }
 }

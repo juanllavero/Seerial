@@ -124,12 +124,6 @@ public class AddSeasonController {
     }
 
     @FXML
-    void cancelImage(MouseEvent event) {
-        Stage stage = (Stage) ((ImageView)event.getSource()).getScene().getWindow();
-        stage.close();
-    }
-
-    @FXML
     void cancelButton(MouseEvent event) {
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
         stage.close();

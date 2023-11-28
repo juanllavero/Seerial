@@ -4,8 +4,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -228,23 +226,13 @@
             </center>
             <top>
                 <BorderPane prefHeight="55.0" prefWidth="600.0" BorderPane.alignment="CENTER">
-                    <right>
-                        <ImageView fitHeight="30.0" fitWidth="30.0" onMouseClicked="#cancelImage" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
-                            <image>
-                                <Image url="@../../../img/icons/close.png" />
-                            </image>
-                            <BorderPane.margin>
-                                <Insets right="15.0" />
-                            </BorderPane.margin>
-                        </ImageView>
-                    </right>
                     <center>
                         <Label text="ADD SEASON" textFill="#f8f8f8" BorderPane.alignment="CENTER">
                             <font>
                                 <Font size="22.0" />
                             </font>
                             <BorderPane.margin>
-                                <Insets left="40.0" />
+                                <Insets />
                             </BorderPane.margin>
                         </Label>
                     </center>

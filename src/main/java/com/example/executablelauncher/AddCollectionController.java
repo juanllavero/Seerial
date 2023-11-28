@@ -42,7 +42,6 @@ public class AddCollectionController {
     private Label orderError;
 
     public Series seriesToEdit = null;
-    private CardController cardControllerParent;
     private DesktopViewController controllerParent;
     private File selectedFile = null;
     private String name;
@@ -63,10 +62,6 @@ public class AddCollectionController {
 
     public void initializeCategories(){
         categoryField.getItems().addAll(Main.getCategories());
-    }
-
-    public void setParentCardController(CardController cardController){
-        cardControllerParent = cardController;
     }
 
     public void setParentController(DesktopViewController controller){
@@ -112,6 +107,8 @@ public class AddCollectionController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCategory-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            AddCategoryController addCategoryController = fxmlLoader.getController();
+            addCategoryController.setParent(controllerParent);
             Stage stage = new Stage();
             stage.setTitle("Add Category");
             stage.setScene(new Scene(root1));
@@ -158,6 +155,13 @@ public class AddCollectionController {
             orderError.setText("");
         }
 
+        if (categoryField.getValue() == null){
+            save = false;
+            errorCategory.setText("You must select a category");
+        }else{
+            errorCategory.setText("");
+        }
+
         if (save){
             if (selectedFile == null)
                 selectedFile = new File(coverField.getText());
@@ -191,8 +195,9 @@ public class AddCollectionController {
                 series.setOrder(Integer.parseInt(orderField.getText()));
             }
 
+            series.setCategory(categoryField.getValue());
+
             if (seriesToEdit != null){
-                cardControllerParent.setData(series);
                 seriesToEdit = null;
             }else{
                 Main.addCollection(series);

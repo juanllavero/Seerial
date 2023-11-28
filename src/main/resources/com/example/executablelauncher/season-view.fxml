@@ -122,7 +122,7 @@
                   </ImageView>
                   <HBox fx:id="episodeBox" alignment="CENTER_LEFT" styleClass="transparent" stylesheets="@styles.css">
                      <children>
-                        <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" styleClass="transparent" stylesheets="@styles.css">
+                        <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" pannable="true" styleClass="transparent" stylesheets="@styles.css">
                            <content>
                               <HBox fx:id="cardContainer" alignment="CENTER_LEFT" prefHeight="300.0" prefWidth="1278.0" stylesheets="@styles.css">
                                  <padding>

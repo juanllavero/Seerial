@@ -5,39 +5,19 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="310.0" prefWidth="600.0" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddDiscController">
+<AnchorPane prefHeight="224.0" prefWidth="521.0" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddDiscController">
     <children>
-        <BorderPane prefHeight="330.0" prefWidth="600.0" stylesheets="@styles.css">
+        <BorderPane prefHeight="243.0" prefWidth="561.0" stylesheets="@styles.css">
             <center>
                 <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
                     <children>
-                        <Label text="Cover Image (Optional)" textFill="#fcfcfc">
-                            <VBox.margin>
-                                <Insets left="50.0" top="15.0" />
-                            </VBox.margin>
-                        </Label>
-                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
-                            <children>
-                                <TextField fx:id="coverField" HBox.hgrow="ALWAYS">
-                                    <HBox.margin>
-                                        <Insets left="50.0" right="10.0" top="5.0" />
-                                    </HBox.margin>
-                                </TextField>
-                                <Button mnemonicParsing="false" onMouseClicked="#loadCover" text="Load">
-                                    <HBox.margin>
-                                        <Insets right="50.0" />
-                                    </HBox.margin>
-                                </Button>
-                            </children>
-                        </HBox>
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" />
                   <Label fx:id="errorCover" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="235.0" prefHeight="17.0" prefWidth="608.0" textFill="#bf0404">
                      <VBox.margin>
                         <Insets top="5.0" />
@@ -112,23 +92,13 @@
             </center>
             <top>
                 <BorderPane prefHeight="55.0" prefWidth="600.0" BorderPane.alignment="CENTER">
-                    <right>
-                        <ImageView fitHeight="30.0" fitWidth="30.0" onMouseClicked="#cancelImage" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
-                            <image>
-                                <Image url="@../../../img/icons/close.png" />
-                            </image>
-                            <BorderPane.margin>
-                                <Insets right="15.0" />
-                            </BorderPane.margin>
-                        </ImageView>
-                    </right>
                     <center>
                         <Label text="ADD DISC/EPISODE" textFill="#f8f8f8" BorderPane.alignment="CENTER">
                             <font>
                                 <Font size="22.0" />
                             </font>
                             <BorderPane.margin>
-                                <Insets left="40.0" />
+                                <Insets />
                             </BorderPane.margin>
                         </Label>
                     </center>

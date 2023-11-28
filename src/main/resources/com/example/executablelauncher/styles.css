@@ -15,7 +15,7 @@
 }
 
 .desktopMenuButtons:hover{
-    -fx-background-radius: 15px;
+    -fx-background-radius: 5px;
     -fx-background-color: #4d4d4d;
 }
 

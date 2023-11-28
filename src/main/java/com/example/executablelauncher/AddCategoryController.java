@@ -14,6 +14,8 @@ public class AddCategoryController {
     @FXML
     private TextField categoryField;
 
+    private DesktopViewController parentController;
+
     @FXML
     void cancelButton(MouseEvent event) {
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
@@ -26,7 +28,12 @@ public class AddCategoryController {
             categoryError.setText("The category already exists");
         }else{
             Main.addCategory(categoryField.getText());
+            parentController.updateCategories();
             cancelButton(event);
         }
+    }
+
+    public void setParent(DesktopViewController desktopViewController) {
+        parentController = desktopViewController;
     }
 }

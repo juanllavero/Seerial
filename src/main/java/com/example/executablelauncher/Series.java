@@ -45,6 +45,19 @@ public class Series implements Serializable {
         this.seasons.add(season.getId());
     }
 
+    public void removeSeason(int id){
+        for (int i = 0; i < seasons.size(); i++){
+            if (seasons.get(i) == id) {
+                seasons.remove(i);
+                break;
+            }
+        }
+    }
+
+    public void clearSeasons(){
+        seasons.clear();
+    }
+
     public String getCategory() {
         return category;
     }

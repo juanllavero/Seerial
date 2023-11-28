@@ -107,4 +107,8 @@ public class Season implements Serializable {
             i++;
         }
     }
+
+    public void addDisc(Disc d){
+        discs.add(d.getId());
+    }
 }

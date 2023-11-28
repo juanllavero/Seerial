@@ -31,12 +31,18 @@ public class DiscController {
     private void onMouseClick(MouseEvent event) {
         if (event.getButton() == MouseButton.SECONDARY) {
             if (desktopController != null)
-                desktopController.openDiscMenu(disc);
-        }else{
+                desktopController.openDiscMenu(event, disc);
+        }else {
             if (parentController != null)
                 parentController.playEpisode(disc);
-            else
-                desktopController.selectDisc(disc);
+            else {
+                if (event.isControlDown())
+                    desktopController.controlSelectDisc(disc);
+                else if (event.isShiftDown())
+                    desktopController.shiftSelectDisc(disc);
+                else
+                    desktopController.selectDisc(disc);
+            }
         }
     }
 }
