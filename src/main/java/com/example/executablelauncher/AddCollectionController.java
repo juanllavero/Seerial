@@ -172,7 +172,7 @@ public class AddCollectionController {
             if (i > 0) {
                 extension = selectedFile.getName().substring(i+1);
             }
-            File newCover = new File("src/main/resources/img/seriesCovers/"+ nameField.getText() + "_cover." + extension);
+            File newCover = new File("src/main/resources/img/seriesCovers/"+ nameField.getText() + "_cover.png");
 
             try{
                 Files.copy(selectedFile.toPath(), newCover.toPath());

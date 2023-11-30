@@ -1,16 +1,30 @@
 package com.example.executablelauncher;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.GaussianBlur;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.geometry.Insets;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Objects;
 
@@ -63,16 +77,30 @@ public class AddSeasonController {
     private File seletedBackground = null;
     private File selectedVideo = null;
     private File selectedMusic = null;
+    private DesktopViewController parentController = null;
+
+    public void setParentController(DesktopViewController parent){
+        parentController = parent;
+    }
 
     public void setSeason(Season s){
         seasonToEdit = s;
 
         nameField.setText(s.getName());
         yearField.setText((s.getYear()));
-        logoField.setText(s.getLogoSrc());
+        if (!s.getLogoSrc().equals("NO_LOGO"))
+            logoField.setText(s.getLogoSrc());
+        else
+            logoField.setText("");
         backgroundField.setText(s.getBackgroundSrc());
-        videoField.setText(s.getVideoSrc());
-        musicField.setText(s.getMusicSrc());
+        if (!s.getVideoSrc().equals("NO_VIDEO"))
+            videoField.setText(s.getVideoSrc());
+        else
+            videoField.setText("");
+        if (!s.getMusicSrc().equals("NO_MUSIC"))
+            musicField.setText(s.getMusicSrc());
+        else
+            musicField.setText("");
         collection = Main.findSeriesByName(s.getCollectionName());
 
         if (s.getOrder() > 0)
@@ -241,98 +269,181 @@ public class AddSeasonController {
 
             season = Objects.requireNonNullElseGet(seasonToEdit, Season::new);
 
-            if (seletedBackground == null)
-                seletedBackground = new File(backgroundField.getText());
-
-            String extension = "";
-
-            int i = seletedBackground.getName().lastIndexOf('.');
-            if (i > 0) {
-                extension = seletedBackground.getName().substring(i+1);
-            }
-
-            File newBackground = new File("src/main/resources/img/backgrounds/"+ collection.getName() + "_" + collection.getSeasons().size() + "_sb." + extension);
-
-            if (!logoField.getText().isEmpty()){
-                if (selectedLogo == null)
-                    selectedLogo = new File(logoField.getText());
-
-                i = selectedLogo.getName().lastIndexOf('.');
-                if (i > 0) {
-                    extension = selectedLogo.getName().substring(i+1);
-                }
-                File newLogo = new File("src/main/resources/img/logos/"+ collection.getName() + "_" + collection.getSeasons().size() + "_sl." + extension);
-
-                try{
-                    Files.copy(selectedLogo.toPath(), newLogo.toPath());
-                }catch (IOException e){
-                    System.err.println("File not copied");
-                }
-                season.setLogoSrc(newLogo.getAbsolutePath());
-            }else{
-                season.setLogoSrc("NO_LOGO");
-            }
-
-            if (!videoField.getText().isEmpty()){
-                if (selectedVideo == null)
-                    selectedVideo = new File(videoField.getText());
-
-                i = selectedVideo.getName().lastIndexOf('.');
-                if (i > 0) {
-                    extension = selectedVideo.getName().substring(i+1);
-                }
-                File newVideo = new File("src/main/resources/video/" + collection.getName() + "_" + collection.getSeasons().size() + "_sv." + extension);
-
-                try{
-                    Files.copy(selectedVideo.toPath(), newVideo.toPath());
-                }catch (IOException e){
-                    System.err.println("File not copied");
-                }
-                season.setVideoSrc(newVideo.getAbsolutePath());
-            }else{
-                season.setVideoSrc("NO_VIDEO");
-            }
-
-            if (!musicField.getText().isEmpty()){
-                if (selectedMusic == null)
-                    selectedMusic = new File(musicField.getText());
-
-                i = selectedMusic.getName().lastIndexOf('.');
-                if (i > 0) {
-                    extension = selectedMusic.getName().substring(i+1);
-                }
-                File newMusic = new File("src/main/resources/music/" + collection.getName() + "_" + collection.getSeasons().size() + "_sm." + extension);
-
-                try{
-                    Files.copy(selectedMusic.toPath(), newMusic.toPath());
-                }catch (IOException e){
-                    System.err.println("File not copied");
-                }
-
-                season.setMusicSrc(newMusic.getAbsolutePath());
-            }else{
-                season.setMusicSrc("NO_MUSIC");
-            }
-
-            try{
-                Files.copy(seletedBackground.toPath(), newBackground.toPath());
-            }catch (IOException e){
-                System.err.println("File not copied");
-            }
-
             season.setName(nameField.getText());
             season.setYear(yearField.getText());
-            season.setBackgroundSrc(newBackground.getAbsolutePath());
             season.setCollectionName(collection.getName());
+
+            if (seasonToEdit != null && !backgroundField.getText().equals(season.getBackgroundSrc())) {
+                try{
+                    Files.delete(FileSystems.getDefault().getPath(season.getBackgroundSrc()));
+                    saveBackground(season, collection.getSeasons().indexOf(season.getId()));
+                } catch (IOException e) {
+                    System.err.println("Background not deleted");
+                }
+            }else{
+                saveBackground(season, collection.getSeasons().size() + 1);
+            }
+
+            if (seasonToEdit != null && !logoField.getText().equals(season.getLogoSrc())) {
+                try{
+                    if (!season.getLogoSrc().equals("NO_LOGO"))
+                        Files.delete(FileSystems.getDefault().getPath(season.getLogoSrc()));
+                    saveLogo(season, collection.getSeasons().indexOf(season.getId()));
+                } catch (IOException e) {
+                    System.err.println("Logo not deleted");
+                }
+            }else{
+                saveLogo(season, collection.getSeasons().size() + 1);
+            }
+
+            if (seasonToEdit != null && !videoField.getText().equals(season.getVideoSrc())) {
+                try{
+                    if (!season.getVideoSrc().equals("NO_VIDEO"))
+                        Files.delete(FileSystems.getDefault().getPath(season.getVideoSrc()));
+                    saveVideo(season, collection.getSeasons().indexOf(season.getId()));
+                } catch (IOException e) {
+                    System.err.println("Video not deleted");
+                }
+            }else{
+                saveVideo(season, collection.getSeasons().size() + 1);
+            }
+
+            if (seasonToEdit != null && !musicField.getText().equals(season.getMusicSrc())) {
+                try{
+                    if (!season.getMusicSrc().equals("NO_MUSIC"))
+                        Files.delete(FileSystems.getDefault().getPath(season.getMusicSrc()));
+                    saveMusic(season, collection.getSeasons().indexOf(season.getId()));
+                } catch (IOException e) {
+                    System.err.println("Background not deleted");
+                }
+            }else{
+                saveMusic(season, collection.getSeasons().size() + 1);
+            }
 
             if (!orderField.getText().isEmpty() && !orderField.getText().equals("0")){
                 season.setOrder(Integer.parseInt(orderField.getText()));
             }
 
-            Main.addSeason(season, season.getCollectionName());
+            if (seasonToEdit == null)
+                Main.addSeason(season, season.getCollectionName());
+
+            parentController.updateDiscView();
 
             Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
             stage.close();
         }
+    }
+
+    private void saveBackground(Season s, int seasonNumber){
+        if (seletedBackground == null)
+            seletedBackground = new File(backgroundField.getText());
+
+        String extension = "";
+
+        int i = seletedBackground.getName().lastIndexOf('.');
+        if (i > 0) {
+            extension = seletedBackground.getName().substring(i+1);
+        }
+
+        File newBackground = new File("src/main/resources/img/backgrounds/"+ collection.getName() + "_" + seasonNumber + "_sb.png");
+
+        try{
+            Files.copy(seletedBackground.toPath(), newBackground.toPath());
+        }catch (IOException e){
+            System.err.println("Background not copied");
+        }
+
+        s.setBackgroundSrc(newBackground.getAbsolutePath());
+
+        Pane pane = new Pane();
+        pane.setPrefWidth(Screen.getPrimary().getBounds().getWidth());
+        pane.setPrefHeight(Screen.getPrimary().getBounds().getHeight());
+        pane.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(0), new Insets(0, 0, 0, 0))));
+
+        ImageView backgroundBlur = new ImageView(new Image(newBackground.getAbsolutePath(), Screen.getPrimary().getBounds().getWidth()
+                , Screen.getPrimary().getBounds().getHeight(), false, true));
+
+        pane.getChildren().add(backgroundBlur);
+        GaussianBlur blur = new GaussianBlur();
+        blur.setRadius(27);
+        backgroundBlur.setEffect(blur);
+
+        File backgroundFullscreenBlur = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + s.getName() + "_fullBlur.png");
+        BufferedImage bImageFull = SwingFXUtils.fromFXImage(backgroundBlur.snapshot(null, null), null);
+
+        try {
+            ImageIO.write(bImageFull, "png", backgroundFullscreenBlur);
+        } catch (IOException e) {
+            System.err.println("Blur images error");
+        }
+
+        s.setFullScreenBlurImageSrc(backgroundFullscreenBlur.getAbsolutePath());
+    }
+
+    private void saveLogo(Season s, int seasonNumber){
+        if (!logoField.getText().isEmpty()){
+            if (selectedLogo == null)
+                selectedLogo = new File(logoField.getText());
+
+            File newLogo = new File("src/main/resources/img/logos/"+ collection.getName() + "_" + seasonNumber + "_sl.png");
+
+            try{
+                Files.copy(selectedLogo.toPath(), newLogo.toPath());
+            }catch (IOException e){
+                System.err.println("Logo not copied");
+            }
+            s.setLogoSrc(newLogo.getAbsolutePath());
+        }else{
+            s.setLogoSrc("NO_LOGO");
+        }
+    }
+
+    private void saveVideo(Season s, int seasonNumber){
+        if (!videoField.getText().isEmpty()){
+            if (selectedVideo == null)
+                selectedVideo = new File(videoField.getText());
+
+            int i = selectedVideo.getName().lastIndexOf('.');
+            String extension = "mp4";
+            if (i > 0) {
+                extension = selectedVideo.getName().substring(i+1);
+            }
+            File newVideo = new File("src/main/resources/video/" + collection.getName() + "_" + seasonNumber + "_sv." + extension);
+
+            try{
+                Files.copy(selectedVideo.toPath(), newVideo.toPath());
+            }catch (IOException e){
+                System.err.println("Video not copied");
+            }
+            s.setVideoSrc(newVideo.getAbsolutePath());
+        }else{
+            s.setVideoSrc("NO_VIDEO");
+        }
+    }
+
+    private void saveMusic(Season s, int seasonNumber){
+        if (!musicField.getText().isEmpty()){
+            if (selectedMusic == null)
+                selectedMusic = new File(musicField.getText());
+
+            int i = selectedMusic.getName().lastIndexOf('.');
+            String extension = "mp3";
+            if (i > 0) {
+                extension = selectedMusic.getName().substring(i+1);
+            }
+            File newMusic = new File("src/main/resources/music/" + collection.getName() + "_" + seasonNumber + "_sm." + extension);
+
+            try{
+                Files.copy(selectedMusic.toPath(), newMusic.toPath());
+            }catch (IOException e){
+                System.err.println("Music not copied");
+            }
+
+            s.setMusicSrc(newMusic.getAbsolutePath());
+        }else{
+            s.setMusicSrc("NO_MUSIC");
+        }
+
+
     }
 }

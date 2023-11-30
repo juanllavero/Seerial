@@ -46,7 +46,7 @@ public class ImageCropper {
 
     private double fixedWidth = 0;
     private double fixedHeight = 0;
-    private final double aspectRatio = (double) 2 /3;
+    private final double aspectRatio = (double) 7/9;
 
     public String savePath;
     private AddCollectionController parentController = null;

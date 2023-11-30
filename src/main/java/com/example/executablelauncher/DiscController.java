@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 
 public class DiscController {
     @FXML
@@ -36,12 +37,14 @@ public class DiscController {
             if (parentController != null)
                 parentController.playEpisode(disc);
             else {
+                VBox discBox = (VBox)event.getSource();
+
                 if (event.isControlDown())
-                    desktopController.controlSelectDisc(disc);
+                    desktopController.controlSelectDisc(disc, discBox);
                 else if (event.isShiftDown())
-                    desktopController.shiftSelectDisc(disc);
+                    desktopController.shiftSelectDisc(disc, discBox);
                 else
-                    desktopController.selectDisc(disc);
+                    desktopController.selectDisc(disc, discBox);
             }
         }
     }

@@ -16,16 +16,16 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.Controller">
+<HBox fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.Controller">
    <children>
-      <StackPane fx:id="firstPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+      <StackPane fx:id="firstPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="transparent" stylesheets="@styles.css">
          <children>
             <ImageView fx:id="backgroundImage" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../../../img/backgroundDefault.jpeg" />
                </image>
                <effect>
-                  <GaussianBlur radius="27.79" />
+                  <GaussianBlur radius="27.0" />
                </effect>
             </ImageView>
             <BorderPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" styleClass="transparent" stylesheets="@styles.css">
@@ -49,6 +49,13 @@
                            <HBox.margin>
                               <Insets top="5.0" />
                            </HBox.margin>
+                           <left>
+                              <HBox fx:id="categoriesBox" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </HBox>
+                           </left>
                         </BorderPane>
                      </children>
                      <BorderPane.margin>
@@ -60,7 +67,7 @@
                   </HBox>
                </top>
                <center>
-                  <StackPane BorderPane.alignment="CENTER">
+                  <StackPane styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                      <children>
                         <HBox fx:id="hBox" styleClass="transparent" stylesheets="@styles.css">
                            <children>
@@ -85,7 +92,7 @@
                   </StackPane>
                </center>
             </BorderPane>
-            <StackPane fx:id="sideMenuParent" styleClass="blurredBackground" stylesheets="@styles.css" StackPane.alignment="CENTER">
+            <StackPane fx:id="sideMenuParent" styleClass="blurredBackground" stylesheets="@styles.css" visible="false" StackPane.alignment="CENTER">
                <children>
                   <AnchorPane StackPane.alignment="CENTER">
                      <children>
@@ -169,7 +176,7 @@
                                           <Insets bottom="10.0" left="15.0" />
                                        </VBox.margin>
                                     </Label>
-                                    <Button fx:id="addCatButton1" alignment="BASELINE_LEFT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#switchToDesktop" prefHeight="44.0" prefWidth="303.0" stylesheets="@styles.css" text="Switch to Desktop Mode" textFill="WHITE">
+                                    <Button fx:id="addCatButton1" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#switchToDesktop" stylesheets="@styles.css" text="Switch to Desktop Mode" textFill="WHITE">
                                        <font>
                                           <Font size="20.0" />
                                        </font>
@@ -185,7 +192,7 @@
                                           </ImageView>
                                        </graphic>
                                     </Button>
-                                    <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" mnemonicParsing="false" onMouseClicked="#close" prefHeight="44.0" prefWidth="302.0" stylesheets="@styles.css" text="Exit VideoLauncher" textFill="WHITE">
+                                    <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#close" stylesheets="@styles.css" text="Exit VideoLauncher" textFill="WHITE">
                                        <font>
                                           <Font size="20.0" />
                                        </font>

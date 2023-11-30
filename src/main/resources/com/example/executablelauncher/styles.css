@@ -10,6 +10,15 @@
     
 }
 
+.translucentBackground{
+    -fx-background-color: rgba(0, 0, 0, 0.47);
+}
+
+.discSelected{
+    -fx-background-color: #525252;
+    -fx-background-radius: 5px;
+}
+
 .desktopMenuButtons{
     -fx-background-color: transparent;
 }
@@ -17,6 +26,22 @@
 .desktopMenuButtons:hover{
     -fx-background-radius: 5px;
     -fx-background-color: #4d4d4d;
+}
+
+.desktopTextButton{
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.desktopTextButton:hover{
+    -fx-background-radius: 5px;
+    -fx-background-color: #252525;
+}
+
+.desktopButtonActive{
+    -fx-background-radius: 5px;
+    -fx-background-color: #252525;
+    -fx-text-fill: white;
 }
 
 .roundButton:hover{
@@ -113,7 +138,7 @@
 
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track{
-    -fx-background-color :#252525;
+    -fx-background-color: rgba(0, 0, 0, 0.26);
     -fx-border-color :transparent;
     -fx-background-radius : 0.0em;
     -fx-border-radius :2.0em;

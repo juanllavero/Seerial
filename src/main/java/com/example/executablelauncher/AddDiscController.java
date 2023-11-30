@@ -116,6 +116,8 @@ public class AddDiscController {
             if (discToEdit != null)
                 discToEdit = null;
 
+            controllerParent.updateDiscView();
+
             Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
             stage.close();
         }
@@ -136,6 +138,5 @@ public class AddDiscController {
         newDisc.setExecutableSrc(file.getAbsolutePath());
 
         Main.addDisc(newDisc);
-        controllerParent.addDiscToCurrentSeason(newDisc);
     }
 }

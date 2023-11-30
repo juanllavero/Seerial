@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -34,10 +35,11 @@ public class Main extends Application {
         stage.setTitle("VideoLauncher Desktop");
         //stage.initStyle(StageStyle.UNDECORATED);
         Scene scene = new Scene(root);
+        scene.setFill(Color.BLACK);
         stage.setScene(scene);
         //stage.setMaximized(true);
-        stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
-        stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+        stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.3);
+        stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.3);
         stage.setMinWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
         stage.setMinHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
         DesktopViewController desktopViewController = fxmlLoader.getController();
@@ -57,19 +59,23 @@ public class Main extends Application {
         try{
             JsonReader reader = new JsonReader(new FileReader(collectionsFile));
             Series[] sList = gson.fromJson(reader,Series[].class);
-            series.addAll(List.of(sList));
+            if (sList != null)
+                series.addAll(List.of(sList));
 
             reader = new JsonReader(new FileReader(seasonsFile));
             Season[] seasonList = gson.fromJson(reader, Season[].class);
-            seasons.addAll(List.of(seasonList));
+            if (seasonList != null)
+                seasons.addAll(List.of(seasonList));
 
             reader = new JsonReader(new FileReader(discsFile));
             Disc[] dList = gson.fromJson(reader, Disc[].class);
-            discs.addAll(List.of(dList));
+            if (dList != null)
+                discs.addAll(List.of(dList));
 
             reader = new JsonReader(new FileReader(catFile));
             String[] catList = gson.fromJson(reader, String[].class);
-            categories.addAll(List.of(catList));
+            if (catList != null)
+                categories.addAll(List.of(catList));
         } catch (FileNotFoundException e) {
             System.err.println("Json files not found");
         }

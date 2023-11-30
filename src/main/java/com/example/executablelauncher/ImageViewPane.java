@@ -21,7 +21,7 @@ import javafx.scene.layout.Region;
  */
 public class ImageViewPane extends Region {
 
-    private ObjectProperty<ImageView> imageViewProperty = new SimpleObjectProperty<ImageView>();
+    private final ObjectProperty<ImageView> imageViewProperty = new SimpleObjectProperty<ImageView>();
 
     public ObjectProperty<ImageView> imageViewProperty() {
         return imageViewProperty;
@@ -45,7 +45,7 @@ public class ImageViewPane extends Region {
         if (imageView != null) {
             imageView.setFitWidth(getWidth());
             imageView.setFitHeight(getHeight());
-            layoutInArea(imageView, 0, 0, getWidth(), getHeight(), 0, HPos.CENTER, VPos.CENTER);
+            layoutInArea(imageView, 0, 0, getWidth(), getHeight(), 0, HPos.LEFT, VPos.TOP);
         }
         super.layoutChildren();
     }

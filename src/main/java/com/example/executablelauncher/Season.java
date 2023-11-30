@@ -14,6 +14,7 @@ public class Season implements Serializable {
     public String videoSrc;
     public String musicSrc;
     public String collectionName;
+    public String fullScreenBlurImageSrc;
     public int order = 0;
     public final List<Integer> discs = new ArrayList<>();
 
@@ -110,5 +111,13 @@ public class Season implements Serializable {
 
     public void addDisc(Disc d){
         discs.add(d.getId());
+    }
+
+    public String getFullScreenBlurImageSrc() {
+        return fullScreenBlurImageSrc;
+    }
+
+    public void setFullScreenBlurImageSrc(String fullScreenBlurImageSrc) {
+        this.fullScreenBlurImageSrc = fullScreenBlurImageSrc;
     }
 }

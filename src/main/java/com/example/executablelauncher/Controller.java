@@ -1,7 +1,8 @@
 package com.example.executablelauncher;
 
-import javafx.animation.FadeTransition;
+import javafx.animation.*;
 import javafx.scene.Node;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
@@ -27,7 +28,13 @@ import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Stream;
+
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -91,11 +98,15 @@ public class Controller implements Initializable {
     @FXML
     private HBox mainBox;
 
+    @FXML
+    private HBox categoriesBox;
+
     private Series seriesToEdit;
     private CardController seriesToEditController;
     private List<Series> collectionList;
 
     private MediaPlayer backgroundMusicPlayer;
+    private List<Timeline> coverBorderTimelines = new ArrayList<>();
 
     @FXML
     private void close(MouseEvent event) throws IOException {
@@ -126,12 +137,6 @@ public class Controller implements Initializable {
                 hideContextMenu();
             }
         });
-
-        //Load collections
-        collectionList = new ArrayList<>(Main.getCollection());
-        for (Series col : collectionList) {
-            addCard(col);
-        }
 
         //Add css to scrollPane to make it look modern
         scrollPane.getStylesheets().add(Objects.requireNonNull(this.getClass().getResource("styles.css")).toExternalForm());
@@ -165,17 +170,22 @@ public class Controller implements Initializable {
         closeButton.prefWidthProperty().bind(sideMenu.prefWidthProperty());
 
         //Remove horizontal and vertical scroll
-        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        DesktopViewController.scrollModification(scrollPane);
 
-        //Changes the scrolling speed
-        final double SPEED = 0.0025;
-        scrollPane.getContent().setOnScroll(scrollEvent -> {
-            double deltaY = scrollEvent.getDeltaY() * SPEED;
-            scrollPane.setVvalue(scrollPane.getVvalue() - deltaY);
-        });
+        List<String> categories = Main.getCategories();
 
-        defaultSelection();
+        for (String cat : categories){
+            Button btn = new Button();
+            btn.setText(cat);
+
+            btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                showSeriesFrom(btn.getText());
+            });
+
+            categoriesBox.getChildren().add(btn);
+        }
+
+        showSeriesFrom(categories.get(0));
 
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
         fadeIn.setFromValue(0);
@@ -183,9 +193,29 @@ public class Controller implements Initializable {
         fadeIn.play();
     }
 
+    public void showSeriesFrom(String cat){
+        cardContainer.getChildren().clear();
+        collectionList = new ArrayList<>(Main.getSeriesFromCategory(cat));
+        for (Series col : collectionList) {
+            addCard(col);
+        }
+        defaultSelection();
+    }
+
     public void defaultSelection(){
         if (!cardContainer.getChildren().isEmpty()){
             selectSeries(collectionList.get(0));
+        }else{
+            seriesToEdit = null;
+            contextMenuLabel.setText("");
+            File file = new File("src/main/resources/img/backgroundDefault.jpeg");
+            Image image = new Image(file.getAbsolutePath());
+            backgroundImage.setImage(image);
+            BackgroundImage myBI= new BackgroundImage(new Image(file.getAbsolutePath(),
+                    Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true),
+                    BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                    BackgroundSize.DEFAULT);
+            mainBox.setBackground(new Background(myBI));
         }
     }
 
@@ -198,6 +228,10 @@ public class Controller implements Initializable {
             node.getStyleClass().add("coverNotSelected");
         }
 
+        for (Timeline t : coverBorderTimelines){
+            t.stop();
+        }
+
         if (s.getName().equals(contextMenuLabel.getText())){
             contextMenuLabel.setText("");
             showSeason(s);
@@ -207,23 +241,34 @@ public class Controller implements Initializable {
                 if (season != null){
                     Image image = new Image(season.getBackgroundSrc());
                     backgroundImage.setImage(image);
+                    //backgroundImage.setVisible(false);
+
+                    BackgroundImage myBI= new BackgroundImage(new Image(season.getFullScreenBlurImageSrc(),
+                            Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true),
+                            BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                            BackgroundSize.DEFAULT);
+                    mainBox.setBackground(new Background(myBI));
+                    GaussianBlur blur = new GaussianBlur();
+                    blur.setRadius(28);
                 }
             }
 
             Node node = cardContainer.getChildren().get(collectionList.indexOf(s));
-            node.getStyleClass().clear();
-            node.getStyleClass().add("coverSelected");
+            //node.getStyleClass().clear();
+            //node.getStyleClass().add("coverSelected");
+            coverBorderTimelines.get(collectionList.indexOf(s)).play();
+
 
             //Fade out effect
             FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), backgroundImage);
-            fadeOut.setFromValue(3.5);
+            fadeOut.setFromValue(1.5);
             fadeOut.setToValue(0.0);
             fadeOut.play();
 
             //Fade in effect
             FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
             fadeIn.setFromValue(0);
-            fadeIn.setToValue(3.5);
+            fadeIn.setToValue(1.5);
             fadeIn.play();
 
             contextMenuLabel.setText(s.getName());
@@ -241,9 +286,31 @@ public class Controller implements Initializable {
 
             VBox cardVBox = new VBox();
             cardVBox.setPrefHeight(364);
-            cardVBox.setPrefWidth(247);
+            cardVBox.setPrefWidth(286);
             cardVBox.setAlignment(Pos.CENTER);
             cardVBox.getChildren().add(cardBox);
+
+            cardBox.setBackground(Background.EMPTY);
+
+            Color[] colors = Stream.of("#d7d7d7", "#e5e5e5",  "#e0e0e0", "#d4d4d4", "#c9c9c9", "#bcbcbc", "#afafaf", "#a0a0a0", "#939393"
+                            , "#797979", "#737373", "#6a6a6a", "#5f5f5f", "#545454", "#494949", "#444444", "#3a3a3a", "#343434", "#2c2c2c", "#2c2c2c"
+                    , "#343434", "#3a3a3a", "#444444", "#494949", "#545454", "#5f5f5f", "#6a6a6a", "#737373", "#797979", "#939393", "#a0a0a0", "#afafaf"
+                    , "#bcbcbc", "#c9c9c9", "#d4d4d4", "#e0e0e0", "#e5e5e5", "#d7d7d7")
+                    .map(Color::web)
+                    .toArray(Color[]::new);
+
+            int[] mills = {-100};
+            KeyFrame[] keyFrames = Stream.iterate(0, i -> i+1)
+                    .limit(100)
+                    .map(i -> new LinearGradient(0, 1, 0, 1, true, CycleMethod.NO_CYCLE
+                            , new Stop(0, colors[i%colors.length]), new Stop(1, colors[(i+1)%colors.length])))
+                    .map(lg -> new Border(new BorderStroke(lg, BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(3))))
+                    .map(b -> new KeyFrame(Duration.millis(mills[0]+=100), new KeyValue(cardVBox.borderProperty(), b, Interpolator.EASE_IN)))
+                    .toArray(KeyFrame[]::new);
+
+            Timeline timeline = new Timeline(keyFrames);
+            timeline.setCycleCount(Timeline.INDEFINITE);
+            coverBorderTimelines.add(timeline);
 
             cardContainer.getChildren().add(cardVBox);
         } catch (IOException e) {

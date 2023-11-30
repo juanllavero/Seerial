@@ -22,12 +22,12 @@
 
 <StackPane fx:id="mainBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
    <children>
-      <ImageView fx:id="globalBackground" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="globalBackground" fitHeight="720.0" fitWidth="1293.0" opacity="0.88" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../../../../Pictures/1315631.png" />
+            <Image url="@../../../img/backgroundDefault.jpeg" />
          </image>
          <effect>
-            <GaussianBlur radius="33.71" />
+            <GaussianBlur radius="50.02" />
          </effect>
       </ImageView>
       <ImageView fx:id="globalBackgroundShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true">
@@ -35,7 +35,7 @@
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
-      <GridPane>
+      <GridPane styleClass="transparent" stylesheets="@styles.css">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
             <ColumnConstraints fx:id="centralBoxH" halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" percentWidth="55.0" prefWidth="100.0" />
@@ -87,31 +87,22 @@
                      <content>
                         <VBox fx:id="seriesContainer" prefHeight="200.0" prefWidth="100.0">
                            <padding>
-                              <Insets bottom="10.0" left="5.0" right="50.0" top="5.0" />
+                              <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
                         </VBox>
                      </content>
                   </ScrollPane>
                </children>
             </VBox>
-            <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" pannable="true" stylesheets="@styles.css" vbarPolicy="ALWAYS" GridPane.columnIndex="1">
-               <styleClass>
-                  <String fx:value="transparent" />
-                  <String fx:value="borderLines" />
-               </styleClass>
+            <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" stylesheets="@styles.css" vbarPolicy="ALWAYS" GridPane.columnIndex="1">
                <content>
-                  <VBox fx:id="centralVBox">
+                  <VBox fx:id="centralVBox" prefHeight="720.0" prefWidth="687.0" styleClass="transparent" stylesheets="@styles.css">
                      <children>
-                        <StackPane fx:id="seasonInfoPane" alignment="BASELINE_CENTER" styleClass="desktopButton" stylesheets="@styles.css">
+                        <StackPane fx:id="seasonInfoPane" alignment="TOP_CENTER" styleClass="transparent" stylesheets="@styles.css">
                            <children>
-                              <ImageView fx:id="backgroundImage" fitHeight="349.0" fitWidth="612.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_LEFT">
-                                 <image>
-                                    <Image url="@../../../../../../../../Pictures/1315631.png" />
-                                 </image>
-                              </ImageView>
-                              <VBox>
+                              <VBox fx:id="seasonInfoInside" alignment="BASELINE_CENTER" prefHeight="583.0" prefWidth="687.0" StackPane.alignment="CENTER">
                                  <children>
-                                    <HBox fx:id="seasonCoverLogoBox" alignment="BOTTOM_LEFT" prefHeight="342.0" prefWidth="642.0">
+                                    <HBox fx:id="seasonCoverLogoBox" alignment="BOTTOM_LEFT" VBox.vgrow="ALWAYS">
                                        <children>
                                           <ImageView fx:id="seriesCover" fitHeight="252.0" fitWidth="177.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
                                              <image>
@@ -176,6 +167,10 @@
                      </children>
                   </VBox>
                </content>
+               <styleClass>
+                  <String fx:value="transparent" />
+                  <String fx:value="borderLines" />
+               </styleClass>
             </ScrollPane>
             <VBox fx:id="rightBox" alignment="TOP_CENTER" styleClass="borderLines" stylesheets="@styles.css" GridPane.columnIndex="2">
                <children>

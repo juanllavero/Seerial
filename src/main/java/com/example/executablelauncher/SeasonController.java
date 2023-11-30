@@ -106,6 +106,7 @@ public class SeasonController {
     int pos = 0;
     final int minPos = 0;
     final int maxPos = 100;
+    private boolean isVideo = false;
 
     public void setParent(Controller c){
         controllerParent = c;
@@ -153,6 +154,22 @@ public class SeasonController {
                 mp.play();
             });
 
+            isVideo = true;
+
+            alertTimer.play();
+        }else if (!season.getMusicSrc().equals("NO_MUSIC")){
+            controllerParent.stopBackground();
+            File file = new File(season.getMusicSrc());
+            Media media = new Media(file.toURI().toString());
+            mp = new MediaPlayer(media);
+
+            mp.setOnEndOfMedia(() -> {
+                mp.seek(Duration.ZERO);
+                mp.play();
+            });
+
+            isVideo = false;
+
             alertTimer.play();
         }
 
@@ -199,7 +216,10 @@ public class SeasonController {
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (KeyCode.ESCAPE == event.getCode()) {
-                goBack(event);
+                if (contextMenu.isVisible())
+                    contextMenu.setVisible(false);
+                else
+                    goBack(event);
             }
         });
 
@@ -247,15 +267,15 @@ public class SeasonController {
     private void playVideo(){
         Platform.runLater(() ->{
             if (mp != null) {
-                backgroundVideo.setVisible(true);
+                if (isVideo){
+                    backgroundVideo.setVisible(true);
 
-                //Fade In Transition
-                FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
-                fadeIn.setFromValue(0);
-                fadeIn.setToValue(1.0);
-                fadeIn.play();
-
-                //Play video
+                    //Fade In Transition
+                    FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
+                    fadeIn.setFromValue(0);
+                    fadeIn.setToValue(1.0);
+                    fadeIn.play();
+                }
                 mp.play();
             }
         });
