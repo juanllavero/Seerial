@@ -79,6 +79,8 @@ public class Main extends Application {
         } catch (FileNotFoundException e) {
             System.err.println("Json files not found");
         }
+
+        categories.replaceAll(String::toUpperCase);
     }
 
     public static void SaveData() throws IOException {
@@ -134,7 +136,7 @@ public class Main extends Application {
     public static List<Series> getSeriesFromCategory(String cat){
         List<Series> seriesList = new ArrayList<>();
         for (Series s : series){
-            if (s != null && s.getCategory().equals(cat)){
+            if (s != null && s.getCategory().toUpperCase().equals(cat)){
                 seriesList.add(s);
             }
         }

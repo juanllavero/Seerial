@@ -5,7 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -19,8 +19,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -29,6 +27,7 @@ import javafx.stage.Stage;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.io.*;
@@ -37,6 +36,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class SeasonController {
+    @FXML
+    private ImageView menuShadow;
+
     @FXML
     private ImageView backgroundImage;
 
@@ -48,12 +50,6 @@ public class SeasonController {
 
     @FXML
     private HBox cardContainer;
-
-    @FXML
-    private FlowPane contextMenu;
-
-    @FXML
-    private Label contextMenuLabel;
 
     @FXML
     private HBox episodeBox;
@@ -92,16 +88,13 @@ public class SeasonController {
 
     private List<Season> seasons = new ArrayList<>();
     private List<Disc> discs = new ArrayList<>();
-    private Disc discToEdit = null;
     private int currentSeason = 0;
     public int currentEpisoceID = -1;
     private boolean showEpisodes = false;
 
-    private MediaPlayer mp;
+    private MediaPlayer mp = null;
 
-    Timeline alertTimer = new Timeline(new KeyFrame(Duration.seconds(3), event ->{
-        playVideo();
-    }));
+    Timeline alertTimer = null;
 
     int pos = 0;
     final int minPos = 0;
@@ -117,9 +110,12 @@ public class SeasonController {
             mp.stop();
         }
 
+        alertTimer = new Timeline(new KeyFrame(Duration.seconds(3), event ->{
+            playVideo();
+        }));
+
         nameField.setText(season.getName());
         yearField.setText(season.getYear());
-        contextMenuLabel.setText(season.getName());
 
         //Set Background Image
         Image background = new Image(season.getBackgroundSrc());
@@ -142,7 +138,6 @@ public class SeasonController {
         }
 
         if (!season.getVideoSrc().equals("NO_VIDEO")){
-            controllerParent.stopBackground();
             File file = new File(season.getVideoSrc());
             Media media = new Media(file.toURI().toString());
             mp = new MediaPlayer(media);
@@ -158,7 +153,6 @@ public class SeasonController {
 
             alertTimer.play();
         }else if (!season.getMusicSrc().equals("NO_MUSIC")){
-            controllerParent.stopBackground();
             File file = new File(season.getMusicSrc());
             Media media = new Media(file.toURI().toString());
             mp = new MediaPlayer(media);
@@ -188,16 +182,8 @@ public class SeasonController {
         fadeIn.setToValue(1.0);
         fadeIn.play();
 
-        if (season.getDiscs().size() <= 1){
-            showEpisodesButton.setVisible(false);
-            if (!season.getDiscs().isEmpty()){
-                discToEdit = Main.findDisc(season.getDiscs().get(0));
-            }
-        }else{
-            showEpisodesButton.setVisible(true);
-        }
+        showEpisodesButton.setVisible(season.getDiscs().size() > 1);
 
-        contextMenu.setVisible(false);
         episodeSection.setTranslateY(episodeBox.getPrefHeight());
         infoBox.setTranslateY(episodeBox.getPrefHeight() / 2);
     }
@@ -214,12 +200,25 @@ public class SeasonController {
             }
         }
 
+        menuShadow.setFitWidth(Screen.getPrimary().getBounds().getWidth());
+        menuShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
+        menuShadow.setVisible(false);
+
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (KeyCode.ESCAPE == event.getCode()) {
-                if (contextMenu.isVisible())
-                    contextMenu.setVisible(false);
-                else
-                    goBack(event);
+            if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()){
+                goBack(event);
+            }else if (KeyCode.LEFT == event.getCode() && lastSeasonButton.isVisible()){
+                //controllerParent.playCategoriesSound();
+                //lastSeason();
+            }else if (KeyCode.RIGHT == event.getCode() && nextSeasonButton.isVisible()){
+                //controllerParent.playCategoriesSound();
+                //nextSeason();
+            }else if (KeyCode.DOWN == event.getCode() && !showEpisodes && discs.size() > 1){
+                controllerParent.playInteractionSound();
+                showEpisodes();
+            }else if (KeyCode.UP == event.getCode() && showEpisodes && discs.size() > 1){
+                controllerParent.playInteractionSound();
+                showEpisodes();
             }
         });
 
@@ -245,15 +244,12 @@ public class SeasonController {
         cardContainer.prefHeightProperty().bind(episodeScroll.heightProperty());
         cardContainer.prefWidthProperty().bind(episodeScroll.widthProperty());
 
-        episodeScroll.setOnScroll(new EventHandler<>() {
-            @Override
-            public void handle(ScrollEvent event) {
+        episodeScroll.setOnScroll(event -> {
 
-                if (event.getDeltaY() > 0)
-                    episodeScroll.setHvalue(pos == minPos ? minPos : pos--);
-                else
-                    episodeScroll.setHvalue(pos == maxPos ? maxPos : pos++);
-            }
+            if (event.getDeltaY() > 0)
+                episodeScroll.setHvalue(pos == minPos ? minPos : pos--);
+            else
+                episodeScroll.setHvalue(pos == maxPos ? maxPos : pos++);
         });
 
         //Remove horizontal and vertical scroll
@@ -303,10 +299,6 @@ public class SeasonController {
         }
     }
 
-    public Season getCurrentSeason(){
-        return seasons.get(currentSeason);
-    }
-
     public void playEpisode(Disc disc){
         mp.stop();
 
@@ -318,7 +310,6 @@ public class SeasonController {
             command = "bluray:///" + disc.getExecutableSrc();
         else
             command = disc.getExecutableSrc();
-
 
         try {
             ProcessBuilder pBuilder = new ProcessBuilder("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe", command);
@@ -340,7 +331,7 @@ public class SeasonController {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
                     String line = null;
                     while ((line = reader.readLine()) != null) {
-                        // TODO: handle line
+                        System.out.println(line);
                     }
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -398,29 +389,39 @@ public class SeasonController {
     }
 
     @FXML
-    void lastSeason(MouseEvent event){
+    void lastSeason(){
         updateInfo(seasons.get(--currentSeason));
         updateButtons();
     }
 
     @FXML
-    void nextSeason(MouseEvent event){
+    void nextSeason(){
         updateInfo(seasons.get(++currentSeason));
         updateButtons();
     }
 
     @FXML
-    void openMenu(MouseEvent event){
-        contextMenu.setVisible(true);
+    void openMenu(ActionEvent event){
+        menuShadow.setVisible(true);
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("seasonMenu-view.fxml"));
+            Parent root = fxmlLoader.load();
+            SeasonMenuController controller = fxmlLoader.getController();
+            controller.setParentController(this);
+            controller.setLabel(seasons.get(currentSeason).getName());
+            Stage stage = new Stage();
+            stage.initStyle(StageStyle.TRANSPARENT);
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Cannot load menu");
+        }
     }
 
     @FXML
-    void cancelButton(MouseEvent event){
-        contextMenu.setVisible(false);
-    }
-
-    @FXML
-    void removeSeason(MouseEvent event){
+    void removeSeason(){
         int currentID = seasons.get(currentSeason).getId();
 
         seasons.remove(seasons.get(currentSeason));
@@ -429,7 +430,7 @@ public class SeasonController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
-            Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
+            Stage stage = (Stage) mainBox.getScene().getWindow();
             stage.setTitle("ExecutableLauncher");
             stage.setScene(new Scene(root));
             stage.setMaximized(true);
@@ -442,7 +443,7 @@ public class SeasonController {
     }
 
     @FXML
-    void showEpisodes(MouseEvent event){
+    void showEpisodes(){
         if (showEpisodes) {
             showEpisodesButton.setImage(new Image("file:src/main/resources/img/icons/arrowDown.png"));
         }else {
@@ -478,7 +479,7 @@ public class SeasonController {
     }
 
     @FXML
-    void play(MouseEvent event){
+    void play(ActionEvent event){
         if (!seasons.get(currentSeason).getDiscs().isEmpty()){
             if (currentEpisoceID == -1){
                 currentEpisoceID = Objects.requireNonNull(Main.findDisc(seasons.get(currentSeason).getDiscs().get(0))).getId();
@@ -491,7 +492,11 @@ public class SeasonController {
     }
 
     @FXML
-    void editSeason(MouseEvent event){
+    void editSeason(){
         //Edit "sorting order"
+    }
+
+    public void hideMenuShadow(){
+        menuShadow.setVisible(false);
     }
 }

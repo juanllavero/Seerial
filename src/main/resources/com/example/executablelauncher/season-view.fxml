@@ -10,7 +10,6 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -88,10 +87,10 @@
                   </Label>
                   <HBox prefHeight="100.0" prefWidth="200.0">
                      <children>
-                        <Button mnemonicParsing="false" onMouseClicked="#play" prefHeight="45.0" prefWidth="199.0" styleClass="seeButton" stylesheets="@styles.css" text="See" />
-                        <Button mnemonicParsing="false" onMouseClicked="#openMenu" prefHeight="47.0" prefWidth="47.0" styleClass="optionsButton" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onAction="#play" prefHeight="45.0" prefWidth="199.0" styleClass="seeButton" stylesheets="@styles.css" text="See" />
+                        <Button mnemonicParsing="false" onAction="#openMenu" onMouseClicked="#openMenu" prefHeight="47.0" prefWidth="47.0" styleClass="optionsButton" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
                                  <image>
                                     <Image url="@../../../img/icons/options.png" />
                                  </image>
@@ -141,76 +140,10 @@
             </VBox>
          </bottom>
       </BorderPane>
-      <FlowPane fx:id="contextMenu" alignment="CENTER" columnHalignment="CENTER" prefHeight="200.0" prefWidth="200.0" styleClass="blurredBackground" stylesheets="@styles.css" visible="false">
-         <children>
-            <VBox alignment="CENTER" fillWidth="false" styleClass="greyGradient" stylesheets="@styles.css">
-               <children>
-                  <HBox fillHeight="false" prefHeight="36.0" prefWidth="286.0" styleClass="darkerBackground" stylesheets="@styles.css">
-                     <children>
-                        <Label fx:id="contextMenuLabel" prefHeight="17.0" prefWidth="280.0" text="Name of the season" textFill="WHITE">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                           <padding>
-                              <Insets bottom="5.0" left="10.0" top="5.0" />
-                           </padding>
-                        </Label>
-                     </children>
-                     <padding>
-                        <Insets top="5.0" />
-                     </padding>
-                  </HBox>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#editSeason" prefHeight="50.0" prefWidth="280.0" styleClass="buttonGradient" stylesheets="@styles.css" text="Edit" textFill="#e1e1e1">
-                     <VBox.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                     </VBox.margin>
-                     <padding>
-                        <Insets left="10.0" />
-                     </padding>
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/edit.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#removeSeason" prefHeight="50.0" prefWidth="280.0" styleClass="buttonGradient" stylesheets="@styles.css" text="Remove" textFill="#e1e1e1">
-                     <padding>
-                        <Insets left="10.0" />
-                     </padding>
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/remove.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <VBox.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" />
-                     </VBox.margin>
-                  </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="12.0" mnemonicParsing="false" onMouseClicked="#cancelButton" prefHeight="50.0" prefWidth="280.0" styleClass="buttonGradient" stylesheets="@styles.css" text="Cancel" textFill="#e1e1e1">
-                     <padding>
-                        <Insets left="10.0" />
-                     </padding>
-                     <graphic>
-                        <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/close.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <VBox.margin>
-                        <Insets bottom="2.0" left="2.0" right="2.0" />
-                     </VBox.margin>
-                  </Button>
-               </children>
-               <FlowPane.margin>
-                  <Insets bottom="20.0" />
-               </FlowPane.margin>
-            </VBox>
-         </children>
-      </FlowPane>
+      <ImageView fx:id="menuShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" visible="false">
+         <image>
+            <Image url="@../../../img/desktopBackgroundShadow.png" />
+         </image>
+      </ImageView>
    </children>
 </StackPane>

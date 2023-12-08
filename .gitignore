@@ -40,6 +40,8 @@ build/
 ## Local json files ##
 *.json
 
+*.jar
+
 ## Local images, audio and video files ###
 /src/main/resources/img/backgrounds/
 /src/main/resources/img/discCovers/

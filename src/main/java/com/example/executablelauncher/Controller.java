@@ -1,8 +1,13 @@
 package com.example.executablelauncher;
 
 import javafx.animation.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.effect.GaussianBlur;
+import javafx.scene.input.MouseButton;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
@@ -39,6 +44,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import org.controlsfx.control.action.Action;
 
 public class Controller implements Initializable {
     @FXML
@@ -51,7 +57,10 @@ public class Controller implements Initializable {
     private BorderPane mainPane;
 
     @FXML
-    private ImageView menuButton;
+    private Button menuButton;
+
+    @FXML
+    private ImageView menuShadow;
 
     @FXML
     private ImageView backgroundImage;
@@ -69,50 +78,30 @@ public class Controller implements Initializable {
     private StackPane sideMenuParent;
 
     @FXML
-    private FlowPane contextMenuParent;
-
-    @FXML
-    private VBox contextMenu;
-
-    @FXML
-    private Button addColButton;
-
-    @FXML
-    private Button addCatButton;
-
-    @FXML
-    private Button closeButton;
-
-    @FXML
     private HBox topBar;
 
     @FXML
     private BorderPane topBorderPane;
 
     @FXML
-    private StackPane firstPane;
-
-    @FXML
-    private Label contextMenuLabel;
-
-    @FXML
-    private HBox mainBox;
+    private StackPane mainBox;
 
     @FXML
     private HBox categoriesBox;
 
     private Series seriesToEdit;
     private CardController seriesToEditController;
-    private List<Series> collectionList;
+    private List<Series> collectionList = new ArrayList<>();
+    private List<Button> seriesButtons = new ArrayList<>();
 
     private MediaPlayer backgroundMusicPlayer;
     private List<Timeline> coverBorderTimelines = new ArrayList<>();
 
     @FXML
-    private void close(MouseEvent event) throws IOException {
+    private void close(ActionEvent event) throws IOException {
         playInteractionSound();
         Main.SaveData();
-        Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
+        Stage stage = (Stage) mainBox.getScene().getWindow();
         stage.close();
     }
 
@@ -125,15 +114,22 @@ public class Controller implements Initializable {
 
         //Open/Close Side Menu
         sideMenu.setVisible(false);
-        contextMenu.setVisible(false);
         menuButton.setOnMouseClicked(mouseEvent -> {
             playInteractionSound();
             sideMenuParent.setVisible(true);
             sideMenu.setVisible(true);
         });
 
+        menuButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (KeyCode.ENTER == event.getCode()) {
+                playInteractionSound();
+                sideMenuParent.setVisible(true);
+                sideMenu.setVisible(true);
+            }
+        });
+
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (KeyCode.ESCAPE == event.getCode()) {
+            if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()) {
                 hideContextMenu();
             }
         });
@@ -146,10 +142,8 @@ public class Controller implements Initializable {
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
         mainBox.prefWidth(screenWidth);
         mainBox.prefHeight(screenHeight);
-        firstPane.prefHeightProperty().bind(mainBox.heightProperty());
-        firstPane.prefWidthProperty().bind(mainBox.widthProperty());
-        mainPane.prefWidthProperty().bind(firstPane.prefWidthProperty());
-        mainPane.prefHeightProperty().bind(firstPane.prefHeightProperty());
+        mainPane.prefWidthProperty().bind(mainBox.prefWidthProperty());
+        mainPane.prefHeightProperty().bind(mainBox.prefHeightProperty());
         hBox.prefWidthProperty().bind(mainPane.widthProperty());
         hBox.prefHeightProperty().bind(mainPane.heightProperty());
         scrollPane.prefWidthProperty().bind(hBox.widthProperty());
@@ -160,86 +154,123 @@ public class Controller implements Initializable {
         backgroundImage.setFitHeight(screenHeight);
         backgroundImage.setFitWidth(screenWidth);
         backgroundImage.setPreserveRatio(false);
-        contextMenuParent.prefHeightProperty().bind(mainBox.heightProperty());
-        contextMenuParent.prefWidthProperty().bind(mainBox.widthProperty());
         
         sideMenuBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
         sideMenuBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth() / 4.5);
         sideMenu.prefHeightProperty().bind(sideMenuBox.prefHeightProperty());
         sideMenu.prefWidthProperty().bind(sideMenuBox.prefWidthProperty());
-        closeButton.prefWidthProperty().bind(sideMenu.prefWidthProperty());
 
         //Remove horizontal and vertical scroll
         DesktopViewController.scrollModification(scrollPane);
+
+        menuShadow.setFitWidth(screenWidth);
+        menuShadow.setFitHeight(screenHeight);
+        menuShadow.setVisible(false);
 
         List<String> categories = Main.getCategories();
 
         for (String cat : categories){
             Button btn = new Button();
             btn.setText(cat);
+            btn.getStyleClass().add("CatButton");
+            HBox.setMargin(btn, new Insets(0, 5, 0, 0));
+            DropShadow ds = new DropShadow();
+            btn.setEffect(ds);
 
             btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                playCategoriesSound();
                 showSeriesFrom(btn.getText());
+            });
+
+            btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+                if (KeyCode.ENTER == event.getCode()) {
+                    playCategoriesSound();
+                    showSeriesFrom(btn.getText());
+                }
+            });
+
+            btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+                playInteractionSound();
             });
 
             categoriesBox.getChildren().add(btn);
         }
 
         showSeriesFrom(categories.get(0));
-
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
+        defaultSelection();
     }
 
     public void showSeriesFrom(String cat){
         cardContainer.getChildren().clear();
-        collectionList = new ArrayList<>(Main.getSeriesFromCategory(cat));
+        seriesButtons.clear();
+        collectionList = Main.getSeriesFromCategory(cat);
         for (Series col : collectionList) {
             addCard(col);
         }
-        defaultSelection();
+
+        seriesToEdit = null;
+
+        File file;
+        if (!collectionList.isEmpty() && !collectionList.get(0).getSeasons().isEmpty()){
+            seriesToEdit = collectionList.get(0);
+            file = new File(Objects.requireNonNull(Main.findSeason(collectionList.get(0).getSeasons().get(0))).getFullScreenBlurImageSrc());
+        }else{
+            file = new File("src/main/resources/img/backgroundDefault.jpeg");
+        }
+
+        Image image = new Image(file.getAbsolutePath());
+        backgroundImage.setImage(image);
+        BackgroundImage myBI= new BackgroundImage(new Image(file.getAbsolutePath(),
+                Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true),
+                BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                BackgroundSize.DEFAULT);
+        mainBox.setBackground(new Background(myBI));
+
+        Background bi = mainBox.getBackground();
+        Background black = new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY));
+
+        mainBox.setBackground(null);
+        mainBox.setBackground(black);
+
+        //Fade in effect
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
+        fadeIn.setFromValue(0.2);
+        fadeIn.setToValue(1);
+        fadeIn.play();
+
+        fadeIn.setOnFinished(event -> mainBox.setBackground(bi));
     }
 
     public void defaultSelection(){
-        if (!cardContainer.getChildren().isEmpty()){
-            selectSeries(collectionList.get(0));
-        }else{
+        if (!collectionList.isEmpty()) {
             seriesToEdit = null;
-            contextMenuLabel.setText("");
-            File file = new File("src/main/resources/img/backgroundDefault.jpeg");
-            Image image = new Image(file.getAbsolutePath());
-            backgroundImage.setImage(image);
-            BackgroundImage myBI= new BackgroundImage(new Image(file.getAbsolutePath(),
-                    Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true),
-                    BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                    BackgroundSize.DEFAULT);
-            mainBox.setBackground(new Background(myBI));
+            selectSeries(collectionList.get(0));
         }
     }
 
     public void selectSeries(Series s){
         playInteractionSound();
 
-        //Clear selection
-        for (Node node : cardContainer.getChildren()){
+        if (seriesToEdit != s){
+            seriesToEdit = s;
+            int i = collectionList.indexOf(seriesToEdit);
+            seriesButtons.get(i).requestFocus();
+
+            //Clear selection
+        /*for (Node node : cardContainer.getChildren()){
             node.getStyleClass().clear();
             node.getStyleClass().add("coverNotSelected");
-        }
+        }*/
 
-        for (Timeline t : coverBorderTimelines){
-            t.stop();
-        }
+            for (Timeline t : coverBorderTimelines){
+                t.stop();
+            }
 
-        if (s.getName().equals(contextMenuLabel.getText())){
-            contextMenuLabel.setText("");
-            showSeason(s);
-        }else{
+
             if (!s.getSeasons().isEmpty()){
                 Season season = Main.findSeason(s.getSeasons().get(0));
                 if (season != null){
-                    Image image = new Image(season.getBackgroundSrc());
+                    Image image = new Image(season.getFullScreenBlurImageSrc());
                     backgroundImage.setImage(image);
                     //backgroundImage.setVisible(false);
 
@@ -248,36 +279,33 @@ public class Controller implements Initializable {
                             BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
                             BackgroundSize.DEFAULT);
                     mainBox.setBackground(new Background(myBI));
-                    GaussianBlur blur = new GaussianBlur();
-                    blur.setRadius(28);
                 }
+
+                //Node node = cardContainer.getChildren().get(collectionList.indexOf(s));
+                //node.getStyleClass().clear();
+                //node.getStyleClass().add("coverSelected");
+                //coverBorderTimelines.get(collectionList.indexOf(s)).play();
+
+                Background bi = mainBox.getBackground();
+                Background black = new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY));
+
+                mainBox.setBackground(null);
+                mainBox.setBackground(black);
+
+                //Fade in effect
+                FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
+                fadeIn.setFromValue(0.2);
+                fadeIn.setToValue(1);
+                fadeIn.play();
+
+                fadeIn.setOnFinished(event -> mainBox.setBackground(bi));
             }
-
-            Node node = cardContainer.getChildren().get(collectionList.indexOf(s));
-            //node.getStyleClass().clear();
-            //node.getStyleClass().add("coverSelected");
-            coverBorderTimelines.get(collectionList.indexOf(s)).play();
-
-
-            //Fade out effect
-            FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), backgroundImage);
-            fadeOut.setFromValue(1.5);
-            fadeOut.setToValue(0.0);
-            fadeOut.play();
-
-            //Fade in effect
-            FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
-            fadeIn.setFromValue(0);
-            fadeIn.setToValue(1.5);
-            fadeIn.play();
-
-            contextMenuLabel.setText(s.getName());
         }
     }
 
     private void addCard(Series s){
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader();
+            /*FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(getClass().getResource("card.fxml"));
             Pane cardBox = fxmlLoader.load();
             CardController cardController = fxmlLoader.getController();
@@ -312,14 +340,55 @@ public class Controller implements Initializable {
             timeline.setCycleCount(Timeline.INDEFINITE);
             coverBorderTimelines.add(timeline);
 
-            cardContainer.getChildren().add(cardVBox);
+            cardContainer.getChildren().add(cardVBox);*/
+
+            File file = new File(s.getCoverSrc());
+            Image img = new Image(file.toURI().toURL().toExternalForm(), 273, 351, true, true);
+            ImageView image = new ImageView(img);
+
+            Button btn = new Button();
+            btn.setGraphic(image);
+            btn.setPrefHeight(364);
+            btn.setPrefWidth(286);
+            btn.setPadding(new Insets(0, 1, 2, 0));
+            btn.setAlignment(Pos.CENTER);
+            btn.getStyleClass().add("seriesCoverButton");
+            seriesButtons.add(btn);
+
+            btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
+                    playInteractionSound();
+                }
+            });
+
+            btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+                if (event.getCode().equals(KeyCode.ENTER)){
+                    if (seriesToEdit != null) {
+                        playCategoriesSound();
+                        showSeason(seriesToEdit);
+                    }
+                }else if (event.getCode().equals(KeyCode.X) || event.getCode().equals(KeyCode.GAME_C)){
+                    showSeriesMenu();
+                }
+            });
+
+            btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
+                if (event.getButton().equals(MouseButton.PRIMARY)){
+                    //selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
+                    //playInteractionSound();
+                }else if (event.getButton().equals(MouseButton.SECONDARY)){
+                    showSeriesMenu();
+                }
+            });
+
+            cardContainer.getChildren().add(btn);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @FXML
-    void Remove(MouseEvent event) throws IOException {
+    public void Remove() throws IOException {
         if (seriesToEdit != null){
             int index = collectionList.indexOf(seriesToEdit);
             if (!cardContainer.getChildren().isEmpty() && cardContainer.getChildren().size() > index)
@@ -337,21 +406,40 @@ public class Controller implements Initializable {
         playInteractionSound();
         seriesToEdit = s;
         seriesToEditController = seriesController;
-        contextMenu.setVisible(true);
         sideMenuParent.setVisible(true);
+    }
+
+    public void showSeriesMenu(){
+        menuShadow.setVisible(true);
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("seriesMenu-view.fxml"));
+            Parent root = fxmlLoader.load();
+            SeriesMenuController controller = fxmlLoader.getController();
+            controller.setParentController(this);
+            controller.setLabel(seriesToEdit.getName());
+            Stage stage = new Stage();
+            stage.initStyle(StageStyle.TRANSPARENT);
+            stage.setAlwaysOnTop(true);
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            System.err.println("Cannot load menu");
+        }
     }
 
     @FXML
     void hideContextMenu(){
         playInteractionSound();
         seriesToEdit = null;
-        contextMenu.setVisible(false);
         sideMenuParent.setVisible(false);
         sideMenu.setVisible(false);
     }
 
     public void showSeason(Series s){
         if (s != null && !s.getSeasons().isEmpty()) {
+            stopBackground();
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
                 Parent root = fxmlLoader.load();
@@ -405,7 +493,7 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    void switchToDesktop(MouseEvent event){
+    void switchToDesktop(ActionEvent event){
         playInteractionSound();
         try {
             Main.SaveData();
@@ -425,7 +513,7 @@ public class Controller implements Initializable {
             desktopViewController.initValues();
             stage.show();
 
-            Stage thisStage = (Stage) ((Button)event.getSource()).getScene().getWindow();
+            Stage thisStage = (Stage) mainBox.getScene().getWindow();
             thisStage.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -433,7 +521,11 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    void editSeries(MouseEvent event){
+    void editSeries(){
         //Edit "sorting order" and "category"
+    }
+
+    public void hideMenuShadow(){
+        menuShadow.setVisible(false);
     }
 }

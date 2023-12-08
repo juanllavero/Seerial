@@ -95,6 +95,11 @@
           <artifactId>android-json</artifactId>
           <version>0.0.20131108.vaadin1</version>
       </dependency>
+      <dependency>
+          <groupId>uk.co.caprica</groupId>
+          <artifactId>vlcj-javafx</artifactId>
+          <version>1.2.0</version>
+      </dependency>
   </dependencies>
 
   <build>

@@ -1,3 +1,7 @@
+.root {
+    -fx-background-color: transparent;
+}
+
 .transparent{
     -fx-background-color: transparent;
 }
@@ -70,7 +74,7 @@
     -fx-background-radius: 35px;
 }
 
-.seeButton:hover{
+.seeButton:focused{
     -fx-background-color: rgb(189, 189, 189);
 }
 
@@ -80,7 +84,7 @@
     -fx-background-radius: 50px;
 }
 
-.optionsButton:hover {
+.optionsButton:focused {
     -fx-background-color: #252525;
 }
 
@@ -100,12 +104,32 @@
     -fx-border-radius: 4, 3, 2;
 }
 
+.seriesCoverButton{
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.seriesCoverButton:focused {
+    -fx-background-color: transparent;
+    -fx-border-color:
+            linear-gradient(#686868 0%, #a9a9a9 25%, #5e5e5e 75%, #3d3d3d 100%),
+            linear-gradient(#9d9e9d 0%, #6b6a6b 20%, #343534 80%, #242424 100%),
+            linear-gradient(#8a8a8a 0%, #6b6a6b 20%, #343534 80%, #262626 100%),
+            linear-gradient(#777777 0%, #606060 50%, #505250 51%, #2a2b2a 100%);
+    -fx-border-width: 3 3 3 3;
+    -fx-border-radius: 4, 3, 2;
+}
+
 .desktopButton{
     -fx-background-color: #3f3f3f;
     -fx-background-radius: 4 3 2;
 }
 
 .desktopButton:hover{
+    -fx-background-color: #5b5b5b;
+}
+
+.desktopButton:focused{
     -fx-background-color: #5b5b5b;
 }
 
@@ -122,11 +146,31 @@
     -fx-text-fill: rgb(255, 255, 255);
 }
 
+.CatButton{
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(159, 159, 159);
+    -fx-font-family: Impact, bold;
+    -fx-font-size: 24px;
+}
+
+.CatButton:hover{
+    -fx-text-fill: #ffffff;
+}
+
+.CatButton:focused{
+    -fx-text-fill: #ffffff;
+}
+
 .buttonGradient {
     -fx-background-color: transparent;
 }
 
 .buttonGradient:hover {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b6b6b6;
+}
+
+.buttonGradient:focused {
     -fx-background-color: transparent;
     -fx-border-width: 2 2 2 2;
     -fx-border-color: linear-gradient(to top, rgba(176,176,176,1) 0%, rgba(186,186,186,1) 31%, rgba(65,65,65,1) 63%, rgba(65,65,65,1) 100%);

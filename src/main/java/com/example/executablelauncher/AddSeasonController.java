@@ -2,12 +2,16 @@ package com.example.executablelauncher;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.BoxBlur;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -22,8 +26,10 @@ import javafx.stage.Stage;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Objects;
@@ -355,18 +361,13 @@ public class AddSeasonController {
 
         s.setBackgroundSrc(newBackground.getAbsolutePath());
 
-        Pane pane = new Pane();
-        pane.setPrefWidth(Screen.getPrimary().getBounds().getWidth());
-        pane.setPrefHeight(Screen.getPrimary().getBounds().getHeight());
-        pane.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(0), new Insets(0, 0, 0, 0))));
-
         ImageView backgroundBlur = new ImageView(new Image(newBackground.getAbsolutePath(), Screen.getPrimary().getBounds().getWidth()
                 , Screen.getPrimary().getBounds().getHeight(), false, true));
 
-        pane.getChildren().add(backgroundBlur);
         GaussianBlur blur = new GaussianBlur();
         blur.setRadius(27);
         backgroundBlur.setEffect(blur);
+
 
         File backgroundFullscreenBlur = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + s.getName() + "_fullBlur.png");
         BufferedImage bImageFull = SwingFXUtils.fromFXImage(backgroundBlur.snapshot(null, null), null);
@@ -375,6 +376,25 @@ public class AddSeasonController {
             ImageIO.write(bImageFull, "png", backgroundFullscreenBlur);
         } catch (IOException e) {
             System.err.println("Blur images error");
+        }
+
+        File file = new File(backgroundFullscreenBlur.getAbsolutePath());
+        Image image;
+        try{
+            image = new Image(file.toURI().toURL().toExternalForm());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+        PixelReader reader = image.getPixelReader();
+        WritableImage newImage = new WritableImage(reader
+                , (int) (image.getWidth() * 0.03), (int) (image.getHeight() * 0.05)
+                , (int) (image.getWidth() * 0.93), (int) (image.getHeight() * 0.9));
+
+        try{
+            RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
+            ImageIO.write(renderedImage,"png", file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         s.setFullScreenBlurImageSrc(backgroundFullscreenBlur.getAbsolutePath());
