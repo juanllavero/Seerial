@@ -18,6 +18,7 @@ public class AddCategoryController {
 
     @FXML
     void cancelButton(MouseEvent event) {
+        parentController.hideBackgroundShadow();
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
         stage.close();
     }
@@ -29,6 +30,7 @@ public class AddCategoryController {
         }else{
             Main.addCategory(categoryField.getText());
             parentController.updateCategories();
+            parentController.hideBackgroundShadow();
             cancelButton(event);
         }
     }

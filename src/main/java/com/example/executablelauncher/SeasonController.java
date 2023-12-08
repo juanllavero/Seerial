@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -90,6 +91,7 @@ public class SeasonController {
     private List<Disc> discs = new ArrayList<>();
     private int currentSeason = 0;
     public int currentEpisoceID = -1;
+    private Disc selectedDisc = null;
     private boolean showEpisodes = false;
 
     private MediaPlayer mp = null;
@@ -208,17 +210,23 @@ public class SeasonController {
             if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()){
                 goBack(event);
             }else if (KeyCode.LEFT == event.getCode() && lastSeasonButton.isVisible()){
+                if (selectedDisc != null)
+                    selectPrevDisc();
                 //controllerParent.playCategoriesSound();
                 //lastSeason();
             }else if (KeyCode.RIGHT == event.getCode() && nextSeasonButton.isVisible()){
+                if (selectedDisc != null)
+                    selectNextDisc();
                 //controllerParent.playCategoriesSound();
                 //nextSeason();
             }else if (KeyCode.DOWN == event.getCode() && !showEpisodes && discs.size() > 1){
                 controllerParent.playInteractionSound();
                 showEpisodes();
+                selectFirstDisc();
             }else if (KeyCode.UP == event.getCode() && showEpisodes && discs.size() > 1){
                 controllerParent.playInteractionSound();
                 showEpisodes();
+                deselectDisc();
             }
         });
 
@@ -498,5 +506,61 @@ public class SeasonController {
 
     public void hideMenuShadow(){
         menuShadow.setVisible(false);
+    }
+
+    public void selectFirstDisc(){
+        selectedDisc = discs.get(0);
+        Node node = cardContainer.getChildren().get(0);
+        node.getStyleClass().clear();
+        node.getStyleClass().add("selectedDisc");
+    }
+
+    public void selectPrevDisc(){
+        int index = getDiscIndex(selectedDisc);
+        if (index > 0){
+            Node node = cardContainer.getChildren().get(index);
+            node.getStyleClass().clear();
+            node.getStyleClass().add("buttonGradient");
+
+            selectedDisc = discs.get(index - 1);
+
+            node = cardContainer.getChildren().get(index - 1);
+            node.getStyleClass().clear();
+            node.getStyleClass().add("selectedDisc");
+        }
+    }
+
+    public void selectNextDisc(){
+        int index = getDiscIndex(selectedDisc);
+        if (index != -1 && index < cardContainer.getChildren().size() - 1){
+            Node node = cardContainer.getChildren().get(index);
+            node.getStyleClass().clear();
+            node.getStyleClass().add("buttonGradient");
+
+            selectedDisc = discs.get(index + 1);
+
+            node = cardContainer.getChildren().get(index + 1);
+            node.getStyleClass().clear();
+            node.getStyleClass().add("selectedDisc");
+        }
+    }
+
+    public void deselectDisc(){
+        int index = getDiscIndex(selectedDisc);
+        if (index != -1){
+            Node node = cardContainer.getChildren().get(index);
+            node.getStyleClass().clear();
+            node.getStyleClass().add("buttonGradient");
+            selectedDisc = null;
+        }
+    }
+
+    private int getDiscIndex(Disc d){
+        for (int i = 0; i < discs.size(); i++){
+            if (discs.get(i).getId() == d.getId())
+                return i;
+        }
+
+        return -1;
     }
 }

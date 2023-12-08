@@ -159,6 +159,7 @@ public class AddSeasonController {
 
     @FXML
     void cancelButton(MouseEvent event) {
+        parentController.hideBackgroundShadow();
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
         stage.close();
     }
@@ -334,6 +335,7 @@ public class AddSeasonController {
                 Main.addSeason(season, season.getCollectionName());
 
             parentController.updateDiscView();
+            parentController.hideBackgroundShadow();
 
             Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
             stage.close();

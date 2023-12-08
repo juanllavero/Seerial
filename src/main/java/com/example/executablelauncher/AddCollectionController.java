@@ -70,6 +70,7 @@ public class AddCollectionController {
 
     @FXML
     void cancelButton(MouseEvent event) {
+        controllerParent.hideBackgroundShadow();
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
         stage.close();
     }
@@ -203,6 +204,8 @@ public class AddCollectionController {
                 Main.addCollection(series);
                 controllerParent.addSeries(series);
             }
+
+            controllerParent.hideBackgroundShadow();
 
             Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
             stage.close();

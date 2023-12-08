@@ -5,6 +5,8 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.stage.Screen;
 
 public class DiscController {
     @FXML
@@ -16,8 +18,16 @@ public class DiscController {
     private DesktopViewController desktopController = null;
 
     public void setData(Disc d) {
-        number.setText(d.getName());
+        name.setText(d.getName());
+        number.setText("Episode " + d.getEpisodeNumber());
         disc = d;
+
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+
+        if (screenWidth < 1920){
+            name.setFont(new Font("System", 20));
+            number.setFont(new Font("System", 14));
+        }
     }
 
     public void setParent(SeasonController col){

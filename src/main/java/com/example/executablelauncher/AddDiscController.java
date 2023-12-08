@@ -74,6 +74,7 @@ public class AddDiscController {
 
     @FXML
     void cancelButton(MouseEvent event) {
+        controllerParent.hideBackgroundShadow();
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
         stage.close();
     }
@@ -117,6 +118,7 @@ public class AddDiscController {
                 discToEdit = null;
 
             controllerParent.updateDiscView();
+            controllerParent.hideBackgroundShadow();
 
             Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
             stage.close();
@@ -129,10 +131,21 @@ public class AddDiscController {
 
         newDisc.setSeasonID(controllerParent.getCurrentSeason().getId());
 
-        if (!folder)
-            newDisc.setName(file.getName().substring(0, file.getName().length() - 4));
-        else
+        if (!folder){
+            String[] result = file.getName().substring(0, file.getName().length() - 4).split(" - ");
+
+            String episodeName = result[2];
+            String episodeNumberSeason = result[1];
+
+            result = episodeNumberSeason.split("E");
+            String episodeNumber = result[1];
+
+            newDisc.setName(episodeName);
+            newDisc.setEpisodeNumber(episodeNumber);
+            //newDisc.setName(file.getName().substring(0, file.getName().length() - 4));
+        }else{
             newDisc.setName("Disc " + Objects.requireNonNull(Main.findSeason(newDisc.getSeasonID())).getDiscs().size() + 1);
+        }
 
         newDisc.setType(typeField.getValue());
         newDisc.setExecutableSrc(file.getAbsolutePath());

@@ -58,6 +58,9 @@ public class DesktopViewController {
     private ImageView globalBackgroundShadow;
 
     @FXML
+    private ImageView backgroundShadow;
+
+    @FXML
     private VBox leftBox;
 
     @FXML
@@ -450,6 +453,7 @@ public class DesktopViewController {
 
     @FXML
     void addCategory(MouseEvent event) {
+        showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCategory-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -457,6 +461,8 @@ public class DesktopViewController {
             addCategoryController.setParent(this);
             Stage stage = new Stage();
             stage.setTitle("Add Category");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(root1));
             stage.show();
         } catch (IOException e) {
@@ -506,7 +512,7 @@ public class DesktopViewController {
     void openSeriesMenu(MouseEvent event) {
         menuParentPane.setVisible(true);
         seriesMenu.setLayoutX(event.getSceneX());
-        seriesMenu.setLayoutY(event.getSceneY());
+        seriesMenu.setLayoutY(event.getSceneY() - seriesMenu.getHeight());
         seriesMenu.setVisible(true);
     }
 
@@ -514,7 +520,7 @@ public class DesktopViewController {
     void openSeasonMenu(MouseEvent event) {
         menuParentPane.setVisible(true);
         seasonMenu.setLayoutX(event.getSceneX());
-        seasonMenu.setLayoutY(event.getSceneY());
+        seasonMenu.setLayoutY(event.getSceneY() - seasonMenu.getHeight());
         seasonMenu.setVisible(true);
     }
 
@@ -522,7 +528,10 @@ public class DesktopViewController {
         discToEdit = disc;
         menuParentPane.setVisible(true);
         discMenu.setLayoutX(event.getSceneX());
-        discMenu.setLayoutY(event.getSceneY());
+        if (discList.indexOf(disc) > 2)
+            discMenu.setLayoutY(event.getSceneY() - discMenu.getHeight());
+        else
+            discMenu.setLayoutY(event.getSceneY());
         discMenu.setVisible(true);
     }
 
@@ -648,6 +657,7 @@ public class DesktopViewController {
 
     @FXML
     void addCollection(MouseEvent event){
+        showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCollection-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -655,9 +665,9 @@ public class DesktopViewController {
             addColController.setParentController(this);
             addColController.initializeCategories();
             Stage stage = new Stage();
-            stage.initStyle(StageStyle.TRANSPARENT);
             stage.setTitle("Add Series");
             stage.initStyle(StageStyle.UNDECORATED);
+            stage.setAlwaysOnTop(true);
             Scene scene = new Scene(root1);
             scene.setFill(Color.TRANSPARENT);
             stage.setScene(scene);
@@ -675,6 +685,7 @@ public class DesktopViewController {
 
     @FXML
     void editSeries(){
+        showBackgroundShadow();
         if (selectedSeries != null){
             try{
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCollection-view.fxml"));
@@ -685,6 +696,7 @@ public class DesktopViewController {
                 Stage stage = new Stage();
                 stage.setTitle("Edit Series");
                 stage.initStyle(StageStyle.UNDECORATED);
+                stage.setAlwaysOnTop(true);
                 Scene scene = new Scene(root1);
                 scene.setFill(Color.BLACK);
                 stage.setScene(scene);
@@ -698,6 +710,7 @@ public class DesktopViewController {
 
     @FXML
     void addSeason(){
+        showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addSeason-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -707,6 +720,7 @@ public class DesktopViewController {
             Stage stage = new Stage();
             stage.setTitle("Add Season");
             stage.initStyle(StageStyle.UNDECORATED);
+            stage.setAlwaysOnTop(true);
             Scene scene = new Scene(root1);
             scene.setFill(Color.BLACK);
             stage.setScene(scene);
@@ -719,6 +733,7 @@ public class DesktopViewController {
 
     @FXML
     void addDisc(MouseEvent event){
+        showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addDisc-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -728,6 +743,7 @@ public class DesktopViewController {
             Stage stage = new Stage();
             stage.setTitle("Add Discs/Episodes");
             stage.initStyle(StageStyle.UNDECORATED);
+            stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(root1));
             stage.show();
         } catch (IOException e) {
@@ -742,6 +758,7 @@ public class DesktopViewController {
 
     @FXML
     void editSeason(MouseEvent event){
+        showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addSeason-view.fxml"));
             Parent root1 = (Parent) fxmlLoader.load();
@@ -751,6 +768,7 @@ public class DesktopViewController {
             Stage stage = new Stage();
             stage.setTitle("Add Season");
             stage.initStyle(StageStyle.UNDECORATED);
+            stage.setAlwaysOnTop(true);
             Scene scene = new Scene(root1);
             scene.setFill(Color.BLACK);
             stage.setScene(scene);
@@ -774,6 +792,7 @@ public class DesktopViewController {
 
     @FXML
     void editDisc(MouseEvent event){
+        showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addDisc-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -783,6 +802,7 @@ public class DesktopViewController {
             Stage stage = new Stage();
             stage.setTitle("Add Discs/Episodes");
             stage.initStyle(StageStyle.UNDECORATED);
+            stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(root1));
             stage.show();
         } catch (IOException e) {
@@ -820,5 +840,13 @@ public class DesktopViewController {
             showSeries();
         }
         hideMenu();
+    }
+
+    public void showBackgroundShadow(){
+        backgroundShadow.setVisible(true);
+    }
+
+    public void hideBackgroundShadow(){
+        backgroundShadow.setVisible(false);
     }
 }

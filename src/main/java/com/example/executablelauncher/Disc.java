@@ -6,7 +6,7 @@ public class Disc implements Serializable {
     public static int NextID = 0;
     public final int id;
     public String name;
-    public float episodeNumber;
+    public String episodeNumber;
     public String executableSrc;
     public String type;    //Folder or File
     public int seasonID = -1;
@@ -51,11 +51,11 @@ public class Disc implements Serializable {
         this.executableSrc = executableSrc;
     }
 
-    public float getEpisodeNumber() {
+    public String getEpisodeNumber() {
         return episodeNumber;
     }
 
-    public void setEpisodeNumber(float episodeNumber) {
+    public void setEpisodeNumber(String episodeNumber) {
         this.episodeNumber = episodeNumber;
     }
 }

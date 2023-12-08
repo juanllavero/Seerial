@@ -33,7 +33,7 @@ public class Utils {
     static class DiscComparator implements Comparator<Disc> {
         @Override
         public int compare(Disc a, Disc b) {
-            return Float.compare(a.getEpisodeNumber(), b.getEpisodeNumber());
+            return CharSequence.compare(a.getEpisodeNumber(), b.getEpisodeNumber());
         }
     }
 
