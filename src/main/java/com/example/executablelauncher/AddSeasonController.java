@@ -32,11 +32,26 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
+
+import static com.example.executablelauncher.Main.*;
 
 public class AddSeasonController {
     @FXML
+    private Button addButton;
+
+    @FXML
+    private Button backgroundButton;
+
+    @FXML
     private TextField backgroundField;
+
+    @FXML
+    private Label backgroundText;
+
+    @FXML
+    private Button cancelButton;
 
     @FXML
     private Label errorBackground;
@@ -57,13 +72,46 @@ public class AddSeasonController {
     private Label errorYear;
 
     @FXML
+    private Button logoButton;
+
+    @FXML
     private TextField logoField;
+
+    @FXML
+    private Label logoText;
+
+    @FXML
+    private Button musicButton;
 
     @FXML
     private TextField musicField;
 
     @FXML
+    private Label musicText;
+
+    @FXML
     private TextField nameField;
+
+    @FXML
+    private Label nameText;
+
+    @FXML
+    private Label orderError;
+
+    @FXML
+    private TextField orderField;
+
+    @FXML
+    private Label sortingText;
+
+    @FXML
+    private Label title;
+
+    @FXML
+    private Label videText;
+
+    @FXML
+    private Button videoButton;
 
     @FXML
     private TextField videoField;
@@ -72,10 +120,7 @@ public class AddSeasonController {
     private TextField yearField;
 
     @FXML
-    private TextField orderField;
-
-    @FXML
-    private Label orderError;
+    private Label yearText;
 
     private Series collection = null;
     public Season seasonToEdit = null;
@@ -111,50 +156,84 @@ public class AddSeasonController {
 
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));
+
+        initValues();
+        title.setText(Main.textBundle.getString("seasonWindowTitleEdit"));
+        addButton.setText(Main.buttonsBundle.getString("saveButton"));
     }
 
     public void setCollection(Series s){
         collection = s;
+        initValues();
+    }
+
+    private void initValues(){
+        title.setText(Main.textBundle.getString("seasonWindowTitle"));
+        nameText.setText(Main.textBundle.getString("name"));
+        logoText.setText(Main.textBundle.getString("logo"));
+        yearText.setText(Main.textBundle.getString("year"));
+        sortingText.setText(Main.textBundle.getString("sortingOrder"));
+        backgroundText.setText(Main.textBundle.getString("backgroundImage"));
+        videText.setText(Main.textBundle.getString("backgroundVideo"));
+        musicText.setText(Main.textBundle.getString("backgroundMusic"));
+        addButton.setText(Main.buttonsBundle.getString("addButton"));
+        cancelButton.setText(Main.buttonsBundle.getString("cancelButton"));
     }
 
     @FXML
     void loadBackground(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select an image");
-        fileChooser.setInitialDirectory(new File("C:\\"));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All images", "*.jpg", "*.png", "*.jpeg"));
+        fileChooser.setTitle(Main.textBundle.getString("selectImage"));
+        if (lastDirectory != null && Files.exists(Path.of(lastDirectory)))
+            fileChooser.setInitialDirectory(new File(lastDirectory));
+        else
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
         seletedBackground = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         backgroundField.setText(seletedBackground.getPath());
+        lastDirectory = seletedBackground.getPath();
     }
 
     @FXML
     void loadLogo(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select an image");
-        fileChooser.setInitialDirectory(new File("C:\\"));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All images", "*.jpg", "*.png", "*.jpeg"));
+        fileChooser.setTitle(Main.textBundle.getString("selectImage"));
+        if (lastDirectory != null && Files.exists(Path.of(lastDirectory)))
+            fileChooser.setInitialDirectory(new File(lastDirectory));
+        else
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
         selectedLogo = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         logoField.setText(selectedLogo.getPath());
+        lastDirectory = selectedLogo.getPath();
     }
 
     @FXML
     void loadVideo(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select a video");
-        fileChooser.setInitialDirectory(new File("C:\\"));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All videos", "*.mp4"));
+        fileChooser.setTitle(Main.textBundle.getString("selectVideo"));
+        if (lastVideoDirectory != null && Files.exists(Path.of(lastVideoDirectory)))
+            fileChooser.setInitialDirectory(new File(lastVideoDirectory));
+        else
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allVideos"), "*.mp4"));
         selectedVideo = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         videoField.setText(selectedVideo.getPath());
+        lastVideoDirectory = selectedVideo.getPath();
     }
 
     @FXML
     void loadMusic(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select a song");
-        fileChooser.setInitialDirectory(new File("C:\\"));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All audio", "*.mp3", "*.wav", "*.flac", "*.aac"));
+        fileChooser.setTitle(Main.textBundle.getString("selectSong"));
+        if (lastMusicDirectory != null && Files.exists(Path.of(lastMusicDirectory)))
+            fileChooser.setInitialDirectory(new File(lastMusicDirectory));
+        else
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allAudios"), "*.mp3", "*.wav", "*.flac", "*.aac"));
         selectedMusic = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         musicField.setText(selectedMusic.getPath());
+        lastMusicDirectory = selectedMusic.getPath();
     }
 
     @FXML
@@ -171,7 +250,7 @@ public class AddSeasonController {
         //Process name
         if (nameField.getText().isEmpty()){
             save = false;
-            errorName.setText("This field cannot be empty");
+            errorName.setText(Main.textBundle.getString("emptyField"));
         }else{
             errorName.setText("");
         }
@@ -179,10 +258,10 @@ public class AddSeasonController {
         //Process year
         if (yearField.getText().isEmpty()) {
             save = false;
-            errorYear.setText("This field cannot be empty");
+            errorYear.setText(Main.textBundle.getString("emptyField"));
         }else if (!yearField.getText().matches("\\d{3,}")){
             save = false;
-            errorYear.setText("The value has to be a number");
+            errorYear.setText(Main.textBundle.getString("numberError"));
         }else{
             errorYear.setText("");
         }
@@ -192,14 +271,14 @@ public class AddSeasonController {
             File logo = new File(logoField.getText());
             if (!logo.exists() && !logoField.getText().isEmpty()) {
                 save = false;
-                errorLogo.setText("Image not found");
+                errorLogo.setText(Main.textBundle.getString("imageNotFound"));
             }else if (logo.exists()){
                 String imageExtension = logoField.getText().substring(logoField.getText().length() - 4);
                 imageExtension = imageExtension.toLowerCase();
 
                 if (!imageExtension.equals(".jpg") && !imageExtension.equals(".png") && !imageExtension.equals("jpeg")){
                     save = false;
-                    errorLogo.setText("Image has to be '.jpg', '.png' or '.jpeg'");
+                    errorLogo.setText(Main.textBundle.getString("imageErrorFormatFull"));
                 }else{
                     errorLogo.setText("");
                 }
@@ -211,14 +290,14 @@ public class AddSeasonController {
             File background = new File(backgroundField.getText());
             if (!background.exists()) {
                 save = false;
-                errorBackground.setText("Image not found");
+                errorBackground.setText(Main.textBundle.getString("imageNotFound"));
             }else{
                 String imageExtension = backgroundField.getText().substring(backgroundField.getText().length() - 4);
                 imageExtension = imageExtension.toLowerCase();
 
                 if (!imageExtension.equals(".jpg") && !imageExtension.equals(".png") && !imageExtension.equals("jpeg")){
                     save = false;
-                    errorBackground.setText("Image has to be '.jpg' or '.png'");
+                    errorBackground.setText(Main.textBundle.getString("imageErrorFormatFull"));
                 }else{
                     errorBackground.setText("");
                 }
@@ -230,14 +309,14 @@ public class AddSeasonController {
             File video = new File(videoField.getText());
             if (!video.exists() && !videoField.getText().isEmpty()) {
                 save = false;
-                errorVideo.setText("Video not found");
+                errorVideo.setText(Main.textBundle.getString("videoNotFound"));
             }else if (video.exists()){
                 String videoExtension = videoField.getText().substring(videoField.getText().length() - 3);
                 videoExtension = videoExtension.toLowerCase();
 
                 if (!videoExtension.equals("mkv") && !videoExtension.equals("mp4")){
                     save = false;
-                    errorVideo.setText("Video has to be '.mkv' or '.mp4'");
+                    errorVideo.setText(Main.textBundle.getString("videoErrorFormat"));
                 }else{
                     errorVideo.setText("");
                 }
@@ -249,14 +328,14 @@ public class AddSeasonController {
             File music = new File(musicField.getText());
             if (!music.exists() && !musicField.getText().isEmpty()) {
                 save = false;
-                errorMusic.setText("Audio not found");
+                errorMusic.setText(Main.textBundle.getString("audioNotFound"));
             }else if (music.exists()){
                 String audioExtension = musicField.getText().substring(musicField.getText().length() - 4);
                 audioExtension = audioExtension.toLowerCase();
 
                 if (!audioExtension.equals(".mp3") && !audioExtension.equals(".wav") && !audioExtension.equals("flac") && !audioExtension.equals(".aac")){
                     save = false;
-                    errorMusic.setText("Audio has to be '.mp3', '.wav', '.flac' or '.aac'");
+                    errorMusic.setText(Main.textBundle.getString("audioErrorFormat"));
                 }else{
                     errorMusic.setText("");
                 }
@@ -265,7 +344,7 @@ public class AddSeasonController {
 
         if (!orderField.getText().isEmpty() && orderField.getText().matches("\\d{3,}")){
             save = false;
-            orderError.setText("Sorting order has to be a number");
+            orderError.setText(Main.textBundle.getString("sortingError"));
         }else{
             orderError.setText("");
         }
@@ -465,7 +544,5 @@ public class AddSeasonController {
         }else{
             s.setMusicSrc("NO_MUSIC");
         }
-
-
     }
 }

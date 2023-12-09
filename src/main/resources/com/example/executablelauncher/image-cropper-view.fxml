@@ -21,7 +21,7 @@
                         <Insets right="5.0" />
                      </HBox.margin>
                   </TextField>
-                  <Button mnemonicParsing="false" onAction="#downloadImage" text="Download">
+                  <Button fx:id="downloadButton" mnemonicParsing="false" onAction="#downloadImage" text="Download">
                      <HBox.margin>
                         <Insets right="10.0" />
                      </HBox.margin>
@@ -31,12 +31,12 @@
                         <Insets right="5.0" />
                      </HBox.margin>
                   </TextField>
-                  <Button mnemonicParsing="false" onAction="#loadImage" text="Load File">
+                  <Button fx:id="loadButton" mnemonicParsing="false" onAction="#loadImage" text="Load File">
                      <HBox.margin>
                         <Insets right="10.0" />
                      </HBox.margin>
                   </Button>
-                  <Button mnemonicParsing="false" onAction="#cropImage" text="Crop Image">
+                  <Button fx:id="cropButton" mnemonicParsing="false" onAction="#cropImage" text="Crop Image">
                      <HBox.margin>
                         <Insets left="10.0" />
                      </HBox.margin>

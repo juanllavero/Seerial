@@ -196,11 +196,11 @@
                   <String fx:value="borderLines" />
                </styleClass>
             </ScrollPane>
-            <VBox fx:id="rightBox" alignment="TOP_CENTER" styleClass="borderLines" stylesheets="@styles.css" GridPane.columnIndex="2">
+            <VBox fx:id="rightBox" styleClass="borderLines" stylesheets="@styles.css" GridPane.columnIndex="2">
                <children>
                   <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" pannable="true" styleClass="transparent" stylesheets="@styles.css">
                      <content>
-                        <FlowPane fx:id="discContainer" alignment="TOP_CENTER" columnHalignment="CENTER" prefHeight="200.0" prefWidth="200.0">
+                        <FlowPane fx:id="discContainer" columnHalignment="CENTER" vgap="5.0">
                            <padding>
                               <Insets bottom="10.0" left="5.0" right="5.0" top="10.0" />
                            </padding>
@@ -215,7 +215,7 @@
          <children>
             <VBox fx:id="mainMenu" layoutX="42.0" layoutY="124.0" style="-fx-background-radius: 5px;" styleClass="darkerBackground" stylesheets="@styles.css">
                <children>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#addCollection" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Add Collection" textFill="WHITE">
+                  <Button fx:id="addCollectionButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#addCollection" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Add Collection" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -230,7 +230,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#openSettings" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Settings" textFill="WHITE">
+                  <Button fx:id="settingsButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#openSettings" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Settings" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -245,7 +245,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#switchToFullScreen" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Switch to Fullscreen Mode   F11" textFill="WHITE">
+                  <Button fx:id="switchFSButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#switchToFullScreen" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Switch to Fullscreen Mode   F11" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -260,7 +260,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#close" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Exit" textFill="WHITE">
+                  <Button fx:id="exitButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#close" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Exit" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -279,7 +279,7 @@
             </VBox>
             <VBox fx:id="seriesMenu" layoutX="61.0" layoutY="434.0" style="-fx-background-radius: 5px;" styleClass="darkerBackground" stylesheets="@styles.css">
                <children>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeries" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
+                  <Button fx:id="editColButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeries" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -294,7 +294,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#addSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Add Season" textFill="WHITE">
+                  <Button fx:id="addSeasonButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#addSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Add Season" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -309,7 +309,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeCollection" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Remove" textFill="WHITE">
+                  <Button fx:id="removeColButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeCollection" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -331,7 +331,7 @@
             </VBox>
             <VBox fx:id="seasonMenu" layoutX="493.0" layoutY="479.0" style="-fx-background-radius: 5px;" styleClass="darkerBackground" stylesheets="@styles.css">
                <children>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
+                  <Button fx:id="editSeasonButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -346,7 +346,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#addDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Add Episodes" textFill="WHITE">
+                  <Button fx:id="addDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#addDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Add Episodes" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -361,7 +361,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Remove" textFill="WHITE">
+                  <Button fx:id="removeSeasonButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -383,7 +383,7 @@
             </VBox>
             <VBox fx:id="discMenu" layoutX="960.0" layoutY="332.0" style="-fx-background-radius: 5px;" styleClass="darkerBackground" stylesheets="@styles.css">
                <children>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
+                  <Button fx:id="editDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -398,7 +398,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Remove" textFill="WHITE">
+                  <Button fx:id="removeDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>

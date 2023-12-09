@@ -27,22 +27,43 @@ import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static com.example.executablelauncher.Main.lastDirectory;
+
 public class ImageCropper {
     @FXML
-    private TextField urlText;
+    private Button cropButton;
+
+    @FXML
+    private Button downloadButton;
+
     @FXML
     private TextField imageText;
+
     @FXML
-    private ImageView mainImageView = new ImageView();
+    private Button loadButton;
+
+    @FXML
+    private VBox mainBox;
+
+    @FXML
+    private ImageView mainImageView;
+
+    @FXML
+    private ScrollPane rootPane;
+
+    @FXML
+    private Group selectionGroup;
+
+    @FXML
+    private TextField urlText;
     private Image mainImage;
     private boolean isAreaSelected = false;
     private final AreaSelection areaSelection = new AreaSelection();
     @FXML
-    private Group selectionGroup = new Group();
-    @FXML
     private AnchorPane firstAnchor = new AnchorPane();
-    @FXML
-    private VBox mainBox = new VBox();
 
     private double fixedWidth = 0;
     private double fixedHeight = 0;
@@ -54,6 +75,12 @@ public class ImageCropper {
     public void initValues(AddCollectionController parent, String path) {
         parentController = parent;
         savePath = path;
+
+        urlText.setPromptText(Main.textBundle.getString("urlText"));
+        downloadButton.setText(Main.buttonsBundle.getString("downloadButton"));
+        loadButton.setText(Main.buttonsBundle.getString("loadImageButton"));
+        cropButton.setText(Main.buttonsBundle.getString("cropImageButton"));
+
         fixedWidth = Screen.getPrimary().getBounds().getWidth();
         fixedHeight = Screen.getPrimary().getBounds().getHeight();
 
@@ -84,11 +111,15 @@ public class ImageCropper {
     @FXML
     void loadImage(ActionEvent event){
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select an image");
-        fileChooser.setInitialDirectory(new File("C:\\"));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("All images", "*.jpg", "*.png", "*.jpeg"));
+        fileChooser.setTitle(Main.textBundle.getString("selectImage"));
+        if (lastDirectory != null && Files.exists(Path.of(lastDirectory)))
+            fileChooser.setInitialDirectory(new File(new File(lastDirectory).getParentFile().getAbsolutePath()));
+        else
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
         File selectedFile = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         if (selectedFile != null) {
+            lastDirectory = selectedFile.getPath();
             imageText.setText(selectedFile.getAbsolutePath());
             //clearSelection(selectionGroup);
             mainImageView.setImage(mainImage);
@@ -100,7 +131,6 @@ public class ImageCropper {
 
     @FXML
     private void cropImage(ActionEvent action) {
-
         int width = (int) areaSelection.selectArea(selectionGroup).getBoundsInParent().getWidth();
         int height = (int) areaSelection.selectArea(selectionGroup).getBoundsInParent().getHeight();
 
@@ -116,13 +146,14 @@ public class ImageCropper {
 
     private void showCroppedImageNewStage(WritableImage wi, Image croppedImage) {
         final Stage croppedImageStage = new Stage();
+        croppedImageStage.setAlwaysOnTop(true);
         croppedImageStage.setResizable(true);
-        croppedImageStage.setTitle("Cropped Image");
+        croppedImageStage.setTitle(Main.textBundle.getString("croppedImage"));
         changeStageSizeImageDimensions(croppedImageStage,croppedImage);
         final BorderPane borderPane = new BorderPane();
         final MenuBar menuBar = new MenuBar();
-        final Menu menu1 = new Menu("File");
-        final MenuItem save = new MenuItem("Save");
+        final Menu menu1 = new Menu(Main.textBundle.getString("file"));
+        final MenuItem save = new MenuItem(Main.textBundle.getString("save"));
         save.setOnAction(event -> saveCroppedImage(croppedImageStage,wi));
         menu1.getItems().add(save);
         menuBar.getMenus().add(menu1);

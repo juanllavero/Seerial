@@ -2,6 +2,7 @@ package com.example.executablelauncher;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Screen;
@@ -9,10 +10,19 @@ import javafx.stage.Stage;
 
 public class SeasonMenuController {
     @FXML
+    private Button cancelButton;
+
+    @FXML
     private Label contextMenuLabel;
 
     @FXML
+    private Button editButton;
+
+    @FXML
     private FlowPane mainBox;
+
+    @FXML
+    private Button removeButton;
 
     private SeasonController parentController = null;
 
@@ -21,6 +31,10 @@ public class SeasonMenuController {
 
         mainBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight());
         mainBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth());
+
+        editButton.setText(Main.buttonsBundle.getString("editButton"));
+        removeButton.setText(Main.buttonsBundle.getString("removeButton"));
+        cancelButton.setText(Main.buttonsBundle.getString("cancelButton"));
     }
 
     public void setLabel(String label){

@@ -15,24 +15,28 @@ import com.google.gson.Gson;
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Main extends Application {
-
     public static List<Series> series = new ArrayList<>();
     public static List<Season> seasons = new ArrayList<>();
     public static List<Disc> discs = new ArrayList<>();
     public static List<Category> categories = new ArrayList<>();
     public static Stage primaryStage;
+    public static Locale globalLanguage = Locale.forLanguageTag("en");
+    public static ResourceBundle buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
+    public static ResourceBundle textBundle = ResourceBundle.getBundle("text", globalLanguage);
+    public static String lastDirectory = null;
+    public static String lastVideoDirectory = null;
+    public static String lastMusicDirectory = null;
+
     @Override
     public void start(Stage stage) throws IOException {
         LoadData();
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
-        stage.setTitle("VideoLauncher Desktop");
+        stage.setTitle(textBundle.getString("desktopMode"));
         //stage.initStyle(StageStyle.UNDECORATED);
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
@@ -110,6 +114,12 @@ public class Main extends Application {
             Gson gson = new GsonBuilder().create();
             gson.toJson(categories, writer);
         }
+    }
+
+    public static void changeLanguage(String lang){
+        globalLanguage = Locale.forLanguageTag(lang);
+        buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
+        textBundle = ResourceBundle.getBundle("text", globalLanguage);
     }
 
     public static Series findSeriesByName(String sName){

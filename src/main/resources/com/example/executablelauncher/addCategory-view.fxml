@@ -18,7 +18,7 @@
          <center>
             <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
                <children>
-                  <Label text="Enter a name" textFill="WHITE">
+                  <Label fx:id="textFieldTitle" text="Enter a name" textFill="WHITE">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -45,12 +45,12 @@
                      <center>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <children>
-                              <Button mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Save">
+                              <Button fx:id="saveButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Save">
                                  <HBox.margin>
                                     <Insets right="50.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+                              <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
                            </children>
                         </HBox>
                      </center>

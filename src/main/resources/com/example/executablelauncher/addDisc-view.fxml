@@ -17,20 +17,14 @@
             <center>
                 <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
                     <children>
-                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" />
-                  <Label fx:id="errorCover" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="235.0" prefHeight="17.0" prefWidth="608.0" textFill="#bf0404">
-                     <VBox.margin>
-                        <Insets top="5.0" />
-                     </VBox.margin>
-                  </Label>
                   <HBox prefHeight="100.0" prefWidth="200.0">
                      <children>
-                        <Label text="Type" textFill="#dadada">
+                        <Label fx:id="type" text="Type" textFill="#dadada">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
                         </Label>
-                              <Label text="Executable" textFill="#fcfcfc">
+                              <Label fx:id="source" text="Source" textFill="#fcfcfc">
                            <HBox.margin>
                               <Insets left="170.0" />
                            </HBox.margin>
@@ -52,7 +46,7 @@
                                         <Insets left="20.0" right="10.0" />
                                     </HBox.margin>
                                 </TextField>
-                                <Button mnemonicParsing="false" onMouseClicked="#loadExe" text="Load">
+                                <Button fx:id="loadButton" mnemonicParsing="false" onMouseClicked="#loadExe" text="Load">
                                     <HBox.margin>
                                         <Insets right="50.0" />
                                     </HBox.margin>
@@ -71,12 +65,12 @@
                             <center>
                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                     <children>
-                                        <Button mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Add">
+                                        <Button fx:id="addButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Add">
                                             <HBox.margin>
                                                 <Insets right="50.0" />
                                             </HBox.margin>
                                         </Button>
-                                        <Button mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+                                        <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
                                     </children>
                            <BorderPane.margin>
                               <Insets />
@@ -93,7 +87,7 @@
             <top>
                 <BorderPane prefHeight="55.0" prefWidth="600.0" BorderPane.alignment="CENTER">
                     <center>
-                        <Label text="ADD DISC/EPISODE" textFill="#f8f8f8" BorderPane.alignment="CENTER">
+                        <Label fx:id="title" text="ADD DISC/EPISODE" textFill="#f8f8f8" BorderPane.alignment="CENTER">
                             <font>
                                 <Font size="22.0" />
                             </font>

@@ -89,8 +89,13 @@ public class Controller implements Initializable {
     @FXML
     private HBox categoriesBox;
 
+    @FXML
+    private Button switchToDesktopButton;
+
+    @FXML
+    private Button exitButton;
+
     private Series seriesToEdit;
-    private CardController seriesToEditController;
     private List<Series> collectionList = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
 
@@ -109,6 +114,9 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         cardContainer.setPadding(new Insets(15, 15, 15, 100));
         sideMenuParent.setVisible(false);
+
+        exitButton.setText(Main.buttonsBundle.getString("exitFullscreen"));
+        switchToDesktopButton.setText(Main.buttonsBundle.getString("switchToDesktop"));
 
         playBackgroundSound();
 
@@ -402,10 +410,9 @@ public class Controller implements Initializable {
         hideContextMenu();
     }
 
-    public void showContextMenu(Series s, CardController seriesController){
+    public void showContextMenu(Series s){
         playInteractionSound();
         seriesToEdit = s;
-        seriesToEditController = seriesController;
         sideMenuParent.setVisible(true);
     }
 
@@ -449,7 +456,7 @@ public class Controller implements Initializable {
                 if (newSeries != null)
                     seasonController.setSeasons(newSeries.getSeasons());
                 Stage stage = (Stage) mainPane.getScene().getWindow();
-                stage.setTitle("Season");
+                stage.setTitle(Main.textBundle.getString("season"));
                 stage.setScene(new Scene(root));
                 stage.setMaximized(true);
                 stage.setWidth(Screen.getPrimary().getBounds().getWidth());
@@ -500,7 +507,7 @@ public class Controller implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
-            stage.setTitle("Desktop Mode");
+            stage.setTitle(Main.textBundle.getString("desktopMode"));
             stage.setScene(new Scene(root));
             stage.setMaximized(false);
             stage.setMinHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);

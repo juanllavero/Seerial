@@ -18,16 +18,16 @@ import java.nio.file.Files;
 
 public class AddCollectionController {
     @FXML
-    private TextField coverField;
+    private Button cancelButton;
 
     @FXML
-    private TextField nameField;
-
-    @FXML
-    private TextField orderField;
+    private Label category;
 
     @FXML
     private ChoiceBox<String> categoryField;
+
+    @FXML
+    private TextField coverField;
 
     @FXML
     private Label errorCategory;
@@ -36,20 +36,39 @@ public class AddCollectionController {
     private Label imageError;
 
     @FXML
+    private Label name;
+
+    @FXML
     private Label nameError;
+
+    @FXML
+    private TextField nameField;
 
     @FXML
     private Label orderError;
 
+    @FXML
+    private TextField orderField;
+
+    @FXML
+    private Button saveButton;
+
+    @FXML
+    private Label sorting;
+
+    @FXML
+    private Label title;
+
     public Series seriesToEdit = null;
     private DesktopViewController controllerParent;
     private File selectedFile = null;
-    private String name;
+    private String nameString;
+
 
     public void setSeries(Series s){
         seriesToEdit = s;
 
-        name = s.getName();
+        nameString = s.getName();
         nameField.setText(s.getName());
         coverField.setText(s.getCoverSrc());
 
@@ -58,10 +77,23 @@ public class AddCollectionController {
 
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));
+
+        title.setText(Main.textBundle.getString("collectionWindowTitleEdit"));
+        initValues();
     }
 
     public void initializeCategories(){
         categoryField.getItems().addAll(Main.getCategories());
+        title.setText(Main.textBundle.getString("collectionWindowTitle"));
+        initValues();
+    }
+
+    private void initValues() {
+        saveButton.setText(Main.buttonsBundle.getString("saveButton"));
+        cancelButton.setText(Main.buttonsBundle.getString("cancelButton"));
+        name.setText(Main.textBundle.getString("name"));
+        category.setText(Main.textBundle.getString("category"));
+        sorting.setText(Main.textBundle.getString("sortingOrder"));
     }
 
     public void setParentController(DesktopViewController controller){
@@ -88,7 +120,7 @@ public class AddCollectionController {
                 stage.setMaximized(false);
                 stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
                 stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
-                stage.setTitle("Edit Series");
+                stage.setTitle(Main.textBundle.getString("imageCropper"));
                 stage.setAlwaysOnTop(true);
                 stage.setScene(new Scene(root1));
                 stage.show();
@@ -96,7 +128,7 @@ public class AddCollectionController {
                 throw new RuntimeException(e);
             }
         }else{
-            imageError.setText("Name field is empty");
+            imageError.setText(Main.textBundle.getString("emptyField"));
         }
     }
 
@@ -112,7 +144,8 @@ public class AddCollectionController {
             AddCategoryController addCategoryController = fxmlLoader.getController();
             addCategoryController.setParent(controllerParent);
             Stage stage = new Stage();
-            stage.setTitle("Add Category");
+            stage.setTitle(Main.textBundle.getString("categoryWindowTitle"));
+            stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(root1));
             stage.show();
         } catch (IOException e) {
@@ -125,26 +158,26 @@ public class AddCollectionController {
         File image = new File(coverField.getText());
         boolean save = true;
 
-        if (Main.nameExist(nameField.getText()) && !nameField.getText().equals(name)){
+        if (Main.nameExist(nameField.getText()) && !nameField.getText().equals(nameString)){
             save = false;
-            nameError.setText("Name exists in another collection");
+            nameError.setText(Main.textBundle.getString("collectionExists"));
         }else if (nameField.getText().isEmpty()){
             save = false;
-            nameError.setText("This field cannot be empty");
+            nameError.setText(Main.textBundle.getString("emptyField"));
         }else{
             nameError.setText("");
         }
 
         if (!image.exists()) {
             save = false;
-            imageError.setText("Image not found");
+            imageError.setText(Main.textBundle.getString("imageNotFound"));
         }else{
             String imageExtension = coverField.getText().substring(coverField.getText().length() - 3);
             imageExtension = imageExtension.toLowerCase();
 
             if (!imageExtension.equals("jpg") && !imageExtension.equals("png")){
                 save = false;
-                imageError.setText("Image has to be '.jpg' or '.png'");
+                imageError.setText(Main.textBundle.getString("imageErrorFormat"));
             }else{
                 imageError.setText("");
             }
@@ -152,14 +185,14 @@ public class AddCollectionController {
 
         if (!orderField.getText().isEmpty() && orderField.getText().matches("\\d{3,}")){
             save = false;
-            orderError.setText("Sorting order has to be a number");
+            orderError.setText(Main.textBundle.getString("sortingError"));
         }else{
             orderError.setText("");
         }
 
         if (categoryField.getValue() == null){
-            save = false;
-            errorCategory.setText("You must select a category");
+            categoryField.setValue("NO CATEGORY");
+            errorCategory.setText("");
         }else{
             errorCategory.setText("");
         }

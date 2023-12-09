@@ -20,7 +20,7 @@
          <center>
             <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
                <children>
-                  <Label text="Name" textFill="WHITE">
+                  <Label fx:id="name" text="Name" textFill="WHITE">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -40,7 +40,7 @@
                   </Label>
                   <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0">
                      <children>
-                        <Label text="Sorting Order" textFill="#fcfcfc">
+                        <Label fx:id="sorting" text="Sorting Order" textFill="#fcfcfc">
                            <HBox.margin>
                               <Insets left="50.0" />
                            </HBox.margin>
@@ -84,7 +84,7 @@
                         <Label fx:id="imageError" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="17.0" prefWidth="608.0" textFill="#c30505" />
                      </children>
                   </HBox>
-                  <Label alignment="TOP_LEFT" layoutX="60.0" layoutY="30.0" prefHeight="17.0" prefWidth="605.0" text="Category" textFill="WHITE">
+                  <Label fx:id="category" alignment="TOP_LEFT" layoutX="60.0" layoutY="30.0" prefHeight="17.0" prefWidth="605.0" text="Category" textFill="WHITE">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -122,12 +122,12 @@
                      <center>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <children>
-                              <Button mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Save">
+                              <Button fx:id="saveButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Save">
                                  <HBox.margin>
                                     <Insets right="50.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+                              <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
                            </children>
                         </HBox>
                      </center>
@@ -141,7 +141,7 @@
          <top>
             <BorderPane prefHeight="55.0" prefWidth="600.0" BorderPane.alignment="CENTER">
                <center>
-                  <Label text="COLLECTION" textFill="#f8f8f8" BorderPane.alignment="CENTER">
+                  <Label fx:id="title" text="COLLECTION" textFill="#f8f8f8" BorderPane.alignment="CENTER">
                      <font>
                         <Font size="22.0" />
                      </font>

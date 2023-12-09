@@ -15,11 +15,10 @@ public class DiscController {
     private Label number;
     private Disc disc;
     private SeasonController parentController = null;
-    private DesktopViewController desktopController = null;
 
     public void setData(Disc d) {
         name.setText(d.getName());
-        number.setText("Episode " + d.getEpisodeNumber());
+        number.setText(d.getEpisodeNumber());
         disc = d;
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
@@ -27,6 +26,9 @@ public class DiscController {
         if (screenWidth < 1920){
             name.setFont(new Font("System", 20));
             number.setFont(new Font("System", 14));
+        }else if (screenWidth >= 2048){
+            name.setFont(new Font("System", 26));
+            number.setFont(new Font("System", 20));
         }
     }
 
@@ -34,28 +36,11 @@ public class DiscController {
         parentController = col;
     }
 
-    public void setDesktopParent(DesktopViewController col){
-        desktopController = col;
-    }
-
     @FXML
     private void onMouseClick(MouseEvent event) {
-        if (event.getButton() == MouseButton.SECONDARY) {
-            if (desktopController != null)
-                desktopController.openDiscMenu(event, disc);
-        }else {
+        if (event.getButton() == MouseButton.PRIMARY) {
             if (parentController != null)
                 parentController.playEpisode(disc);
-            else {
-                VBox discBox = (VBox)event.getSource();
-
-                if (event.isControlDown())
-                    desktopController.controlSelectDisc(disc, discBox);
-                else if (event.isShiftDown())
-                    desktopController.shiftSelectDisc(disc, discBox);
-                else
-                    desktopController.selectDisc(disc, discBox);
-            }
         }
     }
 }
