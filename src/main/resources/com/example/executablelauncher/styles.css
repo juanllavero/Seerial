@@ -70,22 +70,47 @@
 }
 
 .seeButton{
-    -fx-background-color: rgb(246, 246, 246);
+    -fx-background-color: rgba(0, 0, 0, 0.09);
     -fx-background-radius: 35px;
+    -fx-text-fill: #ffffff;
 }
 
-.seeButton:focused{
-    -fx-background-color: rgb(189, 189, 189);
+.seeButton:hover{
+    -fx-background-color: rgba(255, 255, 255, 0.63);
+    -fx-background-radius: 35px;
+    -fx-text-fill: #ffffff;
 }
 
-.optionsButton {
-    -fx-background-image: url("img/icons/options.png");
-    -fx-background-color: rgba(37, 37, 37, 0.66);
+.seeButtonSelected{
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-background-radius: 35px;
+    -fx-text-fill: #0e0e0e;
+    -fx-border-width: 2px;
+    -fx-border-color: #a9a9a9;
+    -fx-border-radius: 35px;
+    -fx-border-insets: -4;
+}
+
+.optionsButton{
+    -fx-background-color: rgba(0, 0, 0, 0.09);
     -fx-background-radius: 50px;
+    -fx-text-fill: #ffffff;
 }
 
-.optionsButton:focused {
-    -fx-background-color: #252525;
+.optionsButton:hover{
+    -fx-background-color: rgba(255, 255, 255, 0.63);
+    -fx-background-radius: 50px;
+    -fx-text-fill: #ffffff;
+}
+
+.optionsButtonSelected{
+    -fx-background-color: rgb(255, 255, 255);
+    -fx-background-radius: 50px;
+    -fx-text-fill: #0e0e0e;
+    -fx-border-width: 2px;
+    -fx-border-color: #a9a9a9;
+    -fx-border-radius: 50px;
+    -fx-border-insets: -4;
 }
 
 .coverNotSelected{

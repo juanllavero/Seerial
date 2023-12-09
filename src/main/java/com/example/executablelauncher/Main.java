@@ -24,7 +24,7 @@ public class Main extends Application {
     public static List<Series> series = new ArrayList<>();
     public static List<Season> seasons = new ArrayList<>();
     public static List<Disc> discs = new ArrayList<>();
-    public static List<String> categories = new ArrayList<>();
+    public static List<Category> categories = new ArrayList<>();
     public static Stage primaryStage;
     @Override
     public void start(Stage stage) throws IOException {
@@ -73,14 +73,16 @@ public class Main extends Application {
                 discs.addAll(List.of(dList));
 
             reader = new JsonReader(new FileReader(catFile));
-            String[] catList = gson.fromJson(reader, String[].class);
+            Category[] catList = gson.fromJson(reader, Category[].class);
             if (catList != null)
                 categories.addAll(List.of(catList));
         } catch (FileNotFoundException e) {
             System.err.println("Json files not found");
         }
 
-        categories.replaceAll(String::toUpperCase);
+        for (Category cat : categories){
+            cat.name = cat.name.toUpperCase();
+        }
     }
 
     public static void SaveData() throws IOException {
@@ -147,16 +149,58 @@ public class Main extends Application {
     }
 
     public static List<String> getCategories(){
-        return categories;
+        List<String> catList = new ArrayList<>();
+        for (Category cat : categories){
+            catList.add(cat.name);
+        }
+        return catList;
     }
 
-    public static void addCategory(String c){
-        categories.add(c);
+    public static List<String> getFullscreenCategories(){
+        List<String> catList = new ArrayList<>();
+        for (Category cat : categories){
+            if (!cat.name.equals("NO CATEGORY") && cat.showOnFullscreen)
+                catList.add(cat.name);
+        }
+        return catList;
+    }
+
+    public static void addCategory(String c, boolean showOnFullscreen){
+        categories.add(new Category(c, showOnFullscreen));
+    }
+
+    public static void editCategory(String c, boolean showOnFullscreen){
+        for (Category cat : categories){
+            if (cat.name.equals(c)){
+                cat.name = c;
+                cat.showOnFullscreen = showOnFullscreen;
+            }
+        }
+    }
+
+    public static void removeCategory(String name){
+        if (!name.equals("NO CATEGORY")){
+            categories.removeIf(cat -> cat.name.equals(name));
+
+            for (Series s : series){
+                if (s.getCategory().toUpperCase().equals(name)){
+                    s.setCategory("NO CATEGORY");
+                }
+            }
+        }
+    }
+
+    public static Category findCategory(String name){
+        for (Category c : categories){
+            if (c.name.equals(name))
+                return c;
+        }
+        return null;
     }
 
     public static boolean categoryExist(String cat){
-        for (String c : categories){
-            if (c.equals(cat))
+        for (Category c : categories){
+            if (c.name.equals(cat))
                 return true;
         }
         return false;

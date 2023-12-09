@@ -89,6 +89,7 @@ public class AddCollectionController {
                 stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
                 stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
                 stage.setTitle("Edit Series");
+                stage.setAlwaysOnTop(true);
                 stage.setScene(new Scene(root1));
                 stage.show();
             } catch (IOException e) {

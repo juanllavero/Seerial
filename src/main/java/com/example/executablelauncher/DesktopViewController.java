@@ -157,10 +157,13 @@ public class DesktopViewController {
     }
 
     public void updateCategories(){
+        List<String> categories = Main.getCategories();
         categorySelector.getItems().clear();
-        categorySelector.getItems().addAll(Main.getCategories());
-        categorySelector.setValue(currentCategory);
-        selectCategory(currentCategory);
+        categorySelector.getItems().addAll(categories);
+        if (!categories.isEmpty()){
+            categorySelector.setValue(categories.get(0));
+            selectCategory(categories.get(0));
+        }
     }
 
     public void initValues(){
@@ -469,8 +472,41 @@ public class DesktopViewController {
             throw new RuntimeException(e);
         }
 
-        categorySelector.getItems().clear();
-        categorySelector.getItems().addAll(Main.getCategories());
+        updateCategories();
+    }
+
+    @FXML
+    void editCategory(MouseEvent event) {
+        if (currentCategory.equals("NO CATEGORY"))
+            return;
+
+        Category cat = Main.findCategory(currentCategory);
+        if (cat != null){
+            showBackgroundShadow();
+            try{
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCategory-view.fxml"));
+                Parent root1 = fxmlLoader.load();
+                AddCategoryController addCategoryController = fxmlLoader.getController();
+                addCategoryController.setParent(this);
+                addCategoryController.setValues(cat.name, cat.showOnFullscreen);
+                Stage stage = new Stage();
+                stage.setTitle("Edit Category");
+                stage.initStyle(StageStyle.UNDECORATED);
+                stage.setAlwaysOnTop(true);
+                stage.setScene(new Scene(root1));
+                stage.show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            updateCategories();
+        }
+    }
+
+    @FXML
+    void removeCategory(MouseEvent event) {
+        Main.removeCategory(currentCategory);
+        updateCategories();
     }
 
     @FXML

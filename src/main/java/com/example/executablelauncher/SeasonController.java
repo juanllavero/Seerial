@@ -32,6 +32,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -85,6 +86,12 @@ public class SeasonController {
     @FXML
     private Label yearField;
 
+    @FXML
+    private Button playButton;
+
+    @FXML
+    private Button optionsButton;
+
     private Controller controllerParent;
 
     private List<Season> seasons = new ArrayList<>();
@@ -93,6 +100,8 @@ public class SeasonController {
     public int currentEpisoceID = -1;
     private Disc selectedDisc = null;
     private boolean showEpisodes = false;
+    private boolean optionsSelected = false;
+    private boolean playSelected = false;
 
     private MediaPlayer mp = null;
 
@@ -165,7 +174,6 @@ public class SeasonController {
             });
 
             isVideo = false;
-
             alertTimer.play();
         }
 
@@ -188,6 +196,8 @@ public class SeasonController {
 
         episodeSection.setTranslateY(episodeBox.getPrefHeight());
         infoBox.setTranslateY(episodeBox.getPrefHeight() / 2);
+
+        selectPlayButton();
     }
 
     private void updateButtons(){
@@ -209,16 +219,29 @@ public class SeasonController {
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()){
                 goBack(event);
-            }else if (KeyCode.LEFT == event.getCode() && lastSeasonButton.isVisible()){
+            }else if (KeyCode.LEFT == event.getCode()){
                 if (selectedDisc != null)
                     selectPrevDisc();
-                //controllerParent.playCategoriesSound();
-                //lastSeason();
-            }else if (KeyCode.RIGHT == event.getCode() && nextSeasonButton.isVisible()){
+                else{
+                    if (optionsSelected) {
+                        selectPlayButton();
+                    }
+                    else if (playSelected && lastSeasonButton.isVisible()){
+                        controllerParent.playCategoriesSound();
+                        lastSeason();
+                    }
+                }
+            }else if (KeyCode.RIGHT == event.getCode()){
                 if (selectedDisc != null)
                     selectNextDisc();
-                //controllerParent.playCategoriesSound();
-                //nextSeason();
+                else{
+                    if (playSelected)
+                        selectOptionsButton();
+                    else if (optionsSelected && nextSeasonButton.isVisible()){
+                        controllerParent.playCategoriesSound();
+                        nextSeason();
+                    }
+                }
             }else if (KeyCode.DOWN == event.getCode() && !showEpisodes && discs.size() > 1){
                 controllerParent.playInteractionSound();
                 showEpisodes();
@@ -227,6 +250,7 @@ public class SeasonController {
                 controllerParent.playInteractionSound();
                 showEpisodes();
                 deselectDisc();
+                selectPlayButton();
             }
         });
 
@@ -381,6 +405,7 @@ public class SeasonController {
     void goBack(KeyEvent event){
         if (mp != null)
             mp.stop();
+        alertTimer.stop();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
@@ -509,6 +534,7 @@ public class SeasonController {
     }
 
     public void selectFirstDisc(){
+        deselectButtons();
         selectedDisc = discs.get(0);
         Node node = cardContainer.getChildren().get(0);
         node.getStyleClass().clear();
@@ -562,5 +588,62 @@ public class SeasonController {
         }
 
         return -1;
+    }
+
+    private void selectPlayButton(){
+        if (optionsSelected){
+            optionsButton.getStyleClass().clear();
+            optionsButton.getStyleClass().add("optionsButton");
+            setOptionsButtonImage(false);
+            optionsSelected = false;
+        }
+        playButton.getStyleClass().clear();
+        playButton.getStyleClass().add("seeButtonSelected");
+        playSelected = true;
+    }
+
+    private void selectOptionsButton(){
+        if (playSelected){
+            playButton.getStyleClass().clear();
+            playButton.getStyleClass().add("seeButton");
+            playSelected = false;
+        }
+        optionsButton.getStyleClass().clear();
+        optionsButton.getStyleClass().add("optionsButtonSelected");
+        setOptionsButtonImage(true);
+        optionsSelected = true;
+    }
+
+    private void deselectButtons(){
+        playButton.getStyleClass().clear();
+        playButton.getStyleClass().add("seeButton");
+        playSelected = false;
+
+        optionsButton.getStyleClass().clear();
+        optionsButton.getStyleClass().add("optionsButton");
+        setOptionsButtonImage(false);
+        optionsSelected = false;
+    }
+
+    private void setOptionsButtonImage(boolean selected){
+        String src;
+        if (selected){
+            src = "src/main/resources/img/icons/optionsSelected.png";
+        }else{
+            src = "src/main/resources/img/icons/options.png";
+        }
+
+        File file = new File(src);
+        Image image = null;
+        try{
+            image = new Image(file.toURI().toURL().toExternalForm(), 20, 20, true, true);
+        } catch (MalformedURLException e) {
+            System.err.println("Options Button image not loaded");
+        }
+
+        if (image != null){
+            ImageView imageView = new ImageView(image);
+            optionsButton.setGraphic(imageView);
+        }
     }
 }

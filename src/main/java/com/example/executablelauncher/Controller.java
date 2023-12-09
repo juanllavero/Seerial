@@ -167,7 +167,7 @@ public class Controller implements Initializable {
         menuShadow.setFitHeight(screenHeight);
         menuShadow.setVisible(false);
 
-        List<String> categories = Main.getCategories();
+        List<String> categories = Main.getFullscreenCategories();
 
         for (String cat : categories){
             Button btn = new Button();

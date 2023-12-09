@@ -87,8 +87,11 @@
                   </Label>
                   <HBox prefHeight="100.0" prefWidth="200.0">
                      <children>
-                        <Button accessibleRole="IMAGE_VIEW" mnemonicParsing="false" onAction="#play" prefHeight="45.0" prefWidth="199.0" styleClass="seeButton" stylesheets="@styles.css" text="See" />
-                        <Button mnemonicParsing="false" onAction="#openMenu" onMouseClicked="#openMenu" prefHeight="47.0" prefWidth="47.0" styleClass="optionsButton" stylesheets="@styles.css">
+                        <Button fx:id="playButton" accessibleRole="IMAGE_VIEW" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="45.0" prefWidth="199.0" styleClass="seeButton" stylesheets="@styles.css" text="See" textAlignment="CENTER">
+                           <font>
+                              <Font size="18.0" />
+                           </font></Button>
+                        <Button fx:id="optionsButton" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#openMenu" prefHeight="47.0" prefWidth="47.0" styleClass="optionsButton" stylesheets="@styles.css" textAlignment="CENTER">
                            <graphic>
                               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
                                  <image>
