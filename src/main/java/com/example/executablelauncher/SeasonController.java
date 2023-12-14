@@ -129,7 +129,7 @@ public class SeasonController {
         yearField.setText(season.getYear());
 
         //Set Background Image
-        Image background = new Image(season.getBackgroundSrc());
+        Image background = new Image("file:" + season.getBackgroundSrc());
         backgroundImage.setImage(background);
         backgroundImage.setPreserveRatio(false);
         backgroundImage.setSmooth(true);
@@ -144,7 +144,7 @@ public class SeasonController {
             seriesTitle.setEffect(new DropShadow());
             infoBox.getChildren().add(0, seriesTitle);
         }else{
-            Image logo = new Image(season.getLogoSrc(), 500, 500, true, true);
+            Image logo = new Image("file:" + season.getLogoSrc(), 500, 500, true, true);
             logoImage.setImage(logo);
         }
 
@@ -181,7 +181,7 @@ public class SeasonController {
         discs.clear();
         List<Integer> discs = season.getDiscs();
         for (int i : discs){
-            Disc d = Main.findDisc(i);
+            Disc d = App.findDisc(i);
             this.discs.add(d);
             addEpisodeCard(d);
         }
@@ -208,7 +208,7 @@ public class SeasonController {
     public void setSeasons(List<Integer> seasonList){
         if (seasons != null){
             for (int i : seasonList){
-                seasons.add(Main.findSeason(i));
+                seasons.add(App.findSeason(i));
             }
         }
 
@@ -458,7 +458,7 @@ public class SeasonController {
         int currentID = seasons.get(currentSeason).getId();
 
         seasons.remove(seasons.get(currentSeason));
-        Main.removeSeason(currentID);
+        App.removeSeason(currentID);
 
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
@@ -515,9 +515,9 @@ public class SeasonController {
     void play(ActionEvent event){
         if (!seasons.get(currentSeason).getDiscs().isEmpty()){
             if (currentEpisoceID == -1){
-                currentEpisoceID = Objects.requireNonNull(Main.findDisc(seasons.get(currentSeason).getDiscs().get(0))).getId();
+                currentEpisoceID = Objects.requireNonNull(App.findDisc(seasons.get(currentSeason).getDiscs().get(0))).getId();
             }
-            Disc d = Main.findDisc(currentEpisoceID);
+            Disc d = App.findDisc(currentEpisoceID);
             if (d != null){
                 playEpisode(d);
             }
@@ -633,17 +633,9 @@ public class SeasonController {
             src = "src/main/resources/img/icons/options.png";
         }
 
-        File file = new File(src);
-        Image image = null;
-        try{
-            image = new Image(file.toURI().toURL().toExternalForm(), 20, 20, true, true);
-        } catch (MalformedURLException e) {
-            System.err.println("Options Button image not loaded");
-        }
+        Image image = new Image("file:" + src, 20, 20, true, true);
 
-        if (image != null){
-            ImageView imageView = new ImageView(image);
-            optionsButton.setGraphic(imageView);
-        }
+        ImageView imageView = new ImageView(image);
+        optionsButton.setGraphic(imageView);
     }
 }

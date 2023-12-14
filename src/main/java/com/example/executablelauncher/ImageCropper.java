@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static com.example.executablelauncher.Main.lastDirectory;
+import static com.example.executablelauncher.App.lastDirectory;
 
 public class ImageCropper {
     @FXML
@@ -76,10 +76,10 @@ public class ImageCropper {
         parentController = parent;
         savePath = path;
 
-        urlText.setPromptText(Main.textBundle.getString("urlText"));
-        downloadButton.setText(Main.buttonsBundle.getString("downloadButton"));
-        loadButton.setText(Main.buttonsBundle.getString("loadImageButton"));
-        cropButton.setText(Main.buttonsBundle.getString("cropImageButton"));
+        urlText.setPromptText(App.textBundle.getString("urlText"));
+        downloadButton.setText(App.buttonsBundle.getString("downloadButton"));
+        loadButton.setText(App.buttonsBundle.getString("loadImageButton"));
+        cropButton.setText(App.buttonsBundle.getString("cropImageButton"));
 
         fixedWidth = Screen.getPrimary().getBounds().getWidth();
         fixedHeight = Screen.getPrimary().getBounds().getHeight();
@@ -111,12 +111,12 @@ public class ImageCropper {
     @FXML
     void loadImage(ActionEvent event){
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(Main.textBundle.getString("selectImage"));
+        fileChooser.setTitle(App.textBundle.getString("selectImage"));
         if (lastDirectory != null && Files.exists(Path.of(lastDirectory)))
             fileChooser.setInitialDirectory(new File(new File(lastDirectory).getParentFile().getAbsolutePath()));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
         File selectedFile = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         if (selectedFile != null) {
             lastDirectory = selectedFile.getPath();
@@ -148,12 +148,12 @@ public class ImageCropper {
         final Stage croppedImageStage = new Stage();
         croppedImageStage.setAlwaysOnTop(true);
         croppedImageStage.setResizable(true);
-        croppedImageStage.setTitle(Main.textBundle.getString("croppedImage"));
+        croppedImageStage.setTitle(App.textBundle.getString("croppedImage"));
         changeStageSizeImageDimensions(croppedImageStage,croppedImage);
         final BorderPane borderPane = new BorderPane();
         final MenuBar menuBar = new MenuBar();
-        final Menu menu1 = new Menu(Main.textBundle.getString("file"));
-        final MenuItem save = new MenuItem(Main.textBundle.getString("save"));
+        final Menu menu1 = new Menu(App.textBundle.getString("file"));
+        final MenuItem save = new MenuItem(App.textBundle.getString("save"));
         save.setOnAction(event -> saveCroppedImage(croppedImageStage,wi));
         menu1.getItems().add(save);
         menuBar.getMenus().add(menu1);
@@ -173,7 +173,7 @@ public class ImageCropper {
             System.err.println("Image not saved");
         }
 
-        parentController.setImageFile(file.getAbsolutePath());
+        parentController.setImageFile("src/main/resources/img/seriesCovers/" + file.getName());
 
         stage.close();
     }

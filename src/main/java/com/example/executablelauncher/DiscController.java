@@ -8,6 +8,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 
+import java.util.ResourceBundle;
+
 public class DiscController {
     @FXML
     private Label name;
@@ -18,7 +20,7 @@ public class DiscController {
 
     public void setData(Disc d) {
         name.setText(d.getName());
-        number.setText(d.getEpisodeNumber());
+        number.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber());
         disc = d;
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();

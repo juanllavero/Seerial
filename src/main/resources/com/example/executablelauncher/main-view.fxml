@@ -20,14 +20,14 @@
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../img/backgroundDefault.jpeg" />
+            <Image url="@../../../img/backgroundDefault.png" />
          </image>
       </ImageView>
       <BorderPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" styleClass="transparent" stylesheets="@styles.css">
          <top>
-            <HBox fx:id="topBar" prefHeight="60.0" prefWidth="1280.0" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="TOP_CENTER">
+            <HBox fx:id="topBar" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="TOP_CENTER">
                <children>
-                  <BorderPane fx:id="topBorderPane" prefHeight="60.0" prefWidth="1276.0">
+                  <BorderPane fx:id="topBorderPane">
                      <padding>
                         <Insets top="5.0" />
                      </padding>
@@ -44,24 +44,36 @@
                            </BorderPane.margin>
                         </HBox>
                      </left>
-                     <center>
-                        <Button fx:id="menuButton" mnemonicParsing="false" styleClass="buttonGradient" stylesheets="@styles.css" BorderPane.alignment="CENTER">
-                           <graphic>
-                              <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../img/icons/menu.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                     </center>
+                     <right>
+                        <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+                           <children>
+                              <Label text="22:30" textFill="WHITE">
+                                 <font>
+                                    <Font size="28.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets right="10.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <Button fx:id="menuButton" mnemonicParsing="false" styleClass="buttonGradient" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/menu.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </right>
                   </BorderPane>
                </children>
                <BorderPane.margin>
                   <Insets />
                </BorderPane.margin>
                <padding>
-                  <Insets left="25.0" right="30.0" />
+                  <Insets left="25.0" right="10.0" />
                </padding>
             </HBox>
          </top>

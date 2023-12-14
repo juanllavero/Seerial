@@ -11,7 +11,6 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -200,11 +199,11 @@
                <children>
                   <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" pannable="true" styleClass="transparent" stylesheets="@styles.css">
                      <content>
-                        <FlowPane fx:id="discContainer" columnHalignment="CENTER" vgap="5.0">
+                        <VBox fx:id="discContainer">
                            <padding>
-                              <Insets bottom="10.0" left="5.0" right="5.0" top="10.0" />
+                              <Insets bottom="5.0" left="2.0" right="2.0" top="5.0" />
                            </padding>
-                        </FlowPane>
+                        </VBox>
                      </content>
                   </ScrollPane>
                </children>

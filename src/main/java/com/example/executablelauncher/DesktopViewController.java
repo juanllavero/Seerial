@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -23,12 +24,15 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +62,7 @@ public class DesktopViewController {
     private VBox centralVBox;
 
     @FXML
-    private FlowPane discContainer;
+    private VBox discContainer;
 
     @FXML
     private VBox discMenu;
@@ -155,6 +159,8 @@ public class DesktopViewController {
     private List<Series> seriesList = new ArrayList<>();
     private List<Season> seasonList = new ArrayList<>();
     private List<Disc> discList = new ArrayList<>();
+    private List<Button> seriesButtons = new ArrayList<>();
+    private List<Button> seasonsButtons = new ArrayList<>();
     private List<Button> discButtons = new ArrayList<>();
 
     private Series selectedSeries = null;
@@ -164,6 +170,7 @@ public class DesktopViewController {
     private String currentCategory;
 
     public void showSeries(){
+        seriesButtons.clear();
         for (Series s : seriesList){
             Button seriesButton = new Button();
             seriesButton.setText(s.getName());
@@ -171,30 +178,38 @@ public class DesktopViewController {
             seriesButton.getStyleClass().add("desktopTextButton");
             seriesButton.setMaxWidth(Integer.MAX_VALUE);
             seriesButton.setAlignment(Pos.BASELINE_LEFT);
+            seriesButton.setWrapText(true);
+
+            seriesButton.setPadding(new Insets(5, 5, 5, 5));
 
             seriesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                selectSeriesButton(seriesButton);
                 if (event.getButton() == MouseButton.SECONDARY) {
                     openSeriesMenu(event);
-                }else{
-                    selectSeriesButton(event);
                 }
             });
 
             seriesContainer.getChildren().add(seriesButton);
+            seriesButtons.add(seriesButton);
         }
 
-        blankSelection();
+        if (seriesList.isEmpty())
+            blankSelection();
+        else{
+            selectSeriesButton(seriesButtons.get(0));
+            selectSeries(seriesList.get(0));
+        }
     }
 
     public void selectCategory(String category){
         seriesContainer.getChildren().clear();
         currentCategory = category;
-        seriesList = Main.getSeriesFromCategory(category);
+        seriesList = App.getSeriesFromCategory(category);
         showSeries();
     }
 
     public void updateCategories(){
-        List<String> categories = Main.getCategories();
+        List<String> categories = App.getCategories();
         categorySelector.getItems().clear();
         categorySelector.getItems().addAll(categories);
         if (!categories.isEmpty()){
@@ -204,28 +219,27 @@ public class DesktopViewController {
     }
 
     public void initValues(){
-        categorySelector.getItems().addAll(Main.getCategories());
-        if (!categorySelector.getItems().isEmpty()) {
-            categorySelector.setValue(categorySelector.getItems().get(0));
-            seriesList = Main.getSeriesFromCategory(categorySelector.getValue());
+        categorySelector.getItems().addAll(App.getCategories());
+        if (categorySelector.getItems().size() > 1) {
+            categorySelector.setValue(categorySelector.getItems().get(1));
+            seriesList = App.getSeriesFromCategory(categorySelector.getValue());
+            selectCategory(categorySelector.getValue());
         }else{
-            seriesList = Main.getCollection();
+            seriesList = App.getCollection();
         }
 
-        addCollectionButton.setText(Main.buttonsBundle.getString("addCollection"));
-        addSeasonButton.setText(Main.buttonsBundle.getString("addSeason"));
-        addDiscButton.setText(Main.buttonsBundle.getString("addEpisodes"));
-        settingsButton.setText(Main.buttonsBundle.getString("settings"));
-        exitButton.setText(Main.buttonsBundle.getString("eixtButton"));
-        switchFSButton.setText(Main.buttonsBundle.getString("switchToFullscreen"));
-        removeColButton.setText(Main.buttonsBundle.getString("removeButton"));
-        removeSeasonButton.setText(Main.buttonsBundle.getString("removeButton"));
-        removeDiscButton.setText(Main.buttonsBundle.getString("removeButton"));
-        editColButton.setText(Main.buttonsBundle.getString("editButton"));
-        editSeasonButton.setText(Main.buttonsBundle.getString("editButton"));
-        editDiscButton.setText(Main.buttonsBundle.getString("editButton"));
-
-        showSeries();
+        addCollectionButton.setText(App.buttonsBundle.getString("addCollection"));
+        addSeasonButton.setText(App.buttonsBundle.getString("addSeason"));
+        addDiscButton.setText(App.buttonsBundle.getString("addEpisodes"));
+        settingsButton.setText(App.buttonsBundle.getString("settings"));
+        exitButton.setText(App.buttonsBundle.getString("eixtButton"));
+        switchFSButton.setText(App.buttonsBundle.getString("switchToFullscreen"));
+        removeColButton.setText(App.buttonsBundle.getString("removeButton"));
+        removeSeasonButton.setText(App.buttonsBundle.getString("removeButton"));
+        removeDiscButton.setText(App.buttonsBundle.getString("removeButton"));
+        editColButton.setText(App.buttonsBundle.getString("editButton"));
+        editSeasonButton.setText(App.buttonsBundle.getString("editButton"));
+        editDiscButton.setText(App.buttonsBundle.getString("editButton"));
 
         categorySelector.getSelectionModel()
                 .selectedItemProperty()
@@ -302,7 +316,7 @@ public class DesktopViewController {
 
     private void closeWindow(){
         try{
-            Main.SaveData();
+            App.SaveData();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -316,23 +330,25 @@ public class DesktopViewController {
         rightBox.setVisible(false);
     }
 
-    public void selectSeries(Series s){
+    public void selectSeries(Series s) {
         if (selectedSeries != s){
             selectedSeries = s;
+            selectSeriesButton(seriesButtons.get(getSeriesIndex(s)));
             centralVBox.setVisible(true);
+
 
             if (!s.getSeasons().isEmpty()){
                 seasonList.clear();
                 for (int i : s.getSeasons()){
-                    Season season = Main.findSeason(i);
+                    Season season = App.findSeason(i);
                     if (season != null)
                         seasonList.add(season);
                 }
 
                 seasonList.sort(new Utils.SeasonComparator());
                 showSeasons();
-
                 selectedSeason = seasonList.get(0);
+                selectSeasonButton(seasonsButtons.get(0));
 
                 fillSeasonInfo();
 
@@ -359,8 +375,8 @@ public class DesktopViewController {
     }
 
     private void fillSeasonInfo() {
-        globalBackground.setImage(new Image(selectedSeason.getBackgroundSrc()));
-        ImageView img = new ImageView(new Image(selectedSeason.getBackgroundSrc()));
+        globalBackground.setImage(new Image("file:" + selectedSeason.getBackgroundSrc()));
+        ImageView img = new ImageView(new Image("file:" + selectedSeason.getBackgroundSrc()));
         img.setPreserveRatio(true);
         seasonBackground.setImageView(img);
         fadeInTransition(globalBackground);
@@ -368,8 +384,7 @@ public class DesktopViewController {
         if (selectedSeason.getLogoSrc().equals("NO_LOGO")){
             seasonCoverLogoBox.getChildren().remove(1);
             Label seasonLogoText = new Label(selectedSeries.getName());
-            seasonLogoText.setFont(new Font("Arial", 42));
-            seasonLogoText.setStyle("-fx-font-weight: bold");
+            seasonLogoText.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 42));
             seasonLogoText.setTextFill(Color.color(1, 1, 1));
             seasonLogoText.setEffect(new DropShadow());
             seasonLogoText.setPadding(new Insets(0, 0, 0, 15));
@@ -381,22 +396,29 @@ public class DesktopViewController {
             seasonCoverLogoBox.getChildren().add(seasonLogo);
         }
 
-        seriesCover.setImage(new Image(selectedSeries.getCoverSrc()));
+        try{
+            File file = new File(selectedSeries.getCoverSrc());
+            seriesCover.setImage(new Image(file.toURI().toURL().toExternalForm()));
+        } catch (MalformedURLException e) {
+            System.err.println("Series cover not found");
+        }
+
         seasonName.setText(selectedSeason.getName());
     }
 
     public void updateDiscView(){
         if (selectedSeason != null){
-            selectedSeason = Main.findSeason(selectedSeason.getId());
+            selectedSeason = App.findSeason(selectedSeason.getId());
             selectSeason(selectedSeason);
         }else{
-            selectedSeries = Main.findSeries(selectedSeries);
+            selectedSeries = App.findSeries(selectedSeries);
             selectSeries(selectedSeries);
         }
     }
 
     private void showSeasons() {
         seasonContainer.getChildren().clear();
+        seasonsButtons.clear();
 
         for (Season s : seasonList){
             Button seasonButton = new Button();
@@ -405,35 +427,42 @@ public class DesktopViewController {
             seasonButton.getStyleClass().add("desktopTextButton");
             seasonButton.setMaxWidth(Integer.MAX_VALUE);
             seasonButton.setAlignment(Pos.BASELINE_LEFT);
+            seasonButton.setWrapText(true);
+
+            seasonButton.setPadding(new Insets(5, 5, 5, 5));
 
             seasonButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                selectSeasonButton(seasonButton);
                 if (event.getButton() == MouseButton.SECONDARY) {
                     openSeasonMenu(event);
-                }else{
-                    selectSeasonButton(event);
                 }
             });
 
             seasonContainer.getChildren().add(seasonButton);
+            seasonsButtons.add(seasonButton);
         }
     }
 
-    private void selectSeasonButton(MouseEvent event) {
-        if (event.getButton() == MouseButton.SECONDARY){
-            openSeasonMenu(event);
-        }else{
-            String seasonName = ((Button)event.getSource()).getText();
-            Season season = null;
+    private void selectSeasonButton(Button btn) {
+        //Clear Selected Button
+        for (Button b : seasonsButtons){
+            b.getStyleClass().clear();
+            b.getStyleClass().add("desktopTextButton");
+        }
+        //Select current button
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("desktopButtonActive");
+        String seasonName = btn.getText();
+        Season season = null;
 
-            for (Season s : seasonList){
-                if (s.getName().equals(seasonName)){
-                    season = s;
-                }
+        for (Season s : seasonList){
+            if (s.getName().equals(seasonName)){
+                season = s;
             }
+        }
 
-            if (season != null){
-                selectSeason(season);
-            }
+        if (season != null){
+            selectSeason(season);
         }
     }
 
@@ -457,7 +486,7 @@ public class DesktopViewController {
         discContainer.getChildren().clear();
         discButtons.clear();
         for (int i : s.getDiscs()){
-            Disc d = Main.findDisc(i);
+            Disc d = App.findDisc(i);
             if (d != null){
                 discList.add(d);
             }
@@ -466,27 +495,16 @@ public class DesktopViewController {
         if (!discList.isEmpty()){
             discList.sort(new Utils.DiscComparator());
             for (Disc d : discList){
-                /*try {
-                    FXMLLoader fxmlLoader = new FXMLLoader();
-                    fxmlLoader.setLocation(getClass().getResource("discCard.fxml"));
-                    VBox cardBox = fxmlLoader.load();
-                    DiscController discController = fxmlLoader.getController();
-                    discController.setDesktopParent(this);
-                    discController.setData(d);
-
-                    cardBox.setPadding(new Insets(10, 10, 10, 10));
-
-                    discContainer.getChildren().add(cardBox);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }*/
                 Button btn = new Button();
-                btn.setText("Episode " + d.getEpisodeNumber() + ": " + d.getName());
-                btn.setBackground(null);
-                btn.getStyleClass().add("desktopTextButton");
+                btn.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber() + "\n" + d.getName());
+                btn.getStyleClass().clear();
+                btn.getStyleClass().add("discButton");
                 btn.setMaxWidth(Integer.MAX_VALUE);
                 btn.setAlignment(Pos.BASELINE_LEFT);
                 btn.setWrapText(true);
+
+                HBox.setMargin(btn, new Insets(2, 2, 2, 2));
+                btn.setPadding(new Insets(2, 2, 2, 5));
 
                 discButtons.add(btn);
 
@@ -518,24 +536,27 @@ public class DesktopViewController {
         return null;
     }
 
-    @FXML
-    void selectSeriesButton(MouseEvent event){
-        if (event.getButton() == MouseButton.SECONDARY){
-            openSeriesMenu(event);
-        }else {
-            String seriesName = ((Button)event.getSource()).getText();
+    void selectSeriesButton(Button btn){
+        //Clear Selected Button
+        for (Button b : seriesButtons){
+            b.getStyleClass().clear();
+            b.getStyleClass().add("desktopTextButton");
+        }
+        //Select current button
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("desktopButtonActive");
+        String seriesName = btn.getText();
 
-            Series series = null;
+        Series series = null;
 
-            for (Series s : seriesList){
-                if (s.getName().equals(seriesName)){
-                    series = s;
-                }
+        for (Series s : seriesList){
+            if (s.getName().equals(seriesName)){
+                series = s;
             }
+        }
 
-            if (series != null){
-                selectSeries(series);
-            }
+        if (series != null){
+            selectSeries(series);
         }
     }
 
@@ -566,7 +587,7 @@ public class DesktopViewController {
         if (currentCategory.equals("NO CATEGORY"))
             return;
 
-        Category cat = Main.findCategory(currentCategory);
+        Category cat = App.findCategory(currentCategory);
         if (cat != null){
             showBackgroundShadow();
             try{
@@ -591,7 +612,7 @@ public class DesktopViewController {
 
     @FXML
     void removeCategory(MouseEvent event) {
-        Main.removeCategory(currentCategory);
+        App.removeCategory(currentCategory);
         updateCategories();
     }
 
@@ -605,9 +626,10 @@ public class DesktopViewController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
-            stage.setTitle(Main.textBundle.getString("fullscreenMode"));
+            stage.setTitle(App.textBundle.getString("fullscreenMode"));
             Scene scene = new Scene(root);
             scene.setFill(Color.BLACK);
+            //scene.setCursor(Cursor.NONE);
             stage.setScene(scene);
             stage.setMaximized(true);
             stage.initStyle(StageStyle.UNDECORATED);
@@ -658,9 +680,16 @@ public class DesktopViewController {
     }
 
     public void controlSelectDisc(Disc d, Button btn){
-        selectedDiscs.add(d);
-        btn.getStyleClass().clear();
-        btn.getStyleClass().add("discSelected");
+        int selectedIndex = selectedDiscs.indexOf(d);
+        if (selectedIndex == -1){
+            selectedDiscs.add(d);
+            btn.getStyleClass().clear();
+            btn.getStyleClass().add("discSelected");
+        }else{
+            selectedDiscs.remove(selectedIndex);
+            btn.getStyleClass().clear();
+            btn.getStyleClass().add("discButton");
+        }
     }
 
     public void shiftSelectDisc(Disc d, Button btn){
@@ -671,11 +700,11 @@ public class DesktopViewController {
             selectedDiscs.clear();
             if (index > selectedIndex){
                 for (int i = selectedIndex; i <= index; i++){
-                    controlSelectDisc(discList.get(i), btn);
+                    controlSelectDisc(discList.get(i), discButtons.get(i));
                 }
             }else{
                 for (int i = index; i <= selectedIndex; i++){
-                    controlSelectDisc(discList.get(i), btn);
+                    controlSelectDisc(discList.get(i), discButtons.get(i));
                 }
             }
         }else{
@@ -689,6 +718,14 @@ public class DesktopViewController {
                 return i;
         }
         return -1;
+    }
+
+    private int getSeriesIndex(Series s){
+        for (int i = 0; i < seriesList.size(); i++){
+            if (seriesList.get(i).getId() == s.getId())
+                return i;
+        }
+        return 0;
     }
 
     @FXML
@@ -722,7 +759,7 @@ public class DesktopViewController {
     private void clearDiscSelection(){
         for (Node n : discContainer.getChildren()){
             n.getStyleClass().clear();
-            n.getStyleClass().add("desktopTextButton");
+            n.getStyleClass().add("discButton");
         }
     }
 
@@ -792,7 +829,7 @@ public class DesktopViewController {
             addColController.setParentController(this);
             addColController.initializeCategories();
             Stage stage = new Stage();
-            stage.setTitle(Main.textBundle.getString("collectionWindowTitle"));
+            stage.setTitle(App.textBundle.getString("collectionWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setAlwaysOnTop(true);
             Scene scene = new Scene(root1);
@@ -821,7 +858,7 @@ public class DesktopViewController {
                 addColController.setParentController(this);
                 addColController.setSeries(selectedSeries);
                 Stage stage = new Stage();
-                stage.setTitle(Main.textBundle.getString("collectionWindowTitleEdit"));
+                stage.setTitle(App.textBundle.getString("collectionWindowTitleEdit"));
                 stage.initStyle(StageStyle.UNDECORATED);
                 stage.setAlwaysOnTop(true);
                 Scene scene = new Scene(root1);
@@ -845,7 +882,7 @@ public class DesktopViewController {
             addSeasonController.setParentController(this);
             addSeasonController.setCollection(selectedSeries);
             Stage stage = new Stage();
-            stage.setTitle(Main.textBundle.getString("seasonWindowTitle"));
+            stage.setTitle(App.textBundle.getString("seasonWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setAlwaysOnTop(true);
             Scene scene = new Scene(root1);
@@ -868,7 +905,7 @@ public class DesktopViewController {
             addDiscController.setParentController(this);
             addDiscController.InitValues();
             Stage stage = new Stage();
-            stage.setTitle(Main.textBundle.getString("discWindowTitle"));
+            stage.setTitle(App.textBundle.getString("episodeWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(root1));
@@ -893,7 +930,7 @@ public class DesktopViewController {
             addSeasonController.setParentController(this);
             addSeasonController.setSeason(selectedSeason);
             Stage stage = new Stage();
-            stage.setTitle(Main.textBundle.getString("seasonWindowTitle"));
+            stage.setTitle(App.textBundle.getString("seasonWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setAlwaysOnTop(true);
             Scene scene = new Scene(root1);
@@ -910,7 +947,7 @@ public class DesktopViewController {
     @FXML
     void removeSeason(MouseEvent event){
         seasonList.remove(selectedSeason);
-        Main.removeSeason(selectedSeason.getId());
+        App.removeSeason(selectedSeason.getId());
 
         selectedSeason = null;
         selectSeries(selectedSeries);
@@ -927,7 +964,7 @@ public class DesktopViewController {
             addDiscController.setParentController(this);
             addDiscController.setDisc(discToEdit);
             Stage stage = new Stage();
-            stage.setTitle(Main.textBundle.getString("discWindowTitleEdit"));
+            stage.setTitle(App.textBundle.getString("episodeWindowTitleEdit"));
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(root1));
@@ -943,12 +980,12 @@ public class DesktopViewController {
         if (selectedDiscs.size() > 1){
             for (Disc d : selectedDiscs){
                 discList.remove(d);
-                Main.removeDisc(d);
+                App.removeDisc(d);
                 selectedSeason.removeDisc(d);
             }
         }else if (discToEdit != null){
             discList.remove(discToEdit);
-            Main.removeDisc(discToEdit);
+            App.removeDisc(discToEdit);
             selectedSeason.removeDisc(discToEdit);
         }
 
@@ -961,9 +998,9 @@ public class DesktopViewController {
     void removeCollection(MouseEvent event) throws IOException {
         if (selectedSeries != null){
             seriesList.remove(selectedSeries);
-            Main.removeCollection(selectedSeries);
+            App.removeCollection(selectedSeries);
             selectedSeries = null;
-            seriesList = Main.getCollection();
+            seriesList = App.getCollection();
             showSeries();
         }
         hideMenu();

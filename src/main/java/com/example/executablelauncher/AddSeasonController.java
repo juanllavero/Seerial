@@ -2,29 +2,20 @@ package com.example.executablelauncher;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.effect.BoxBlur;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.geometry.Insets;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
@@ -35,7 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-import static com.example.executablelauncher.Main.*;
+import static com.example.executablelauncher.App.*;
 
 public class AddSeasonController {
     @FXML
@@ -152,14 +143,14 @@ public class AddSeasonController {
             musicField.setText(s.getMusicSrc());
         else
             musicField.setText("");
-        collection = Main.findSeriesByName(s.getCollectionName());
+        collection = App.findSeriesByName(s.getCollectionName());
 
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));
 
         initValues();
-        title.setText(Main.textBundle.getString("seasonWindowTitleEdit"));
-        addButton.setText(Main.buttonsBundle.getString("saveButton"));
+        title.setText(App.textBundle.getString("seasonWindowTitleEdit"));
+        addButton.setText(App.buttonsBundle.getString("saveButton"));
     }
 
     public void setCollection(Series s){
@@ -168,27 +159,27 @@ public class AddSeasonController {
     }
 
     private void initValues(){
-        title.setText(Main.textBundle.getString("seasonWindowTitle"));
-        nameText.setText(Main.textBundle.getString("name"));
-        logoText.setText(Main.textBundle.getString("logo"));
-        yearText.setText(Main.textBundle.getString("year"));
-        sortingText.setText(Main.textBundle.getString("sortingOrder"));
-        backgroundText.setText(Main.textBundle.getString("backgroundImage"));
-        videText.setText(Main.textBundle.getString("backgroundVideo"));
-        musicText.setText(Main.textBundle.getString("backgroundMusic"));
-        addButton.setText(Main.buttonsBundle.getString("addButton"));
-        cancelButton.setText(Main.buttonsBundle.getString("cancelButton"));
+        title.setText(App.textBundle.getString("seasonWindowTitle"));
+        nameText.setText(App.textBundle.getString("name"));
+        logoText.setText(App.textBundle.getString("logo"));
+        yearText.setText(App.textBundle.getString("year"));
+        sortingText.setText(App.textBundle.getString("sortingOrder"));
+        backgroundText.setText(App.textBundle.getString("backgroundImage"));
+        videText.setText(App.textBundle.getString("backgroundVideo"));
+        musicText.setText(App.textBundle.getString("backgroundMusic"));
+        addButton.setText(App.buttonsBundle.getString("addButton"));
+        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
     }
 
     @FXML
     void loadBackground(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(Main.textBundle.getString("selectImage"));
+        fileChooser.setTitle(App.textBundle.getString("selectImage"));
         if (lastDirectory != null && Files.exists(Path.of(lastDirectory)))
             fileChooser.setInitialDirectory(new File(lastDirectory));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
         seletedBackground = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         backgroundField.setText(seletedBackground.getPath());
         lastDirectory = seletedBackground.getPath();
@@ -197,12 +188,12 @@ public class AddSeasonController {
     @FXML
     void loadLogo(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(Main.textBundle.getString("selectImage"));
+        fileChooser.setTitle(App.textBundle.getString("selectImage"));
         if (lastDirectory != null && Files.exists(Path.of(lastDirectory)))
             fileChooser.setInitialDirectory(new File(lastDirectory));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
         selectedLogo = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         logoField.setText(selectedLogo.getPath());
         lastDirectory = selectedLogo.getPath();
@@ -211,12 +202,12 @@ public class AddSeasonController {
     @FXML
     void loadVideo(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(Main.textBundle.getString("selectVideo"));
+        fileChooser.setTitle(App.textBundle.getString("selectVideo"));
         if (lastVideoDirectory != null && Files.exists(Path.of(lastVideoDirectory)))
             fileChooser.setInitialDirectory(new File(lastVideoDirectory));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allVideos"), "*.mp4"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allVideos"), "*.mp4"));
         selectedVideo = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         videoField.setText(selectedVideo.getPath());
         lastVideoDirectory = selectedVideo.getPath();
@@ -225,12 +216,12 @@ public class AddSeasonController {
     @FXML
     void loadMusic(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(Main.textBundle.getString("selectSong"));
+        fileChooser.setTitle(App.textBundle.getString("selectSong"));
         if (lastMusicDirectory != null && Files.exists(Path.of(lastMusicDirectory)))
             fileChooser.setInitialDirectory(new File(lastMusicDirectory));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allAudios"), "*.mp3", "*.wav", "*.flac", "*.aac"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allAudios"), "*.mp3", "*.wav", "*.flac", "*.aac"));
         selectedMusic = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
         musicField.setText(selectedMusic.getPath());
         lastMusicDirectory = selectedMusic.getPath();
@@ -250,7 +241,7 @@ public class AddSeasonController {
         //Process name
         if (nameField.getText().isEmpty()){
             save = false;
-            errorName.setText(Main.textBundle.getString("emptyField"));
+            errorName.setText(App.textBundle.getString("emptyField"));
         }else{
             errorName.setText("");
         }
@@ -258,10 +249,10 @@ public class AddSeasonController {
         //Process year
         if (yearField.getText().isEmpty()) {
             save = false;
-            errorYear.setText(Main.textBundle.getString("emptyField"));
+            errorYear.setText(App.textBundle.getString("emptyField"));
         }else if (!yearField.getText().matches("\\d{3,}")){
             save = false;
-            errorYear.setText(Main.textBundle.getString("numberError"));
+            errorYear.setText(App.textBundle.getString("numberError"));
         }else{
             errorYear.setText("");
         }
@@ -271,14 +262,14 @@ public class AddSeasonController {
             File logo = new File(logoField.getText());
             if (!logo.exists() && !logoField.getText().isEmpty()) {
                 save = false;
-                errorLogo.setText(Main.textBundle.getString("imageNotFound"));
+                errorLogo.setText(App.textBundle.getString("imageNotFound"));
             }else if (logo.exists()){
                 String imageExtension = logoField.getText().substring(logoField.getText().length() - 4);
                 imageExtension = imageExtension.toLowerCase();
 
                 if (!imageExtension.equals(".jpg") && !imageExtension.equals(".png") && !imageExtension.equals("jpeg")){
                     save = false;
-                    errorLogo.setText(Main.textBundle.getString("imageErrorFormatFull"));
+                    errorLogo.setText(App.textBundle.getString("imageErrorFormatFull"));
                 }else{
                     errorLogo.setText("");
                 }
@@ -290,14 +281,14 @@ public class AddSeasonController {
             File background = new File(backgroundField.getText());
             if (!background.exists()) {
                 save = false;
-                errorBackground.setText(Main.textBundle.getString("imageNotFound"));
+                errorBackground.setText(App.textBundle.getString("imageNotFound"));
             }else{
                 String imageExtension = backgroundField.getText().substring(backgroundField.getText().length() - 4);
                 imageExtension = imageExtension.toLowerCase();
 
                 if (!imageExtension.equals(".jpg") && !imageExtension.equals(".png") && !imageExtension.equals("jpeg")){
                     save = false;
-                    errorBackground.setText(Main.textBundle.getString("imageErrorFormatFull"));
+                    errorBackground.setText(App.textBundle.getString("imageErrorFormatFull"));
                 }else{
                     errorBackground.setText("");
                 }
@@ -309,14 +300,14 @@ public class AddSeasonController {
             File video = new File(videoField.getText());
             if (!video.exists() && !videoField.getText().isEmpty()) {
                 save = false;
-                errorVideo.setText(Main.textBundle.getString("videoNotFound"));
+                errorVideo.setText(App.textBundle.getString("videoNotFound"));
             }else if (video.exists()){
                 String videoExtension = videoField.getText().substring(videoField.getText().length() - 3);
                 videoExtension = videoExtension.toLowerCase();
 
                 if (!videoExtension.equals("mkv") && !videoExtension.equals("mp4")){
                     save = false;
-                    errorVideo.setText(Main.textBundle.getString("videoErrorFormat"));
+                    errorVideo.setText(App.textBundle.getString("videoErrorFormat"));
                 }else{
                     errorVideo.setText("");
                 }
@@ -328,14 +319,14 @@ public class AddSeasonController {
             File music = new File(musicField.getText());
             if (!music.exists() && !musicField.getText().isEmpty()) {
                 save = false;
-                errorMusic.setText(Main.textBundle.getString("audioNotFound"));
+                errorMusic.setText(App.textBundle.getString("audioNotFound"));
             }else if (music.exists()){
                 String audioExtension = musicField.getText().substring(musicField.getText().length() - 4);
                 audioExtension = audioExtension.toLowerCase();
 
                 if (!audioExtension.equals(".mp3") && !audioExtension.equals(".wav") && !audioExtension.equals("flac") && !audioExtension.equals(".aac")){
                     save = false;
-                    errorMusic.setText(Main.textBundle.getString("audioErrorFormat"));
+                    errorMusic.setText(App.textBundle.getString("audioErrorFormat"));
                 }else{
                     errorMusic.setText("");
                 }
@@ -344,7 +335,7 @@ public class AddSeasonController {
 
         if (!orderField.getText().isEmpty() && orderField.getText().matches("\\d{3,}")){
             save = false;
-            orderError.setText(Main.textBundle.getString("sortingError"));
+            orderError.setText(App.textBundle.getString("sortingError"));
         }else{
             orderError.setText("");
         }
@@ -411,7 +402,7 @@ public class AddSeasonController {
             }
 
             if (seasonToEdit == null)
-                Main.addSeason(season, season.getCollectionName());
+                App.addSeason(season, season.getCollectionName());
 
             parentController.updateDiscView();
             parentController.hideBackgroundShadow();
@@ -432,7 +423,7 @@ public class AddSeasonController {
             extension = seletedBackground.getName().substring(i+1);
         }
 
-        File newBackground = new File("src/main/resources/img/backgrounds/"+ collection.getName() + "_" + seasonNumber + "_sb.png");
+        File newBackground = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonNumber + "_sb.png");
 
         try{
             Files.copy(seletedBackground.toPath(), newBackground.toPath());
@@ -440,7 +431,7 @@ public class AddSeasonController {
             System.err.println("Background not copied");
         }
 
-        s.setBackgroundSrc(newBackground.getAbsolutePath());
+        s.setBackgroundSrc("src/main/resources/img/backgrounds/" + newBackground.getName());
 
         ImageView backgroundBlur = new ImageView(new Image(newBackground.getAbsolutePath(), Screen.getPrimary().getBounds().getWidth()
                 , Screen.getPrimary().getBounds().getHeight(), false, true));
@@ -478,7 +469,7 @@ public class AddSeasonController {
             throw new RuntimeException(e);
         }
 
-        s.setFullScreenBlurImageSrc(backgroundFullscreenBlur.getAbsolutePath());
+        s.setFullScreenBlurImageSrc("src/main/resources/img/backgrounds/" + backgroundFullscreenBlur.getName());
     }
 
     private void saveLogo(Season s, int seasonNumber){
@@ -486,14 +477,14 @@ public class AddSeasonController {
             if (selectedLogo == null)
                 selectedLogo = new File(logoField.getText());
 
-            File newLogo = new File("src/main/resources/img/logos/"+ collection.getName() + "_" + seasonNumber + "_sl.png");
+            File newLogo = new File("src/main/resources/img/logos/" + collection.getName() + "_" + seasonNumber + "_sl.png");
 
             try{
                 Files.copy(selectedLogo.toPath(), newLogo.toPath());
             }catch (IOException e){
                 System.err.println("Logo not copied");
             }
-            s.setLogoSrc(newLogo.getAbsolutePath());
+            s.setLogoSrc("src/main/resources/img/logos/" + newLogo.getName());
         }else{
             s.setLogoSrc("NO_LOGO");
         }
@@ -516,7 +507,7 @@ public class AddSeasonController {
             }catch (IOException e){
                 System.err.println("Video not copied");
             }
-            s.setVideoSrc(newVideo.getAbsolutePath());
+            s.setVideoSrc("src/main/resources/video/" + newVideo.getName());
         }else{
             s.setVideoSrc("NO_VIDEO");
         }
@@ -540,7 +531,7 @@ public class AddSeasonController {
                 System.err.println("Music not copied");
             }
 
-            s.setMusicSrc(newMusic.getAbsolutePath());
+            s.setMusicSrc("src/main/resources/music/" + newMusic.getName());
         }else{
             s.setMusicSrc("NO_MUSIC");
         }

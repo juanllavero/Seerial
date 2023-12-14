@@ -49,14 +49,14 @@ public class AddDiscController {
     private File selectedFolder = null;
 
     public void InitValues(){
-        typeField.getItems().addAll(Arrays.asList(Main.textBundle.getString("file"), Main.textBundle.getString("folder")));
-        typeField.setValue(Main.textBundle.getString("file"));
-        title.setText(Main.textBundle.getString("episodeWindowTitle"));
-        addButton.setText(Main.buttonsBundle.getString("addButton"));
-        cancelButton.setText(Main.buttonsBundle.getString("cancelButton"));
-        type.setText(Main.textBundle.getString("type"));
-        source.setText(Main.textBundle.getString("source"));
-        loadButton.setText(Main.buttonsBundle.getString("loadButton"));
+        typeField.getItems().addAll(Arrays.asList(App.textBundle.getString("file"), App.textBundle.getString("folder")));
+        typeField.setValue(App.textBundle.getString("file"));
+        title.setText(App.textBundle.getString("episodeWindowTitle"));
+        addButton.setText(App.buttonsBundle.getString("addButton"));
+        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
+        type.setText(App.textBundle.getString("type"));
+        source.setText(App.textBundle.getString("source"));
+        loadButton.setText(App.buttonsBundle.getString("loadButton"));
     }
 
     public void setDisc(Disc d){
@@ -64,8 +64,8 @@ public class AddDiscController {
         executableField.setText(d.getExecutableSrc());
         typeField.setValue(d.getType());
         InitValues();
-        title.setText(Main.textBundle.getString("episodeWindowTitleEdit"));
-        addButton.setText(Main.buttonsBundle.getString("saveButton"));
+        title.setText(App.textBundle.getString("episodeWindowTitleEdit"));
+        addButton.setText(App.buttonsBundle.getString("saveButton"));
     }
 
     public void setParentController(DesktopViewController controller){
@@ -74,21 +74,21 @@ public class AddDiscController {
 
     @FXML
     void loadExe(MouseEvent event) {
-        if (typeField.getValue().equals(Main.textBundle.getString("folder"))){
+        if (typeField.getValue().equals(App.textBundle.getString("folder"))){
             DirectoryChooser directoryChooser = new DirectoryChooser();
             selectedFolder = directoryChooser.showDialog((Stage)((Button) event.getSource()).getScene().getWindow());
             executableField.setText(selectedFolder.getAbsolutePath());
         }else{
             FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle(Main.textBundle.getString("selectFile"));
+            fileChooser.setTitle(App.textBundle.getString("selectFile"));
             fileChooser.setInitialDirectory(new File("C:\\"));
-            fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(Main.textBundle.getString("allFiles"), "*.mkv", "*.mp4", "*.iso", "*.ISO", "*.m2ts", "*.exe", "*.bat"));
+            fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allFiles"), "*.mkv", "*.mp4", "*.iso", "*.ISO", "*.m2ts", "*.exe", "*.bat"));
             if (discToEdit != null) {
                 selectedFolder = fileChooser.showOpenDialog((Stage) ((Button) event.getSource()).getScene().getWindow());
                 executableField.setText(selectedFolder.getAbsolutePath());
             }else {
                 selectedFiles = fileChooser.showOpenMultipleDialog((Stage) ((Button) event.getSource()).getScene().getWindow());
-                executableField.setText(Main.textBundle.getString("multipleSelection"));
+                executableField.setText(App.textBundle.getString("multipleSelection"));
             }
         }
     }
@@ -106,17 +106,17 @@ public class AddDiscController {
 
         //Get file/files
         File exe = new File(executableField.getText());
-        if (!executableField.getText().equals(Main.textBundle.getString("multipleSelection")) && !exe.exists()){
+        if (!executableField.getText().equals(App.textBundle.getString("multipleSelection")) && !exe.exists()){
             save = false;
-            errorLoad.setText(Main.textBundle.getString("fileNotFound"));
-        }else if (!executableField.getText().equals(Main.textBundle.getString("multipleSelection")) && !selectedFolder.exists()){
+            errorLoad.setText(App.textBundle.getString("fileNotFound"));
+        }else if (!executableField.getText().equals(App.textBundle.getString("multipleSelection")) && !selectedFolder.exists()){
             String fileExtension = executableField.getText().substring(executableField.getText().length() - 4);
             fileExtension = fileExtension.toLowerCase();
 
             if (!fileExtension.equals(".mkv") && !fileExtension.equals(".mp4") && !fileExtension.equals("m2ts")
                     && !fileExtension.equals(".iso") && !fileExtension.equals(".exe") && !fileExtension.equals(".bat")){
                 save = false;
-                errorLoad.setText(Main.textBundle.getString("extensionNotAllowed"));
+                errorLoad.setText(App.textBundle.getString("extensionNotAllowed"));
             }else{
                 errorLoad.setText("");
             }
@@ -129,7 +129,7 @@ public class AddDiscController {
 
             disc = Objects.requireNonNullElseGet(discToEdit, Disc::new);
 
-            if (executableField.getText().equals(Main.textBundle.getString("multipleSelection")))
+            if (executableField.getText().equals(App.textBundle.getString("multipleSelection")))
                 for (File file : selectedFiles)
                     setDiscInfo(disc, file, false);
             else
@@ -163,19 +163,19 @@ public class AddDiscController {
                 String episodeNumber = result[1];
 
                 newDisc.setName(episodeName);
-                newDisc.setEpisodeNumber(Main.textBundle.getString("episode") + " " + episodeNumber);
+                newDisc.setEpisodeNumber(App.textBundle.getString("episode") + " " + episodeNumber);
             }else{
                 //FIX THIS
                 newDisc.setName(file.getName().substring(0, file.getName().length() - 4));
             }
 
         }else{
-            newDisc.setName(Main.textBundle.getString("disc") + " " + Objects.requireNonNull(Main.findSeason(newDisc.getSeasonID())).getDiscs().size() + 1);
+            newDisc.setName(App.textBundle.getString("disc") + " " + Objects.requireNonNull(App.findSeason(newDisc.getSeasonID())).getDiscs().size() + 1);
         }
 
         newDisc.setType(typeField.getValue());
         newDisc.setExecutableSrc(file.getAbsolutePath());
 
-        Main.addDisc(newDisc);
+        App.addDisc(newDisc);
     }
 }

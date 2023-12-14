@@ -18,9 +18,35 @@
     -fx-background-color: rgba(0, 0, 0, 0.47);
 }
 
+.choice-box .context-menu { -fx-background-color: black; }
+.choice-box .menu-item { -fx-background-color: transparent; }
+.choice-box .menu-item:focused { -fx-background-color: grey; }
+.choice-box .menu-item > .label { -fx-text-fill: white; }
+.choice-box .menu-item:focused > .label { -fx-text-fill: black; }
+.choice-box {
+    -fx-background-color: black;
+    -fx-mark-color: white;
+}
+.choice-box > .label { -fx-text-fill: white; }
+
+
 .discSelected{
-    -fx-background-color: #525252;
+    -fx-background-color: rgba(0, 0, 0, 0.37);
     -fx-background-radius: 5px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 22px;
+}
+
+.discButton{
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 22px;
+}
+
+.discButton:hover{
+    -fx-background-color: transparent;
+    -fx-text-fill: #888888;
+    -fx-font-size: 22px;
 }
 
 .desktopMenuButtons{
@@ -35,17 +61,19 @@
 .desktopTextButton{
     -fx-background-color: transparent;
     -fx-text-fill: white;
+    -fx-font-size: 15px;
 }
 
 .desktopTextButton:hover{
-    -fx-background-radius: 5px;
-    -fx-background-color: #252525;
+    -fx-background-color: rgba(147, 147, 147, 0.6);
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
 }
 
 .desktopButtonActive{
-    -fx-background-radius: 5px;
-    -fx-background-color: #252525;
+    -fx-background-color: rgba(37, 37, 37, 0.59);
     -fx-text-fill: white;
+    -fx-font-size: 15px;
 }
 
 .roundButton:hover{
@@ -146,18 +174,18 @@
 }
 
 .desktopButton{
-    -fx-background-color: #3f3f3f;
+    -fx-background-color: #0e0e0e;
     -fx-background-radius: 4 3 2;
 }
 
 .desktopButton:hover{
     -fx-background-color: #5b5b5b;
 }
-
-.desktopButton:focused{
+/*
+.desktopButton{
     -fx-background-color: #5b5b5b;
 }
-
+*/
 .borderLines{
     -fx-border-color: #A9A9A9FF;
     -fx-border-width: 0 0 0 0.5;

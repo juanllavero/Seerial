@@ -32,9 +32,9 @@ public class SeasonMenuController {
         mainBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight());
         mainBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth());
 
-        editButton.setText(Main.buttonsBundle.getString("editButton"));
-        removeButton.setText(Main.buttonsBundle.getString("removeButton"));
-        cancelButton.setText(Main.buttonsBundle.getString("cancelButton"));
+        editButton.setText(App.buttonsBundle.getString("editButton"));
+        removeButton.setText(App.buttonsBundle.getString("removeButton"));
+        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
     }
 
     public void setLabel(String label){

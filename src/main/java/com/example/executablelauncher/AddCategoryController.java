@@ -8,8 +8,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
-import java.util.ResourceBundle;
-
 public class AddCategoryController {
     @FXML
     private Button cancelButton;
@@ -44,45 +42,45 @@ public class AddCategoryController {
     }
 
     public void setValues(String catName, boolean showFS){
-        title.setText(Main.textBundle.getString("categoryWindowTitleEdit"));
+        title.setText(App.textBundle.getString("categoryWindowTitleEdit"));
         categoryField.setText(catName);
         showOnFullscreen.setSelected(showFS);
         toEdit = true;
         this.catName = catName;
 
-        saveButton.setText(Main.buttonsBundle.getString("saveButton"));
-        cancelButton.setText(Main.buttonsBundle.getString("cancelButton"));
+        saveButton.setText(App.buttonsBundle.getString("saveButton"));
+        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
     }
 
     public void initValues(){
-        title.setText(Main.textBundle.getString("categoryWindowTitle"));
+        title.setText(App.textBundle.getString("categoryWindowTitle"));
         showOnFullscreen.setSelected(false);
         toEdit = false;
-        saveButton.setText(Main.buttonsBundle.getString("saveButton"));
-        cancelButton.setText(Main.buttonsBundle.getString("cancelButton"));
-        showOnFullscreen.setText(Main.textBundle.getString("showOnFullscreen"));
+        saveButton.setText(App.buttonsBundle.getString("saveButton"));
+        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
+        showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
     }
 
     @FXML
     void save(MouseEvent event) {
         if (toEdit){
-            if (!catName.equals(categoryField.getText()) && Main.categoryExist(categoryField.getText())) {
-                categoryError.setText(Main.textBundle.getString("categoryExists"));
+            if (!catName.equals(categoryField.getText()) && App.categoryExist(categoryField.getText())) {
+                categoryError.setText(App.textBundle.getString("categoryExists"));
             }else if (categoryField.getText().isEmpty()){
-                categoryError.setText(Main.textBundle.getString("emptyField"));
+                categoryError.setText(App.textBundle.getString("emptyField"));
             }else{
-                Main.editCategory(categoryField.getText(), showOnFullscreen.isSelected());
+                App.editCategory(categoryField.getText(), showOnFullscreen.isSelected());
                 parentController.updateCategories();
                 parentController.hideBackgroundShadow();
                 cancelButton(event);
             }
         }else{
-            if (Main.categoryExist(categoryField.getText())){
-                categoryError.setText(Main.textBundle.getString("categoryExists"));
+            if (App.categoryExist(categoryField.getText())){
+                categoryError.setText(App.textBundle.getString("categoryExists"));
             }else if (categoryField.getText().isEmpty()){
-                categoryError.setText(Main.textBundle.getString("emptyField"));
+                categoryError.setText(App.textBundle.getString("emptyField"));
             }else{
-                Main.addCategory(categoryField.getText(), showOnFullscreen.isSelected());
+                App.addCategory(categoryField.getText(), showOnFullscreen.isSelected());
                 parentController.updateCategories();
                 parentController.hideBackgroundShadow();
                 cancelButton(event);
