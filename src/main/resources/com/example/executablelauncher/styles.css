@@ -1,10 +1,36 @@
+/*
+    Icons used: heroicons made by Tailwind Labs for figma.com
+    url: https://www.figma.com/community/file/958423903283802665
+    Licensed under CC BY 4.0
+ */
+
 .root {
     -fx-background-color: transparent;
+
+    /* Main colors */
+    -fx-main-color: #DB162F;
+    -fx-light-color: #EDF2F4;
+    -fx-dark-color: #0E0F19;
+    -fx-dark-grey-color: #24252E;
+    -fx-grey-color: #383941;
+    -fx-light-grey-color: #4A4B52;
+    -fx-lighter-grey-color: #5A5B62;
 }
 
 .transparent{
     -fx-background-color: transparent;
 }
+
+/*.closeButton{
+    -fx-fill: red;
+    -fx-shape: "m6 18l18 6m6 6l12 12";
+}
+
+.closeButton:hover{
+    -fx-fill: red;
+    -fx-shape: "m6 18l18 6m6 6l12 12";
+}*/
+
 
 .selected{
     -fx-background-color: #b8b8b8;
@@ -29,6 +55,24 @@
 }
 .choice-box > .label { -fx-text-fill: white; }
 
+.downloadedImageButton{
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+.downloadedImageButton:hover{
+    -fx-background-color: black;
+    -fx-text-fill: white;
+    -fx-border-width: 3px;
+    -fx-border-color: -fx-main-color;
+}
+
+.downloadedImageButtonSelected{
+    -fx-background-color: black;
+    -fx-text-fill: white;
+    -fx-border-width: 3px;
+    -fx-border-color: -fx-main-color;
+}
 
 .discSelected{
     -fx-background-color: rgba(0, 0, 0, 0.37);
@@ -81,9 +125,26 @@
     -fx-border-color: rgba(169, 169, 169, 0.07);
 }
 
-.darkerBackground{
-    -fx-background-color: #202124;
+.moreDarkBackground{
+    -fx-background-color: #0E0F19;
 }
+
+.darkerBackground{
+    -fx-background-color: #24252E;
+}
+
+.lessDarkBackground{
+    -fx-background-color: #383941;
+}
+
+.whiteColor{
+    -fx-background-color: #EDF2F4;
+}
+
+.redColor{
+    -fx-background-color: -fx-main-color;
+}
+
 
 .greyGradient{
     -fx-background-color: linear-gradient(to top right, rgba(61,61,66,1) 0%, rgba(50,50,55,1) 19%, rgba(47,47,51,1) 35%, rgba(45,45,48,1) 53%, rgba(41,41,43,1) 70%, rgba(33,33,33,1) 100%);

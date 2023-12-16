@@ -2,18 +2,15 @@ package com.example.executablelauncher;
 
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -23,9 +20,11 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -154,6 +153,15 @@ public class DesktopViewController {
     @FXML
     private Button switchFSButton;
 
+    @FXML
+    private HBox topRightBar;
+
+    @FXML
+    private HBox topLeftBar;
+
+    @FXML
+    private Button closeButton;
+
     private final ImageViewPane seasonBackground = new ImageViewPane();
 
     private List<Series> seriesList = new ArrayList<>();
@@ -167,7 +175,10 @@ public class DesktopViewController {
     private Season selectedSeason = null;
     private List<Disc> selectedDiscs = new ArrayList<>();
     private Disc discToEdit = null;
-    private String currentCategory;
+    private String currentCategory = "";
+
+    private double xOffset = 0;
+    private double yOffset = 0;
 
     public void showSeries(){
         seriesButtons.clear();
@@ -212,9 +223,9 @@ public class DesktopViewController {
         List<String> categories = App.getCategories();
         categorySelector.getItems().clear();
         categorySelector.getItems().addAll(categories);
-        if (!categories.isEmpty()){
-            categorySelector.setValue(categories.get(0));
-            selectCategory(categories.get(0));
+        if (categories.size() > 1){
+            categorySelector.setValue(categories.get(1));
+            selectCategory(categories.get(1));
         }
     }
 
@@ -257,6 +268,9 @@ public class DesktopViewController {
             }
         });
 
+        setDragWindow(topRightBar);
+        setDragWindow(topLeftBar);
+
         menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
             hideMenu();
         });
@@ -296,6 +310,29 @@ public class DesktopViewController {
         globalBackgroundShadow.fitWidthProperty().bind(mainBox.widthProperty());
         globalBackgroundShadow.fitHeightProperty().bind(mainBox.heightProperty());
         globalBackgroundShadow.setPreserveRatio(false);
+
+        backgroundShadow.fitWidthProperty().bind(mainBox.widthProperty());
+        backgroundShadow.fitHeightProperty().bind(mainBox.heightProperty());
+        backgroundShadow.setPreserveRatio(false);
+    }
+
+    private void setDragWindow(HBox topLeftBar) {
+        topLeftBar.setOnMousePressed(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                xOffset = event.getSceneX();
+                yOffset = event.getSceneY();
+            }
+        });
+
+        topLeftBar.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                Stage stage = (Stage) mainBox.getScene().getWindow();
+                stage.setX(event.getScreenX() - xOffset);
+                stage.setY(event.getScreenY() - yOffset);
+            }
+        });
     }
 
     static void scrollModification(ScrollPane scroll) {
@@ -310,8 +347,19 @@ public class DesktopViewController {
     }
 
     @FXML
-    void close(MouseEvent e) throws IOException {
+    void close(MouseEvent event) {
         closeWindow();
+    }
+
+    @FXML
+    void minimizeWindow(MouseEvent event) {
+        ((Stage)((Button) event.getSource()).getScene().getWindow()).setIconified(true);
+    }
+
+    @FXML
+    void maximizeWindow(MouseEvent event) {
+        Stage stage = (Stage)((Button) event.getSource()).getScene().getWindow();
+        stage.setMaximized(!stage.isMaximized());
     }
 
     private void closeWindow(){
@@ -320,14 +368,11 @@ public class DesktopViewController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        Stage stage = (Stage) mainBox.getScene().getWindow();
-        stage.close();
+        System.exit(0);
     }
 
     public void blankSelection(){
         centralVBox.setVisible(false);
-        rightBox.setVisible(false);
     }
 
     public void selectSeries(Series s) {
@@ -353,15 +398,12 @@ public class DesktopViewController {
                 fillSeasonInfo();
 
                 if (!selectedSeason.getDiscs().isEmpty()){
-                    rightBox.setVisible(true);
-
                     showDiscs(selectedSeason);
                 }else{
-                    rightBox.setVisible(false);
+                    discContainer.getChildren().clear();
                 }
             }else{
                 centralVBox.setVisible(false);
-                rightBox.setVisible(false);
             }
         }
     }
@@ -381,7 +423,7 @@ public class DesktopViewController {
         seasonBackground.setImageView(img);
         fadeInTransition(globalBackground);
         fadeInTransition(seasonBackground.getImageView());
-        if (selectedSeason.getLogoSrc().equals("NO_LOGO")){
+        if (selectedSeason.getLogoSrc().equals("")){
             seasonCoverLogoBox.getChildren().remove(1);
             Label seasonLogoText = new Label(selectedSeries.getName());
             seasonLogoText.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 42));
@@ -392,8 +434,15 @@ public class DesktopViewController {
         }else{
             seasonCoverLogoBox.getChildren().remove(1);
             seasonLogo = new ImageView();
-            seasonLogo.setImage(new Image(selectedSeason.getLogoSrc()));
-            seasonCoverLogoBox.getChildren().add(seasonLogo);
+            File file = new File(selectedSeason.getLogoSrc());
+            try{
+                seasonLogo.setImage(new Image(file.toURI().toURL().toExternalForm()));
+                seasonLogo.setFitWidth(353);
+                seasonLogo.setPreserveRatio(true);
+                seasonCoverLogoBox.getChildren().add(seasonLogo);
+            } catch (MalformedURLException e) {
+                System.err.println("DesktopViewController: Logo not loaded");
+            }
         }
 
         try{
@@ -473,10 +522,9 @@ public class DesktopViewController {
             fillSeasonInfo();
 
             if (!selectedSeason.getDiscs().isEmpty()){
-                rightBox.setVisible(true);
                 showDiscs(selectedSeason);
             }else{
-                rightBox.setVisible(false);
+                discContainer.getChildren().clear();
             }
         }
     }
@@ -572,8 +620,8 @@ public class DesktopViewController {
             Stage stage = new Stage();
             stage.setTitle("Add Category");
             stage.initStyle(StageStyle.UNDECORATED);
-            stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(root1));
+            App.setPopUpProperties(stage);
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -599,8 +647,8 @@ public class DesktopViewController {
                 Stage stage = new Stage();
                 stage.setTitle("Edit Category");
                 stage.initStyle(StageStyle.UNDECORATED);
-                stage.setAlwaysOnTop(true);
                 stage.setScene(new Scene(root1));
+                App.setPopUpProperties(stage);
                 stage.show();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -831,10 +879,10 @@ public class DesktopViewController {
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("collectionWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);
-            stage.setAlwaysOnTop(true);
             Scene scene = new Scene(root1);
             scene.setFill(Color.TRANSPARENT);
             stage.setScene(scene);
+            App.setPopUpProperties(stage);
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -860,10 +908,10 @@ public class DesktopViewController {
                 Stage stage = new Stage();
                 stage.setTitle(App.textBundle.getString("collectionWindowTitleEdit"));
                 stage.initStyle(StageStyle.UNDECORATED);
-                stage.setAlwaysOnTop(true);
                 Scene scene = new Scene(root1);
                 scene.setFill(Color.BLACK);
                 stage.setScene(scene);
+                App.setPopUpProperties(stage);
                 stage.show();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -884,10 +932,10 @@ public class DesktopViewController {
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("seasonWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);
-            stage.setAlwaysOnTop(true);
             Scene scene = new Scene(root1);
             scene.setFill(Color.BLACK);
             stage.setScene(scene);
+            App.setPopUpProperties(stage);
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -907,8 +955,8 @@ public class DesktopViewController {
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("episodeWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);
-            stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(root1));
+            App.setPopUpProperties(stage);
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -925,17 +973,17 @@ public class DesktopViewController {
         showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addSeason-view.fxml"));
-            Parent root1 = (Parent) fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
             AddSeasonController addSeasonController = fxmlLoader.getController();
             addSeasonController.setParentController(this);
             addSeasonController.setSeason(selectedSeason);
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("seasonWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);
-            stage.setAlwaysOnTop(true);
             Scene scene = new Scene(root1);
             scene.setFill(Color.BLACK);
             stage.setScene(scene);
+            App.setPopUpProperties(stage);
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -966,8 +1014,8 @@ public class DesktopViewController {
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("episodeWindowTitleEdit"));
             stage.initStyle(StageStyle.UNDECORATED);
-            stage.setAlwaysOnTop(true);
             stage.setScene(new Scene(root1));
+            App.setPopUpProperties(stage);
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -1012,5 +1060,10 @@ public class DesktopViewController {
 
     public void hideBackgroundShadow(){
         backgroundShadow.setVisible(false);
+    }
+
+    public void refreshSeason(Season s){
+        selectedSeason = null;
+        selectSeason(s);
     }
 }

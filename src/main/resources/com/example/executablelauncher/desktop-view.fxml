@@ -46,18 +46,22 @@
          <children>
             <VBox fx:id="leftBox">
                <children>
-                  <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopButton" stylesheets="@styles.css">
-                     <VBox.margin>
-                        <Insets bottom="20.0" left="10.0" top="10.0" />
-                     </VBox.margin>
-                     <graphic>
-                        <ImageView fitHeight="37.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/menu.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
+                  <HBox fx:id="topLeftBar">
+                     <children>
+                        <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopButton" stylesheets="@styles.css">
+                           <graphic>
+                              <ImageView fitHeight="37.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/menu.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                     </children>
+                     <padding>
+                        <Insets left="10.0" top="20.0" />
+                     </padding>
+                  </HBox>
                   <HBox alignment="CENTER">
                      <children>
                         <ChoiceBox fx:id="categorySelector" prefWidth="163.0">
@@ -103,7 +107,7 @@
                         </Button>
                      </children>
                      <VBox.margin>
-                        <Insets bottom="10.0" />
+                        <Insets bottom="10.0" top="20.0" />
                      </VBox.margin>
                   </HBox>
                   <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS">
@@ -197,6 +201,16 @@
             </ScrollPane>
             <VBox fx:id="rightBox" styleClass="borderLines" stylesheets="@styles.css" GridPane.columnIndex="2">
                <children>
+                  <HBox fx:id="topRightBar" alignment="TOP_RIGHT">
+                     <children>
+                        <Button mnemonicParsing="false" onMouseClicked="#minimizeWindow" prefHeight="40.0" prefWidth="50.0" styleClass="minimizeButton" stylesheets="@styles.css" />
+                        <Button mnemonicParsing="false" onMouseClicked="#maximizeWindow" prefHeight="40.0" prefWidth="50.0" styleClass="maximizeButton" stylesheets="@styles.css" />
+                        <Button fx:id="closeButton" mnemonicParsing="false" onMouseClicked="#close" prefHeight="40.0" prefWidth="50.0" styleClass="closeButton" stylesheets="@styles.css" />
+                     </children>
+                     <padding>
+                        <Insets right="30.0" top="20.0" />
+                     </padding>
+                  </HBox>
                   <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" pannable="true" styleClass="transparent" stylesheets="@styles.css">
                      <content>
                         <VBox fx:id="discContainer">
@@ -425,4 +439,7 @@
          </image>
       </ImageView>
    </children>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" />
+   </padding>
 </StackPane>

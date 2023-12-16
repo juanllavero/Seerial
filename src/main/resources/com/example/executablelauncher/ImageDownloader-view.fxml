@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="657.0" prefWidth="971.0" styleClass="lessDarkBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageDownloaderController">
+   <center>
+      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" hmax="0.0" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <content>
+            <FlowPane fx:id="imagesContainer" alignment="TOP_CENTER" hgap="10.0" prefHeight="247.0" prefWidth="598.0" prefWrapLength="300.0" styleClass="darkerBackground" stylesheets="@styles.css" vgap="10.0">
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </FlowPane>
+         </content>
+      </ScrollPane>
+   </center>
+   <bottom>
+      <VBox alignment="CENTER" styleClass="darkerBackground" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="loadMoreButton" mnemonicParsing="false" onAction="#loadMore" text="Load more">
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin></Button>
+            <BorderPane>
+               <left>
+                  <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+                     <children>
+                        <Label fx:id="resolutionText" text="Resolution: " textFill="WHITE" />
+                        <TextField fx:id="widthField" prefHeight="25.0" prefWidth="49.0" text="1920" />
+                        <Label text="X" />
+                        <TextField fx:id="heightField" prefHeight="25.0" prefWidth="49.0" text="1080" />
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </HBox>
+               </left>
+               <center>
+                  <TextField fx:id="searchTextField" BorderPane.alignment="CENTER">
+                     <BorderPane.margin>
+                        <Insets right="5.0" />
+                     </BorderPane.margin></TextField>
+               </center>
+               <right>
+                  <Button fx:id="searchButton" mnemonicParsing="false" onAction="#loadImages" text="Search" BorderPane.alignment="CENTER">
+                     <BorderPane.margin>
+                        <Insets right="5.0" />
+                     </BorderPane.margin></Button>
+               </right>
+            </BorderPane>
+            <BorderPane>
+               <left>
+                  <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+                     <children>
+                        <CheckBox fx:id="transparentCheck" mnemonicParsing="false" text="Transparent" textFill="WHITE" />
+                     </children>
+                  </HBox>
+               </left>
+               <right>
+                  <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+                     <children>
+                        <Button fx:id="selectImageButton" disable="true" mnemonicParsing="false" onAction="#selectImage" text="Select">
+                           <HBox.margin>
+                              <Insets right="10.0" />
+                           </HBox.margin></Button>
+                        <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancel" text="Cancel" />
+                     </children>
+                  </HBox>
+               </right>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <padding>
+                  <Insets left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </BorderPane>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="5.0" right="5.0" top="10.0" />
+         </padding>
+      </VBox>
+   </bottom>
+   <top>
+      <BorderPane stylesheets="@styles.css" BorderPane.alignment="CENTER">
+         <left>
+            <Label fx:id="title" text="Image Downloader" textFill="WHITE" BorderPane.alignment="CENTER">
+               <font>
+                  <Font size="14.0" />
+               </font></Label>
+         </left>
+         <right>
+            <HBox BorderPane.alignment="CENTER" />
+         </right>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </BorderPane>
+   </top>
+</BorderPane>

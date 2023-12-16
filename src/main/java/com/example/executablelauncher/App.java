@@ -6,10 +6,13 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import com.google.gson.Gson;
+import javafx.stage.StageStyle;
 
 import java.io.*;
 import java.nio.file.FileSystems;
@@ -36,11 +39,10 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
         stage.setTitle(textBundle.getString("desktopMode"));
-        //stage.initStyle(StageStyle.UNDECORATED);
+        stage.initStyle(StageStyle.UNDECORATED);
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
         stage.setScene(scene);
-        //stage.setMaximized(true);
         stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.3);
         stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.3);
         stage.setMinWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
@@ -48,7 +50,13 @@ public class App extends Application {
         DesktopViewController desktopViewController = fxmlLoader.getController();
         desktopViewController.initValues();
         primaryStage = stage;
+        FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
         stage.show();
+    }
+
+    public static void setPopUpProperties(Stage stage){
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(App.primaryStage);
     }
 
     public void LoadData() {
@@ -317,6 +325,14 @@ public class App extends Application {
     public static List<Series> getCollection(){
         series.sort(new Utils.SeriesComparator());
         return series;
+    }
+
+    public static void showErrorMessage(String title, String header, String content){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {
