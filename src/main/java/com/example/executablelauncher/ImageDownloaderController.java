@@ -1,23 +1,37 @@
 package com.example.executablelauncher;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
 public class ImageDownloaderController {
 
@@ -57,6 +71,12 @@ public class ImageDownloaderController {
     @FXML
     private TextField widthField;
 
+    @FXML
+    private BorderPane mainPane;
+
+    @FXML
+    private BorderPane downloadingPane;
+
     private final int numberOfImages = 60;
     private boolean isCover = false;
     private boolean isLogo = false;
@@ -65,12 +85,16 @@ public class ImageDownloaderController {
     private List<File> imagesFiles = new ArrayList<>();
     private File selectedFile = null;
     private AddSeasonController seasonParent = null;
+    private Stage loadingStage = null;
+    private Stage stage = null;
+    private String filters = "";
 
     public void setSeasonParent(AddSeasonController parent){
         seasonParent = parent;
     }
 
-    public void initValues(String searchText, String width, String height, boolean isCover, boolean isLogo, boolean transparent){
+    public void initValues(Stage stage, String searchText, String width, String height, boolean isCover, boolean isLogo, boolean transparent){
+        this.stage = stage;
         searchTextField.setText(searchText);
         this.isCover = isCover;
         this.isLogo = isLogo;
@@ -86,48 +110,81 @@ public class ImageDownloaderController {
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         searchButton.setText(App.buttonsBundle.getString("searchButton"));
 
+        downloadingPane.setVisible(false);
+
+        preDownload();
         searchImages();
     }
 
     public void searchImages(){
+        String coverFilters = "+filterui:aspect-tall&form=IRFLTR&first=1";
+        String wideScreen = "+filterui:aspect-wide";
+        String transparent = "+filterui:photo-transparent";
+        String endText = "&form=IRFLTR&first=1";
+
+        if (isCover)
+            filters = coverFilters;
+        else if (!isLogo)
+            filters = wideScreen;
+
+        filters += "+filterui:imagesize-custom_"+widthField.getText()+"_"+heightField.getText();
+
+        if (transparentCheck.isSelected())
+            filters += transparent;
+
+        filters += endText;
+
+        Timeline timer = new Timeline(new KeyFrame(Duration.seconds(1), event ->{
+            startProcess();
+        }));
+
+        timer.play();
+    }
+
+    private void startProcess(){
+        Platform.runLater(() ->{
+            // runnable for that thread
+            new Thread(() -> {
+                try {
+                    ProcessBuilder pb =
+                            new ProcessBuilder("python","src/main/resources/python/BingDownloader.py"
+                                    ,"-o", "src/main/resources/img/DownloadCache"
+                                    , "--filters", filters
+                                    , "--limit", Integer.toString(numberOfImages)
+                                    , searchTextField.getText());
+
+                    pb.redirectErrorStream(true);
+                    Process process = pb.start();
+
+                    process.waitFor();
+                    Platform.runLater(this::postDownload);
+                } catch (IOException | InterruptedException e) {
+                    System.err.println("Error downloading images");
+                }
+            }).start();
+        });
+
+    }
+
+    private void preDownload(){
+        mainPane.setDisable(true);
+        downloadingPane.setVisible(true);
+
         imagesContainer.getChildren().clear();
         imagesFiles.clear();
         downloadedImages.clear();
+        selectedFile = null;
 
         try{
             FileUtils.cleanDirectory(new File("src/main/resources/img/DownloadCache"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
-        String coverFilters = "+filterui:aspect-tall&form=IRFLTR&first=1";
-        String wideScreen = "+filterui:aspect-wide+filterui:imagesize-custom_"+widthField.getText()+"_"+heightField.getText()+"&form=IRFLTR&first=1";
-        String transparent = "+filterui:photo-transparent";
-        String filters;
-
-        if (isCover)
-            filters = coverFilters;
-        else
-            filters = wideScreen;
-
-        if (transparentCheck.isSelected())
-            filters += transparent;
-
-        try {
-            ProcessBuilder pb =
-                    new ProcessBuilder("python","src/main/resources/python/BingDownloader.py"
-                            ,"-o", "src/main/resources/img/DownloadCache"
-                            , "--filters", filters
-                            , "--limit", Integer.toString(numberOfImages)
-                            , searchTextField.getText());
-
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Error downloading images");
-        }
+    private void postDownload(){
+        mainPane.setDisable(false);
+        downloadingPane.setVisible(false);
 
         //Add images to view
         File dir = new File("src/main/resources/img/DownloadCache/");
@@ -196,6 +253,7 @@ public class ImageDownloaderController {
     void loadImages(ActionEvent event) {
         moreLoaded = !moreLoaded;
         loadMoreButton.setDisable(!loadMoreButton.isDisabled());
+        preDownload();
         searchImages();
     }
 

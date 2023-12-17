@@ -162,6 +162,9 @@ public class DesktopViewController {
     @FXML
     private Button closeButton;
 
+    @FXML
+    private ImageView maximizeRestoreImage;
+
     private final ImageViewPane seasonBackground = new ImageViewPane();
 
     private List<Series> seriesList = new ArrayList<>();
@@ -359,6 +362,12 @@ public class DesktopViewController {
     @FXML
     void maximizeWindow(MouseEvent event) {
         Stage stage = (Stage)((Button) event.getSource()).getScene().getWindow();
+
+        if (stage.isMaximized())
+            maximizeRestoreImage.setImage(new Image("file:src/main/resources/img/icons/windowMaximize.png"));
+        else
+            maximizeRestoreImage.setImage(new Image("file:src/main/resources/img/icons/windowRestore.png"));
+
         stage.setMaximized(!stage.isMaximized());
     }
 

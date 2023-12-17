@@ -35,7 +35,7 @@
                         <Insets top="5.0" />
                      </HBox.margin>
                      <left>
-                        <HBox fx:id="categoriesBox" alignment="BOTTOM_LEFT" prefHeight="50.0" prefWidth="1109.0" BorderPane.alignment="CENTER">
+                        <HBox fx:id="categoriesBox" alignment="BOTTOM_LEFT" prefHeight="50.0" BorderPane.alignment="CENTER">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
@@ -47,17 +47,17 @@
                      <right>
                         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                            <children>
-                              <Label text="22:30" textFill="WHITE">
+                              <Label alignment="CENTER" prefHeight="35.0" prefWidth="98.0" text="22:30" textFill="WHITE">
                                  <font>
-                                    <Font size="28.0" />
+                                    <Font size="24.0" />
                                  </font>
                                  <HBox.margin>
-                                    <Insets right="10.0" />
+                                    <Insets right="20.0" />
                                  </HBox.margin>
                               </Label>
-                              <Button fx:id="menuButton" mnemonicParsing="false" styleClass="buttonGradient" stylesheets="@styles.css">
+                              <Button fx:id="menuButton" mnemonicParsing="false" prefHeight="45.0" prefWidth="45.0" styleClass="menuButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true" smooth="false">
                                        <image>
                                           <Image url="@../../../img/icons/menu.png" />
                                        </image>
@@ -65,6 +65,12 @@
                                  </graphic>
                               </Button>
                            </children>
+                           <BorderPane.margin>
+                              <Insets />
+                           </BorderPane.margin>
+                           <padding>
+                              <Insets right="50.0" />
+                           </padding>
                         </HBox>
                      </right>
                   </BorderPane>
@@ -103,13 +109,13 @@
             </StackPane>
          </center>
       </BorderPane>
-      <StackPane fx:id="sideMenuParent" styleClass="blurredBackground" stylesheets="@styles.css" visible="false" StackPane.alignment="CENTER">
+      <StackPane fx:id="sideMenuParent" styleClass="blurredBackground" stylesheets="@styles.css" StackPane.alignment="CENTER">
          <children>
             <AnchorPane StackPane.alignment="CENTER">
                <children>
                   <AnchorPane fx:id="sideMenuBox" layoutX="975.0" prefHeight="720.0" prefWidth="300.0" AnchorPane.rightAnchor="50.0">
                      <children>
-                        <VBox fx:id="sideMenu" fillWidth="false" layoutX="-70.0" stylesheets="@styles.css" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+                        <VBox fx:id="sideMenu" layoutX="-70.0" stylesheets="@styles.css" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
                            <children>
                               <Label prefHeight="34.0" prefWidth="247.0" text="VideoLauncher" textFill="WHITE">
                                  <font>

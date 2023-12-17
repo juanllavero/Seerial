@@ -50,7 +50,7 @@
                      <children>
                         <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopButton" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="37.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/menu.png" />
                                  </image>
@@ -136,7 +136,7 @@
                                                 <Image url="@../../../img/test.png" />
                                              </image>
                                              <HBox.margin>
-                                                <Insets bottom="5.0" />
+                                                <Insets bottom="5.0" right="10.0" />
                                              </HBox.margin>
                                           </ImageView>
                                           <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="353.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
@@ -203,13 +203,46 @@
                <children>
                   <HBox fx:id="topRightBar" alignment="TOP_RIGHT">
                      <children>
-                        <Button mnemonicParsing="false" onMouseClicked="#minimizeWindow" prefHeight="40.0" prefWidth="50.0" styleClass="minimizeButton" stylesheets="@styles.css" />
-                        <Button mnemonicParsing="false" onMouseClicked="#maximizeWindow" prefHeight="40.0" prefWidth="50.0" styleClass="maximizeButton" stylesheets="@styles.css" />
-                        <Button fx:id="closeButton" mnemonicParsing="false" onMouseClicked="#close" prefHeight="40.0" prefWidth="50.0" styleClass="closeButton" stylesheets="@styles.css" />
+                        <Button mnemonicParsing="false" onMouseClicked="#minimizeWindow" prefHeight="40.0" prefWidth="50.0" styleClass="minimizeButton" stylesheets="@styles.css">
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/windowMinimize.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <padding>
+                              <Insets bottom="10.0" top="10.0" />
+                           </padding></Button>
+                        <Button mnemonicParsing="false" onMouseClicked="#maximizeWindow" prefHeight="40.0" prefWidth="50.0" styleClass="maximizeButton" stylesheets="@styles.css">
+                           <graphic>
+                              <ImageView fx:id="maximizeRestoreImage" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/windowMaximize.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <padding>
+                              <Insets bottom="10.0" top="10.0" />
+                           </padding></Button>
+                        <Button fx:id="closeButton" mnemonicParsing="false" onMouseClicked="#close" prefHeight="40.0" prefWidth="50.0" styleClass="closeButton" stylesheets="@styles.css">
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/windowClose.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <padding>
+                              <Insets bottom="10.0" top="10.0" />
+                           </padding></Button>
                      </children>
                      <padding>
                         <Insets right="30.0" top="20.0" />
                      </padding>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
                   </HBox>
                   <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" pannable="true" styleClass="transparent" stylesheets="@styles.css">
                      <content>
@@ -219,6 +252,9 @@
                            </padding>
                         </VBox>
                      </content>
+                     <padding>
+                        <Insets top="10.0" />
+                     </padding>
                   </ScrollPane>
                </children>
             </VBox>

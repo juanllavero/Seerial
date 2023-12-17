@@ -21,15 +21,29 @@
     -fx-background-color: transparent;
 }
 
-/*.closeButton{
-    -fx-fill: red;
-    -fx-shape: "m6 18l18 6m6 6l12 12";
+.minimizeButton{
+    -fx-background-color: transparent;
+}
+
+.minimizeButton:hover{
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+}
+
+.maximizeButton{
+    -fx-background-color: transparent;
+}
+
+.maximizeButton:hover{
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+}
+
+.closeButton{
+    -fx-background-color: transparent;
 }
 
 .closeButton:hover{
-    -fx-fill: red;
-    -fx-shape: "m6 18l18 6m6 6l12 12";
-}*/
+    -fx-background-color: -fx-main-color;
+}
 
 
 .selected{
@@ -56,22 +70,22 @@
 .choice-box > .label { -fx-text-fill: white; }
 
 .downloadedImageButton{
-    -fx-background-color: black;
-    -fx-text-fill: white;
+    -fx-background-color: #000000;
+    -fx-text-fill: #ffffff;
 }
 
 .downloadedImageButton:hover{
-    -fx-background-color: black;
-    -fx-text-fill: white;
+    -fx-background-color: #000000;
+    -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: -fx-main-color;
+    -fx-border-color: #DB162F;
 }
 
 .downloadedImageButtonSelected{
-    -fx-background-color: black;
-    -fx-text-fill: white;
+    -fx-background-color: #000000;
+    -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: -fx-main-color;
+    -fx-border-color: #DB162F;
 }
 
 .discSelected{
@@ -145,6 +159,24 @@
     -fx-background-color: -fx-main-color;
 }
 
+.progress-bar {
+    -fx-accent: rgba(0, 138, 230, 0.85);
+}
+
+.progress-bar .bar {
+    -fx-padding: 1px;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+
+.progress-bar > .track {
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-text-box-border: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
 
 .greyGradient{
     -fx-background-color: linear-gradient(to top right, rgba(61,61,66,1) 0%, rgba(50,50,55,1) 19%, rgba(47,47,51,1) 35%, rgba(45,45,48,1) 53%, rgba(41,41,43,1) 70%, rgba(33,33,33,1) 100%);
@@ -196,6 +228,25 @@
     -fx-background-color: rgb(255, 255, 255);
     -fx-background-radius: 50px;
     -fx-text-fill: #0e0e0e;
+    -fx-border-width: 2px;
+    -fx-border-color: #a9a9a9;
+    -fx-border-radius: 50px;
+    -fx-border-insets: -4;
+}
+
+.menuButton{
+    -fx-background-color: transparent;
+    -fx-background-radius: 50px;
+}
+
+.menuButton:hover{
+    -fx-background-color: rgba(255, 255, 255, 0.34);
+    -fx-background-radius: 50px;
+}
+
+.menuButton:focused{
+    -fx-background-color: rgba(0, 0, 0, 0.62);
+    -fx-background-radius: 50px;
     -fx-border-width: 2px;
     -fx-border-color: #a9a9a9;
     -fx-border-radius: 50px;
@@ -286,6 +337,12 @@
 }
 
 .buttonGradient:focused {
+    -fx-background-color: transparent;
+    -fx-border-width: 2 2 2 2;
+    -fx-border-color: linear-gradient(to top, rgba(176,176,176,1) 0%, rgba(186,186,186,1) 31%, rgba(65,65,65,1) 63%, rgba(65,65,65,1) 100%);
+}
+
+.discHover{
     -fx-background-color: transparent;
     -fx-border-width: 2 2 2 2;
     -fx-border-color: linear-gradient(to top, rgba(176,176,176,1) 0%, rgba(186,186,186,1) 31%, rgba(65,65,65,1) 63%, rgba(65,65,65,1) 100%);

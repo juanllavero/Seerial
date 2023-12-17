@@ -96,6 +96,7 @@ public class SeasonController {
 
     private List<Season> seasons = new ArrayList<>();
     private List<Disc> discs = new ArrayList<>();
+    private List<Pane> discsButtons = new ArrayList<>();
     private int currentSeason = 0;
     public int currentEpisoceID = -1;
     private Disc selectedDisc = null;
@@ -135,7 +136,7 @@ public class SeasonController {
         backgroundImage.setSmooth(true);
         backgroundImage.setCache(true);
 
-        if (season.getLogoSrc().equals("NO_LOGO")){
+        if (season.getLogoSrc().equals("")){
             infoBox.getChildren().remove(0);
             Label seriesTitle = new Label(season.getCollectionName());
             seriesTitle.setFont(new Font("Arial", 58));
@@ -148,7 +149,7 @@ public class SeasonController {
             logoImage.setImage(logo);
         }
 
-        if (!season.getVideoSrc().equals("NO_VIDEO")){
+        if (!season.getVideoSrc().equals("")){
             File file = new File(season.getVideoSrc());
             Media media = new Media(file.toURI().toString());
             mp = new MediaPlayer(media);
@@ -163,7 +164,7 @@ public class SeasonController {
             isVideo = true;
 
             alertTimer.play();
-        }else if (!season.getMusicSrc().equals("NO_MUSIC")){
+        }else if (!season.getMusicSrc().equals("")){
             File file = new File(season.getMusicSrc());
             Media media = new Media(file.toURI().toString());
             mp = new MediaPlayer(media);
@@ -178,11 +179,11 @@ public class SeasonController {
         }
 
         cardContainer.getChildren().clear();
+        discsButtons.clear();
         discs.clear();
         List<Integer> discs = season.getDiscs();
         for (int i : discs){
             Disc d = App.findDisc(i);
-            this.discs.add(d);
             addEpisodeCard(d);
         }
 
@@ -323,6 +324,7 @@ public class SeasonController {
                 HBox.setMargin(cardBox, new Insets(0, 0, 0, 50));
 
                 cardContainer.getChildren().add(cardBox);
+                discsButtons.add(cardBox);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -544,13 +546,12 @@ public class SeasonController {
     public void selectPrevDisc(){
         int index = getDiscIndex(selectedDisc);
         if (index > 0){
-            Node node = cardContainer.getChildren().get(index);
+            Pane node = discsButtons.get(index);
             node.getStyleClass().clear();
-            node.getStyleClass().add("buttonGradient");
 
-            selectedDisc = discs.get(index - 1);
+            selectedDisc = discs.get(--index);
 
-            node = cardContainer.getChildren().get(index - 1);
+            node = discsButtons.get(index);
             node.getStyleClass().clear();
             node.getStyleClass().add("selectedDisc");
         }
@@ -558,14 +559,13 @@ public class SeasonController {
 
     public void selectNextDisc(){
         int index = getDiscIndex(selectedDisc);
-        if (index != -1 && index < cardContainer.getChildren().size() - 1){
-            Node node = cardContainer.getChildren().get(index);
+        if (index != -1 && index < discsButtons.size() - 1){
+            Pane node = discsButtons.get(index);
             node.getStyleClass().clear();
-            node.getStyleClass().add("buttonGradient");
 
-            selectedDisc = discs.get(index + 1);
+            selectedDisc = discs.get(++index);
 
-            node = cardContainer.getChildren().get(index + 1);
+            node = discsButtons.get(index);
             node.getStyleClass().clear();
             node.getStyleClass().add("selectedDisc");
         }
@@ -574,9 +574,8 @@ public class SeasonController {
     public void deselectDisc(){
         int index = getDiscIndex(selectedDisc);
         if (index != -1){
-            Node node = cardContainer.getChildren().get(index);
+            Pane node = discsButtons.get(index);
             node.getStyleClass().clear();
-            node.getStyleClass().add("buttonGradient");
             selectedDisc = null;
         }
     }

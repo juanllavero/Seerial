@@ -221,10 +221,6 @@ public class AddSeasonController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ImageDownloader-view.fxml"));
             Parent root1 = fxmlLoader.load();
-            ImageDownloaderController controller = fxmlLoader.getController();
-            controller.setSeasonParent(this);
-            controller.initValues(collection.getName() + " " + nameField.getText() + " wallpaper", String.valueOf((int)Screen.getPrimary().getBounds().getWidth())
-                    , String.valueOf((int)Screen.getPrimary().getBounds().getHeight()), false, false, false);
             Stage stage = new Stage();
             stage.setTitle("ImageDownloader");
             stage.initStyle(StageStyle.UNDECORATED);
@@ -233,6 +229,10 @@ public class AddSeasonController {
             //ResizeHelper.addResizeListener(stage);
             App.setPopUpProperties(stage);
             stage.show();
+            ImageDownloaderController controller = fxmlLoader.getController();
+            controller.setSeasonParent(this);
+            controller.initValues(stage, collection.getName() + " " + nameField.getText() + " wallpaper", String.valueOf((int)Screen.getPrimary().getBounds().getWidth())
+                    , String.valueOf((int)Screen.getPrimary().getBounds().getHeight()), false, false, false);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -243,10 +243,6 @@ public class AddSeasonController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ImageDownloader-view.fxml"));
             Parent root1 = fxmlLoader.load();
-            ImageDownloaderController controller = fxmlLoader.getController();
-            controller.setSeasonParent(this);
-            controller.initValues(collection.getName() + " logo", Integer.toString(353)
-                    , Integer.toString(122), false, true, true);
             Stage stage = new Stage();
             stage.setTitle("ImageDownloader");
             stage.initStyle(StageStyle.UNDECORATED);
@@ -255,6 +251,10 @@ public class AddSeasonController {
             //ResizeHelper.addResizeListener(stage);
             App.setPopUpProperties(stage);
             stage.show();
+            ImageDownloaderController controller = fxmlLoader.getController();
+            controller.setSeasonParent(this);
+            controller.initValues(stage, collection.getName() + " logo", Integer.toString(353)
+                    , Integer.toString(122), false, true, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -417,7 +417,11 @@ public class AddSeasonController {
         season.setCollectionName(collection.getName());
 
         if (seasonToEdit != null && selectedBackground != null) {
-            if (!oldBackgroundPath.isEmpty() && !oldBackgroundPath.equals(selectedBackground.getAbsolutePath())){
+            String newName = selectedBackground.getName();
+            String oldName = "";
+            if (!oldBackgroundPath.isEmpty())
+                oldName = oldBackgroundPath.substring(oldBackgroundPath.length() - newName.length());
+            if (oldBackgroundPath.isEmpty() || !newName.equals(oldName)){
                 try{
                     File f = new File(season.getBackgroundSrc());
                     if (f.exists())
@@ -437,7 +441,11 @@ public class AddSeasonController {
         }
 
         if (seasonToEdit != null && selectedLogo != null) {
-            if (!oldLogoPath.isEmpty() && !oldLogoPath.equals(selectedLogo.getAbsolutePath())){
+            String newName = selectedLogo.getName();
+            String oldName = "";
+            if (!oldLogoPath.isEmpty())
+                oldName = oldLogoPath.substring(oldLogoPath.length() - newName.length());
+            if (oldLogoPath.isEmpty() || !newName.equals(oldName)){
                 try {
                     File f = new File(season.getLogoSrc());
                     if (f.exists())
