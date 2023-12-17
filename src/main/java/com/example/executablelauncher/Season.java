@@ -15,6 +15,7 @@ public class Season implements Serializable {
     public String musicSrc;
     public String collectionName;
     public String fullScreenBlurImageSrc;
+    public String desktopBackgroundEffect;
     public int order = 0;
     public final List<Integer> discs = new ArrayList<>();
 
@@ -119,5 +120,13 @@ public class Season implements Serializable {
 
     public void setFullScreenBlurImageSrc(String fullScreenBlurImageSrc) {
         this.fullScreenBlurImageSrc = fullScreenBlurImageSrc;
+    }
+
+    public String getDesktopBackgroundEffect() {
+        return desktopBackgroundEffect;
+    }
+
+    public void setDesktopBackgroundEffect(String desktopBackgroundEffect) {
+        this.desktopBackgroundEffect = desktopBackgroundEffect;
     }
 }

@@ -4,6 +4,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,6 +13,10 @@ import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -26,6 +31,7 @@ import javafx.util.Duration;
 import org.apache.commons.io.FileUtils;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -134,36 +140,37 @@ public class ImageDownloaderController {
 
         filters += endText;
 
-        Timeline timer = new Timeline(new KeyFrame(Duration.seconds(1), event ->{
-            startProcess();
-        }));
-
-        timer.play();
+        startProcess();
     }
 
     private void startProcess(){
-        Platform.runLater(() ->{
-            // runnable for that thread
-            new Thread(() -> {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() {
                 try {
                     ProcessBuilder pb =
-                            new ProcessBuilder("python","src/main/resources/python/BingDownloader.py"
-                                    ,"-o", "src/main/resources/img/DownloadCache"
+                            new ProcessBuilder("python", "src/main/resources/python/BingDownloader.py"
+                                    , "-o", "src/main/resources/img/DownloadCache"
                                     , "--filters", filters
                                     , "--limit", Integer.toString(numberOfImages)
                                     , searchTextField.getText());
 
                     pb.redirectErrorStream(true);
                     Process process = pb.start();
-
                     process.waitFor();
-                    Platform.runLater(this::postDownload);
                 } catch (IOException | InterruptedException e) {
                     System.err.println("Error downloading images");
                 }
-            }).start();
-        });
 
+                return null;
+            }
+        };
+
+        //Run when the process ends
+        task.setOnSucceeded(e -> postDownload());
+
+        //Start the process in a new thread
+        new Thread(task).start();
     }
 
     private void preDownload(){
@@ -183,30 +190,56 @@ public class ImageDownloaderController {
     }
 
     private void postDownload(){
-        mainPane.setDisable(false);
-        downloadingPane.setVisible(false);
+        Platform.runLater(() -> {
+            mainPane.setDisable(false);
+            downloadingPane.setVisible(false);
 
-        //Add images to view
-        File dir = new File("src/main/resources/img/DownloadCache/");
-        File[] files = dir.listFiles();
-        assert files != null;
-        for (File f : files){
-            try{
-                BufferedImage bimg = ImageIO.read(f);
-                if (bimg != null){
-                    int width = bimg.getWidth();
-                    int height = bimg.getHeight();
-                    addImageButton(bimg, width, height);
-                    imagesFiles.add(f);
+            //Add images to view
+            File dir = new File("src/main/resources/img/DownloadCache/");
+            File[] files = dir.listFiles();
+            assert files != null;
+            for (File f : files){
+                try{
+                    BufferedImage bimg = ImageIO.read(f);
+
+                    if (bimg != null){
+                        int newWidth = 300;
+                        int newHeight = -1;
+
+                        //Calculate new height
+                        if (bimg.getWidth() > 0) {
+                            double aspectRatio = (double) newWidth / bimg.getWidth();
+                            newHeight = (int) (bimg.getHeight() * aspectRatio);
+                        }
+
+                        //Check image type for compatibility
+                        int imageType = bimg.getType();
+                        if (imageType == 0) {
+                            //Assign default if not compatible
+                            imageType = BufferedImage.TYPE_INT_ARGB;
+                        }
+
+                        BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, imageType);
+                        Graphics2D g = resizedImage.createGraphics();
+                        g.drawImage(bimg, 0, 0, newWidth, newHeight, null);
+                        g.dispose();
+
+                        int width = bimg.getWidth();
+                        int height = bimg.getHeight();
+                        bimg.flush();
+                        addImageButton(resizedImage, width, height);
+                        imagesFiles.add(f);
+                    }
+                } catch (IOException e) {
+                    System.err.println("ImageDownloader: Error loading images");
                 }
-            } catch (IOException e) {
-                System.err.println("ImageDownloader: Error loading images");
             }
-        }
+        });
     }
 
     private void addImageButton(BufferedImage bimg, int width, int height){
         Image image = SwingFXUtils.toFXImage(bimg, null);
+        bimg.flush();
         ImageView imageView = new ImageView(image);
         imageView.setPreserveRatio(true);
         if (isCover){
@@ -214,6 +247,7 @@ public class ImageDownloaderController {
         }else{
             imageView.setFitWidth(300);
         }
+
         Button btn = new Button();
         btn.setGraphic(imageView);
         btn.setText(width + "x" + height + "px");

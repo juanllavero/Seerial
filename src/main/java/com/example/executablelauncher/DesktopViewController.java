@@ -233,27 +233,7 @@ public class DesktopViewController {
     }
 
     public void initValues(){
-        categorySelector.getItems().addAll(App.getCategories());
-        if (categorySelector.getItems().size() > 1) {
-            categorySelector.setValue(categorySelector.getItems().get(1));
-            seriesList = App.getSeriesFromCategory(categorySelector.getValue());
-            selectCategory(categorySelector.getValue());
-        }else{
-            seriesList = App.getCollection();
-        }
-
-        addCollectionButton.setText(App.buttonsBundle.getString("addCollection"));
-        addSeasonButton.setText(App.buttonsBundle.getString("addSeason"));
-        addDiscButton.setText(App.buttonsBundle.getString("addEpisodes"));
-        settingsButton.setText(App.buttonsBundle.getString("settings"));
-        exitButton.setText(App.buttonsBundle.getString("eixtButton"));
-        switchFSButton.setText(App.buttonsBundle.getString("switchToFullscreen"));
-        removeColButton.setText(App.buttonsBundle.getString("removeButton"));
-        removeSeasonButton.setText(App.buttonsBundle.getString("removeButton"));
-        removeDiscButton.setText(App.buttonsBundle.getString("removeButton"));
-        editColButton.setText(App.buttonsBundle.getString("editButton"));
-        editSeasonButton.setText(App.buttonsBundle.getString("editButton"));
-        editDiscButton.setText(App.buttonsBundle.getString("editButton"));
+        updateLanguage();
 
         categorySelector.getSelectionModel()
                 .selectedItemProperty()
@@ -317,6 +297,31 @@ public class DesktopViewController {
         backgroundShadow.fitWidthProperty().bind(mainBox.widthProperty());
         backgroundShadow.fitHeightProperty().bind(mainBox.heightProperty());
         backgroundShadow.setPreserveRatio(false);
+    }
+
+    public void updateLanguage(){
+        categorySelector.getItems().clear();
+        categorySelector.getItems().addAll(App.getCategories());
+        if (categorySelector.getItems().size() > 1) {
+            categorySelector.setValue(categorySelector.getItems().get(1));
+            seriesList = App.getSeriesFromCategory(categorySelector.getValue());
+            selectCategory(categorySelector.getValue());
+        }else{
+            seriesList = App.getCollection();
+        }
+
+        addCollectionButton.setText(App.buttonsBundle.getString("addCollection"));
+        addSeasonButton.setText(App.buttonsBundle.getString("addSeason"));
+        addDiscButton.setText(App.buttonsBundle.getString("addEpisodes"));
+        settingsButton.setText(App.buttonsBundle.getString("settings"));
+        exitButton.setText(App.buttonsBundle.getString("eixtButton"));
+        switchFSButton.setText(App.buttonsBundle.getString("switchToFullscreen"));
+        removeColButton.setText(App.buttonsBundle.getString("removeButton"));
+        removeSeasonButton.setText(App.buttonsBundle.getString("removeButton"));
+        removeDiscButton.setText(App.buttonsBundle.getString("removeButton"));
+        editColButton.setText(App.buttonsBundle.getString("editButton"));
+        editSeasonButton.setText(App.buttonsBundle.getString("editButton"));
+        editDiscButton.setText(App.buttonsBundle.getString("editButton"));
     }
 
     private void setDragWindow(HBox topLeftBar) {
@@ -427,7 +432,7 @@ public class DesktopViewController {
 
     private void fillSeasonInfo() {
         globalBackground.setImage(new Image("file:" + selectedSeason.getBackgroundSrc()));
-        ImageView img = new ImageView(new Image("file:" + selectedSeason.getBackgroundSrc()));
+        ImageView img = new ImageView(new Image("file:" + selectedSeason.getDesktopBackgroundEffect()));
         img.setPreserveRatio(true);
         seasonBackground.setImageView(img);
         fadeInTransition(globalBackground);
@@ -787,7 +792,22 @@ public class DesktopViewController {
 
     @FXML
     void openSettings(MouseEvent event){
-
+        showBackgroundShadow();
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("mainMenuDesktop-view.fxml"));
+            Parent root1 = fxmlLoader.load();
+            MainMenuDesktopController addDiscController = fxmlLoader.getController();
+            addDiscController.initValues(this);
+            Stage stage = new Stage();
+            stage.setTitle("Settings");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(new Scene(root1));
+            App.setPopUpProperties(stage);
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        hideMenu();
     }
 
     private void hideMenu(){

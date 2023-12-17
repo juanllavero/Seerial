@@ -25,15 +25,21 @@ public class App extends Application {
     public static List<Disc> discs = new ArrayList<>();
     public static List<Category> categories = new ArrayList<>();
     public static Stage primaryStage;
-    public static Locale globalLanguage = Locale.forLanguageTag("en");
-    public static ResourceBundle buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
-    public static ResourceBundle textBundle = ResourceBundle.getBundle("text", globalLanguage);
+    public static List<Locale> languages = new ArrayList<>();
+    public static Locale globalLanguage;
+    public static ResourceBundle buttonsBundle;
+    public static ResourceBundle textBundle;
     public static String lastDirectory = null;
     public static String lastVideoDirectory = null;
     public static String lastMusicDirectory = null;
 
     @Override
     public void start(Stage stage) throws IOException {
+        languages.add(Locale.forLanguageTag("en"));
+        languages.add(Locale.forLanguageTag("es"));
+        globalLanguage = Locale.forLanguageTag("en");
+        buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
+        textBundle = ResourceBundle.getBundle("text", globalLanguage);
         LoadData();
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
@@ -57,6 +63,14 @@ public class App extends Application {
     public static void setPopUpProperties(Stage stage){
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(App.primaryStage);
+    }
+
+    public static List<String> getLanguages(){
+        List<String> langs = new ArrayList<>();
+        for (Locale locale : languages){
+            langs.add(locale.getLanguage());
+        }
+        return langs;
     }
 
     public void LoadData() {
