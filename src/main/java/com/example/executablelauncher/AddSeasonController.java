@@ -24,12 +24,14 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 import static com.example.executablelauncher.App.*;
@@ -347,12 +349,18 @@ public class AddSeasonController {
     void removeBackground(ActionEvent event) {
         selectedBackground = null;
         backgroundImageView.setImage(null);
+        seasonToEdit.setBackgroundSrc("");
+        seasonToEdit.setDesktopBackgroundEffect("");
+        seasonToEdit.setFullScreenBlurImageSrc("");
+        oldBackgroundPath = "";
     }
 
     @FXML
     void removeLogo(ActionEvent event) {
         selectedLogo = null;
         logoImageView.setImage(null);
+        seasonToEdit.setLogoSrc("");
+        oldLogoPath = "";
     }
 
     @FXML
@@ -426,11 +434,14 @@ public class AddSeasonController {
                 try{
                     File f = new File(season.getBackgroundSrc());
                     if (f.exists())
-                        Files.delete(FileSystems.getDefault().getPath(season.getBackgroundSrc()));
+                        Files.delete(f.toPath());
                     f = new File(season.getFullScreenBlurImageSrc());
                     if (f.exists())
                         Files.delete(f.toPath());
                     f = new File(season.getDesktopBackgroundEffect());
+                    if (f.exists())
+                        Files.delete(f.toPath());
+                    f = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + season.getName() + "_desktopBlur.png");
                     if (f.exists())
                         Files.delete(f.toPath());
                     saveBackground(season, collection.getSeasons().indexOf(season.getId()));
@@ -513,7 +524,7 @@ public class AddSeasonController {
         File newBackground = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonNumber + "_sb.png");
 
         try{
-            Files.copy(selectedBackground.toPath(), newBackground.toPath());
+            Files.copy(selectedBackground.toPath(), newBackground.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }catch (IOException e){
             System.err.println("Background not copied");
         }
@@ -539,8 +550,10 @@ public class AddSeasonController {
         try {
             ImageIO.write(bImageFull, "png", backgroundFullscreenBlur);
         } catch (IOException e) {
-            System.err.println("Blur images error");
+            System.err.println("Blur image fullscreen error");
         }
+
+        bImageFull.flush();
 
         File file = new File(backgroundFullscreenBlur.getAbsolutePath());
         try{
@@ -561,9 +574,45 @@ public class AddSeasonController {
             System.err.println("Background image copy error");
         }
 
+        ImageView backgroundBlurDesktop = new ImageView(image);
+        blur.setRadius(80);
+        backgroundBlurDesktop.setEffect(blur);
+
+        File backgroundDesktopBlur = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + s.getName() + "_desktopBlur.png");
+        BufferedImage bImageDesktop = SwingFXUtils.fromFXImage(backgroundBlurDesktop.snapshot(null, null), null);
+
+        try {
+            ImageIO.write(bImageDesktop, "png", backgroundDesktopBlur);
+        } catch (IOException e) {
+            System.err.println("Blur image desktop error");
+        }
+
+        bImageDesktop.flush();
+
+        file = new File(backgroundDesktopBlur.getAbsolutePath());
+        try{
+            image = new Image(file.toURI().toURL().toExternalForm());
+        } catch (MalformedURLException e) {
+            System.err.println("Background image creation error");
+        }
+
+        reader = image.getPixelReader();
+        newImage = new WritableImage(reader
+                , (int) (image.getWidth() * 0.08), (int) (image.getHeight() * 0.1)
+                , (int) (image.getWidth() * 0.86), (int) (image.getHeight() * 0.8));
+
+        try{
+            RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
+            ImageIO.write(renderedImage,"png", file);
+        } catch (IOException e) {
+            System.err.println("Background image copy error");
+        }
+
         s.setFullScreenBlurImageSrc("src/main/resources/img/backgrounds/" + backgroundFullscreenBlur.getName());
 
         s.setDesktopBackgroundEffect(setTransparencyEffect(s.getBackgroundSrc(), s.getName()));
+
+        setDesktopBackgroundBlur(s.getName());
     }
 
     private void saveLogo(Season s, int seasonNumber){
@@ -660,9 +709,77 @@ public class AddSeasonController {
             //Save the image with the progressive transparency effect
             ImageIO.write(blendedImage, "png"
                     , new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonName + "_transparencyEffect.png"));
+            originalImage.flush();
+            blendedImage.flush();
         } catch (IOException e) {
             System.err.println("AddSeasonController: error applying transparency effect to background");
         }
         return "src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonName + "_transparencyEffect.png";
+    }
+
+    private void setDesktopBackgroundBlur(String seasonName){
+        try {
+            BufferedImage backgroundEffect = ImageIO.read(new File("src/main/resources/img/Background.png"));
+            BufferedImage originalImage = ImageIO.read(new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonName + "_desktopBlur.png"));
+
+            float contrastFactor = 0.1f;
+            BufferedImage highContrastImage = applyContrast(backgroundEffect, contrastFactor);
+
+            BufferedImage resultImage = applyNoiseEffect(highContrastImage, originalImage);
+            resultImage = applyNoiseEffect(resultImage, originalImage);
+
+            ImageIO.write(resultImage, "png", new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonName + "_desktopBlur.png"));
+            backgroundEffect.flush();
+            originalImage.flush();
+            highContrastImage.flush();
+            resultImage.flush();
+        } catch (IOException e) {
+            System.err.println("AddSeasonController: Error creating Desktop Blur and Noise Effects");
+        }
+    }
+
+    private static BufferedImage scaleImageTo(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        java.awt.Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, java.awt.Image.SCALE_SMOOTH);
+
+        BufferedImage scaledBufferedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = scaledBufferedImage.createGraphics();
+        g2d.drawImage(scaledImage, 0, 0, null);
+        g2d.dispose();
+
+        return scaledBufferedImage;
+    }
+
+    private static BufferedImage applyNoiseEffect(BufferedImage originalImage, BufferedImage noiseImage) {
+        BufferedImage scaledNoiseImage = scaleImageTo(noiseImage, originalImage.getWidth(), originalImage.getHeight());
+
+        int width = Math.min(originalImage.getWidth(), scaledNoiseImage.getWidth());
+        int height = Math.min(originalImage.getHeight(), scaledNoiseImage.getHeight());
+
+        BufferedImage resultImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        float blendFactor = 0.2f;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Color originalColor = new Color(originalImage.getRGB(x, y), true);
+
+                Color noiseColor = new Color(scaledNoiseImage.getRGB(x, y));
+
+                int blendedRed = (int) (originalColor.getRed() * (1 - blendFactor) + noiseColor.getRed() * blendFactor);
+                int blendedGreen = (int) (originalColor.getGreen() * (1 - blendFactor) + noiseColor.getGreen() * blendFactor);
+                int blendedBlue = (int) (originalColor.getBlue() * (1 - blendFactor) + noiseColor.getBlue() * blendFactor);
+                int blendedAlpha = originalColor.getAlpha();
+
+                Color blendedColor = new Color(blendedRed, blendedGreen, blendedBlue, blendedAlpha);
+                resultImage.setRGB(x, y, blendedColor.getRGB());
+            }
+        }
+
+        return resultImage;
+    }
+
+    private static BufferedImage applyContrast(BufferedImage image, float contrastFactor) {
+        RescaleOp rescaleOp = new RescaleOp(contrastFactor, 0, null);
+        return rescaleOp.filter(image, null);
     }
 }

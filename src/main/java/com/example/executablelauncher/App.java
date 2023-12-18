@@ -42,7 +42,8 @@ public class App extends Application {
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
         LoadData();
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
+        //FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("newDesign.fxml"));
         Parent root = fxmlLoader.load();
         stage.setTitle(textBundle.getString("desktopMode"));
         stage.initStyle(StageStyle.UNDECORATED);
@@ -51,10 +52,12 @@ public class App extends Application {
         stage.setScene(scene);
         stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.3);
         stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.3);
-        stage.setMinWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
-        stage.setMinHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
-        DesktopViewController desktopViewController = fxmlLoader.getController();
-        desktopViewController.initValues();
+        //stage.setMinWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
+        //stage.setMinHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+        //DesktopViewController desktopViewController = fxmlLoader.getController();
+        //desktopViewController.initValues();
+        NewDesign controller = fxmlLoader.getController();
+        controller.initValues();
         primaryStage = stage;
         FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
         stage.show();

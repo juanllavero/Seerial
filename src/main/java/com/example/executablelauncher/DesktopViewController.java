@@ -431,7 +431,8 @@ public class DesktopViewController {
     }
 
     private void fillSeasonInfo() {
-        globalBackground.setImage(new Image("file:" + selectedSeason.getBackgroundSrc()));
+        globalBackground.setImage(new Image("file:" +
+                "src/main/resources/img/backgrounds/" + selectedSeries.getName() + "_" + selectedSeason.getName() + "_desktopBlur.png"));
         ImageView img = new ImageView(new Image("file:" + selectedSeason.getDesktopBackgroundEffect()));
         img.setPreserveRatio(true);
         seasonBackground.setImageView(img);

@@ -31,6 +31,9 @@
          <image>
             <Image url="@../../../img/BackgroundShadow.png" />
          </image>
+         <effect>
+            <ColorAdjust contrast="0.18" />
+         </effect>
       </ImageView>
       <BorderPane prefWidth="1280.0">
          <right>

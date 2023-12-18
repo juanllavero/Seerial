@@ -13,6 +13,9 @@ module com.example.executablelauncher {
     requires javafx.web;
     requires com.fasterxml.jackson.annotation;
     requires org.apache.commons.io;
+    requires FX.BorderlessScene;
+    requires com.sun.jna.platform;
+    requires com.sun.jna;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;
