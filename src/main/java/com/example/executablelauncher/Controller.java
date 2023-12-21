@@ -3,6 +3,8 @@ package com.example.executablelauncher;
 import javafx.animation.*;
 import javafx.event.ActionEvent;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -108,6 +110,8 @@ public class Controller implements Initializable {
         switchToDesktopButton.setText(App.buttonsBundle.getString("switchToDesktop"));
 
         playBackgroundSound();
+
+
 
         //Open/Close Side Menu
         sideMenu.setVisible(false);
@@ -253,12 +257,6 @@ public class Controller implements Initializable {
             int i = collectionList.indexOf(seriesToEdit);
             seriesButtons.get(i).requestFocus();
 
-            //Clear selection
-        /*for (Node node : cardContainer.getChildren()){
-            node.getStyleClass().clear();
-            node.getStyleClass().add("coverNotSelected");
-        }*/
-
             for (Timeline t : coverBorderTimelines){
                 t.stop();
             }
@@ -269,13 +267,19 @@ public class Controller implements Initializable {
                 if (season != null){
                     Image image = new Image("file:" + season.getFullScreenBlurImageSrc());
                     backgroundImage.setImage(image);
-                    //backgroundImage.setVisible(false);
+                    //backgroundImage.setPreserveRatio(true);
+                    backgroundImage.setSmooth(true);
+                    backgroundImage.setCache(true);
 
-                    BackgroundImage myBI= new BackgroundImage(new Image("file:" + season.getFullScreenBlurImageSrc(),
-                            Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true),
+                    ImageView background = new ImageView(new Image("file:" + season.getFullScreenBlurImageSrc(),
+                            Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true));
+
+                    BackgroundImage myBI= new BackgroundImage(getCroppedImage(background),
                             BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
                             BackgroundSize.DEFAULT);
                     mainBox.setBackground(new Background(myBI));
+
+                    backgroundImage.setImage(getCroppedImage(backgroundImage));
                 }
 
                 //Node node = cardContainer.getChildren().get(collectionList.indexOf(s));
@@ -298,6 +302,32 @@ public class Controller implements Initializable {
                 fadeIn.setOnFinished(event -> mainBox.setBackground(bi));
             }
         }
+    }
+
+    private WritableImage getCroppedImage(ImageView img){
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        double targetAspectRatio = screenWidth / screenHeight;
+
+        double originalWidth = img.getImage().getWidth();
+        double originalHeight = img.getImage().getHeight();
+        double originalAspectRatio = originalWidth / originalHeight;
+
+        double newWidth, newHeight;
+        if (originalAspectRatio > targetAspectRatio) {
+            newWidth = originalHeight * targetAspectRatio;
+            newHeight = originalHeight;
+        } else {
+            newWidth = originalWidth;
+            newHeight = originalWidth / targetAspectRatio;
+        }
+
+        double xOffset = 0;
+        double yOffset = 0;
+
+        PixelReader pixelReader = img.getImage().getPixelReader();
+
+        return new WritableImage(pixelReader, 0, 0, (int) newWidth, (int) newHeight);
     }
 
     private void addCard(Series s){
@@ -482,14 +512,13 @@ public class Controller implements Initializable {
             stage.setTitle(App.textBundle.getString("desktopMode"));
             stage.setScene(new Scene(root));
             stage.setMaximized(false);
-            stage.setMinHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
-            stage.setMinWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
-            stage.initStyle(StageStyle.DECORATED);
-            stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 2);
             stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
 
             DesktopViewController desktopViewController = fxmlLoader.getController();
             desktopViewController.initValues();
+            FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
             stage.show();
 
             Stage thisStage = (Stage) mainBox.getScene().getWindow();

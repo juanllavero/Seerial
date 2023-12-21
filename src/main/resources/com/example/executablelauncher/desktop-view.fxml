@@ -1,48 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
+<StackPane fx:id="mainBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
    <children>
-      <ImageView fx:id="globalBackground" fitHeight="720.0" fitWidth="1293.0" opacity="0.88" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="1920.0" opacity="0.88" pickOnBounds="true" StackPane.alignment="TOP_LEFT">
          <image>
             <Image url="@../../../img/backgroundDefault.png" />
          </image>
+         <effect>
+            <GaussianBlur radius="50.02" />
+         </effect>
       </ImageView>
-      <ImageView fx:id="globalBackgroundShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true" visible="false">
+      <ImageView fx:id="globalBackgroundShadow" fitHeight="1080.0" fitWidth="1920.0" pickOnBounds="true" StackPane.alignment="TOP_LEFT">
          <image>
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
-      <GridPane styleClass="transparent" stylesheets="@styles.css">
-         <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="20.0" prefWidth="100.0" />
-            <ColumnConstraints fx:id="centralBoxH" halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" percentWidth="55.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="25.0" prefWidth="100.0" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints fx:id="centralBoxV" minHeight="10.0" percentHeight="100.0" prefHeight="100.0" vgrow="SOMETIMES" />
-         </rowConstraints>
-         <children>
-            <VBox fx:id="leftBox">
-               <children>
-                  <HBox fx:id="topLeftBar">
+      <BorderPane fx:id="mainBorderPane">
+         <top>
+            <BorderPane fx:id="topBar" BorderPane.alignment="CENTER">
+               <left>
+                  <HBox BorderPane.alignment="CENTER">
                      <children>
                         <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopButton" stylesheets="@styles.css">
                            <graphic>
@@ -53,13 +46,6 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                     </children>
-                     <padding>
-                        <Insets left="10.0" top="20.0" />
-                     </padding>
-                  </HBox>
-                  <HBox alignment="CENTER">
-                     <children>
                         <ChoiceBox fx:id="categorySelector" prefWidth="163.0">
                            <HBox.margin>
                               <Insets left="10.0" />
@@ -102,161 +88,175 @@
                            </HBox.margin>
                         </Button>
                      </children>
-                     <VBox.margin>
-                        <Insets bottom="10.0" top="20.0" />
-                     </VBox.margin>
+                     <padding>
+                        <Insets left="10.0" top="5.0" />
+                     </padding>
+                     <BorderPane.margin>
+                        <Insets />
+                     </BorderPane.margin>
                   </HBox>
-                  <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS">
-                     <content>
-                        <VBox fx:id="seriesContainer" prefHeight="200.0" prefWidth="100.0">
-                           <padding>
-                              <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
-                        </VBox>
-                     </content>
-                  </ScrollPane>
-               </children>
-            </VBox>
-            <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" stylesheets="@styles.css" vbarPolicy="ALWAYS" GridPane.columnIndex="1">
-               <content>
-                  <VBox fx:id="centralVBox" prefHeight="720.0" prefWidth="687.0" styleClass="transparent" stylesheets="@styles.css">
+               </left>
+               <right>
+                  <HBox fx:id="topRightBar" alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
                      <children>
-                        <StackPane fx:id="seasonInfoPane" alignment="TOP_CENTER" styleClass="transparent" stylesheets="@styles.css">
-                           <children>
-                              <VBox fx:id="seasonInfoInside" alignment="BASELINE_CENTER" prefHeight="583.0" prefWidth="687.0" StackPane.alignment="CENTER">
-                                 <children>
-                                    <HBox fx:id="seasonCoverLogoBox" alignment="BOTTOM_LEFT" VBox.vgrow="ALWAYS">
-                                       <children>
-                                          <ImageView fx:id="seriesCover" fitHeight="252.0" fitWidth="177.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
-                                             <image>
-                                                <Image url="@../../../img/testCover.png" />
-                                             </image>
-                                             <HBox.margin>
-                                                <Insets bottom="5.0" right="10.0" />
-                                             </HBox.margin>
-                                          </ImageView>
-                                          <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="353.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
-                                             <image>
-                                                <Image url="@../../../img/logoTest.png" />
-                                             </image>
-                                             <HBox.margin>
-                                                <Insets bottom="5.0" left="20.0" />
-                                             </HBox.margin>
-                                          </ImageView>
-                                       </children>
-                                       <VBox.margin>
-                                          <Insets bottom="10.0" />
-                                       </VBox.margin>
-                                    </HBox>
-                                    <HBox alignment="CENTER_LEFT">
-                                       <children>
-                                          <Label fx:id="seasonName" text="Season Name" textFill="WHITE">
-                                             <font>
-                                                <Font name="System Bold" size="32.0" />
-                                             </font>
-                                             <HBox.margin>
-                                                <Insets bottom="5.0" />
-                                             </HBox.margin>
-                                             <effect>
-                                                <DropShadow />
-                                             </effect>
-                                          </Label>
-                                          <Button contentDisplay="CENTER" mnemonicParsing="false" onMouseClicked="#editSeason" styleClass="desktopButton" stylesheets="@styles.css">
-                                             <graphic>
-                                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
-                                                   <image>
-                                                      <Image url="@../../../img/icons/edit.png" />
-                                                   </image>
-                                                </ImageView>
-                                             </graphic>
-                                             <HBox.margin>
-                                                <Insets left="20.0" />
-                                             </HBox.margin>
-                                          </Button>
-                                       </children>
-                                    </HBox>
-                                 </children>
-                                 <padding>
-                                    <Insets bottom="10.0" left="20.0" />
-                                 </padding>
-                              </VBox>
-                           </children>
-                        </StackPane>
-                        <VBox fx:id="seasonContainer" minHeight="200.0">
-                           <padding>
-                              <Insets bottom="10.0" top="10.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </VBox>
-               </content>
-               <styleClass>
-                  <String fx:value="transparent" />
-                  <String fx:value="borderLines" />
-               </styleClass>
-            </ScrollPane>
-            <VBox fx:id="rightBox" styleClass="borderLines" stylesheets="@styles.css" GridPane.columnIndex="2">
-               <children>
-                  <HBox fx:id="topRightBar" alignment="TOP_RIGHT">
-                     <children>
-                        <Button mnemonicParsing="false" onMouseClicked="#minimizeWindow" prefHeight="40.0" prefWidth="50.0" styleClass="minimizeButton" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onMouseClicked="#minimizeWindow" prefHeight="35.0" prefWidth="35.0" styleClass="minimizeButton" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/windowMinimize.png" />
                                  </image>
                               </ImageView>
                            </graphic>
-                           <padding>
-                              <Insets bottom="10.0" top="10.0" />
-                           </padding></Button>
-                        <Button mnemonicParsing="false" onMouseClicked="#maximizeWindow" prefHeight="40.0" prefWidth="50.0" styleClass="maximizeButton" stylesheets="@styles.css">
+                        </Button>
+                        <Button mnemonicParsing="false" onMouseClicked="#maximizeWindow" prefHeight="35.0" prefWidth="35.0" styleClass="maximizeButton" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fx:id="maximizeRestoreImage" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="maximizeRestoreImage" fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/windowMaximize.png" />
                                  </image>
                               </ImageView>
                            </graphic>
-                           <padding>
-                              <Insets bottom="10.0" top="10.0" />
-                           </padding></Button>
-                        <Button fx:id="closeButton" mnemonicParsing="false" onMouseClicked="#close" prefHeight="40.0" prefWidth="50.0" styleClass="closeButton" stylesheets="@styles.css">
+                        </Button>
+                        <Button fx:id="closeButton" mnemonicParsing="false" onMouseClicked="#close" prefHeight="35.0" prefWidth="35.0" styleClass="closeButton" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/windowClose.png" />
                                  </image>
                               </ImageView>
                            </graphic>
-                           <padding>
-                              <Insets bottom="10.0" top="10.0" />
-                           </padding></Button>
+                        </Button>
                      </children>
                      <padding>
-                        <Insets right="30.0" top="20.0" />
+                        <Insets right="10.0" />
                      </padding>
-                     <VBox.margin>
-                        <Insets bottom="10.0" />
-                     </VBox.margin>
                   </HBox>
-                  <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" pannable="true" styleClass="transparent" stylesheets="@styles.css">
-                     <content>
-                        <VBox fx:id="discContainer">
-                           <padding>
-                              <Insets bottom="5.0" left="2.0" right="2.0" top="5.0" />
-                           </padding>
-                        </VBox>
-                     </content>
+               </right>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </BorderPane>
+         </top>
+         <center>
+            <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
+               <content>
+                  <VBox fx:id="centralVBox" alignment="TOP_CENTER" styleClass="transparent" stylesheets="@styles.css">
+                     <children>
+                        <StackPane fx:id="seasonInfoPane" alignment="TOP_CENTER" styleClass="transparent" stylesheets="@styles.css">
+                           <children>
+                              <BorderPane>
+                                 <right>
+                                    <VBox fx:id="detailsBox" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <Label prefHeight="35.0" prefWidth="144.0" text="Details" textFill="WHITE">
+                                             <font>
+                                                <Font size="24.0" />
+                                             </font>
+                                          </Label>
+                                          <ImageView fx:id="seriesCover" fitHeight="252.0" fitWidth="177.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/testCover.png" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                       <BorderPane.margin>
+                                          <Insets right="100.0" />
+                                       </BorderPane.margin>
+                                    </VBox>
+                                 </right>
+                                 <center>
+                                    <VBox BorderPane.alignment="CENTER">
+                                       <children>
+                                          <HBox fx:id="seasonContainer" prefHeight="100.0" prefWidth="200.0" />
+                                          <VBox fx:id="discContainer">
+                                             <padding>
+                                                <Insets bottom="5.0" left="2.0" right="2.0" top="5.0" />
+                                             </padding>
+                                          </VBox>
+                                       </children>
+                                    </VBox>
+                                 </center>
+                                 <padding>
+                                    <Insets left="200.0" right="200.0" />
+                                 </padding>
+                                 <top>
+                                    <VBox fx:id="seasonInfoInside" alignment="BASELINE_CENTER" prefHeight="583.0" BorderPane.alignment="CENTER">
+                                       <children>
+                                          <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" prefHeight="600.0">
+                                             <children>
+                                                <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
+                                                   <image>
+                                                      <Image url="@../../../img/logoTest.png" />
+                                                   </image>
+                                                   <HBox.margin>
+                                                      <Insets bottom="5.0" left="20.0" />
+                                                   </HBox.margin>
+                                                </ImageView>
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="30.0" />
+                                             </padding>
+                                          </HBox>
+                                          <HBox alignment="CENTER_LEFT">
+                                             <children>
+                                                <Label fx:id="seasonName" text="Season Name" textFill="WHITE">
+                                                   <font>
+                                                      <Font name="System Bold" size="32.0" />
+                                                   </font>
+                                                   <HBox.margin>
+                                                      <Insets bottom="5.0" />
+                                                   </HBox.margin>
+                                                   <effect>
+                                                      <DropShadow />
+                                                   </effect>
+                                                </Label>
+                                                <Button contentDisplay="CENTER" mnemonicParsing="false" onMouseClicked="#editSeason" styleClass="desktopButton" stylesheets="@styles.css">
+                                                   <graphic>
+                                                      <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../../../img/icons/edit.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                   <HBox.margin>
+                                                      <Insets left="20.0" />
+                                                   </HBox.margin>
+                                                </Button>
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" left="100.0" right="100.0" />
+                                       </padding>
+                                    </VBox>
+                                 </top>
+                              </BorderPane>
+                           </children>
+                        </StackPane>
+                     </children>
+                  </VBox>
+               </content>
+               <BorderPane.margin>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+               </BorderPane.margin>
+            </ScrollPane>
+         </center>
+         <left>
+            <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="300.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
+               <content>
+                  <VBox fx:id="seriesContainer" prefHeight="200.0" prefWidth="100.0">
                      <padding>
-                        <Insets top="10.0" />
+                        <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
-                  </ScrollPane>
-               </children>
-            </VBox>
-         </children>
-      </GridPane>
-      <Pane fx:id="menuParentPane" prefHeight="200.0" prefWidth="1280.0">
+                  </VBox>
+               </content>
+               <BorderPane.margin>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+               </BorderPane.margin>
+            </ScrollPane>
+         </left>
+      </BorderPane>
+      <Pane fx:id="menuParentPane" prefHeight="200.0" prefWidth="1280.0" visible="false">
          <children>
             <VBox fx:id="mainMenu" layoutX="42.0" layoutY="124.0" style="-fx-background-radius: 5px;" styleClass="darkerBackground" stylesheets="@styles.css">
                <children>
@@ -465,13 +465,10 @@
             </VBox>
          </children>
       </Pane>
-      <ImageView fx:id="backgroundShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true" visible="false">
+      <ImageView fx:id="backgroundShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" visible="false">
          <image>
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
    </children>
-   <padding>
-      <Insets bottom="5.0" left="5.0" right="5.0" />
-   </padding>
 </StackPane>

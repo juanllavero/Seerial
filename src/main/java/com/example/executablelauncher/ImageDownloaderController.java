@@ -108,8 +108,8 @@ public class ImageDownloaderController {
 
         title.setText(App.textBundle.getString("imageDownloaderTitle"));
         transparentCheck.setText(App.textBundle.getString("transparentCheck"));
-        widthField.setText(width);
-        heightField.setText(height);
+        //widthField.setText(width);
+        //heightField.setText(height);
         resolutionText.setText(App.textBundle.getString("resolutionText"));
         selectImageButton.setText(App.buttonsBundle.getString("selectButton"));
         loadMoreButton.setText(App.buttonsBundle.getString("loadMoreButton"));
@@ -133,7 +133,8 @@ public class ImageDownloaderController {
         else if (!isLogo)
             filters = wideScreen;
 
-        filters += "+filterui:imagesize-custom_"+widthField.getText()+"_"+heightField.getText();
+        if (!widthField.getText().isEmpty() && !heightField.getText().isEmpty())
+            filters += "+filterui:imagesize-custom_"+widthField.getText()+"_"+heightField.getText();
 
         if (transparentCheck.isSelected())
             filters += transparent;

@@ -186,7 +186,7 @@ public class FXResizeHelper {
             else if (l_trigger) fireAction(Cursor.E_RESIZE);
             else if (r_trigger) fireAction(Cursor.W_RESIZE);
             else if (d_trigger) fireAction(Cursor.N_RESIZE);
-            else if (sy < TM && !u_trigger) fireAction(Cursor.OPEN_HAND);
+            //else if (sy < TM && !u_trigger) fireAction(Cursor.OPEN_HAND);
             else if (u_trigger) fireAction(Cursor.S_RESIZE);
             else fireAction(Cursor.DEFAULT);
         });

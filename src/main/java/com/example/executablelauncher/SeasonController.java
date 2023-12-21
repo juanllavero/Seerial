@@ -6,9 +6,11 @@ import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -18,10 +20,13 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -120,6 +125,10 @@ public class SeasonController {
     private void updateInfo(Season season){
         if (mp != null){
             mp.stop();
+            double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+            if (aspectRatio > 1.8f){
+                //backgroundShadow.setTranslateX(-backgroundVideo.getFitWidth() / 4.5);
+            }
         }
 
         alertTimer = new Timeline(new KeyFrame(Duration.seconds(3), event ->{
@@ -132,9 +141,42 @@ public class SeasonController {
         //Set Background Image
         Image background = new Image("file:" + season.getBackgroundSrc());
         backgroundImage.setImage(background);
-        backgroundImage.setPreserveRatio(false);
+        backgroundImage.setPreserveRatio(true);
         backgroundImage.setSmooth(true);
         backgroundImage.setCache(true);
+
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        double targetAspectRatio = screenWidth / screenHeight;
+
+        // Calcular las dimensiones del recorte
+        double originalWidth = backgroundImage.getImage().getWidth();
+        double originalHeight = backgroundImage.getImage().getHeight();
+        double originalAspectRatio = originalWidth / originalHeight;
+
+        double newWidth, newHeight;
+        if (originalAspectRatio > targetAspectRatio) {
+            // Recortar en la altura
+            newWidth = originalHeight * targetAspectRatio;
+            newHeight = originalHeight;
+        } else {
+            // Recortar en el ancho
+            newWidth = originalWidth;
+            newHeight = originalWidth / targetAspectRatio;
+        }
+
+        // Calcular la posición de inicio del recorte
+        double xOffset = 0;
+        double yOffset = 0;
+
+        // Obtener el lector de píxeles de la imagen original
+        PixelReader pixelReader = backgroundImage.getImage().getPixelReader();
+
+        // Crear una nueva imagen recortada utilizando WritableImage
+        WritableImage croppedImage = new WritableImage(pixelReader, 0, 0, (int) newWidth, (int) newHeight);
+
+        // Crear el nuevo ImageView con la imagen recortada
+        backgroundImage.setImage(croppedImage);
 
         if (season.getLogoSrc().equals("")){
             infoBox.getChildren().remove(0);
@@ -145,8 +187,10 @@ public class SeasonController {
             seriesTitle.setEffect(new DropShadow());
             infoBox.getChildren().add(0, seriesTitle);
         }else{
-            Image logo = new Image("file:" + season.getLogoSrc(), 500, 500, true, true);
+            Image logo = new Image("file:" + season.getLogoSrc(), screenWidth * 0.25, screenHeight * 0.25, true, true);
             logoImage.setImage(logo);
+            logoImage.setFitWidth(screenWidth * 0.15);
+            logoImage.setFitHeight(screenHeight * 0.15);
         }
 
         if (!season.getVideoSrc().equals("")){
@@ -297,6 +341,55 @@ public class SeasonController {
         Platform.runLater(() ->{
             if (mp != null) {
                 if (isVideo){
+                    /*//Fade Out Transition
+                    FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), backgroundImage);
+                    fadeOut.setFromValue(1.0);
+                    fadeOut.setToValue(0);
+                    fadeOut.play();
+
+                    fadeOut.onFinishedProperty().set(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent actionEvent) {
+                            double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+                            if (aspectRatio > 1.8f){
+                                backgroundShadow.setTranslateX(backgroundVideo.getFitWidth() / 4.5);
+                            }
+
+                            backgroundVideo.setVisible(true);
+
+                            //Fade In Transition
+                            FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
+                            fadeIn.setFromValue(0);
+                            fadeIn.setToValue(1.0);
+                            fadeIn.play();
+                            mp.stop();
+                            mp.seek(mp.getStartTime());
+                            mp.play();
+                        }
+                    });*/
+                    /*double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+                    if (aspectRatio > 1.8f){
+                        backgroundVideo.setPreserveRatio(false);
+                    }else
+                        backgroundVideo.setPreserveRatio(true);
+
+                     */
+                    double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+                    double mediaRatio = (double) backgroundVideo.getMediaPlayer().getMedia().getWidth() / backgroundVideo.getMediaPlayer().getMedia().getHeight();
+
+                    backgroundVideo.setPreserveRatio(true);
+
+                    if (screenRatio < 1.8f && mediaRatio > 1.8f){
+                        //Fade Out Transition
+                        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), backgroundImage);
+                        fadeOut.setFromValue(1.0);
+                        fadeOut.setToValue(0);
+                        fadeOut.play();
+                    }else if (screenRatio > 1.8f && mediaRatio > 1.8f){
+                        backgroundVideo.setPreserveRatio(false);
+                    }
+
+
                     backgroundVideo.setVisible(true);
 
                     //Fade In Transition
@@ -304,8 +397,10 @@ public class SeasonController {
                     fadeIn.setFromValue(0);
                     fadeIn.setToValue(1.0);
                     fadeIn.play();
+                    mp.stop();
+                    mp.seek(mp.getStartTime());
+                    mp.play();
                 }
-                mp.play();
             }
         });
     }

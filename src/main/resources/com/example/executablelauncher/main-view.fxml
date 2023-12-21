@@ -47,7 +47,7 @@
                      <right>
                         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                            <children>
-                              <Label alignment="CENTER" prefHeight="35.0" prefWidth="98.0" text="22:30" textFill="WHITE">
+                              <Label fx:id="clock" alignment="CENTER" prefHeight="35.0" prefWidth="98.0" text="22:30" textFill="WHITE">
                                  <font>
                                     <Font size="24.0" />
                                  </font>

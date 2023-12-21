@@ -16,24 +16,27 @@
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
+<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
    <children>
-      <ImageView fx:id="backgroundImage" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="backgroundImage" fitHeight="1080.0" fitWidth="1920.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_LEFT">
          <image>
-            <Image url="@../../../img/backgroundDefault.jpeg" />
+            <Image url="@../../../img/TEST_NoBlur.png" />
          </image>
          <effect>
-            <ColorAdjust brightness="-0.15" />
+            <ColorAdjust brightness="-0.28" />
          </effect>
       </ImageView>
-      <MediaView fx:id="backgroundVideo" fitHeight="720.0" fitWidth="1280.0" preserveRatio="false" />
-      <ImageView fx:id="backgroundShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true">
-         <image>
-            <Image url="@../../../img/BackgroundShadow.png" />
-         </image>
+      <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
          <effect>
-            <ColorAdjust contrast="0.18" />
+            <DropShadow height="255.0" radius="127.0" spread="0.44" width="255.0" />
+         </effect></MediaView>
+      <ImageView fx:id="backgroundShadow" fitHeight="1080.0" fitWidth="1920.0" pickOnBounds="true" StackPane.alignment="CENTER_RIGHT">
+         <effect>
+            <ColorAdjust contrast="0.16" />
          </effect>
+         <image>
+            <Image url="@../../../img/backgroundShadow.png" />
+         </image>
       </ImageView>
       <BorderPane prefWidth="1280.0">
          <right>
@@ -113,7 +116,7 @@
                   </HBox>
                </children>
                <padding>
-                  <Insets bottom="20.0" left="75.0" />
+                  <Insets bottom="100.0" left="130.0" />
                </padding>
             </VBox>
          </center>
@@ -129,7 +132,7 @@
                      <children>
                         <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" pannable="true" styleClass="transparent" stylesheets="@styles.css">
                            <content>
-                              <HBox fx:id="cardContainer" alignment="CENTER_LEFT" prefHeight="300.0" prefWidth="1278.0" stylesheets="@styles.css">
+                              <HBox fx:id="cardContainer" alignment="CENTER_LEFT" prefHeight="98.0" prefWidth="1920.0" stylesheets="@styles.css">
                                  <padding>
                                     <Insets bottom="5.0" left="40.0" right="60.0" top="5.0" />
                                  </padding>
