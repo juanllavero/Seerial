@@ -9,9 +9,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
+import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -27,6 +25,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -46,35 +45,46 @@ public class ImageCropper {
     private Button loadButton;
 
     @FXML
-    private VBox mainBox;
+    private BorderPane mainBox;
 
     @FXML
     private ImageView mainImageView;
-
-    @FXML
-    private ScrollPane rootPane;
 
     @FXML
     private Group selectionGroup;
 
     @FXML
     private TextField urlText;
+    private Image originalImage;
     private Image mainImage;
     private boolean isAreaSelected = false;
     private final AreaSelection areaSelection = new AreaSelection();
-    @FXML
-    private AnchorPane firstAnchor = new AnchorPane();
 
     private double fixedWidth = 0;
     private double fixedHeight = 0;
-    private final double aspectRatio = (double) 7/9;
-
+    private double aspectRatio = (double) 7/9;
+    private double screenRatio = 0;
+    private double originalWidth = 0;
+    private double originalHeight = 0;
+    private double newWidth = 0;
+    private double newHeight = 0;
     public String savePath;
+    private WritableImage imageToSave = null;
+    private WritableImage croppedImage = null;
     private AddCollectionController parentController = null;
+    private AddSeasonController seasonController = null;
 
-    public void initValues(AddCollectionController parent, String path) {
-        parentController = parent;
+    public void setSeasonParent(AddSeasonController s){ seasonController = s; }
+
+    public void setCollectionParent(AddCollectionController s){ parentController = s; }
+
+    public void initValues(String path, boolean isBackground) {
         savePath = path;
+
+        screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+
+        if (isBackground)
+            aspectRatio = screenRatio;
 
         urlText.setPromptText(App.textBundle.getString("urlText"));
         downloadButton.setText(App.buttonsBundle.getString("downloadButton"));
@@ -83,27 +93,35 @@ public class ImageCropper {
 
         fixedWidth = Screen.getPrimary().getBounds().getWidth();
         fixedHeight = Screen.getPrimary().getBounds().getHeight();
+    }
 
-        firstAnchor.setPrefWidth(fixedWidth);
-        firstAnchor.setPrefHeight(fixedHeight);
-        mainBox.prefWidthProperty().bind(firstAnchor.prefWidthProperty());
-        mainBox.prefHeightProperty().bind(firstAnchor.prefHeightProperty());
-        selectionGroup.prefHeight(fixedHeight);
-        selectionGroup.prefWidth(fixedWidth);
-        mainImageView.setFitWidth(fixedWidth / 2);
-        mainImageView.setFitHeight(fixedHeight / 2);
+    private void setImage(){
+        originalHeight = originalImage.getHeight();
+        originalWidth = originalImage.getWidth();
+
+        double originalRatio = originalWidth / originalHeight;
+
+        newHeight = Screen.getPrimary().getBounds().getHeight() / 2;
+        newWidth = newHeight * originalRatio;
+
+        mainImage = new Image(originalImage.getUrl(), newWidth, newHeight, false, true);
+
+        //Show Image
+        mainImageView.setFitHeight(newHeight);
+        mainImageView.setFitWidth(newWidth);
+        mainImageView.setImage(mainImage);
+        areaSelection.selectArea(selectionGroup);
     }
 
     @FXML
     void downloadImage(ActionEvent event) {
         if (!urlText.getText().isEmpty()){
-            mainImage = new Image(urlText.getText(), Screen.getPrimary().getBounds().getWidth() / 1.5, Screen.getPrimary().getBounds().getHeight() / 1.5, true, true);
-            if (mainImage.isError()) {
+            originalImage = new Image(urlText.getText());
+            if (originalImage.isError()) {
                 System.out.println("Error loading image from " + urlText.getText());
             } else {
-                //clearSelection(selectionGroup);
-                mainImageView.setImage(mainImage);
-                areaSelection.selectArea(selectionGroup);
+                clearSelection(selectionGroup);
+                setImage();
             }
         }
     }
@@ -117,34 +135,70 @@ public class ImageCropper {
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
-        File selectedFile = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
+        File selectedFile = fileChooser.showOpenDialog(((Button) event.getSource()).getScene().getWindow());
         if (selectedFile != null) {
             lastDirectory = selectedFile.getPath();
             imageText.setText(selectedFile.getAbsolutePath());
-            //clearSelection(selectionGroup);
-            mainImageView.setImage(mainImage);
-            mainImage = new Image(selectedFile.getAbsolutePath(), Screen.getPrimary().getBounds().getWidth() / 1.5, Screen.getPrimary().getBounds().getHeight() / 1.5, true, true);
-            mainImageView.setImage(mainImage);
-            areaSelection.selectArea(selectionGroup);
+            try{
+                originalImage = new Image(selectedFile.toURI().toURL().toExternalForm());
+                clearSelection(selectionGroup);
+                setImage();
+            } catch (MalformedURLException e) {
+                System.err.println("ImageCropper: Error loading image");
+            }
+        }
+    }
+
+    public void loadImageToCrop(File imgFile){
+        if (imgFile != null) {
+            try{
+                lastDirectory = imgFile.getPath();
+                imageText.setText(imgFile.getAbsolutePath());
+                originalImage = new Image(imgFile.toURI().toURL().toExternalForm());
+                setImage();
+            } catch (MalformedURLException e) {
+                System.err.println("ImageCropper: Error trying to load an image to crop");
+            }
         }
     }
 
     @FXML
     private void cropImage(ActionEvent action) {
+        //Scale to transform the points
+        double scaleX = (originalWidth / newWidth);
+        double scaleY = (originalHeight / newHeight);
+
+        //Size of the rectangle
         int width = (int) areaSelection.selectArea(selectionGroup).getBoundsInParent().getWidth();
         int height = (int) areaSelection.selectArea(selectionGroup).getBoundsInParent().getHeight();
 
+        //Size of the resized rectangle
+        int realWidth = (int) (scaleX * width);
+        int realHeight = (int) (scaleY * height);
+
+        //Starting position of the resized rectangle
+        int x = (int) (areaSelection.selectArea(selectionGroup).getBoundsInParent().getMinX() * scaleX);
+        int y = (int) (areaSelection.selectArea(selectionGroup).getBoundsInParent().getMinY() * scaleY);
+
+        //Crop image
         SnapshotParameters parameters = new SnapshotParameters();
         parameters.setFill(Color.TRANSPARENT);
         parameters.setViewport(new Rectangle2D(areaSelection.selectArea(selectionGroup).getBoundsInParent().getMinX(), areaSelection.selectArea(selectionGroup).getBoundsInParent().getMinY(), width, height));
-
         WritableImage wi = new WritableImage(width, height);
         Image croppedImage = mainImageView.snapshot(parameters, wi);
 
-        showCroppedImageNewStage(wi, croppedImage);
+        //Crop original image
+        WritableImage realImage = new WritableImage(realWidth, realHeight);
+        SnapshotParameters param2 = new SnapshotParameters();
+        param2.setFill(Color.TRANSPARENT);
+        param2.setViewport(new Rectangle2D(x, y, realWidth, realHeight));
+        Image realCropped = new ImageView(originalImage).snapshot(param2, realImage);
+
+        //Show cropped image and pass original to save
+        showCroppedImageNewStage(wi, croppedImage, realImage);
     }
 
-    private void showCroppedImageNewStage(WritableImage wi, Image croppedImage) {
+    private void showCroppedImageNewStage(WritableImage wi, Image croppedImage, WritableImage realImage) {
         final Stage croppedImageStage = new Stage();
         croppedImageStage.setAlwaysOnTop(true);
         croppedImageStage.setResizable(true);
@@ -154,7 +208,7 @@ public class ImageCropper {
         final MenuBar menuBar = new MenuBar();
         final Menu menu1 = new Menu(App.textBundle.getString("file"));
         final MenuItem save = new MenuItem(App.textBundle.getString("save"));
-        save.setOnAction(event -> saveCroppedImage(croppedImageStage,wi));
+        save.setOnAction(event -> saveCroppedImage(croppedImageStage, realImage));
         menu1.getItems().add(save);
         menuBar.getMenus().add(menu1);
         borderPane.setTop(menuBar);
@@ -167,13 +221,22 @@ public class ImageCropper {
         File file = new File(savePath);
 
         try{
-            RenderedImage renderedImage = SwingFXUtils.fromFXImage(wi, null);
+            RenderedImage renderedImage;
+            if (croppedImage != null)
+                renderedImage = SwingFXUtils.fromFXImage(croppedImage, null);
+            else
+                renderedImage = SwingFXUtils.fromFXImage(wi, null);
             ImageIO.write(renderedImage,"png", file);
         } catch (IOException e) {
             System.err.println("Image not saved");
         }
 
-        parentController.setImageFile("src/main/resources/img/seriesCovers/" + file.getName());
+        if (parentController != null) {
+            parentController.setImageFile("src/main/resources/img/seriesCovers/" + file.getName());
+        }else {
+            seasonController.loadBackground(file.getAbsolutePath());
+            seasonController.setCroppedImage(true);
+        }
 
         stage.close();
     }

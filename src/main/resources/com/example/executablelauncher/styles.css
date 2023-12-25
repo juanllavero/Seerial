@@ -8,7 +8,7 @@
     -fx-background-color: transparent;
 
     /* TestMain colors */
-    -fx-main-color: #DB162F;
+    -fx-main-color: #960F20;
     -fx-light-color: #EDF2F4;
     -fx-dark-color: #0E0F19;
     -fx-dark-grey-color: #24252E;
@@ -119,19 +119,38 @@
 .desktopTextButton{
     -fx-background-color: transparent;
     -fx-text-fill: white;
-    -fx-font-size: 15px;
+    -fx-font-size: 18px;
 }
 
 .desktopTextButton:hover{
-    -fx-background-color: rgba(147, 147, 147, 0.6);
+    -fx-background-color: -fx-lighter-grey-color;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+}
+
+.desktopButtonActive{
+    -fx-background-color: -fx-main-color;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.seasonButton{
+    -fx-background-color: transparent;
     -fx-text-fill: white;
     -fx-font-size: 15px;
 }
 
-.desktopButtonActive{
-    -fx-background-color: rgba(37, 37, 37, 0.59);
+.seasonButton:hover{
+    -fx-text-fill: #989898;
+    -fx-font-size: 15px;
+}
+
+.seasonButtonActive{
     -fx-text-fill: white;
     -fx-font-size: 15px;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: white;
 }
 
 .roundButton:hover{

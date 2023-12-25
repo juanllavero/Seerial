@@ -14,6 +14,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.BackgroundImage;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -108,6 +109,9 @@ public class AddSeasonController {
     //Old values to check
     private String oldLogoPath = "";
     private String oldBackgroundPath = "";
+    private String oldVideoPath = "";
+    private String oldMusicPath = "";
+    private boolean croppedImage = false;
 
     public void setParentController(DesktopViewController parent){
         parentController = parent;
@@ -118,6 +122,8 @@ public class AddSeasonController {
 
         oldBackgroundPath = s.getBackgroundSrc();
         oldLogoPath = s.getLogoSrc();
+        oldVideoPath = s.getVideoSrc();
+        oldMusicPath = s.getMusicSrc();
 
         nameField.setText(s.getName());
         yearField.setText((s.getYear()));
@@ -159,6 +165,10 @@ public class AddSeasonController {
         musicText.setText(App.textBundle.getString("backgroundMusic"));
         addButton.setText(App.buttonsBundle.getString("addButton"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
+    }
+
+    public void setCroppedImage(boolean croppedImage) {
+        this.croppedImage = croppedImage;
     }
 
     public void loadLogo(String src){
@@ -216,6 +226,31 @@ public class AddSeasonController {
         if (selectedLogo != null){
             loadLogo(selectedLogo.getPath());
             lastDirectory = selectedLogo.getPath().substring(0, (selectedLogo.getPath().length() - selectedLogo.getName().length()));
+        }
+    }
+
+    @FXML
+    void cropBackground(ActionEvent event){
+        if (selectedBackground != null){
+            try{
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("image-cropper-view.fxml"));
+                Parent root1 = fxmlLoader.load();
+                ImageCropper controller = fxmlLoader.getController();
+                controller.setSeasonParent(this);
+                controller.initValues(selectedBackground.getAbsolutePath(), true);
+                controller.loadImageToCrop(selectedBackground);
+                Stage stage = new Stage();
+                stage.setTitle("ImageDownloader");
+                stage.setResizable(true);
+                stage.setMaximized(false);
+                stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+                Scene scene = new Scene(root1);
+                stage.setScene(scene);
+                App.setPopUpProperties(stage);
+                stage.show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -315,8 +350,10 @@ public class AddSeasonController {
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allVideos"), "*.mp4"));
         selectedVideo = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
-        videoField.setText(selectedVideo.getPath());
-        lastVideoDirectory = selectedVideo.getPath();
+        if (selectedVideo != null){
+            videoField.setText(selectedVideo.getPath());
+            lastVideoDirectory = selectedVideo.getPath();
+        }
     }
 
     @FXML
@@ -329,8 +366,10 @@ public class AddSeasonController {
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allAudios"), "*.mp3", "*.wav", "*.flac", "*.aac"));
         selectedMusic = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
-        musicField.setText(selectedMusic.getPath());
-        lastMusicDirectory = selectedMusic.getPath();
+        if (selectedMusic != null){
+            musicField.setText(selectedMusic.getPath());
+            lastMusicDirectory = selectedMusic.getPath();
+        }
     }
 
     @FXML
@@ -425,79 +464,69 @@ public class AddSeasonController {
         season.setYear(yearField.getText());
         season.setCollectionName(collection.getName());
 
-        if (seasonToEdit != null && selectedBackground != null) {
-            String newName = selectedBackground.getName();
-            String oldName = "";
-            if (!oldBackgroundPath.isEmpty())
-                oldName = oldBackgroundPath.substring(oldBackgroundPath.length() - newName.length());
-            if (oldBackgroundPath.isEmpty() || !newName.equals(oldName)){
+
+        //Save Background
+        String newName = "";
+        if (selectedBackground != null)
+            newName = selectedBackground.getName();
+        String oldName = "";
+        if (!oldBackgroundPath.isEmpty())
+            oldName = oldBackgroundPath.substring(oldBackgroundPath.lastIndexOf("/")+1);
+        if (oldBackgroundPath.isEmpty() || !newName.equals(oldName) || croppedImage){
+            saveBackground(season);
+        }
+
+        //Save Logo
+        if (selectedLogo != null)
+            newName = selectedLogo.getName();
+        oldName = "";
+        if (!oldLogoPath.isEmpty())
+            oldName = oldLogoPath.substring(oldLogoPath.lastIndexOf("/")+1);
+        if (oldLogoPath.isEmpty() || !newName.equals(oldName)){
+            try {
+                File f = new File(season.getLogoSrc());
+                if (f.exists())
+                    Files.delete(FileSystems.getDefault().getPath(season.getLogoSrc()));
+                saveLogo(season);
+            } catch (IOException e) {
+                System.err.println("Logo not deleted");
+            }
+        }
+
+        //Save Video
+        if (!videoField.getText().isEmpty()){
+            newName = videoField.getText().substring(oldVideoPath.lastIndexOf("/") + 1);
+            oldName = "";
+            if (!oldVideoPath.isEmpty())
+                oldName = oldVideoPath.substring(oldVideoPath.lastIndexOf("/") + 1);
+            System.out.println(oldName);
+            System.out.println(newName);
+            if (oldVideoPath.isEmpty() || !newName.equals(oldName)){
                 try{
-                    File f = new File(season.getBackgroundSrc());
-                    if (f.exists())
-                        Files.delete(f.toPath());
-                    f = new File(season.getFullScreenBlurImageSrc());
-                    if (f.exists())
-                        Files.delete(f.toPath());
-                    f = new File(season.getDesktopBackgroundEffect());
-                    if (f.exists())
-                        Files.delete(f.toPath());
-                    f = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + season.getName() + "_desktopBlur.png");
-                    if (f.exists())
-                        Files.delete(f.toPath());
-                    saveBackground(season, collection.getSeasons().indexOf(season.getId()));
+                    if (!season.getVideoSrc().isEmpty())
+                        Files.delete(FileSystems.getDefault().getPath(season.getVideoSrc()));
+                    saveVideo(season);
                 } catch (IOException e) {
-                    System.err.println("Background not deleted");
+                    System.err.println("Video not deleted");
                 }
             }
-        }else if (seasonToEdit == null && selectedBackground != null){
-            saveBackground(season, collection.getSeasons().size() + 1);
-        }else{
-            season.setBackgroundSrc("");
         }
 
-        if (seasonToEdit != null && selectedLogo != null) {
-            String newName = selectedLogo.getName();
-            String oldName = "";
-            if (!oldLogoPath.isEmpty())
-                oldName = oldLogoPath.substring(oldLogoPath.length() - newName.length());
-            if (oldLogoPath.isEmpty() || !newName.equals(oldName)){
-                try {
-                    File f = new File(season.getLogoSrc());
-                    if (f.exists())
-                        Files.delete(FileSystems.getDefault().getPath(season.getLogoSrc()));
-                    saveLogo(season, collection.getSeasons().indexOf(season.getId()));
+        //Save Music
+        if (!musicField.getText().isEmpty()){
+            newName = musicField.getText().substring(oldMusicPath.lastIndexOf("/") + 1);
+            oldName = "";
+            if (!oldMusicPath.isEmpty())
+                oldName = oldMusicPath.substring(oldMusicPath.lastIndexOf("/") + 1);
+            if (oldMusicPath.isEmpty() || !newName.equals(oldName)){
+                try{
+                    if (!season.getMusicSrc().isEmpty())
+                        Files.delete(FileSystems.getDefault().getPath(season.getMusicSrc()));
+                    saveMusic(season);
                 } catch (IOException e) {
-                    System.err.println("Logo not deleted");
+                    System.err.println("Music not deleted");
                 }
             }
-        }else if (seasonToEdit == null && selectedLogo != null){
-            saveLogo(season, collection.getSeasons().size() + 1);
-        }else{
-            season.setLogoSrc("");
-        }
-
-        if (seasonToEdit != null && !videoField.getText().equals(season.getVideoSrc())) {
-            try{
-                if (!season.getVideoSrc().equals(""))
-                    Files.delete(FileSystems.getDefault().getPath(season.getVideoSrc()));
-                saveVideo(season, collection.getSeasons().indexOf(season.getId()));
-            } catch (IOException e) {
-                System.err.println("Video not deleted");
-            }
-        }else{
-            saveVideo(season, collection.getSeasons().size() + 1);
-        }
-
-        if (seasonToEdit != null && !musicField.getText().equals(season.getMusicSrc())) {
-            try{
-                if (!season.getMusicSrc().equals(""))
-                    Files.delete(FileSystems.getDefault().getPath(season.getMusicSrc()));
-                saveMusic(season, collection.getSeasons().indexOf(season.getId()));
-            } catch (IOException e) {
-                System.err.println("Background not deleted");
-            }
-        }else{
-            saveMusic(season, collection.getSeasons().size() + 1);
         }
 
         if (!orderField.getText().isEmpty() && !orderField.getText().equals("0")){
@@ -520,113 +549,142 @@ public class AddSeasonController {
         stage.close();
     }
 
-    private void saveBackground(Season s, int seasonNumber){
-        File newBackground = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonNumber + "_sb.png");
+    private void saveBackground(Season s){
+        if (selectedBackground != null){
+            //Clear old images
+            try{
+                File f;
+                if (!croppedImage){
+                    f = new File(s.getBackgroundSrc());
+                    if (f.exists())
+                        Files.delete(f.toPath());
+                }
+                f = new File("src/main/resources/img/backgrounds/" + s.getId() + "_fullBlur.png");
+                if (f.exists())
+                    Files.delete(f.toPath());
+                f = new File("src/main/resources/img/backgrounds/" + s.getId() + "_transparencyEffect.png");
+                if (f.exists())
+                    Files.delete(f.toPath());
+                f = new File("src/main/resources/img/backgrounds/" + s.getId() + "_desktopBlur.png");
+                if (f.exists())
+                    Files.delete(f.toPath());
+            } catch (IOException e) {
+                System.err.println("AddSeasonController: Error removing old images");
+            }
 
-        try{
-            Files.copy(selectedBackground.toPath(), newBackground.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }catch (IOException e){
-            System.err.println("Background not copied");
+            File newBackground;
+            if (!croppedImage || seasonToEdit == null){
+                newBackground = new File("src/main/resources/img/backgrounds/" + s.getId() + "_sb.png");
+
+                try{
+                    Files.copy(selectedBackground.toPath(), newBackground.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }catch (IOException e){
+                    System.err.println("Background not copied");
+                }
+
+                s.setBackgroundSrc("src/main/resources/img/backgrounds/" + newBackground.getName());
+            }else{
+                newBackground = new File(seasonToEdit.getBackgroundSrc());
+            }
+
+            Image image = null;
+            try{
+                image = new Image(newBackground.toURI().toURL().toExternalForm());
+            } catch (MalformedURLException e) {
+                System.err.println("Background image not created");
+            }
+
+            ImageView backgroundBlur = new ImageView(image);
+            GaussianBlur blur = new GaussianBlur();
+            blur.setRadius(27);
+            backgroundBlur.setEffect(blur);
+
+            File backgroundFullscreenBlur = new File("src/main/resources/img/backgrounds/" + s.getId() + "_fullBlur.png");
+            BufferedImage bImageFull = SwingFXUtils.fromFXImage(backgroundBlur.snapshot(null, null), null);
+
+            try {
+                ImageIO.write(bImageFull, "png", backgroundFullscreenBlur);
+            } catch (IOException e) {
+                System.err.println("Blur image fullscreen error");
+            }
+
+            bImageFull.flush();
+
+            File file = new File(backgroundFullscreenBlur.getAbsolutePath());
+            try{
+                image = new Image(file.toURI().toURL().toExternalForm());
+            } catch (MalformedURLException e) {
+                System.err.println("Background image creation error");
+            }
+            assert image != null;
+            PixelReader reader = image.getPixelReader();
+            WritableImage newImage = new WritableImage(reader
+                    , (int) (image.getWidth() * 0.03), (int) (image.getHeight() * 0.05)
+                    , (int) (image.getWidth() * 0.93), (int) (image.getHeight() * 0.9));
+
+            try{
+                RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
+                ImageIO.write(renderedImage,"png", file);
+            } catch (IOException e) {
+                System.err.println("Background image copy error");
+            }
+
+            ImageView backgroundBlurDesktop = new ImageView(image);
+            blur.setRadius(80);
+            backgroundBlurDesktop.setEffect(blur);
+
+            File backgroundDesktopBlur = new File("src/main/resources/img/backgrounds/" + s.getId() + "_desktopBlur.png");
+            BufferedImage bImageDesktop = SwingFXUtils.fromFXImage(backgroundBlurDesktop.snapshot(null, null), null);
+
+            try {
+                ImageIO.write(bImageDesktop, "png", backgroundDesktopBlur);
+            } catch (IOException e) {
+                System.err.println("Blur image desktop error");
+            }
+
+            bImageDesktop.flush();
+
+            file = new File(backgroundDesktopBlur.getAbsolutePath());
+            try{
+                image = new Image(file.toURI().toURL().toExternalForm());
+            } catch (MalformedURLException e) {
+                System.err.println("Background image creation error");
+            }
+
+            reader = image.getPixelReader();
+            newImage = new WritableImage(reader
+                    , (int) (image.getWidth() * 0.08), (int) (image.getHeight() * 0.1)
+                    , (int) (image.getWidth() * 0.86), (int) (image.getHeight() * 0.8));
+
+            try{
+                RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
+                ImageIO.write(renderedImage,"png", file);
+            } catch (IOException e) {
+                System.err.println("Background image copy error");
+            }
+
+            s.setFullScreenBlurImageSrc("src/main/resources/img/backgrounds/" + backgroundFullscreenBlur.getName());
+
+            s.setDesktopBackgroundEffect(setTransparencyEffect(s.getBackgroundSrc(), s.getId()));
+
+            setDesktopBackgroundBlur(s.getId());
         }
-
-        s.setBackgroundSrc("src/main/resources/img/backgrounds/" + newBackground.getName());
-
-        Image image = null;
-        try{
-            image = new Image(newBackground.toURI().toURL().toExternalForm(), Screen.getPrimary().getBounds().getWidth()
-                    , Screen.getPrimary().getBounds().getHeight(), false, true);
-        } catch (MalformedURLException e) {
-            System.err.println("Background image not created");
-        }
-
-        ImageView backgroundBlur = new ImageView(image);
-        GaussianBlur blur = new GaussianBlur();
-        blur.setRadius(27);
-        backgroundBlur.setEffect(blur);
-
-        File backgroundFullscreenBlur = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + s.getName() + "_fullBlur.png");
-        BufferedImage bImageFull = SwingFXUtils.fromFXImage(backgroundBlur.snapshot(null, null), null);
-
-        try {
-            ImageIO.write(bImageFull, "png", backgroundFullscreenBlur);
-        } catch (IOException e) {
-            System.err.println("Blur image fullscreen error");
-        }
-
-        bImageFull.flush();
-
-        File file = new File(backgroundFullscreenBlur.getAbsolutePath());
-        try{
-            image = new Image(file.toURI().toURL().toExternalForm());
-        } catch (MalformedURLException e) {
-            System.err.println("Background image creation error");
-        }
-        assert image != null;
-        PixelReader reader = image.getPixelReader();
-        WritableImage newImage = new WritableImage(reader
-                , (int) (image.getWidth() * 0.03), (int) (image.getHeight() * 0.05)
-                , (int) (image.getWidth() * 0.93), (int) (image.getHeight() * 0.9));
-
-        try{
-            RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
-            ImageIO.write(renderedImage,"png", file);
-        } catch (IOException e) {
-            System.err.println("Background image copy error");
-        }
-
-        ImageView backgroundBlurDesktop = new ImageView(image);
-        blur.setRadius(80);
-        backgroundBlurDesktop.setEffect(blur);
-
-        File backgroundDesktopBlur = new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + s.getName() + "_desktopBlur.png");
-        BufferedImage bImageDesktop = SwingFXUtils.fromFXImage(backgroundBlurDesktop.snapshot(null, null), null);
-
-        try {
-            ImageIO.write(bImageDesktop, "png", backgroundDesktopBlur);
-        } catch (IOException e) {
-            System.err.println("Blur image desktop error");
-        }
-
-        bImageDesktop.flush();
-
-        file = new File(backgroundDesktopBlur.getAbsolutePath());
-        try{
-            image = new Image(file.toURI().toURL().toExternalForm());
-        } catch (MalformedURLException e) {
-            System.err.println("Background image creation error");
-        }
-
-        reader = image.getPixelReader();
-        newImage = new WritableImage(reader
-                , (int) (image.getWidth() * 0.08), (int) (image.getHeight() * 0.1)
-                , (int) (image.getWidth() * 0.86), (int) (image.getHeight() * 0.8));
-
-        try{
-            RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
-            ImageIO.write(renderedImage,"png", file);
-        } catch (IOException e) {
-            System.err.println("Background image copy error");
-        }
-
-        s.setFullScreenBlurImageSrc("src/main/resources/img/backgrounds/" + backgroundFullscreenBlur.getName());
-
-        s.setDesktopBackgroundEffect(setTransparencyEffect(s.getBackgroundSrc(), s.getName()));
-
-        setDesktopBackgroundBlur(s.getName());
     }
 
-    private void saveLogo(Season s, int seasonNumber){
-        File newLogo = new File("src/main/resources/img/logos/" + collection.getName() + "_" + seasonNumber + "_sl.png");
+    private void saveLogo(Season s){
+        if (selectedLogo != null){
+            File newLogo = new File("src/main/resources/img/logos/" + s.getId() + "_sl.png");
 
-        try{
-            Files.copy(selectedLogo.toPath(), newLogo.toPath());
-        }catch (IOException e){
-            System.err.println("Logo not copied");
+            try{
+                Files.copy(selectedLogo.toPath(), newLogo.toPath());
+            }catch (IOException e){
+                System.err.println("Logo not copied");
+            }
+            s.setLogoSrc("src/main/resources/img/logos/" + newLogo.getName());
         }
-        s.setLogoSrc("src/main/resources/img/logos/" + newLogo.getName());
     }
 
-    private void saveVideo(Season s, int seasonNumber){
+    private void saveVideo(Season s){
         if (!videoField.getText().isEmpty()){
             if (selectedVideo == null)
                 selectedVideo = new File(videoField.getText());
@@ -636,7 +694,7 @@ public class AddSeasonController {
             if (i > 0) {
                 extension = selectedVideo.getName().substring(i+1);
             }
-            File newVideo = new File("src/main/resources/video/" + collection.getName() + "_" + seasonNumber + "_sv." + extension);
+            File newVideo = new File("src/main/resources/video/" + s.getId() + "_sv." + extension);
 
             try{
                 Files.copy(selectedVideo.toPath(), newVideo.toPath());
@@ -649,7 +707,7 @@ public class AddSeasonController {
         }
     }
 
-    private void saveMusic(Season s, int seasonNumber){
+    private void saveMusic(Season s){
         if (!musicField.getText().isEmpty()){
             if (selectedMusic == null)
                 selectedMusic = new File(musicField.getText());
@@ -659,7 +717,7 @@ public class AddSeasonController {
             if (i > 0) {
                 extension = selectedMusic.getName().substring(i+1);
             }
-            File newMusic = new File("src/main/resources/music/" + collection.getName() + "_" + seasonNumber + "_sm." + extension);
+            File newMusic = new File("src/main/resources/music/" + s.getId() + "_sm." + extension);
 
             try{
                 Files.copy(selectedMusic.toPath(), newMusic.toPath());
@@ -673,7 +731,7 @@ public class AddSeasonController {
         }
     }
 
-    private String setTransparencyEffect(String src, String seasonName){
+    private String setTransparencyEffect(String src, int seasonId){
         try {
             //Load image
             BufferedImage originalImage = ImageIO.read(new File(src));
@@ -708,19 +766,19 @@ public class AddSeasonController {
 
             //Save the image with the progressive transparency effect
             ImageIO.write(blendedImage, "png"
-                    , new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonName + "_transparencyEffect.png"));
+                    , new File("src/main/resources/img/backgrounds/" + seasonId + "_transparencyEffect.png"));
             originalImage.flush();
             blendedImage.flush();
         } catch (IOException e) {
             System.err.println("AddSeasonController: error applying transparency effect to background");
         }
-        return "src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonName + "_transparencyEffect.png";
+        return "src/main/resources/img/backgrounds/" + seasonId + "_transparencyEffect.png";
     }
 
-    private void setDesktopBackgroundBlur(String seasonName){
+    private void setDesktopBackgroundBlur(int seasonId){
         try {
             BufferedImage backgroundEffect = ImageIO.read(new File("src/main/resources/img/Background.png"));
-            BufferedImage originalImage = ImageIO.read(new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonName + "_desktopBlur.png"));
+            BufferedImage originalImage = ImageIO.read(new File("src/main/resources/img/backgrounds/" + seasonId + "_desktopBlur.png"));
 
             float contrastFactor = 0.1f;
             BufferedImage highContrastImage = applyContrast(backgroundEffect, contrastFactor);
@@ -728,7 +786,7 @@ public class AddSeasonController {
             BufferedImage resultImage = applyNoiseEffect(highContrastImage, originalImage);
             resultImage = applyNoiseEffect(resultImage, originalImage);
 
-            ImageIO.write(resultImage, "png", new File("src/main/resources/img/backgrounds/" + collection.getName() + "_" + seasonName + "_desktopBlur.png"));
+            ImageIO.write(resultImage, "png", new File("src/main/resources/img/backgrounds/" + seasonId + "_desktopBlur.png"));
             backgroundEffect.flush();
             originalImage.flush();
             highContrastImage.flush();

@@ -5,10 +5,10 @@ import java.io.Serializable;
 public class Disc implements Serializable {
     public static int NextID = 0;
     public final int id;
-    public String name;
-    public String episodeNumber;
-    public String executableSrc;
-    public String type;    //Folder or File
+    public String name = "";
+    public String episodeNumber = "";
+    public String executableSrc = "";
+    public String type = "";    //Folder or File
     public int seasonID = -1;
 
     public Disc() {

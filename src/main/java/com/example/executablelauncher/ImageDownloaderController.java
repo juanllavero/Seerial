@@ -108,8 +108,8 @@ public class ImageDownloaderController {
 
         title.setText(App.textBundle.getString("imageDownloaderTitle"));
         transparentCheck.setText(App.textBundle.getString("transparentCheck"));
-        //widthField.setText(width);
-        //heightField.setText(height);
+        widthField.setText("");
+        heightField.setText("");
         resolutionText.setText(App.textBundle.getString("resolutionText"));
         selectImageButton.setText(App.buttonsBundle.getString("selectButton"));
         loadMoreButton.setText(App.buttonsBundle.getString("loadMoreButton"));

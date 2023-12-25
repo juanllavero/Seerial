@@ -1,12 +1,15 @@
 package com.example.executablelauncher;
 
 import javafx.animation.FadeTransition;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -21,12 +24,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -158,10 +158,18 @@ public class DesktopViewController {
 
     @FXML
     private HBox topRightBar;
+
+    @FXML
+    private ImageView noiseImage;
+
+    @FXML
+    private StackPane seriesStack;
     //endregion
 
     //region ATTRIBUTES
     private final ImageViewPane seasonBackground = new ImageViewPane();
+    private final ImageViewPane seasonBackgroundNoise = new ImageViewPane();
+    private final ImageViewPane seriesBackgroundNoise = new ImageViewPane();
 
     private List<Series> seriesList = new ArrayList<>();
     private List<Season> seasonList = new ArrayList<>();
@@ -177,14 +185,22 @@ public class DesktopViewController {
     private String currentCategory = "";
     private double xOffset = 0;
     private double yOffset = 0;
+    private double ASPECT_RATIO = 16.0 / 9.0;
     //endregion
 
     public void initValues(){
+        Stage stage = (Stage) mainBox.getScene().getWindow();
         updateLanguage();
 
         categorySelector.getSelectionModel()
                 .selectedItemProperty()
                 .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectCategory(newValue) );
+
+        setDragWindow(topBar);
+
+        menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+            hideMenu();
+        });
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (KeyCode.F11 == event.getCode()) {
@@ -198,11 +214,30 @@ public class DesktopViewController {
             }
         });
 
-        setDragWindow(topBar);
+        ChangeListener<Number> widthListener = (obs, oldWidth, newWidth) -> {
+            double scaleFactor;
+            double currentAspectRatio = newWidth.doubleValue() / stage.heightProperty().doubleValue();
 
-        menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
-            hideMenu();
-        });
+            if (currentAspectRatio >= ASPECT_RATIO) {
+                scaleFactor = newWidth.doubleValue() / globalBackground.getImage().getWidth();
+                globalBackground.setFitWidth(newWidth.doubleValue());
+                globalBackground.setFitHeight(globalBackground.getImage().getHeight() * scaleFactor);
+            }
+        };
+
+        ChangeListener<Number> heightListener = (obs, oldHeight, newHeight) -> {
+            double scaleFactor;
+            double currentAspectRatio = stage.widthProperty().doubleValue() / newHeight.doubleValue();
+            double ratioHeight = stage.widthProperty().doubleValue() / ASPECT_RATIO;
+            if (ratioHeight < newHeight.doubleValue()){
+                scaleFactor = newHeight.doubleValue() / globalBackground.getImage().getHeight();
+                globalBackground.setFitHeight(newHeight.doubleValue());
+                globalBackground.setFitWidth(globalBackground.getImage().getWidth() * scaleFactor);
+            }
+        };
+
+        stage.widthProperty().addListener(widthListener);
+        stage.heightProperty().addListener(heightListener);
 
         mainBox.getScene().getWindow().setOnCloseRequest(e -> closeWindow());
 
@@ -225,18 +260,35 @@ public class DesktopViewController {
         discContainer.setPrefHeight(screenHeight);
         seasonScroll.setPrefHeight(screenHeight);
         seasonScroll.prefWidthProperty().bind(mainBox.prefWidthProperty());
-        centralVBox.setPrefHeight(screenHeight);
+        centralVBox.prefHeightProperty().bind(seasonScroll.prefHeightProperty());
         seasonInfoPane.prefHeightProperty().bind(centralVBox.heightProperty());
+        seasonInfoPane.prefWidthProperty().bind(mainBox.prefWidthProperty());
         seasonLogoBox.setPrefHeight(screenHeight * 0.6);
         seasonInfoPane.getChildren().add(0, seasonBackground);
+        seasonInfoPane.getChildren().add(1, seasonBackgroundNoise);
 
-        globalBackground.fitWidthProperty().bind(mainBox.widthProperty());
-        globalBackground.fitHeightProperty().bind(mainBox.heightProperty());
-        globalBackground.setPreserveRatio(false);
+        ImageView seasonNoise = new ImageView(new Image("file:src/main/resources/img/noise.png"));
+        seasonNoise.setPreserveRatio(false);
+        seasonNoise.setOpacity(0.03);
+        seasonBackgroundNoise.setImageView(seasonNoise);
+
+        seriesStack.prefHeightProperty().bind(seriesScrollPane.heightProperty());
+        seriesStack.getChildren().add(0, seriesBackgroundNoise);
+
+        ImageView seriesNoise = new ImageView(new Image("file:src/main/resources/img/noise.png"));
+        seriesNoise.setPreserveRatio(false);
+        seriesNoise.setOpacity(0.03);
+        seriesBackgroundNoise.setImageView(seriesNoise);
+
+        globalBackground.setPreserveRatio(true);
 
         globalBackgroundShadow.fitWidthProperty().bind(mainBox.widthProperty());
         globalBackgroundShadow.fitHeightProperty().bind(mainBox.heightProperty());
         globalBackgroundShadow.setPreserveRatio(false);
+
+        noiseImage.setFitWidth(screenWidth);
+        noiseImage.setFitHeight(screenHeight);
+        noiseImage.setPreserveRatio(false);
 
         backgroundShadow.fitWidthProperty().bind(mainBox.widthProperty());
         backgroundShadow.fitHeightProperty().bind(mainBox.heightProperty());
@@ -317,8 +369,9 @@ public class DesktopViewController {
     }
 
     private void fillSeasonInfo() {
-        globalBackground.setImage(new Image("file:" +
-                "src/main/resources/img/backgrounds/" + selectedSeries.getName() + "_" + selectedSeason.getName() + "_desktopBlur.png"));
+        Image i = new Image("file:" + "src/main/resources/img/backgrounds/" + selectedSeason.getId() + "_desktopBlur.png");
+        ASPECT_RATIO = i.getWidth() / i.getHeight();
+        globalBackground.setImage(i);
         ImageView img = new ImageView(new Image("file:" + selectedSeason.getDesktopBackgroundEffect()));
         img.setPreserveRatio(true);
         seasonBackground.setImageView(img);
@@ -338,7 +391,7 @@ public class DesktopViewController {
             File file = new File(selectedSeason.getLogoSrc());
             try{
                 seasonLogo.setImage(new Image(file.toURI().toURL().toExternalForm()));
-                seasonLogo.setFitWidth(353);
+                seasonLogo.setFitWidth(500);
                 seasonLogo.setPreserveRatio(true);
                 seasonLogoBox.getChildren().add(seasonLogo);
             } catch (MalformedURLException e) {
@@ -374,7 +427,7 @@ public class DesktopViewController {
             Button seasonButton = new Button();
             seasonButton.setText(s.getName());
             seasonButton.setBackground(null);
-            seasonButton.getStyleClass().add("desktopTextButton");
+            seasonButton.getStyleClass().add("seasonButton");
             seasonButton.setMaxWidth(Integer.MAX_VALUE);
             seasonButton.setAlignment(Pos.BASELINE_LEFT);
             seasonButton.setWrapText(true);
@@ -512,11 +565,11 @@ public class DesktopViewController {
         //Clear Selected Button
         for (Button b : seasonsButtons){
             b.getStyleClass().clear();
-            b.getStyleClass().add("desktopTextButton");
+            b.getStyleClass().add("seasonButton");
         }
         //Select current button
         btn.getStyleClass().clear();
-        btn.getStyleClass().add("desktopButtonActive");
+        btn.getStyleClass().add("seasonButtonActive");
         String seasonName = btn.getText();
         Season season = null;
 
@@ -750,30 +803,25 @@ public class DesktopViewController {
     }
     @FXML
     void addCollection(MouseEvent event) {
-        if (currentCategory.equals("NO CATEGORY"))
-            return;
-
-        Category cat = App.findCategory(currentCategory);
-        if (cat != null){
-            showBackgroundShadow();
-            try{
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCategory-view.fxml"));
-                Parent root1 = fxmlLoader.load();
-                AddCategoryController addCategoryController = fxmlLoader.getController();
-                addCategoryController.setParent(this);
-                addCategoryController.setValues(cat.name, cat.showOnFullscreen);
-                Stage stage = new Stage();
-                stage.setTitle("Edit Category");
-                stage.initStyle(StageStyle.UNDECORATED);
-                stage.setScene(new Scene(root1));
-                App.setPopUpProperties(stage);
-                stage.show();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            updateCategories();
+        showBackgroundShadow();
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCollection-view.fxml"));
+            Parent root1 = fxmlLoader.load();
+            AddCollectionController addColController = fxmlLoader.getController();
+            addColController.setParentController(this);
+            addColController.initializeCategories();
+            Stage stage = new Stage();
+            stage.setTitle(App.textBundle.getString("collectionWindowTitle"));
+            stage.initStyle(StageStyle.UNDECORATED);
+            Scene scene = new Scene(root1);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+            App.setPopUpProperties(stage);
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        hideMenu();
     }
     @FXML
     void addSeason(){

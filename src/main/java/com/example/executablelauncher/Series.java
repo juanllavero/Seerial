@@ -7,10 +7,10 @@ import java.util.List;
 public class Series implements Serializable {
     public static int NextID = 0;
     public final int id;
-    public String name;
-    public String category;
+    public String name = "";
+    public String category = "";
     public int order = 0;
-    public String coverSrc;
+    public String coverSrc = "";
     public List<Integer> seasons = new ArrayList<>();
 
     public Series() {

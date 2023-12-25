@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -161,13 +162,46 @@
                                  <HBox.margin>
                                     <Insets left="2.0" top="5.0" />
                                  </HBox.margin>
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/add.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
                               </Button>
                               <Button mnemonicParsing="false" onAction="#loadBackgroundURL" prefHeight="25.0" prefWidth="25.0">
                                  <HBox.margin>
                                     <Insets left="2.0" top="5.0" />
                                  </HBox.margin>
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/url.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
                               </Button>
                               <Button mnemonicParsing="false" onAction="#downloadBackground" prefHeight="25.0" prefWidth="25.0">
+                                 <HBox.margin>
+                                    <Insets left="2.0" top="5.0" />
+                                 </HBox.margin>
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/web.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#cropBackground" prefHeight="25.0" prefWidth="25.0">
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/crop.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
                                  <HBox.margin>
                                     <Insets left="2.0" top="5.0" />
                                  </HBox.margin>
@@ -176,6 +210,13 @@
                                  <HBox.margin>
                                     <Insets left="2.0" top="5.0" />
                                  </HBox.margin>
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/remove.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
                               </Button>
                            </children>
                            <padding>

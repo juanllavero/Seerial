@@ -114,14 +114,15 @@ public class AddCollectionController {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("image-cropper-view.fxml"));
                 Parent root1 = fxmlLoader.load();
                 ImageCropper cropperController = fxmlLoader.getController();
-                cropperController.initValues(this, "src/main/resources/img/seriesCovers/" + nameField.getText() + "_cover.png");
+                cropperController.setCollectionParent(this);
+                cropperController.initValues("src/main/resources/img/seriesCovers/" + nameField.getText() + "_cover.png", false);
                 Stage stage = new Stage();
                 stage.setResizable(true);
                 stage.setMaximized(false);
                 stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
                 stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
                 stage.setTitle(App.textBundle.getString("imageCropper"));
-                stage.setAlwaysOnTop(true);
+                App.setPopUpProperties(stage);
                 stage.setScene(new Scene(root1));
                 stage.show();
             } catch (IOException e) {

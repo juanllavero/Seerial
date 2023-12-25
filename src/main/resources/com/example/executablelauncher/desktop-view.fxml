@@ -6,7 +6,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.effect.DropShadow?>
-<?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
@@ -16,15 +15,17 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
+<StackPane fx:id="mainBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: black; -fx-background-radius: 15px;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
    <children>
-      <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="1920.0" opacity="0.88" pickOnBounds="true" StackPane.alignment="TOP_LEFT">
+      <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="2027.0" opacity="0.88" pickOnBounds="true">
          <image>
             <Image url="@../../../img/backgroundDefault.png" />
          </image>
-         <effect>
-            <GaussianBlur radius="50.02" />
-         </effect>
+      </ImageView>
+      <ImageView fx:id="noiseImage" fitHeight="1080.0" fitWidth="1920.0" opacity="0.02" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../img/noise.png" />
+         </image>
       </ImageView>
       <ImageView fx:id="globalBackgroundShadow" fitHeight="1080.0" fitWidth="1920.0" pickOnBounds="true" StackPane.alignment="TOP_LEFT">
          <image>
@@ -35,7 +36,7 @@
          <top>
             <BorderPane fx:id="topBar" BorderPane.alignment="CENTER">
                <left>
-                  <HBox BorderPane.alignment="CENTER">
+                  <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                      <children>
                         <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopButton" stylesheets="@styles.css">
                            <graphic>
@@ -138,11 +139,11 @@
             </BorderPane>
          </top>
          <center>
-            <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="seasonScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
                <content>
                   <VBox fx:id="centralVBox" alignment="TOP_CENTER" styleClass="transparent" stylesheets="@styles.css">
                      <children>
-                        <StackPane fx:id="seasonInfoPane" alignment="TOP_CENTER" styleClass="transparent" stylesheets="@styles.css">
+                        <StackPane fx:id="seasonInfoPane" alignment="TOP_LEFT" styleClass="transparent" stylesheets="@styles.css">
                            <children>
                               <BorderPane>
                                  <right>
@@ -177,10 +178,10 @@
                                     </VBox>
                                  </center>
                                  <padding>
-                                    <Insets left="200.0" right="200.0" />
+                                    <Insets bottom="100.0" left="200.0" right="200.0" top="50.0" />
                                  </padding>
                                  <top>
-                                    <VBox fx:id="seasonInfoInside" alignment="BASELINE_CENTER" prefHeight="583.0" BorderPane.alignment="CENTER">
+                                    <VBox fx:id="seasonInfoInside" alignment="BASELINE_CENTER" prefHeight="650.0" BorderPane.alignment="CENTER_LEFT">
                                        <children>
                                           <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" prefHeight="600.0">
                                              <children>
@@ -226,7 +227,7 @@
                                           </HBox>
                                        </children>
                                        <padding>
-                                          <Insets bottom="10.0" left="100.0" right="100.0" />
+                                          <Insets bottom="10.0" />
                                        </padding>
                                     </VBox>
                                  </top>
@@ -237,22 +238,26 @@
                   </VBox>
                </content>
                <BorderPane.margin>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="30.0" />
                </BorderPane.margin>
             </ScrollPane>
          </center>
          <left>
-            <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="300.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
-               <content>
-                  <VBox fx:id="seriesContainer" prefHeight="200.0" prefWidth="100.0">
-                     <padding>
-                        <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
-                     </padding>
-                  </VBox>
-               </content>
+            <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="350.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
                <BorderPane.margin>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="30.0" />
                </BorderPane.margin>
+               <content>
+                  <StackPane fx:id="seriesStack" prefHeight="150.0" prefWidth="200.0">
+                     <children>
+                        <VBox fx:id="seriesContainer" prefHeight="200.0" prefWidth="100.0">
+                           <padding>
+                              <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </StackPane>
+               </content>
             </ScrollPane>
          </left>
       </BorderPane>

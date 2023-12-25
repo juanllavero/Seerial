@@ -7,15 +7,15 @@ import java.util.List;
 public class Season implements Serializable {
     public static int NextID = 0;
     public final int id;
-    public String name;
-    public String year;
-    public String logoSrc;
-    public String backgroundSrc;
-    public String videoSrc;
-    public String musicSrc;
-    public String collectionName;
-    public String fullScreenBlurImageSrc;
-    public String desktopBackgroundEffect;
+    public String name = "";
+    public String year = "";
+    public String logoSrc = "";
+    public String backgroundSrc = "";
+    public String videoSrc = "";
+    public String musicSrc = "";
+    public String collectionName = "";
+    public String fullScreenBlurImageSrc = "";
+    public String desktopBackgroundEffect = "";
     public int order = 0;
     public final List<Integer> discs = new ArrayList<>();
 
@@ -52,7 +52,7 @@ public class Season implements Serializable {
     }
 
     public String getLogoSrc() {
-        return logoSrc;
+        return this.logoSrc;
     }
 
     public void setLogoSrc(String logoSrc) {

@@ -294,11 +294,11 @@ public class App extends Application {
 
         try{
             Files.delete(FileSystems.getDefault().getPath(s.getBackgroundSrc()));
-            if (!s.getLogoSrc().equals("NO_LOGO"))
+            if (!s.getLogoSrc().isEmpty())
                 Files.delete(FileSystems.getDefault().getPath(s.getLogoSrc()));
-            if (!s.getMusicSrc().equals("NO_MUSIC"))
+            if (!s.getMusicSrc().isEmpty())
                 Files.delete(FileSystems.getDefault().getPath(s.getMusicSrc()));
-            if (!s.getVideoSrc().equals("NO_VIDEO"))
+            if (!s.getVideoSrc().isEmpty())
                 Files.delete(FileSystems.getDefault().getPath(s.getVideoSrc()));
         } catch (IOException e) {
             throw new RuntimeException(e);
