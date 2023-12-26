@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="620.0" prefWidth="631.0" styleClass="lessDarkBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchSeriesController">
+   <center>
+      <ScrollPane styleClass="darkerBackground" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+         <content>
+            <VBox fx:id="seriesContainer" spacing="2.0" />
+         </content>
+      </ScrollPane>
+   </center>
+   <top>
+      <BorderPane BorderPane.alignment="CENTER">
+         <left>
+            <Label fx:id="title" text="Search Series" textFill="WHITE" BorderPane.alignment="CENTER" />
+         </left>
+         <right>
+            <Button mnemonicParsing="false" onAction="#close" styleClass="closeButton" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+               <graphic>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../img/icons/close.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+         </right>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <padding>
+            <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+         </padding>
+      </BorderPane>
+   </top>
+   <bottom>
+      <VBox BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER" spacing="20.0">
+               <children>
+                  <Button fx:id="searchButton" mnemonicParsing="false" onAction="#searchSeries" text="Search" />
+                  <TextField fx:id="searchText" />
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="CENTER" spacing="40.0">
+               <children>
+                  <Button fx:id="selectButton" disable="true" mnemonicParsing="false" onAction="#selectSeries" text="Select" />
+                  <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#close" text="Cancel" />
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </HBox>
+         </children>
+      </VBox>
+   </bottom>
+</BorderPane>

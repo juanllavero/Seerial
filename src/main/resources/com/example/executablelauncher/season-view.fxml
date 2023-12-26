@@ -26,10 +26,6 @@
             <ColorAdjust brightness="-0.28" />
          </effect>
       </ImageView>
-      <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
-         <effect>
-            <DropShadow height="255.0" radius="127.0" spread="0.44" width="255.0" />
-         </effect></MediaView>
       <ImageView fx:id="backgroundShadow" fitHeight="1080.0" fitWidth="1920.0" pickOnBounds="true" StackPane.alignment="CENTER_RIGHT">
          <effect>
             <ColorAdjust contrast="0.21" />
@@ -38,6 +34,10 @@
             <Image url="@../../../img/backgroundShadow.png" />
          </image>
       </ImageView>
+      <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
+         <effect>
+            <DropShadow height="255.0" radius="127.0" spread="0.44" width="255.0" />
+         </effect></MediaView>
       <BorderPane prefWidth="1280.0">
          <right>
             <Button fx:id="nextSeasonButton" mnemonicParsing="false" onMouseClicked="#nextSeason" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">

@@ -1,4 +1,4 @@
-package com.example.executablelauncher;
+package com.example.executablelauncher.entities;
 
 public class Category {
     public String name;

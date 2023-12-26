@@ -1,7 +1,10 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Season;
+import com.example.executablelauncher.entities.Series;
 import javafx.animation.*;
 import javafx.event.ActionEvent;
+import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
@@ -29,6 +32,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import javafx.scene.image.ImageView;
@@ -85,6 +90,9 @@ public class Controller implements Initializable {
 
     @FXML
     private Button exitButton;
+
+    @FXML
+    private Label clock;
 
     private Series seriesToEdit;
     private List<Series> collectionList = new ArrayList<>();
@@ -197,8 +205,28 @@ public class Controller implements Initializable {
             categoriesBox.getChildren().add(btn);
         }
 
+        //region CLOCK TIMELINE
+        updateHour();
+        Timeline timeline = new Timeline(new KeyFrame(
+                Duration.minutes(1),
+                event -> updateHour()
+        ));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+        //endregion
+
         showSeriesFrom(categories.get(0));
         defaultSelection();
+    }
+
+    private void updateHour() {
+        // Obtener la hora actual
+        LocalTime currentTime = LocalTime.now();
+
+        DateTimeFormatter format24 = DateTimeFormatter.ofPattern("HH:mm");
+        String time = currentTime.format(format24);
+
+        clock.setText(time);
     }
 
     public void showSeriesFrom(String cat){

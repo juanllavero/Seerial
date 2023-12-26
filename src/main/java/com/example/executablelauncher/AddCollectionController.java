@@ -1,5 +1,7 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Series;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -8,15 +10,26 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
+import java.util.Objects;
 
 public class AddCollectionController {
+    @FXML
+    private ImageView coverImageView;
+
+    @FXML
+    private Label resolutionText;
+
     @FXML
     private Button cancelButton;
 
@@ -27,31 +40,22 @@ public class AddCollectionController {
     private ChoiceBox<String> categoryField;
 
     @FXML
-    private TextField coverField;
-
-    @FXML
-    private Label errorCategory;
-
-    @FXML
-    private Label imageError;
+    private Label coverText;
 
     @FXML
     private Label name;
 
     @FXML
-    private Label nameError;
-
-    @FXML
     private TextField nameField;
-
-    @FXML
-    private Label orderError;
 
     @FXML
     private TextField orderField;
 
     @FXML
     private Button saveButton;
+
+    @FXML
+    private Button searchButton;
 
     @FXML
     private Label sorting;
@@ -63,14 +67,17 @@ public class AddCollectionController {
     private DesktopViewController controllerParent;
     private File selectedFile = null;
     private String nameString;
-
+    private String coverSrc = "";
+    private String oldCoverPath = "";
 
     public void setSeries(Series s){
         seriesToEdit = s;
 
         nameString = s.getName();
         nameField.setText(s.getName());
-        coverField.setText(s.getCoverSrc());
+
+        oldCoverPath = s.getCoverSrc();
+        setImageFile(s.getCoverSrc());
 
         categoryField.getItems().addAll(App.getCategories());
         categoryField.setValue(s.getCategory());
@@ -98,6 +105,11 @@ public class AddCollectionController {
 
     public void setParentController(DesktopViewController controller){
         controllerParent = controller;
+    }
+
+    public void setMetadata(String name, String url){
+        nameField.setText(name);
+        System.out.println(url);
     }
 
     @FXML
@@ -129,12 +141,39 @@ public class AddCollectionController {
                 throw new RuntimeException(e);
             }
         }else{
-            imageError.setText(App.textBundle.getString("emptyField"));
+            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("emptyField"));
         }
     }
 
     public void setImageFile(String path){
-        coverField.setText(path);
+        selectedFile = new File(path);
+        try{
+            Image img = new Image(selectedFile.toURI().toURL().toExternalForm());
+            resolutionText.setText(img.getWidth() + "x" + img.getHeight());
+            coverImageView.setImage(img);
+            coverSrc = path;
+        } catch (MalformedURLException e) {
+            System.err.println("AddCollectionController: Error loading new cover");
+        }
+
+    }
+
+    @FXML
+    void downloadCover(ActionEvent event) {
+
+    }
+
+    @FXML
+    void loadImage(ActionEvent event) {
+
+    }
+
+    @FXML
+    void removeCover(ActionEvent event) {
+        selectedFile = null;
+        coverImageView.setImage(null);
+        seriesToEdit.setCoverSrc("");
+        oldCoverPath = "";
     }
 
     @FXML
@@ -155,95 +194,89 @@ public class AddCollectionController {
     }
 
     @FXML
+    void searchSeries(ActionEvent event){
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("searchSeries-view.fxml"));
+            Parent root1 = fxmlLoader.load();
+            SearchSeriesController controller = fxmlLoader.getController();
+            controller.setParent(this);
+            controller.initValues(nameField.getText());
+            Stage stage = new Stage();
+            stage.setTitle("Search Series");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setAlwaysOnTop(true);
+            stage.setScene(new Scene(root1));
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @FXML
     void save(MouseEvent event) {
-        File image = new File(coverField.getText());
-        boolean save = true;
+        File image = new File(coverSrc);
 
         if (App.nameExist(nameField.getText()) && !nameField.getText().equals(nameString)){
-            save = false;
-            nameError.setText(App.textBundle.getString("collectionExists"));
+            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("collectionExists"));
+            return;
         }else if (nameField.getText().isEmpty()){
-            save = false;
-            nameError.setText(App.textBundle.getString("emptyField"));
-        }else{
-            nameError.setText("");
+            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("emptyField"));
+            return;
         }
 
         if (!image.exists()) {
-            save = false;
-            imageError.setText(App.textBundle.getString("imageNotFound"));
+            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("imageNotFound"));
+            return;
         }else{
-            String imageExtension = coverField.getText().substring(coverField.getText().length() - 3);
+            String imageExtension = image.getPath().substring(image.getPath().length() - 3);
             imageExtension = imageExtension.toLowerCase();
 
-            if (!imageExtension.equals("jpg") && !imageExtension.equals("png")){
-                save = false;
-                imageError.setText(App.textBundle.getString("imageErrorFormat"));
-            }else{
-                imageError.setText("");
-            }
+            if (!imageExtension.equals("jpg") && !imageExtension.equals("png"))
+                return;
         }
 
         if (!orderField.getText().isEmpty() && orderField.getText().matches("\\d{3,}")){
-            save = false;
-            orderError.setText(App.textBundle.getString("sortingError"));
-        }else{
-            orderError.setText("");
+            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("sortingError"));
+            return;
         }
 
-        if (categoryField.getValue() == null){
+        if (categoryField.getValue() == null)
             categoryField.setValue("NO CATEGORY");
-            errorCategory.setText("");
+
+        if (selectedFile == null)
+            selectedFile = image;
+
+        File newCover = new File("src/main/resources/img/seriesCovers/"+ nameField.getText() + "_cover.png");
+
+        try{
+            Files.copy(selectedFile.toPath(), newCover.toPath());
+        }catch (IOException e){
+            System.err.println("Image not copied");
+        }
+
+        Series series;
+
+        series = Objects.requireNonNullElseGet(seriesToEdit, Series::new);
+
+        series.setName(nameField.getText());
+        series.setCoverSrc("src/main/resources/img/seriesCovers/" + newCover.getName());
+
+        if (!orderField.getText().isEmpty() && !orderField.getText().equals("0")){
+            series.setOrder(Integer.parseInt(orderField.getText()));
+        }
+
+        series.setCategory(categoryField.getValue());
+
+        if (seriesToEdit != null){
+            seriesToEdit = null;
         }else{
-            errorCategory.setText("");
+            App.addCollection(series);
+            controllerParent.addSeries(series);
         }
 
-        if (save){
-            if (selectedFile == null)
-                selectedFile = new File(coverField.getText());
+        controllerParent.hideBackgroundShadow();
 
-            String extension = "";
-
-            int i = selectedFile.getName().lastIndexOf('.');
-            if (i > 0) {
-                extension = selectedFile.getName().substring(i+1);
-            }
-            File newCover = new File("src/main/resources/img/seriesCovers/"+ nameField.getText() + "_cover.png");
-
-            try{
-                Files.copy(selectedFile.toPath(), newCover.toPath());
-            }catch (IOException e){
-                System.err.println("Image not copied");
-            }
-
-            Series series;
-
-            if (seriesToEdit != null){
-                series = seriesToEdit;
-            }else{
-                series = new Series();
-            }
-
-            series.setName(nameField.getText());
-            series.setCoverSrc("src/main/resources/img/seriesCovers/" + newCover.getName());
-
-            if (!orderField.getText().isEmpty() && !orderField.getText().equals("0")){
-                series.setOrder(Integer.parseInt(orderField.getText()));
-            }
-
-            series.setCategory(categoryField.getValue());
-
-            if (seriesToEdit != null){
-                seriesToEdit = null;
-            }else{
-                App.addCollection(series);
-                controllerParent.addSeries(series);
-            }
-
-            controllerParent.hideBackgroundShadow();
-
-            Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
-            stage.close();
-        }
+        Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
+        stage.close();
     }
 }

@@ -1,4 +1,4 @@
-package com.example.executablelauncher;
+package com.example.executablelauncher.entities;
 
 import java.io.Serializable;
 

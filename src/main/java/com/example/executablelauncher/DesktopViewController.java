@@ -1,15 +1,17 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Category;
+import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.entities.Season;
+import com.example.executablelauncher.entities.Series;
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -26,7 +28,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -164,6 +165,27 @@ public class DesktopViewController {
 
     @FXML
     private StackPane seriesStack;
+
+    @FXML
+    private Label detailsText;
+
+    @FXML
+    private Label yearText;
+
+    @FXML
+    private Label orderText;
+
+    @FXML
+    private Label episodesText;
+
+    @FXML
+    private Label yearField;
+
+    @FXML
+    private Label orderField;
+
+    @FXML
+    private Label episodesField;
     //endregion
 
     //region ATTRIBUTES
@@ -377,6 +399,16 @@ public class DesktopViewController {
         seasonBackground.setImageView(img);
         fadeInTransition(globalBackground);
         fadeInTransition(seasonBackground.getImageView());
+
+        //Fill info
+        detailsText.setText(App.textBundle.getString("details"));
+        yearText.setText(App.textBundle.getString("year"));
+        orderText.setText(App.textBundle.getString("order"));
+        episodesText.setText(App.textBundle.getString("episodes"));
+        yearField.setText(selectedSeason.getYear());
+        orderField.setText(Integer.toString(selectedSeason.getOrder()));
+        episodesField.setText(Integer.toString(selectedSeason.getDiscs().size()));
+
         if (selectedSeason.getLogoSrc().isEmpty()){
             seasonLogoBox.getChildren().remove(0);
             Label seasonLogoText = new Label(selectedSeries.getName());
@@ -466,7 +498,6 @@ public class DesktopViewController {
                 btn.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber() + " - " + d.getName());
                 btn.getStyleClass().clear();
                 btn.getStyleClass().add("discButton");
-                btn.setMaxWidth(Integer.MAX_VALUE);
                 btn.setAlignment(Pos.BASELINE_LEFT);
                 btn.setWrapText(true);
 
@@ -507,7 +538,7 @@ public class DesktopViewController {
         centralVBox.setVisible(false);
     }
 
-    static void scrollModification(ScrollPane scroll) {
+    public static void scrollModification(ScrollPane scroll) {
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 

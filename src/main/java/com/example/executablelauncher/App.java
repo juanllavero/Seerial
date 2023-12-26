@@ -1,5 +1,13 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.*;
+import com.github.m0nk3y2k4.thetvdb.api.QueryParameters;
+import com.github.m0nk3y2k4.thetvdb.api.TheTVDBApi;
+import com.github.m0nk3y2k4.thetvdb.api.constants.Query;
+import com.github.m0nk3y2k4.thetvdb.api.exception.APIException;
+import com.github.m0nk3y2k4.thetvdb.api.model.data.Episode;
+import com.github.m0nk3y2k4.thetvdb.api.model.data.Language;
+import com.github.m0nk3y2k4.thetvdb.api.model.data.SeriesSearchResult;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import javafx.application.Application;
@@ -19,16 +27,23 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.*;
 
+import com.github.m0nk3y2k4.thetvdb.TheTVDBApiFactory;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 public class App extends Application {
+    public static List<EpisodeMetadata> episodeMetadata = new ArrayList<>();
     public static List<Series> series = new ArrayList<>();
     public static List<Season> seasons = new ArrayList<>();
     public static List<Disc> discs = new ArrayList<>();
     public static List<Category> categories = new ArrayList<>();
-    public static Stage primaryStage;
     public static List<Locale> languages = new ArrayList<>();
     public static Locale globalLanguage;
     public static ResourceBundle buttonsBundle;
     public static ResourceBundle textBundle;
+    public static Stage primaryStage;
     public static String lastDirectory = null;
     public static String lastVideoDirectory = null;
     public static String lastMusicDirectory = null;
@@ -37,10 +52,101 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         languages.add(Locale.forLanguageTag("en"));
         languages.add(Locale.forLanguageTag("es"));
-        globalLanguage = Locale.forLanguageTag("en");
+        globalLanguage = Locale.forLanguageTag("es");
         buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
         LoadData();
+
+        /*TheTVDBApi api = TheTVDBApiFactory.createApi("f46a28ea-ef53--9e7b-31e32b7743ab");
+
+        try{
+
+
+            api.setLanguage("es");
+
+            List<SeriesSearchResult> seriesSearch = api.searchSeriesByName("Attack on Titan");
+
+            for (SeriesSearchResult s : seriesSearch) {
+                System.out.println(s.getSeriesName() + " - " + s.getId());
+            }
+
+
+            //TheTVDB
+            String tvdbSearch = "https://www.thetvdb.com/api/GetSeries.php?seriesname=";
+            String searchTitle = "naruto";
+            String endSearch = "&language=all";
+
+            Document doc = Jsoup.connect(tvdbSearch + searchTitle + endSearch).timeout(6000).get();
+            Elements seriesList = doc.getAllElements();
+
+
+            long seriesID = 267440;
+            QueryParameters query = TheTVDBApiFactory.createQueryParameters();
+            query.addParameter(Query.Series.AIREDSEASON, "3");
+
+            List<Episode> seasonThree = api.queryEpisodesByAiredSeason(seriesID, 3);
+
+            System.out.println("And again, all the episodes of season 3:");
+            seasonThree.stream().forEach(e -> System.out.println(
+                        e.getAiredSeason() + "." + e.getAiredEpisodeNumber() + ": " + e.getEpisodeName() + e.getImdbId()));
+        } catch (APIException e) {
+            System.err.println("App: Couldn't find episodes");
+        }*/
+
+        /************************************/
+        //IMDB
+        String imdbBase = "https://www.imdb.com/title/";
+        String imdbPoster = "/mediaviewer";
+        String posterSrc = "";
+
+        Document doc = Jsoup.connect(imdbBase + "tt8733180" + imdbPoster).timeout(6000).get();
+        Elements body = doc.select("div.media-viewer");
+        for (Element element : body){
+            posterSrc = element.select("img").attr("src");
+        }
+
+        /************************************/
+
+        /*Document doc= Jsoup.connect("https://www.imdb.com/find/?s=tt&q=the%20eminence%20in%20shadow&ref_=nv_sr_sm").timeout(6000).get();
+        Elements body = doc.select("ul.ipc-metadata-list");
+        System.out.println(body.select("div.ipc-metadata-list-summary-item__tc").size() + " search results");
+        int counter=1;
+        for (Element e : body.select("div.ipc-metadata-list-summary-item__tc"))
+        {
+            System.out.println(counter);
+            String title = e.select("a.ipc-metadata-list-summary-item__t").text();
+            String url = e.select("a.ipc-metadata-list-summary-item__t").attr("href");
+            Elements elements = e.select("ul span");
+            String year = "", type = "";
+            if (elements.size() > 1){
+                year = elements.get(0).text();
+                type = elements.get(1).text();
+            }else if (elements.size() == 1){
+                year = elements.get(0).text();
+                type = "";
+            }
+
+            System.out.println("Title: " + title);
+            System.out.println("Year: " + year);
+            System.out.println("Type: " + type);
+            System.out.println("URL: " + url + "\n");
+            counter++;
+        }
+
+        doc= Jsoup.connect("https://www.imdb.com" + "/title/tt0988824/episodes/?season=1").timeout(6000).get();
+        body = doc.select("section.sc-58f3e8aa-0");
+        System.out.println(body.select("div.sc-9115db22-1").size() + " search results");
+        counter=1;
+        for (Element e : body.select("div.sc-9115db22-1"))
+        {
+            System.out.println(counter);
+            String title = e.select("div.ipc-title__text").text();
+            String img = e.select("img.ipc-image").attr("src");
+
+            System.out.println("Year: " + title);
+            System.out.println("Img: " + img+ "\n");
+            counter++;
+        }*/
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
@@ -76,6 +182,7 @@ public class App extends Application {
         String seasonsFile = "Seasons.json";
         String discsFile = "Discs.json";
         String catFile = "Categories.json";
+        String episodeMeta = "EpisodeMetadata.json";
 
         Gson gson = new Gson();
 
@@ -99,6 +206,11 @@ public class App extends Application {
             Category[] catList = gson.fromJson(reader, Category[].class);
             if (catList != null)
                 categories.addAll(List.of(catList));
+
+            reader = new JsonReader(new FileReader(episodeMeta));
+            EpisodeMetadata[] episodeList = gson.fromJson(reader, EpisodeMetadata[].class);
+            if (episodeList != null)
+                episodeMetadata.addAll(List.of(episodeList));
         } catch (FileNotFoundException e) {
             System.err.println("Json files not found");
         }
@@ -113,6 +225,7 @@ public class App extends Application {
         String seasonsFile = "Seasons.json";
         String discsFile = "Discs.json";
         String catFile = "Categories.json";
+        String episodeMeta = "EpisodeMetadata.json";
 
         try (Writer writer = new FileWriter(collectionsFile)) {
             Gson gson = new GsonBuilder().create();
@@ -132,6 +245,11 @@ public class App extends Application {
         try (Writer writer = new FileWriter(catFile)) {
             Gson gson = new GsonBuilder().create();
             gson.toJson(categories, writer);
+        }
+
+        try (Writer writer = new FileWriter(episodeMeta)) {
+            Gson gson = new GsonBuilder().create();
+            gson.toJson(episodeMetadata, writer);
         }
     }
 

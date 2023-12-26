@@ -1,5 +1,9 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.entities.Season;
+import com.example.executablelauncher.entities.Series;
+
 import java.util.Comparator;
 
 public class Utils {
@@ -16,21 +20,21 @@ public class Utils {
 
         return name.compareTo(name2);
     }
-    static class SeriesComparator implements Comparator<Series> {
+    public static class SeriesComparator implements Comparator<Series> {
         @Override
         public int compare(Series a, Series b) {
             return CompareSeriesOrSeasons(a.getOrder(), b.getOrder(), a.getName(), b.getName());
         }
     }
 
-    static class SeasonComparator implements Comparator<Season> {
+    public static class SeasonComparator implements Comparator<Season> {
         @Override
         public int compare(Season a, Season b) {
             return CompareSeriesOrSeasons(a.getOrder(), b.getOrder(), a.getName(), b.getName());
         }
     }
 
-    static class DiscComparator implements Comparator<Disc> {
+    public static class DiscComparator implements Comparator<Disc> {
         @Override
         public int compare(Disc a, Disc b) {
             return CharSequence.compare(a.getEpisodeNumber(), b.getEpisodeNumber());

@@ -1,16 +1,16 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.entities.Season;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -26,7 +26,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -37,7 +36,6 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -125,10 +123,6 @@ public class SeasonController {
     private void updateInfo(Season season){
         if (mp != null){
             mp.stop();
-            double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
-            if (aspectRatio > 1.8f){
-                //backgroundShadow.setTranslateX(-backgroundVideo.getFitWidth() / 4.5);
-            }
         }
 
         alertTimer = new Timeline(new KeyFrame(Duration.seconds(3), event ->{
@@ -178,7 +172,7 @@ public class SeasonController {
         // Crear el nuevo ImageView con la imagen recortada
         backgroundImage.setImage(croppedImage);
 
-        if (season.getLogoSrc().equals("")){
+        if (season.getLogoSrc().isEmpty()){
             infoBox.getChildren().remove(0);
             Label seriesTitle = new Label(season.getCollectionName());
             seriesTitle.setFont(new Font("Arial", 58));
@@ -193,7 +187,7 @@ public class SeasonController {
             logoImage.setFitHeight(screenHeight * 0.15);
         }
 
-        if (!season.getVideoSrc().equals("")){
+        if (!season.getVideoSrc().isEmpty()){
             File file = new File(season.getVideoSrc());
             Media media = new Media(file.toURI().toString());
             mp = new MediaPlayer(media);
@@ -208,7 +202,7 @@ public class SeasonController {
             isVideo = true;
 
             alertTimer.play();
-        }else if (!season.getMusicSrc().equals("")){
+        }else if (!season.getMusicSrc().isEmpty()){
             File file = new File(season.getMusicSrc());
             Media media = new Media(file.toURI().toString());
             mp = new MediaPlayer(media);
@@ -296,6 +290,12 @@ public class SeasonController {
                 showEpisodes();
                 deselectDisc();
                 selectPlayButton();
+            }else if (KeyCode.ENTER == event.getCode()) {
+                System.out.println("SSDASD");
+                if (playSelected)
+                    selectedDisc = discs.get(0);
+                if (selectedDisc != null)
+                    play();
             }
         });
 
@@ -341,51 +341,12 @@ public class SeasonController {
         Platform.runLater(() ->{
             if (mp != null) {
                 if (isVideo){
-                    /*//Fade Out Transition
-                    FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), backgroundImage);
-                    fadeOut.setFromValue(1.0);
-                    fadeOut.setToValue(0);
-                    fadeOut.play();
-
-                    fadeOut.onFinishedProperty().set(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent actionEvent) {
-                            double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
-                            if (aspectRatio > 1.8f){
-                                backgroundShadow.setTranslateX(backgroundVideo.getFitWidth() / 4.5);
-                            }
-
-                            backgroundVideo.setVisible(true);
-
-                            //Fade In Transition
-                            FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
-                            fadeIn.setFromValue(0);
-                            fadeIn.setToValue(1.0);
-                            fadeIn.play();
-                            mp.stop();
-                            mp.seek(mp.getStartTime());
-                            mp.play();
-                        }
-                    });*/
-                    /*double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
-                    if (aspectRatio > 1.8f){
-                        backgroundVideo.setPreserveRatio(false);
-                    }else
-                        backgroundVideo.setPreserveRatio(true);
-
-                     */
                     double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
                     double mediaRatio = (double) backgroundVideo.getMediaPlayer().getMedia().getWidth() / backgroundVideo.getMediaPlayer().getMedia().getHeight();
 
                     backgroundVideo.setPreserveRatio(true);
 
-                    if (screenRatio < 1.8f && mediaRatio > 1.8f){
-                        //Fade Out Transition
-                        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), backgroundImage);
-                        fadeOut.setFromValue(1.0);
-                        fadeOut.setToValue(0);
-                        fadeOut.play();
-                    }else if (screenRatio > 1.8f && mediaRatio > 1.8f){
+                    if (screenRatio > 1.8f && mediaRatio > 1.8f){
                         backgroundVideo.setPreserveRatio(false);
                     }
 
@@ -608,9 +569,9 @@ public class SeasonController {
         showEpisodes = !showEpisodes;
     }
 
-    @FXML
-    void play(ActionEvent event){
+    void play(){
         if (!seasons.get(currentSeason).getDiscs().isEmpty()){
+            System.out.println("AAA");
             if (currentEpisoceID == -1){
                 currentEpisoceID = Objects.requireNonNull(App.findDisc(seasons.get(currentSeason).getDiscs().get(0))).getId();
             }

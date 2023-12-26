@@ -1,16 +1,11 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Disc;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
-
-import java.awt.event.ActionEvent;
-import java.util.ResourceBundle;
 
 public class DiscController {
     @FXML

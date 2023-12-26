@@ -16,7 +16,12 @@ module com.example.executablelauncher {
     requires FX.BorderlessScene;
     requires com.sun.jna.platform;
     requires com.sun.jna;
+    requires thetvdb.java.api;
+    requires org.apache.httpcomponents.httpclient;
+    requires org.apache.httpcomponents.httpcore;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;
+    exports com.example.executablelauncher.entities;
+    opens com.example.executablelauncher.entities to javafx.fxml;
 }

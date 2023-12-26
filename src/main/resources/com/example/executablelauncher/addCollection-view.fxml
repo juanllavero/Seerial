@@ -8,154 +8,210 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="341.0" prefWidth="600.0" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddCollectionController">
-   <children>
-      <BorderPane prefHeight="300.0" prefWidth="600.0" stylesheets="@styles.css">
-         <center>
-            <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+<BorderPane stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddCollectionController">
+   <center>
+      <VBox BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="name" text="Name" textFill="WHITE">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets left="50.0" top="20.0" />
+               </VBox.margin>
+            </Label>
+            <TextField fx:id="nameField" prefHeight="25.0" prefWidth="526.0">
+               <VBox.margin>
+                  <Insets left="50.0" right="50.0" top="5.0" />
+               </VBox.margin>
+            </TextField>
+            <HBox alignment="BOTTOM_LEFT">
+               <VBox.margin>
+                  <Insets bottom="5.0" top="5.0" />
+               </VBox.margin>
+            </HBox>
+            <HBox alignment="CENTER" />
+            <HBox layoutX="10.0" layoutY="99.0">
+               <VBox.margin>
+                  <Insets bottom="5.0" top="5.0" />
+               </VBox.margin>
+            </HBox>
+            <HBox>
                <children>
-                  <Label fx:id="name" text="Name" textFill="WHITE">
+                  <Label fx:id="category" alignment="TOP_LEFT" prefHeight="17.0" prefWidth="280.0" text="Category" textFill="WHITE">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
-                     <VBox.margin>
-                        <Insets left="50.0" top="20.0" />
-                     </VBox.margin>
+                     <HBox.margin>
+                        <Insets left="50.0" />
+                     </HBox.margin>
                   </Label>
-                  <TextField fx:id="nameField" prefHeight="25.0" prefWidth="526.0">
-                     <VBox.margin>
-                        <Insets left="50.0" right="50.0" top="5.0" />
-                     </VBox.margin>
-                  </TextField>
-                  <Label fx:id="nameError" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="226.0" prefHeight="17.0" prefWidth="609.0" textFill="#c30505">
-                     <VBox.margin>
+                  <Label fx:id="coverText" text="Cover" textFill="WHITE" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" top="5.0" />
+               </padding>
+            </HBox>
+            <HBox spacing="10.0">
+               <children>
+                  <VBox prefHeight="225.0" prefWidth="185.0" spacing="10.0">
+                     <children>
+                        <ChoiceBox fx:id="categoryField" prefHeight="25.0" prefWidth="206.0" />
+                        <Label fx:id="sorting" prefHeight="17.0" prefWidth="240.0" text="Sorting Order" textFill="#fcfcfc">
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </Label>
+                        <TextField fx:id="orderField">
+                           <VBox.margin>
+                              <Insets right="100.0" />
+                           </VBox.margin>
+                        </TextField>
+                     </children>
+                     <padding>
                         <Insets top="5.0" />
-                     </VBox.margin>
-                  </Label>
-                  <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0">
+                     </padding>
+                  </VBox>
+                  <Button mnemonicParsing="false" onMouseClicked="#addCategory">
+                     <graphic>
+                        <ImageView fitHeight="17.0" fitWidth="76.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../img/icons/add.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </Button>
+                  <VBox>
                      <children>
-                        <Label fx:id="sorting" text="Sorting Order" textFill="#fcfcfc">
-                           <HBox.margin>
-                              <Insets left="50.0" />
-                           </HBox.margin>
-                        </Label>
-                        <Label text="Cover" textFill="#fcfcfc">
-                           <HBox.margin>
-                              <Insets left="45.0" />
-                           </HBox.margin>
-                        </Label>
-                     </children>
-                     <VBox.margin>
-                        <Insets bottom="5.0" />
-                     </VBox.margin>
-                  </HBox>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
-                     <children>
-                        <TextField fx:id="orderField" prefHeight="25.0" prefWidth="0.0" HBox.hgrow="ALWAYS">
-                           <HBox.margin>
-                              <Insets left="50.0" right="10.0" />
-                           </HBox.margin>
-                        </TextField>
-                        <TextField fx:id="coverField" prefHeight="25.0" prefWidth="246.0" HBox.hgrow="ALWAYS">
-                           <HBox.margin>
-                              <Insets left="10.0" right="10.0" />
-                           </HBox.margin>
-                        </TextField>
-                        <Button mnemonicParsing="false" onMouseClicked="#loadImage" text="Load">
-                           <HBox.margin>
-                              <Insets right="50.0" />
-                           </HBox.margin>
-                        </Button>
-                     </children>
-                  </HBox>
-                  <HBox layoutX="10.0" layoutY="99.0" prefHeight="100.0" prefWidth="200.0">
-                     <children>
-                        <Label fx:id="orderError" alignment="TOP_LEFT" contentDisplay="CENTER" prefHeight="17.0" prefWidth="340.0" textFill="#c30505">
-                           <HBox.margin>
-                              <Insets left="50.0" />
-                           </HBox.margin>
-                        </Label>
-                        <Label fx:id="imageError" alignment="CENTER" contentDisplay="CENTER" layoutX="10.0" layoutY="10.0" prefHeight="17.0" prefWidth="608.0" textFill="#c30505" />
-                     </children>
-                  </HBox>
-                  <Label fx:id="category" alignment="TOP_LEFT" layoutX="60.0" layoutY="30.0" prefHeight="17.0" prefWidth="605.0" text="Category" textFill="WHITE">
-                     <opaqueInsets>
-                        <Insets />
-                     </opaqueInsets>
-                     <VBox.margin>
-                        <Insets bottom="5.0" left="50.0" />
-                     </VBox.margin>
-                  </Label>
-                  <HBox prefHeight="100.0" prefWidth="200.0">
-                     <children>
-                        <ChoiceBox fx:id="categoryField" prefHeight="25.0" prefWidth="221.0">
-                           <HBox.margin>
-                              <Insets left="50.0" />
-                           </HBox.margin>
-                        </ChoiceBox>
-                        <Button mnemonicParsing="false" onMouseClicked="#addCategory">
-                           <graphic>
-                              <ImageView fitHeight="17.0" fitWidth="76.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../img/icons/add.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                           <HBox.margin>
-                              <Insets left="10.0" />
-                           </HBox.margin>
-                        </Button>
-                     </children>
-                  </HBox>
-                  <Label fx:id="errorCategory" alignment="TOP_LEFT" contentDisplay="CENTER" layoutX="10.0" layoutY="82.0" prefHeight="17.0" prefWidth="609.0" textFill="#c30505">
-                     <VBox.margin>
-                        <Insets bottom="10.0" left="50.0" />
-                     </VBox.margin>
-                  </Label>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0">
-                     <center>
-                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                        <HBox>
                            <children>
-                              <Button fx:id="saveButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Save">
+                              <Button mnemonicParsing="false" onAction="#loadImage" prefHeight="25.0" prefWidth="25.0">
                                  <HBox.margin>
-                                    <Insets right="50.0" />
+                                    <Insets left="2.0" top="5.0" />
                                  </HBox.margin>
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/add.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
                               </Button>
-                              <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+                              <Button mnemonicParsing="false" onAction="#downloadCover" prefHeight="25.0" prefWidth="25.0">
+                                 <HBox.margin>
+                                    <Insets left="2.0" top="5.0" />
+                                 </HBox.margin>
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/web.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                              <Button mnemonicParsing="false" onAction="#removeCover" prefHeight="25.0" prefWidth="25.0">
+                                 <HBox.margin>
+                                    <Insets left="2.0" top="5.0" />
+                                 </HBox.margin>
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/remove.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="5.0" />
+                           </padding>
+                        </HBox>
+                        <Label fx:id="resolutionText" text="1920x1080px" textFill="WHITE" />
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <ImageView fx:id="coverImageView" fitHeight="148.0" fitWidth="251.0" pickOnBounds="true" preserveRatio="true" />
                            </children>
                         </HBox>
-                     </center>
-                  </BorderPane>
+                     </children>
+                     <HBox.margin>
+                        <Insets left="40.0" />
+                     </HBox.margin>
+                  </VBox>
                </children>
+               <VBox.margin>
+                  <Insets left="50.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+         <BorderPane.margin>
+            <Insets top="20.0" />
+         </BorderPane.margin>
+      </VBox>
+   </center>
+   <top>
+      <BorderPane prefHeight="55.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <left>
+            <Label fx:id="title" text="Add Collection" textFill="#f8f8f8" BorderPane.alignment="CENTER">
+               <font>
+                  <Font size="22.0" />
+               </font>
                <BorderPane.margin>
-                  <Insets top="20.0" />
+                  <Insets />
                </BorderPane.margin>
-            </VBox>
-         </center>
-         <top>
-            <BorderPane prefHeight="55.0" prefWidth="600.0" BorderPane.alignment="CENTER">
-               <center>
-                  <Label fx:id="title" text="COLLECTION" textFill="#f8f8f8" BorderPane.alignment="CENTER">
-                     <font>
-                        <Font size="22.0" />
-                     </font>
-                     <BorderPane.margin>
-                        <Insets />
-                     </BorderPane.margin>
-                  </Label>
-               </center>
-            </BorderPane>
-         </top>
-         <styleClass>
-            <String fx:value="darkerBackground" />
-            <String fx:value="roundedMenu" />
-         </styleClass>
+            </Label>
+         </left>
+         <padding>
+            <Insets left="10.0" right="10.0" />
+         </padding>
+         <right>
+            <Button mnemonicParsing="false" styleClass="closeButton" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+               <graphic>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../img/icons/windowClose.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+         </right>
       </BorderPane>
-   </children>
-</AnchorPane>
+   </top>
+   <styleClass>
+      <String fx:value="darkerBackground" />
+      <String fx:value="roundedMenu" />
+   </styleClass>
+   <bottom>
+      <BorderPane BorderPane.alignment="CENTER">
+         <right>
+            <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+               <children>
+                  <Button fx:id="saveButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Save">
+                     <HBox.margin>
+                        <Insets right="50.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+               </children>
+            </HBox>
+         </right>
+         <left>
+            <Button fx:id="searchButton" mnemonicParsing="false" onAction="#searchSeries" text="Search" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+            </Button>
+         </left>
+         <padding>
+            <Insets bottom="30.0" left="50.0" right="50.0" top="30.0" />
+         </padding>
+      </BorderPane>
+   </bottom>
+</BorderPane>
