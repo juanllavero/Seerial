@@ -10,6 +10,7 @@ public class Disc implements Serializable {
     public String executableSrc = "";
     public String type = "";    //Folder or File
     public int seasonID = -1;
+    public String imgSrc = "";
 
     public Disc() {
         this.id = NextID++;

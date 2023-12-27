@@ -1080,10 +1080,22 @@ public class DesktopViewController {
     }
     @FXML
     void openSettings(MouseEvent event) {
-        menuParentPane.setVisible(true);
-        seriesMenu.setLayoutX(event.getSceneX());
-        seriesMenu.setLayoutY(event.getSceneY() - seriesMenu.getHeight());
-        seriesMenu.setVisible(true);
+        showBackgroundShadow();
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("mainMenuDesktop-view.fxml"));
+            Parent root1 = fxmlLoader.load();
+            MainMenuDesktopController addDiscController = fxmlLoader.getController();
+            addDiscController.initValues(this);
+            Stage stage = new Stage();
+            stage.setTitle("Settings");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(new Scene(root1));
+            App.setPopUpProperties(stage);
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        hideMenu();
     }
     @FXML
     void openSeriesMenu(MouseEvent event) {

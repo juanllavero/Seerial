@@ -139,30 +139,80 @@ public class SearchSeriesController {
 
         TheTVDBApi api = TheTVDBApiFactory.createApi("f46a28ea-ef53--9e7b-31e32b7743ab");
 
+        api.setLanguage(App.globalLanguage.getLanguage());
+
+        List<EpisodeMetadata> episodeMetadata = new ArrayList<>();
+
         try{
-            api.setLanguage(App.globalLanguage.getLanguage());
-
             com.github.m0nk3y2k4.thetvdb.api.model.data.Series series = api.getSeries(Long.parseLong(selectedSeries.id));
-            posterUrl = series.getPoster();
             selectedSeries.name = series.getSeriesName();
+            String imdbID = series.getImdbId();
+            if (imdbID != null){
+                try{
+                    Document doc= Jsoup.connect("https://www.imdb.com/title/" + imdbID).timeout(6000).get();
+                    Elements body = doc.select("div.ipc-poster");
+                    for (Element e : body.select("a.ipc-lockup-overlay"))
+                    {
+                        String img = e.attr("href");
 
-            List<List<Episode>> episodes = new ArrayList<>();
+                        posterUrl = "https://www.imdb.com" + img;
+                        break;
+                    }
+
+                    doc = Jsoup.connect(posterUrl).timeout(6000).get();
+                    body = doc.select("div.sc-7c0a9e7c-2");
+                    for (Element e : body.select("img.sc-7c0a9e7c-0"))
+                    {
+                        posterUrl = e.attr("src");
+                        break;
+                    }
+                } catch (IOException e) {
+                    System.err.println("SearchSeries: IMDB connection lost");
+                }
+
+            }
 
             List<Episode> episodeList;
             int i = 0;
             while(true){
                 episodeList = api.queryEpisodesByAiredSeason(Long.parseLong(selectedSeries.id), i);
-                if (episodeList.isEmpty()) {
-                    return;
+                for (Episode episode : episodeList){
+                    long absoluteEpisode, episodeNumber, seasonNumber;
+
+                    try{
+                         absoluteEpisode = episode.getAbsoluteNumber();
+                    }catch (NullPointerException exception){
+                        absoluteEpisode = -1;
+                    }
+
+                    try{
+                        episodeNumber = episode.getAiredEpisodeNumber();
+                    }catch (NullPointerException exception){
+                        episodeNumber = -1;
+                    }
+
+                    try{
+                        seasonNumber = episode.getAiredSeason();
+                    }catch (NullPointerException exception){
+                        seasonNumber = -1;
+                    }
+
+                    System.out.println(absoluteEpisode + " - " + episodeNumber + " - " + seasonNumber);
+
+                    episodeMetadata.add(new EpisodeMetadata(Objects.requireNonNull(episode.getId()).toString(), episode.getImdbId(), episode.getSeriesId(), episode.getEpisodeName(), absoluteEpisode, episodeNumber, seasonNumber));
                 }
-                episodeList.forEach(e ->
-                        App.episodeMetadata.add(new EpisodeMetadata(Objects.requireNonNull(e.getId()).toString()
-                                , e.getImdbId(), selectedSeries.id, e.getEpisodeName())));
+                i++;
             }
-        } catch (APIException e) {
-            System.err.println("App: Couldn't find episodes");
+
+        } catch (APIException | NullPointerException e) {
+            if (!episodeMetadata.isEmpty()){
+                App.episodesMetadata.remove(episodeMetadata.get(0).seriesID);
+                App.episodesMetadata.put(episodeMetadata.get(0).seriesID, episodeMetadata);
+            }
+            System.err.println("Error: there are no episodes for this season");
         }
-        parent.setMetadata(selectedSeries.name, posterUrl);
+
+        parent.setMetadata(selectedSeries.name, posterUrl, Long.parseLong(selectedSeries.id));
         close(event);
     }
 }

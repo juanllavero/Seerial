@@ -384,7 +384,7 @@ public class Controller implements Initializable {
 
         cardContainer.getChildren().add(cardVBox);*/
 
-        Image img = new Image("file:" + s.getCoverSrc(), 273, 351, true, true);
+        Image img = new Image("file:" + s.getCoverSrc(), 273, 351, false, true);
         ImageView image = new ImageView(img);
 
         Button btn = new Button();

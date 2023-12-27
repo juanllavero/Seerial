@@ -7,6 +7,7 @@ import java.util.List;
 public class Series implements Serializable {
     public static int NextID = 0;
     public final int id;
+    public long thetvdbID = 0;
     public String name = "";
     public String category = "";
     public int order = 0;

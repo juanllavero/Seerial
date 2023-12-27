@@ -230,7 +230,7 @@ public class ImageCropper {
         }
 
         if (parentController != null) {
-            parentController.setImageFile("src/main/resources/img/seriesCovers/" + file.getName());
+            parentController.setImageFile(file.getAbsolutePath());
         }else {
             seasonController.loadBackground(file.getAbsolutePath());
             seasonController.setCroppedImage(true);

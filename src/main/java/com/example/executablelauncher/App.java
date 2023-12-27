@@ -9,6 +9,7 @@ import com.github.m0nk3y2k4.thetvdb.api.model.data.Episode;
 import com.github.m0nk3y2k4.thetvdb.api.model.data.Language;
 import com.github.m0nk3y2k4.thetvdb.api.model.data.SeriesSearchResult;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +24,7 @@ import com.google.gson.Gson;
 import javafx.stage.StageStyle;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.*;
@@ -34,7 +36,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class App extends Application {
-    public static List<EpisodeMetadata> episodeMetadata = new ArrayList<>();
+    public static Map<String, List<EpisodeMetadata>> episodesMetadata = new HashMap<>();
     public static List<Series> series = new ArrayList<>();
     public static List<Season> seasons = new ArrayList<>();
     public static List<Disc> discs = new ArrayList<>();
@@ -52,7 +54,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         languages.add(Locale.forLanguageTag("en"));
         languages.add(Locale.forLanguageTag("es"));
-        globalLanguage = Locale.forLanguageTag("es");
+        globalLanguage = Locale.forLanguageTag("en");
         buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
         LoadData();
@@ -93,9 +95,8 @@ public class App extends Application {
             System.err.println("App: Couldn't find episodes");
         }*/
 
-        /************************************/
         //IMDB
-        String imdbBase = "https://www.imdb.com/title/";
+        /*String imdbBase = "https://www.imdb.com/title/";
         String imdbPoster = "/mediaviewer";
         String posterSrc = "";
 
@@ -103,9 +104,8 @@ public class App extends Application {
         Elements body = doc.select("div.media-viewer");
         for (Element element : body){
             posterSrc = element.select("img").attr("src");
-        }
+        }*/
 
-        /************************************/
 
         /*Document doc= Jsoup.connect("https://www.imdb.com/find/?s=tt&q=the%20eminence%20in%20shadow&ref_=nv_sr_sm").timeout(6000).get();
         Elements body = doc.select("ul.ipc-metadata-list");
@@ -208,9 +208,8 @@ public class App extends Application {
                 categories.addAll(List.of(catList));
 
             reader = new JsonReader(new FileReader(episodeMeta));
-            EpisodeMetadata[] episodeList = gson.fromJson(reader, EpisodeMetadata[].class);
-            if (episodeList != null)
-                episodeMetadata.addAll(List.of(episodeList));
+            Type type = new TypeToken<Map<String, List<EpisodeMetadata>>>() {}.getType();
+            episodesMetadata = new Gson().fromJson(reader, type);
         } catch (FileNotFoundException e) {
             System.err.println("Json files not found");
         }
@@ -247,9 +246,15 @@ public class App extends Application {
             gson.toJson(categories, writer);
         }
 
+        /*List<EpisodeMetadata> episodeMetadata = new ArrayList<>();
+
+        for (String key : episodesMetadata.keySet()){
+            episodeMetadata.addAll(episodesMetadata.get(key));
+        }*/
+
         try (Writer writer = new FileWriter(episodeMeta)) {
             Gson gson = new GsonBuilder().create();
-            gson.toJson(episodeMetadata, writer);
+            gson.toJson(episodesMetadata, writer);
         }
     }
 
