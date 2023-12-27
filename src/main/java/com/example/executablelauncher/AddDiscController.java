@@ -6,12 +6,17 @@ import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -24,6 +29,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -41,9 +48,6 @@ public class AddDiscController {
     private Button cancelButton;
 
     @FXML
-    private Label errorLoad;
-
-    @FXML
     private TextField executableField;
 
     @FXML
@@ -58,10 +62,21 @@ public class AddDiscController {
     @FXML
     private Label type;
 
+    @FXML
+    private Label nameText;
+
+    @FXML
+    private TextField nameField;
+
+    @FXML
+    private FlowPane imagesContainer;
+
     public Disc discToEdit = null;
     private DesktopViewController controllerParent;
     private List<File> selectedFiles = null;
     private File selectedFolder = null;
+    private List<File> imagesFiles = new ArrayList<>();
+    private File selectedImage = null;
 
     public void InitValues(){
         typeField.getItems().addAll(Arrays.asList(App.textBundle.getString("file"), App.textBundle.getString("folder")));
@@ -72,6 +87,8 @@ public class AddDiscController {
         type.setText(App.textBundle.getString("type"));
         source.setText(App.textBundle.getString("source"));
         loadButton.setText(App.buttonsBundle.getString("loadButton"));
+        if (nameText != null)
+            nameText.setText(App.textBundle.getString("name"));
     }
 
     public void setDisc(Disc d){
@@ -81,6 +98,64 @@ public class AddDiscController {
         InitValues();
         title.setText(App.textBundle.getString("episodeWindowTitleEdit"));
         addButton.setText(App.buttonsBundle.getString("saveButton"));
+        nameField.setText(d.getName());
+        selectedImage = new File(d.imgSrc);
+
+        showImages();
+    }
+
+    private void showImages(){
+        //Add images to view
+        File dir = new File("src/main/resources/img/discCovers/");
+        File[] files = dir.listFiles();
+        assert files != null;
+        for (File f : files){
+            String[] name = f.getName().split("_");
+            if (name[0].equals(Integer.toString(discToEdit.getId()))){
+                imagesFiles.add(f);
+            }
+        }
+
+        for (File f : imagesFiles){
+            try{
+                Image img = new Image(f.toURI().toURL().toExternalForm(), 150, 100, true, true);
+                Button btn = new Button();
+                ImageView image = new ImageView(img);
+                btn.setGraphic(image);
+                btn.setText("");
+                btn.getStyleClass().add("downloadedImageButton");
+
+                HBox.setMargin(btn, new Insets(2, 2, 2, 2));
+
+                btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                    selectButton(btn);
+                });
+
+                imagesContainer.getChildren().add(btn);
+            } catch (MalformedURLException e) {
+                System.err.println("AddDiscController: Error loading image thumbnail");
+            }
+
+
+        }
+    }
+
+    private void selectButton(Button btn){
+        int index = 0;
+        int i = 0;
+        for (Node n : imagesContainer.getChildren()){
+            Button b = (Button)n;
+            b.getStyleClass().clear();
+            b.getStyleClass().add("downloadedImageButton");
+            if (b == btn)
+                index = i;
+            i++;
+        }
+
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("downloadedImageButtonSelected");
+
+        selectedImage = imagesFiles.get(index);
     }
 
     public void setParentController(DesktopViewController controller){
@@ -123,7 +198,7 @@ public class AddDiscController {
         File exe = new File(executableField.getText());
         if (!executableField.getText().equals(App.textBundle.getString("multipleSelection")) && !exe.exists()){
             save = false;
-            errorLoad.setText(App.textBundle.getString("fileNotFound"));
+            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("fileNotFound"));
         }else if (!executableField.getText().equals(App.textBundle.getString("multipleSelection")) && !selectedFolder.exists()){
             String fileExtension = executableField.getText().substring(executableField.getText().length() - 4);
             fileExtension = fileExtension.toLowerCase();
@@ -131,12 +206,8 @@ public class AddDiscController {
             if (!fileExtension.equals(".mkv") && !fileExtension.equals(".mp4") && !fileExtension.equals("m2ts")
                     && !fileExtension.equals(".iso") && !fileExtension.equals(".exe") && !fileExtension.equals(".bat")){
                 save = false;
-                errorLoad.setText(App.textBundle.getString("extensionNotAllowed"));
-            }else{
-                errorLoad.setText("");
+                App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("extensionNotAllowed"));
             }
-        }else{
-            errorLoad.setText("");
         }
 
         if (save){
@@ -144,14 +215,19 @@ public class AddDiscController {
 
             disc = Objects.requireNonNullElseGet(discToEdit, Disc::new);
 
-            if (executableField.getText().equals(App.textBundle.getString("multipleSelection")))
-                for (File file : selectedFiles)
-                    setDiscInfo(disc, file, false);
-            else
-                setDiscInfo(disc, selectedFolder, true);
+            if (selectedImage != null){
+                disc.name = nameField.getText();
+                disc.imgSrc = "src/main/resources/img/discCovers/" + selectedImage.getName().substring(selectedImage.getName().length() - 4);
+            }else{
+                if (executableField.getText().equals(App.textBundle.getString("multipleSelection")))
+                    for (File file : selectedFiles)
+                        setDiscInfo(disc, file, false);
+                else
+                    setDiscInfo(disc, selectedFolder, true);
 
-            if (discToEdit != null)
-                discToEdit = null;
+                if (discToEdit != null)
+                    discToEdit = null;
+            }
 
             controllerParent.updateDiscView();
             controllerParent.hideBackgroundShadow();
@@ -257,7 +333,68 @@ public class AddDiscController {
 
         try{
             String imdbBase = "https://www.imdb.com/title/";
+            String mediaAll = "/mediaindex/?ref_=tt_mv_sm";
+            String posterSrc = null;
+
+            Document doc = Jsoup.connect(imdbBase + imdbID + mediaAll).timeout(6000).get();
+            Elements body = doc.select("div.media_index_thumb_list");
+            List<String> imagesUrls = new ArrayList<>();
+            for (Element element : body){
+                Elements elements = element.select("a");
+                int i = 0;
+                for (Element e : elements){
+                    if (i == 8)
+                        break;
+
+                    if (i != 0)
+                        imagesUrls.add("https://www.imdb.com" + e.attr("href"));
+                    i++;
+                }
+                break;
+            }
+
+            int i = 0;
+            for (String url : imagesUrls){
+                doc = Jsoup.connect(url).timeout(2000).get();
+                body = doc.select("div.media-viewer");
+                for (Element element : body){
+                    posterSrc = element.select("img").attr("src");
+                }
+
+                if (posterSrc != null){
+                    Image img = new Image(posterSrc);
+
+                    if (img.isError()){
+                        return;
+                    }
+
+                    File file = new File("src/main/resources/img/discCovers/" + disc.id + "_" + i + ".png");
+                    try{
+                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);
+                        ImageIO.write(renderedImage,"png", file);
+                    } catch (IOException e) {
+                        System.err.println("Disc downloaded thumbnail not saved");
+                        return;
+                    }
+                }
+                i++;
+            }
+
+            File img = new File("src/main/resources/img/discCovers/" + disc.id + "_0.png");
+            if (!img.exists()){
+                //setVideoThumbnail()
+                return;
+            }
+
+            disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "_0.png";
+        } catch (IOException e) {
+            System.err.println("AddDiscController: Error connecting to IMDB");
+        }
+
+        /*try{
+            String imdbBase = "https://www.imdb.com/title/";
             String imdbPoster = "/mediaviewer";
+            String mediaAll = "/mediaindex/?ref_=tt_mv_sm";
             String posterSrc = null;
 
             Document doc = Jsoup.connect(imdbBase + imdbID + imdbPoster).timeout(6000).get();
@@ -287,6 +424,6 @@ public class AddDiscController {
             }
         } catch (IOException e) {
             System.err.println("AddDiscController: Error connecting to IMDB");
-        }
+        }*/
     }
 }

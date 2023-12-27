@@ -56,11 +56,6 @@
                                 <Insets top="5.0" />
                             </VBox.margin>
                         </HBox>
-                  <Label fx:id="errorLoad" alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="608.0" textFill="#bf0404">
-                     <VBox.margin>
-                        <Insets top="5.0" />
-                     </VBox.margin>
-                  </Label>
                         <BorderPane prefHeight="200.0" prefWidth="200.0">
                             <center>
                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">

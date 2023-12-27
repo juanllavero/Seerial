@@ -977,7 +977,7 @@ public class DesktopViewController {
     void editDisc(MouseEvent event){
         showBackgroundShadow();
         try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addDisc-view.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editDisc-view.fxml"));
             Parent root1 = fxmlLoader.load();
             AddDiscController addDiscController = fxmlLoader.getController();
             addDiscController.setParentController(this);
