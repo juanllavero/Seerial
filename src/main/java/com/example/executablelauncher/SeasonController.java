@@ -57,10 +57,13 @@ public class SeasonController {
     private HBox cardContainer;
 
     @FXML
-    private HBox episodeBox;
+    private VBox episodeSection;
 
     @FXML
-    private VBox episodeSection;
+    private ImageView episodeShadow;
+
+    @FXML
+    private ImageView episodeShadow2;
 
     @FXML
     private ScrollPane episodeScroll;
@@ -82,9 +85,6 @@ public class SeasonController {
 
     @FXML
     private StackPane mainBox;
-
-    @FXML
-    private ImageView showEpisodesButton;
 
     @FXML
     private Label yearField;
@@ -115,6 +115,7 @@ public class SeasonController {
     final int minPos = 0;
     final int maxPos = 100;
     private boolean isVideo = false;
+    private List<DiscController> discsControllers = new ArrayList<>();
 
     public void setParent(Controller c){
         controllerParent = c;
@@ -217,6 +218,7 @@ public class SeasonController {
         }
 
         cardContainer.getChildren().clear();
+        discsControllers.clear();
         discsButtons.clear();
         discs.clear();
         List<Integer> discs = season.getDiscs();
@@ -231,10 +233,8 @@ public class SeasonController {
         fadeIn.setToValue(1.0);
         fadeIn.play();
 
-        showEpisodesButton.setVisible(season.getDiscs().size() > 1);
-
-        episodeSection.setTranslateY(episodeBox.getPrefHeight());
-        infoBox.setTranslateY(episodeBox.getPrefHeight() / 2);
+        episodeSection.setTranslateY(episodeShadow.getFitHeight());
+        infoBox.setTranslateY(episodeShadow.getFitHeight() / 2);
 
         selectPlayButton();
     }
@@ -295,7 +295,7 @@ public class SeasonController {
                 if (playSelected)
                     selectedDisc = discs.get(0);
                 if (selectedDisc != null)
-                    play();
+                    playEpisode(selectedDisc);
             }
         });
 
@@ -314,12 +314,15 @@ public class SeasonController {
         backgroundVideo.setFitWidth(screenWidth);
         backgroundShadow.setFitWidth(screenWidth);
         backgroundShadow.setFitHeight(screenHeight);
-        episodeSection.setPrefHeight(screenHeight * 0.2);
-        episodeBox.setPrefHeight(episodeSection.getPrefHeight() - 50);
-        episodeScroll.prefHeightProperty().bind(episodeBox.heightProperty());
+        episodeScroll.prefHeightProperty().bind(episodeSection.heightProperty());
         episodeScroll.setPrefWidth(screenWidth);
         cardContainer.prefHeightProperty().bind(episodeScroll.heightProperty());
         cardContainer.prefWidthProperty().bind(episodeScroll.widthProperty());
+
+        episodeShadow.fitWidthProperty().bind(episodeSection.widthProperty());
+        episodeShadow.setFitHeight(500);
+        episodeShadow2.fitWidthProperty().bind(episodeSection.widthProperty());
+        episodeShadow2.setFitHeight(500);
 
         episodeScroll.setOnScroll(event -> {
 
@@ -376,16 +379,16 @@ public class SeasonController {
                 DiscController discController = fxmlLoader.getController();
                 discController.setParent(this);
                 discController.setData(d);
+                cardBox.getStyleClass().add("selectedDisc");
+                cardBox.setPadding(new Insets(1));
 
-                HBox.setMargin(cardBox, new Insets(0, 0, 0, 50));
+                discsControllers.add(discController);
 
                 cardContainer.getChildren().add(cardBox);
                 discsButtons.add(cardBox);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-            showEpisodesButton.setVisible(seasons.get(currentSeason).getDiscs().size() > 1);
         }
     }
 
@@ -409,53 +412,11 @@ public class SeasonController {
             // or gobble it separately
             pBuilder.redirectErrorStream(true);
             final Process process = pBuilder.start();
-            final InputStream is = process.getInputStream();
 
-            // in case you need to send information back to the process
-            // get its output stream. Don't forget to close when through with it
-            final OutputStream os = process.getOutputStream();
-
-            // thread to handle or gobble text sent from input stream
-            new Thread(() -> {
-                // try with resources
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
-                    String line = null;
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println(line);
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }).start();
-
-            // thread to get exit value from process without blocking
-            Thread waitForThread = new Thread(() -> {
-                try {
-                    int exitValue = process.waitFor();
-                    // TODO: handle exit value here
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-            waitForThread.start();
-
-            // if you want to join after a certain time:
-            long timeOut = 4000;
-            waitForThread.join(timeOut);
-
-            List<Integer> discList = seasons.get(currentSeason).getDiscs();
-            for (int i = 0; i < discList.size(); i++){
-                if (discList.get(i) == disc.getId()){
-                    if (i + 1 < discList.size()){
-                        currentEpisoceID = discList.get(i + 1);
-                        break;
-                    }
-                }
-            }
-
+            process.waitFor();
             mp.play();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            System.err.println("Error playing episode in DesktopViewController");
         }
     }
 
@@ -535,22 +496,16 @@ public class SeasonController {
 
     @FXML
     void showEpisodes(){
-        if (showEpisodes) {
-            showEpisodesButton.setImage(new Image("file:src/main/resources/img/icons/arrowDown.png"));
-        }else {
-            showEpisodesButton.setImage(new Image("file:src/main/resources/img/icons/arrowUp.png"));
-        }
-
         TranslateTransition slide = new TranslateTransition();
         TranslateTransition slideInfo = new TranslateTransition();
-        slide.setDuration(Duration.seconds(0.25));
-        slideInfo.setDuration(Duration.seconds(0.25));
+        slide.setDuration(Duration.seconds(0.3));
+        slideInfo.setDuration(Duration.seconds(0.3));
         slide.setNode(episodeSection);
         slideInfo.setNode(infoBox);
 
         if (showEpisodes) {
-            slide.setToY(episodeBox.getPrefHeight());
-            slideInfo.setToY(episodeBox.getPrefHeight() / 2);
+            slide.setToY(episodeSection.getHeight());
+            slideInfo.setToY(episodeSection.getHeight() / 2);
         }else {
             slide.setToY(0);
             slideInfo.setToY(0);
@@ -561,9 +516,9 @@ public class SeasonController {
 
         if (showEpisodes) {
             episodeSection.setTranslateY(0);
-            infoBox.setTranslateY(episodeBox.getPrefHeight() / 2);
+            infoBox.setTranslateY(episodeSection.getHeight() / 2);
         }else {
-            episodeSection.setTranslateY(episodeBox.getPrefHeight());
+            episodeSection.setTranslateY(episodeSection.getHeight());
             infoBox.setTranslateY(0);
         }
         showEpisodes = !showEpisodes;
@@ -596,7 +551,8 @@ public class SeasonController {
         selectedDisc = discs.get(0);
         Node node = cardContainer.getChildren().get(0);
         node.getStyleClass().clear();
-        node.getStyleClass().add("selectedDisc");
+        node.getStyleClass().add("selectedDiscActive");
+        discsControllers.get(0).selectDiscFullScreen();
     }
 
     public void selectPrevDisc(){
@@ -604,12 +560,19 @@ public class SeasonController {
         if (index > 0){
             Pane node = discsButtons.get(index);
             node.getStyleClass().clear();
+            node.getStyleClass().add("selectedDisc");
+            discsControllers.get(index).clearSelection();
 
             selectedDisc = discs.get(--index);
 
             node = discsButtons.get(index);
             node.getStyleClass().clear();
-            node.getStyleClass().add("selectedDisc");
+            node.getStyleClass().add("selectedDiscActive");
+            discsControllers.get(index).selectDiscFullScreen();
+
+            if (node.getLayoutX() + cardContainer.getLayoutX() + cardContainer.getTranslateX() < 827) {
+                episodeScroll.setHvalue(episodeScroll.getHvalue() - 1);
+            }
         }
     }
 
@@ -618,20 +581,29 @@ public class SeasonController {
         if (index != -1 && index < discsButtons.size() - 1){
             Pane node = discsButtons.get(index);
             node.getStyleClass().clear();
+            node.getStyleClass().add("selectedDisc");
+            discsControllers.get(index).clearSelection();
 
             selectedDisc = discs.get(++index);
 
             node = discsButtons.get(index);
             node.getStyleClass().clear();
-            node.getStyleClass().add("selectedDisc");
+            node.getStyleClass().add("selectedDiscActive");
+            discsControllers.get(index).selectDiscFullScreen();
+
+            if (node.getLayoutX() + cardContainer.getLayoutX() + cardContainer.getTranslateX() > episodeScroll.getViewportBounds().getWidth()) {
+                episodeScroll.setHvalue(episodeScroll.getHvalue() + 1);
+            }
         }
     }
 
     public void deselectDisc(){
         int index = getDiscIndex(selectedDisc);
         if (index != -1){
+            discsControllers.get(index).clearSelection();
             Pane node = discsButtons.get(index);
             node.getStyleClass().clear();
+            node.getStyleClass().add("selectedDisc");
             selectedDisc = null;
         }
     }

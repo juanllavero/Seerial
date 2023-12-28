@@ -13,10 +13,19 @@
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="620.0" prefWidth="631.0" styleClass="lessDarkBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchSeriesController">
    <center>
-      <ScrollPane styleClass="darkerBackground" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+      <ScrollPane hbarPolicy="NEVER" prefWidth="631.0" styleClass="darkerBackground" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <content>
-            <VBox fx:id="seriesContainer" spacing="2.0" />
+            <VBox fx:id="seriesContainer" prefWidth="630.0" spacing="2.0">
+               <padding>
+                  <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+               </padding></VBox>
          </content>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <padding>
+            <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />
+         </padding>
       </ScrollPane>
    </center>
    <top>

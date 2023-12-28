@@ -70,41 +70,70 @@
 .choice-box > .label { -fx-text-fill: white; }
 
 .downloadedImageButton{
-    -fx-background-color: #000000;
+    -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
+    -fx-border-width: 3px;
+    -fx-border-color: transparent;
 }
 
 .downloadedImageButton:hover{
-    -fx-background-color: #000000;
+    -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: #DB162F;
+    -fx-border-color: -fx-main-color;
 }
 
 .downloadedImageButtonSelected{
-    -fx-background-color: #000000;
+    -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: #DB162F;
+    -fx-border-color: -fx-main-color;
+}
+
+.selectionOptions{
+    -fx-background-color: rgba(0, 0, 0, 0.58);
+    -fx-border-width: 1px;
+    -fx-border-color: -fx-main-color;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.selectionOptionsButton{
+    -fx-background-color: transparent;
+    -fx-text-fill: #a6a6a6;
+}
+
+.selectionOptionsButton:hover{
+    -fx-text-fill: -fx-light-color;
+}
+
+.selectionOptionsButtonDelete{
+    -fx-background-color: transparent;
+    -fx-text-fill: #a6a6a6;
+}
+
+.selectionOptionsButtonDelete:hover{
+    -fx-text-fill: -fx-main-color;
 }
 
 .discSelected{
-    -fx-background-color: rgba(0, 0, 0, 0.37);
-    -fx-background-radius: 5px;
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 22px;
+    -fx-background-color: transparent;
+    -fx-border-color: -fx-main-color;
+    -fx-border-width: 2px;
 }
 
 .discButton{
     -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
     -fx-text-fill: #ffffff;
-    -fx-font-size: 22px;
 }
 
 .discButton:hover{
     -fx-background-color: transparent;
-    -fx-text-fill: #888888;
-    -fx-font-size: 22px;
+    -fx-border-color: -fx-main-color;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ffffff;
 }
 
 .desktopMenuButtons{
@@ -363,8 +392,9 @@
 
 .seriesSearchButtonActive{
     -fx-text-fill: white;
+    -fx-border-width: 1px;
+    -fx-border-color: -fx-lighter-grey-color;
     -fx-background-color: -fx-grey-color;
-    -fx-border-width: 0;
 }
 
 .buttonGradient {
@@ -390,6 +420,12 @@
 }
 
 .selectedDisc {
+    -fx-background-color: transparent;
+    -fx-border-width: 2 2 2 2;
+    -fx-border-color: transparent;
+}
+
+.selectedDiscActive {
     -fx-background-color: transparent;
     -fx-border-width: 2 2 2 2;
     -fx-border-color: linear-gradient(to top, rgba(176,176,176,1) 0%, rgba(186,186,186,1) 31%, rgba(65,65,65,1) 63%, rgba(65,65,65,1) 100%);

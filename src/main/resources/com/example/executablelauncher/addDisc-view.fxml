@@ -46,7 +46,7 @@
                                         <Insets left="20.0" right="10.0" />
                                     </HBox.margin>
                                 </TextField>
-                                <Button fx:id="loadButton" mnemonicParsing="false" onMouseClicked="#loadExe" text="Load">
+                                <Button fx:id="loadButton" mnemonicParsing="false" onMouseClicked="#loadExe" styleClass="desktopButton" stylesheets="@styles.css" text="Load" textFill="WHITE">
                                     <HBox.margin>
                                         <Insets right="50.0" />
                                     </HBox.margin>
@@ -60,12 +60,12 @@
                             <center>
                                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                                     <children>
-                                        <Button fx:id="addButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Add">
+                                        <Button fx:id="addButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="desktopButton" stylesheets="@styles.css" text="Add" textFill="WHITE">
                                             <HBox.margin>
                                                 <Insets right="50.0" />
                                             </HBox.margin>
                                         </Button>
-                                        <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+                                        <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE" />
                                     </children>
                            <BorderPane.margin>
                               <Insets />

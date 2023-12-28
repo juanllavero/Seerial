@@ -8,9 +8,12 @@ import com.github.m0nk3y2k4.thetvdb.api.exception.APIException;
 import com.github.m0nk3y2k4.thetvdb.api.model.data.Episode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -55,8 +58,6 @@ public class SearchSeriesController {
     }
 
     public void initValues(String toSearch){
-
-
         if (!toSearch.isEmpty())
             search(toSearch);
     }
@@ -93,6 +94,8 @@ public class SearchSeriesController {
                 btn.setText(s.name + "\n" + s.year);
                 btn.getStyleClass().add("seriesSearchButton");
                 btn.setMaxWidth(Integer.MAX_VALUE);
+                btn.setAlignment(Pos.CENTER_LEFT);
+                btn.setPadding(new Insets(1));
 
                 btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
                     selectButton(btn);

@@ -7,6 +7,7 @@ import com.example.executablelauncher.entities.Series;
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -47,6 +48,21 @@ public class DesktopViewController {
     private Button addCollectionButton;
 
     @FXML
+    private Label elementsSelectedText;
+
+    @FXML
+    private Button deleteSelectedButton;
+
+    @FXML
+    private Button deselectAllButton;
+
+    @FXML
+    private Button selectAllButton;
+
+    @FXML
+    private BorderPane selectionOptions;
+
+    @FXML
     private Button addDiscButton;
 
     @FXML
@@ -68,7 +84,7 @@ public class DesktopViewController {
     private VBox detailsBox;
 
     @FXML
-    private VBox discContainer;
+    private FlowPane discContainer;
 
     @FXML
     private VBox discMenu;
@@ -199,11 +215,11 @@ public class DesktopViewController {
     private List<Button> seriesButtons = new ArrayList<>();
     private List<Button> seasonsButtons = new ArrayList<>();
     private List<Button> discButtons = new ArrayList<>();
-
+    public Disc selectedDisc = null;
     private Series selectedSeries = null;
     private Season selectedSeason = null;
     private List<Disc> selectedDiscs = new ArrayList<>();
-    private Disc discToEdit = null;
+    private List<DiscController> discControllers = new ArrayList<>();
     private String currentCategory = "";
     private double xOffset = 0;
     private double yOffset = 0;
@@ -219,6 +235,8 @@ public class DesktopViewController {
                 .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectCategory(newValue) );
 
         setDragWindow(topBar);
+
+        selectionOptions.setVisible(false);
 
         menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
             hideMenu();
@@ -494,36 +512,42 @@ public class DesktopViewController {
         if (!discList.isEmpty()){
             discList.sort(new Utils.DiscComparator());
             for (Disc d : discList){
-                Button btn = new Button();
-                btn.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber() + " - " + d.getName());
-                btn.getStyleClass().clear();
-                btn.getStyleClass().add("discButton");
-                btn.setAlignment(Pos.BASELINE_LEFT);
-                btn.setWrapText(true);
+                try {
+                    FXMLLoader fxmlLoader = new FXMLLoader();
+                    fxmlLoader.setLocation(getClass().getResource("discCard.fxml"));
+                    Pane cardBox = fxmlLoader.load();
+                    DiscController discController = fxmlLoader.getController();
+                    discController.setDesktopParentParent(this);
+                    discController.setData(d);
 
-                HBox.setMargin(btn, new Insets(2, 2, 2, 2));
-                btn.setPadding(new Insets(2, 2, 2, 5));
+                    /*btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                        Disc disc = getDiscFromButton(btn);
+                        if (event.getButton() == MouseButton.SECONDARY) {
+                            if (disc != null)
+                                openDiscMenu(event, disc);
+                        }else{
+                            if (event.isControlDown())
+                                controlSelectDisc(disc, btn);
+                            else if (event.isShiftDown())
+                                shiftSelectDisc(disc, btn);
+                            else
+                                selectDisc(disc);
+                        }
+                    });*/
 
-                discButtons.add(btn);
-
-                btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
-                    Disc disc = getDiscFromButton(btn);
-                    if (event.getButton() == MouseButton.SECONDARY) {
-                        if (disc != null)
-                            openDiscMenu(event, disc);
-                    }else{
-                        if (event.isControlDown())
-                            controlSelectDisc(disc, btn);
-                        else if (event.isShiftDown())
-                            shiftSelectDisc(disc, btn);
-                        else
-                            selectDisc(disc, btn);
-                    }
-                });
-
-                discContainer.getChildren().add(btn);
+                    discContainer.getChildren().add(cardBox);
+                    discControllers.add(discController);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
+    }
+
+
+
+    public Season getCurrentSeason(){
+        return selectedSeason;
     }
 
     private Disc getDiscFromButton(Button btn){
@@ -536,6 +560,14 @@ public class DesktopViewController {
 
     public void blankSelection(){
         centralVBox.setVisible(false);
+    }
+
+    private int getSeriesIndex(Series s){
+        for (int i = 0; i < seriesList.size(); i++){
+            if (seriesList.get(i).getId() == s.getId())
+                return i;
+        }
+        return 0;
     }
 
     public static void scrollModification(ScrollPane scroll) {
@@ -653,19 +685,16 @@ public class DesktopViewController {
         }
     }
     //endregion
-
-
-    public Season getCurrentSeason(){
-        return selectedSeason;
+    public boolean isDiscSelected(){
+        return !selectedDiscs.isEmpty();
     }
-
     public void refreshSeason(Season s){
         selectedSeason = null;
         selectSeason(s);
     }
 
     //region PLAY EPISODE
-    private void playEpisode(Disc disc) {
+    public void playEpisode(Disc disc) {
         //Run file in vlc
         String command = null;
         String extension = disc.getExecutableSrc().substring(disc.getExecutableSrc().length() - 3);
@@ -692,69 +721,38 @@ public class DesktopViewController {
     //endregion
 
     //region EPISODE SELECTION
-    public void controlSelectDisc(Disc d, Button btn){
-        int selectedIndex = selectedDiscs.indexOf(d);
-        if (selectedIndex == -1){
-            selectedDiscs.add(d);
-            btn.getStyleClass().clear();
-            btn.getStyleClass().add("discSelected");
+    public void selectDisc(Disc disc){
+        if (selectedDiscs.contains(disc)) {
+            selectedDiscs.remove(disc);
         }else{
-            selectedDiscs.remove(selectedIndex);
-            btn.getStyleClass().clear();
-            btn.getStyleClass().add("discButton");
-        }
-    }
-    public void shiftSelectDisc(Disc d, Button btn){
-        if (discToEdit != null){
-            int index = getDiscIndex(d);
-            int selectedIndex = getDiscIndex(discToEdit);
-
-            selectedDiscs.clear();
-            if (index > selectedIndex){
-                for (int i = selectedIndex; i <= index; i++){
-                    controlSelectDisc(discList.get(i), discButtons.get(i));
-                }
-            }else{
-                for (int i = index; i <= selectedIndex; i++){
-                    controlSelectDisc(discList.get(i), discButtons.get(i));
-                }
-            }
-        }else{
-            selectDisc(d, btn);
-        }
-    }
-    private int getDiscIndex(Disc d){
-        for (int i = 0; i < discList.size(); i++){
-            if (discList.get(i).getId() == d.getId())
-                return i;
-        }
-        return -1;
-    }
-    private int getSeriesIndex(Series s){
-        for (int i = 0; i < seriesList.size(); i++){
-            if (seriesList.get(i).getId() == s.getId())
-                return i;
-        }
-        return 0;
-    }
-    public void selectDisc(Disc disc, Button btn){
-        clearDiscSelection();
-        if (selectedDiscs.size() == 1 && discToEdit != null && discToEdit.getId() == disc.getId()){
-            playEpisode(disc);
-        }else{
-            assert selectedDiscs != null;
-            selectedDiscs.clear();
-            discToEdit = disc;
             selectedDiscs.add(disc);
-            clearDiscSelection();
-            btn.getStyleClass().clear();
-            btn.getStyleClass().add("discSelected");
         }
+
+        selectionOptions.setVisible(!selectedDiscs.isEmpty());
+
+        if (selectedDiscs.size() == 1)
+            elementsSelectedText.setText(App.textBundle.getString("oneSelected"));
+        else
+            elementsSelectedText.setText(selectedDiscs.size() + " " + App.textBundle.getString("selectedDiscs"));
     }
-    private void clearDiscSelection(){
-        for (Node n : discContainer.getChildren()){
-            n.getStyleClass().clear();
-            n.getStyleClass().add("discButton");
+    @FXML
+    void deleteSelected(ActionEvent event) {
+
+    }
+
+    @FXML
+    void deselectAll(ActionEvent event) {
+        for (DiscController d : discControllers){
+            d.clearSelection();
+        }
+        selectionOptions.setVisible(false);
+        selectedDiscs.clear();
+    }
+    @FXML
+    void selectAll(ActionEvent event) {
+        for (DiscController d : discControllers){
+            if (!d.discSelected)
+                d.selectDiscDesktop();
         }
     }
     //endregion
@@ -975,13 +973,16 @@ public class DesktopViewController {
     }
     @FXML
     void editDisc(MouseEvent event){
+        editDisc(selectedDisc);
+    }
+    void editDisc(Disc d){
         showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editDisc-view.fxml"));
             Parent root1 = fxmlLoader.load();
             AddDiscController addDiscController = fxmlLoader.getController();
             addDiscController.setParentController(this);
-            addDiscController.setDisc(discToEdit);
+            addDiscController.setDisc(d);
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("episodeWindowTitleEdit"));
             stage.initStyle(StageStyle.UNDECORATED);
@@ -1022,20 +1023,22 @@ public class DesktopViewController {
         hideMenu();
     }
     @FXML
-    void removeDisc(MouseEvent event) {
+    void removeDisc(MouseEvent event){
+        removeDisc(selectedDisc);
+    }
+    void removeDisc(Disc d) {
         if (selectedDiscs.size() > 1){
-            for (Disc d : selectedDiscs){
-                discList.remove(d);
-                App.removeDisc(d);
-                selectedSeason.removeDisc(d);
+            for (Disc disc : selectedDiscs){
+                discList.remove(disc);
+                App.removeDisc(disc);
+                selectedSeason.removeDisc(disc);
             }
-        }else if (discToEdit != null){
-            discList.remove(discToEdit);
-            App.removeDisc(discToEdit);
-            selectedSeason.removeDisc(discToEdit);
+        }else if (d != null){
+            discList.remove(d);
+            App.removeDisc(d);
+            selectedSeason.removeDisc(d);
         }
 
-        discToEdit = null;
         selectSeason(selectedSeason);
         hideMenu();
     }
@@ -1112,7 +1115,6 @@ public class DesktopViewController {
         seasonMenu.setVisible(true);
     }
     public void openDiscMenu(MouseEvent event, Disc disc) {
-        discToEdit = disc;
         menuParentPane.setVisible(true);
         discMenu.setLayoutX(event.getSceneX());
         if (discList.indexOf(disc) > 2)

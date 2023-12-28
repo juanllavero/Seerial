@@ -55,6 +55,12 @@ public class AddSeasonController {
     private Button musicButton;
 
     @FXML
+    private Label logoResolution;
+
+    @FXML
+    private Label backgroundResolution;
+
+    @FXML
     private TextField musicField;
 
     @FXML
@@ -177,7 +183,9 @@ public class AddSeasonController {
         if (file.exists()) {
             selectedLogo = file;
             try{
-                logoImageView.setImage(new Image(file.toURI().toURL().toExternalForm(), 258, 110, true, true));
+                Image img = new Image(file.toURI().toURL().toExternalForm());
+                logoResolution.setText((int)img.getWidth() + "x" + (int)img.getHeight());
+                logoImageView.setImage(img);
             } catch (MalformedURLException e) {
                 selectedLogo = null;
                 System.err.println("Logo not loaded");
@@ -192,7 +200,9 @@ public class AddSeasonController {
         if (file.exists()) {
             selectedBackground = file;
             try{
-                backgroundImageView.setImage(new Image(file.toURI().toURL().toExternalForm(), 251, 148, true, true));
+                Image img = new Image(file.toURI().toURL().toExternalForm());
+                backgroundResolution.setText((int)img.getWidth() + "x" + (int)img.getHeight());
+                backgroundImageView.setImage(img);
             } catch (MalformedURLException e) {
                 selectedBackground = null;
                 System.err.println("Background not loaded");

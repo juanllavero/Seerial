@@ -9,6 +9,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
@@ -232,14 +233,57 @@
                                     </VBox>
                                  </right>
                                  <center>
-                                    <VBox BorderPane.alignment="CENTER">
+                                    <VBox BorderPane.alignment="TOP_LEFT">
                                        <children>
                                           <HBox fx:id="seasonContainer" />
-                                          <VBox fx:id="discContainer" fillWidth="false">
+                                          <BorderPane fx:id="selectionOptions" styleClass="selectionOptions" stylesheets="@styles.css" visible="false">
+                                             <left>
+                                                <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+                                                   <children>
+                                                      <Label fx:id="elementsSelectedText" text="1 element selected" textFill="#960f20" />
+                                                      <Button fx:id="deleteSelectedButton" mnemonicParsing="false" onAction="#deleteSelected" styleClass="selectionOptionsButtonDelete" stylesheets="@styles.css" text="Eliminar" />
+                                                   </children>
+                                                   <BorderPane.margin>
+                                                      <Insets left="5.0" />
+                                                   </BorderPane.margin>
+                                                </HBox>
+                                             </left>
+                                             <right>
+                                                <HBox BorderPane.alignment="CENTER">
+                                                   <children>
+                                                      <Button fx:id="selectAllButton" mnemonicParsing="false" onAction="#selectAll" styleClass="selectionOptionsButton" stylesheets="@styles.css" text="Select all">
+                                                         <graphic>
+                                                            <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                                               <image>
+                                                                  <Image url="@../../../img/icons/circle.png" />
+                                                               </image>
+                                                            </ImageView>
+                                                         </graphic>
+                                                      </Button>
+                                                      <Button fx:id="deselectAllButton" mnemonicParsing="false" onAction="#deselectAll" styleClass="selectionOptionsButton" stylesheets="@styles.css" text="Deselect all">
+                                                         <graphic>
+                                                            <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                                               <image>
+                                                                  <Image url="@../../../img/icons/close.png" />
+                                                               </image>
+                                                            </ImageView>
+                                                         </graphic>
+                                                      </Button>
+                                                   </children>
+                                                </HBox>
+                                             </right>
                                              <padding>
-                                                <Insets bottom="5.0" left="2.0" right="2.0" top="5.0" />
+                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                              </padding>
-                                          </VBox>
+                                             <VBox.margin>
+                                                <Insets top="5.0" />
+                                             </VBox.margin>
+                                          </BorderPane>
+                                          <FlowPane fx:id="discContainer" hgap="20.0" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS">
+                                             <VBox.margin>
+                                                <Insets bottom="20.0" top="10.0" />
+                                             </VBox.margin>
+                                          </FlowPane>
                                        </children>
                                     </VBox>
                                  </center>

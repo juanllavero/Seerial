@@ -45,12 +45,12 @@
                      <center>
                         <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <children>
-                              <Button fx:id="saveButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Save">
+                              <Button fx:id="saveButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="desktopButton" stylesheets="@styles.css" text="Save" textFill="WHITE">
                                  <HBox.margin>
                                     <Insets right="50.0" />
                                  </HBox.margin>
                               </Button>
-                              <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+                              <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE" />
                            </children>
                         </HBox>
                      </center>

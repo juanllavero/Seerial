@@ -241,10 +241,8 @@ public class ImageDownloaderController {
         btn.setGraphic(imageView);
         btn.setText(width + "x" + height + "px");
         btn.setContentDisplay(ContentDisplay.TOP);
-        btn.setPadding(new Insets(5, 5, 5, 5));
+        btn.setPadding(new Insets(2));
         btn.getStyleClass().add("downloadedImageButton");
-
-        HBox.setMargin(btn, new Insets(2, 2, 2, 2));
 
         btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
             selectButton(btn);

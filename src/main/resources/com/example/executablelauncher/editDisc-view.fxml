@@ -74,7 +74,7 @@
                         <Insets left="20.0" right="10.0" />
                      </HBox.margin>
                   </TextField>
-                  <Button fx:id="loadButton" mnemonicParsing="false" onMouseClicked="#loadExe" text="Load">
+                  <Button fx:id="loadButton" mnemonicParsing="false" onMouseClicked="#loadExe" styleClass="desktopButton" stylesheets="@styles.css" text="Load" textFill="WHITE">
                      <HBox.margin>
                         <Insets right="50.0" />
                      </HBox.margin>
@@ -86,7 +86,10 @@
             </HBox>
             <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="darkerBackground" stylesheets="@styles.css">
                <content>
-                  <FlowPane fx:id="imagesContainer" />
+                  <FlowPane fx:id="imagesContainer" alignment="TOP_CENTER" hgap="10.0" vgap="10.0">
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding></FlowPane>
                </content>
             </ScrollPane>
          </children>
@@ -131,12 +134,12 @@
          <center>
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button fx:id="addButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="roundButton" stylesheets="@styles.css" text="Save">
+                  <Button fx:id="addButton" mnemonicParsing="false" onMouseClicked="#save" styleClass="desktopButton" stylesheets="@styles.css" text="Save" textFill="WHITE">
                      <HBox.margin>
                         <Insets right="50.0" />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+                  <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE" />
                </children>
                <BorderPane.margin>
                   <Insets />

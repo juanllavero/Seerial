@@ -7,6 +7,7 @@ import com.example.executablelauncher.entities.Series;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -15,8 +16,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -118,14 +119,20 @@ public class AddDiscController {
 
         for (File f : imagesFiles){
             try{
-                Image img = new Image(f.toURI().toURL().toExternalForm(), 150, 100, true, true);
+                Image img = new Image(f.toURI().toURL().toExternalForm(), 150, 84, true, true);
                 Button btn = new Button();
                 ImageView image = new ImageView(img);
-                btn.setGraphic(image);
+                HBox imageContainer = new HBox();
+                imageContainer.setAlignment(Pos.CENTER);
+                imageContainer.setPrefWidth(150);
+                imageContainer.setPrefHeight(84);
+                imageContainer.getChildren().add(image);
+                imageContainer.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+
+                btn.setGraphic(imageContainer);
                 btn.setText("");
                 btn.getStyleClass().add("downloadedImageButton");
-
-                HBox.setMargin(btn, new Insets(2, 2, 2, 2));
+                btn.setPadding(new Insets(2));
 
                 btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
                     selectButton(btn);
@@ -199,14 +206,16 @@ public class AddDiscController {
         if (!executableField.getText().equals(App.textBundle.getString("multipleSelection")) && !exe.exists()){
             save = false;
             App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("fileNotFound"));
-        }else if (!executableField.getText().equals(App.textBundle.getString("multipleSelection")) && !selectedFolder.exists()){
-            String fileExtension = executableField.getText().substring(executableField.getText().length() - 4);
-            fileExtension = fileExtension.toLowerCase();
+        }else if (!executableField.getText().equals(App.textBundle.getString("multipleSelection")) && selectedFolder != null){
+            if (selectedFolder.exists()){
+                String fileExtension = executableField.getText().substring(executableField.getText().length() - 4);
+                fileExtension = fileExtension.toLowerCase();
 
-            if (!fileExtension.equals(".mkv") && !fileExtension.equals(".mp4") && !fileExtension.equals("m2ts")
-                    && !fileExtension.equals(".iso") && !fileExtension.equals(".exe") && !fileExtension.equals(".bat")){
-                save = false;
-                App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("extensionNotAllowed"));
+                if (!fileExtension.equals(".mkv") && !fileExtension.equals(".mp4") && !fileExtension.equals("m2ts")
+                        && !fileExtension.equals(".iso") && !fileExtension.equals(".exe") && !fileExtension.equals(".bat")){
+                    save = false;
+                    App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("extensionNotAllowed"));
+                }
             }
         }
 
@@ -217,7 +226,7 @@ public class AddDiscController {
 
             if (selectedImage != null){
                 disc.name = nameField.getText();
-                disc.imgSrc = "src/main/resources/img/discCovers/" + selectedImage.getName().substring(selectedImage.getName().length() - 4);
+                disc.imgSrc = "src/main/resources/img/discCovers/" + selectedImage.getName();
             }else{
                 if (executableField.getText().equals(App.textBundle.getString("multipleSelection")))
                     for (File file : selectedFiles)
