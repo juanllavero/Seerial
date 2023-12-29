@@ -3,22 +3,23 @@ package com.example.executablelauncher.entities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Series implements Serializable {
-    public static int NextID = 0;
-    public final int id;
+    public static AtomicLong NextID = new AtomicLong();
+    public final long id;
     public long thetvdbID = 0;
     public String name = "";
     public String category = "";
     public int order = 0;
     public String coverSrc = "";
-    public List<Integer> seasons = new ArrayList<>();
+    public List<Long> seasons = new ArrayList<>();
 
     public Series() {
-        this.id = NextID++;
+        this.id = NextID.getAndIncrement();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -38,7 +39,7 @@ public class Series implements Serializable {
         this.coverSrc = coverSrc;
     }
 
-    public List<Integer> getSeasons() {
+    public List<Long> getSeasons() {
         return seasons;
     }
 
@@ -46,7 +47,7 @@ public class Series implements Serializable {
         this.seasons.add(season.getId());
     }
 
-    public void removeSeason(int id){
+    public void removeSeason(long id){
         for (int i = 0; i < seasons.size(); i++){
             if (seasons.get(i) == id) {
                 seasons.remove(i);

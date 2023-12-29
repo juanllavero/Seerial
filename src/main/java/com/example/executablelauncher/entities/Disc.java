@@ -1,22 +1,23 @@
 package com.example.executablelauncher.entities;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Disc implements Serializable {
-    public static int NextID = 0;
-    public final int id;
+    public static AtomicLong NextID = new AtomicLong();
+    public final long id;
     public String name = "";
     public String episodeNumber = "";
     public String executableSrc = "";
     public String type = "";    //Folder or File
-    public int seasonID = -1;
+    public long seasonID = -1;
     public String imgSrc = "";
 
     public Disc() {
-        this.id = NextID++;
+        this.id = NextID.getAndIncrement();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -36,11 +37,11 @@ public class Disc implements Serializable {
         this.type = type;
     }
 
-    public int getSeasonID() {
+    public long getSeasonID() {
         return seasonID;
     }
 
-    public void setSeasonID(int seasonID) {
+    public void setSeasonID(long seasonID) {
         this.seasonID = seasonID;
     }
 

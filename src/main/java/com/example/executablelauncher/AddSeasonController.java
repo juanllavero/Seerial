@@ -214,8 +214,8 @@ public class AddSeasonController {
 
     private File getImageFile(){
         fileChooser.setTitle(App.textBundle.getString("selectImage"));
-        if (lastDirectory != null && Files.exists(Path.of(lastDirectory)))
-            fileChooser.setInitialDirectory(new File(lastDirectory));
+        if (App.lastDirectory != null && Files.exists(Path.of(App.lastDirectory)))
+            fileChooser.setInitialDirectory(new File(App.lastDirectory));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
@@ -227,7 +227,7 @@ public class AddSeasonController {
         selectedBackground = getImageFile();
         if (selectedBackground != null){
             loadBackground(selectedBackground.getPath());
-            lastDirectory = selectedBackground.getPath().substring(0, (selectedBackground.getPath().length() - selectedBackground.getName().length()));
+            App.lastDirectory = selectedBackground.getPath().substring(0, (selectedBackground.getPath().length() - selectedBackground.getName().length()));
         }
     }
 
@@ -236,7 +236,7 @@ public class AddSeasonController {
         selectedLogo = getImageFile();
         if (selectedLogo != null){
             loadLogo(selectedLogo.getPath());
-            lastDirectory = selectedLogo.getPath().substring(0, (selectedLogo.getPath().length() - selectedLogo.getName().length()));
+            App.lastDirectory = selectedLogo.getPath().substring(0, (selectedLogo.getPath().length() - selectedLogo.getName().length()));
         }
     }
 
@@ -742,7 +742,7 @@ public class AddSeasonController {
         }
     }
 
-    private String setTransparencyEffect(String src, int seasonId){
+    private String setTransparencyEffect(String src, long seasonId){
         try {
             //Load image
             BufferedImage originalImage = ImageIO.read(new File(src));
@@ -786,7 +786,7 @@ public class AddSeasonController {
         return "src/main/resources/img/backgrounds/" + seasonId + "_transparencyEffect.png";
     }
 
-    private void setDesktopBackgroundBlur(int seasonId){
+    private void setDesktopBackgroundBlur(long seasonId){
         try {
             BufferedImage backgroundEffect = ImageIO.read(new File("src/main/resources/img/Background.png"));
             BufferedImage originalImage = ImageIO.read(new File("src/main/resources/img/backgrounds/" + seasonId + "_desktopBlur.png"));

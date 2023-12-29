@@ -128,14 +128,14 @@ public class ImageCropper {
     void loadImage(ActionEvent event){
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(App.textBundle.getString("selectImage"));
-        if (lastDirectory != null && Files.exists(Path.of(lastDirectory)))
-            fileChooser.setInitialDirectory(new File(new File(lastDirectory).getParentFile().getAbsolutePath()));
+        if (App.lastDirectory != null && Files.exists(Path.of(App.lastDirectory)))
+            fileChooser.setInitialDirectory(new File(new File(App.lastDirectory).getParentFile().getAbsolutePath()));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allImages"), "*.jpg", "*.png", "*.jpeg"));
         File selectedFile = fileChooser.showOpenDialog(((Button) event.getSource()).getScene().getWindow());
         if (selectedFile != null) {
-            lastDirectory = selectedFile.getPath();
+            App.lastDirectory = selectedFile.getPath().substring(0, (selectedFile.getPath().length() - selectedFile.getName().length()));
             imageText.setText(selectedFile.getAbsolutePath());
             try{
                 originalImage = new Image(selectedFile.toURI().toURL().toExternalForm());
@@ -150,7 +150,7 @@ public class ImageCropper {
     public void loadImageToCrop(File imgFile){
         if (imgFile != null) {
             try{
-                lastDirectory = imgFile.getPath();
+                App.lastDirectory = imgFile.getPath();
                 imageText.setText(imgFile.getAbsolutePath());
                 originalImage = new Image(imgFile.toURI().toURL().toExternalForm());
                 setImage();

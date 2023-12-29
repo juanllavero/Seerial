@@ -38,10 +38,11 @@ public class DiscController {
     @FXML
     private StackPane thumbnailStackPane;
 
-    private Disc disc;
+    public Disc disc;
     private SeasonController parentController = null;
     private DesktopViewController desktopParent = null;
     public boolean discSelected = false;
+    private String oldThumbnailPath = "";
 
     public void setData(Disc d) {
         name.setText(d.getName());
@@ -202,11 +203,16 @@ public class DiscController {
         discMenu.setVisible(false);
     }
 
-    private void setThumbnail(){
+    public void setThumbnail(){
+        if (disc.imgSrc.isEmpty() || oldThumbnailPath.equals(disc.imgSrc))
+            return;
+
         double targetWidth = thumbnail.getFitWidth();
         double targetHeight = thumbnail.getFitHeight();
 
         Image originalImage = new Image("file:" + disc.imgSrc);
+
+        oldThumbnailPath = disc.imgSrc;
 
         double aspectRatio = targetWidth / targetHeight;
         double originalWidth = originalImage.getWidth();

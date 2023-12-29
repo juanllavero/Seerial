@@ -3,10 +3,11 @@ package com.example.executablelauncher.entities;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Season implements Serializable {
-    public static int NextID = 0;
-    public final int id;
+    public static AtomicLong NextID = new AtomicLong();
+    public final long id;
     public String name = "";
     public String year = "";
     public String logoSrc = "";
@@ -17,13 +18,13 @@ public class Season implements Serializable {
     public String fullScreenBlurImageSrc = "";
     public String desktopBackgroundEffect = "";
     public int order = 0;
-    public final List<Integer> discs = new ArrayList<>();
+    public final List<Long> discs = new ArrayList<>();
 
     public Season() {
-        this.id = NextID++;
+        this.id = NextID.getAndIncrement();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -91,7 +92,7 @@ public class Season implements Serializable {
         this.order = order;
     }
 
-    public List<Integer> getDiscs() {
+    public List<Long> getDiscs() {
         return discs;
     }
 
@@ -101,7 +102,7 @@ public class Season implements Serializable {
 
     public void removeDisc(Disc d){
         int i = 0;
-        for (int disc : discs){
+        for (long disc : discs){
             if (disc == d.getId()) {
                 discs.remove(i);
                 break;

@@ -101,7 +101,7 @@ public class SeasonController {
     private List<Disc> discs = new ArrayList<>();
     private List<Pane> discsButtons = new ArrayList<>();
     private int currentSeason = 0;
-    public int currentEpisoceID = -1;
+    public long currentEpisoceID = -1;
     private Disc selectedDisc = null;
     private boolean showEpisodes = false;
     private boolean optionsSelected = false;
@@ -221,8 +221,8 @@ public class SeasonController {
         discsControllers.clear();
         discsButtons.clear();
         discs.clear();
-        List<Integer> discs = season.getDiscs();
-        for (int i : discs){
+        List<Long> discs = season.getDiscs();
+        for (long i : discs){
             Disc d = App.findDisc(i);
             addEpisodeCard(d);
         }
@@ -244,10 +244,10 @@ public class SeasonController {
         nextSeasonButton.setVisible(currentSeason != seasons.size() - 1);
     }
 
-    public void setSeasons(List<Integer> seasonList){
+    public void setSeasons(List<Long> seasonList){
         if (seasons != null){
-            for (int i : seasonList){
-                seasons.add(App.findSeason(i));
+            for (long id : seasonList){
+                seasons.add(App.findSeason(id));
             }
         }
 
@@ -474,7 +474,7 @@ public class SeasonController {
 
     @FXML
     void removeSeason(){
-        int currentID = seasons.get(currentSeason).getId();
+        long currentID = seasons.get(currentSeason).getId();
 
         seasons.remove(seasons.get(currentSeason));
         App.removeSeason(currentID);

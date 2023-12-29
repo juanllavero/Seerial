@@ -4,6 +4,8 @@ import com.example.executablelauncher.entities.Disc;
 import com.example.executablelauncher.entities.EpisodeMetadata;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -78,6 +80,9 @@ public class AddDiscController {
     private File selectedFolder = null;
     private List<File> imagesFiles = new ArrayList<>();
     private File selectedImage = null;
+    //To load before the view is closed
+    private String nameValue = "";
+    private String typeValue = "";
 
     public void InitValues(){
         typeField.getItems().addAll(Arrays.asList(App.textBundle.getString("file"), App.textBundle.getString("folder")));
@@ -112,7 +117,7 @@ public class AddDiscController {
         assert files != null;
         for (File f : files){
             String[] name = f.getName().split("_");
-            if (name[0].equals(Integer.toString(discToEdit.getId()))){
+            if (name[0].equals(Long.toString(discToEdit.getId()))){
                 imagesFiles.add(f);
             }
         }
@@ -220,219 +225,17 @@ public class AddDiscController {
         }
 
         if (save){
-            Disc disc;
-
-            disc = Objects.requireNonNullElseGet(discToEdit, Disc::new);
-
-            if (selectedImage != null){
-                disc.name = nameField.getText();
-                disc.imgSrc = "src/main/resources/img/discCovers/" + selectedImage.getName();
+            if (selectedImage != null && discToEdit != null){
+                discToEdit.name = nameField.getText();
+                discToEdit.imgSrc = "src/main/resources/img/discCovers/" + selectedImage.getName();
+                controllerParent.hideBackgroundShadow();
             }else{
-                if (executableField.getText().equals(App.textBundle.getString("multipleSelection")))
-                    for (File file : selectedFiles)
-                        setDiscInfo(disc, file, false);
-                else
-                    setDiscInfo(disc, selectedFolder, true);
-
-                if (discToEdit != null)
-                    discToEdit = null;
+                typeValue = typeField.getValue();
+                controllerParent.addDiscSetValues(selectedFiles, selectedFolder, executableField.getText(), typeValue);
             }
-
-            controllerParent.updateDiscView();
-            controllerParent.hideBackgroundShadow();
 
             Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
             stage.close();
         }
-    }
-
-    private void setDiscInfo(Disc newDisc, File file, boolean folder) {
-        if (discToEdit == null)
-            newDisc = new Disc();
-
-        newDisc.setSeasonID(controllerParent.getCurrentSeason().getId());
-
-        if (!folder){
-            String fullName = file.getName().substring(0, file.getName().length() - 4);
-
-            final String regexSeasonEpisode = "(?i)(?<season>S[0-9]{1,3}+)(?<episode>E[0-9]{1,4})";
-            final String regexOnlyEpisode = "(?i)(?<episode>[0-9]{1,4})";
-
-            final Pattern pattern = Pattern.compile(regexSeasonEpisode, Pattern.MULTILINE);
-            final Matcher matcher = pattern.matcher(fullName);
-
-            if (!matcher.find()){
-                Pattern newPattern = Pattern.compile(regexOnlyEpisode, Pattern.MULTILINE);
-                Matcher newMatch = newPattern.matcher(fullName);
-
-                if (newMatch.find()){
-                    setEpisodeName(newDisc, "NO_SEASON", newMatch.group("episode"));
-                    newDisc.setEpisodeNumber(newMatch.group("episode"));
-                }else{
-                    newDisc.setName(fullName);
-                    newDisc.setEpisodeNumber("");
-                }
-            }else{
-                setEpisodeName(newDisc, matcher.group("season").substring(1), matcher.group("episode").substring(1));
-                newDisc.setEpisodeNumber(matcher.group("episode").substring(1));
-            }
-        }else{
-            newDisc.setName(App.textBundle.getString("disc") + " " + Objects.requireNonNull(App.findSeason(newDisc.getSeasonID())).getDiscs().size() + 1);
-            newDisc.setEpisodeNumber("");
-        }
-
-        newDisc.setType(typeField.getValue());
-        newDisc.setExecutableSrc(file.getAbsolutePath());
-
-        App.addDisc(newDisc);
-    }
-
-    private void setEpisodeName(Disc disc, String season, String episode){
-        Season s = App.findSeason(disc.seasonID);
-        assert s != null;
-        Series series = App.findSeriesByName(s.collectionName);
-        assert series != null;
-        String tvdbId = String.valueOf(series.thetvdbID);
-
-        System.out.println("Series tvdbID: " + tvdbId);
-        System.out.println("Episode to find: " + episode);
-
-        List<EpisodeMetadata> episodeMetadata = App.episodesMetadata.get(tvdbId);
-
-        if (episodeMetadata != null){
-            EpisodeMetadata episodeMeta = null;
-
-            int episodeToFind = Integer.parseInt(episode);
-            int seasonToFind = -1;
-            if (!season.equals("NO_SEASON"))
-                seasonToFind = Integer.parseInt(season);
-
-            for (EpisodeMetadata ep : episodeMetadata){
-                if (season.equals("NO_SEASON")){
-                    if (ep.absoluteEpisode == episodeToFind){
-                        episodeMeta = ep;
-                        break;
-                    }
-                }else{
-                    if (ep.seasonNumber == seasonToFind && ep.episodeNumber == episodeToFind){
-                        episodeMeta = ep;
-                        break;
-                    }
-                }
-            }
-
-            if (episodeMeta == null){
-                disc.name = "";
-                //*************************************************************************************************     Set video thumbnail
-                //setVideoThumbnail();
-                return;
-            }
-
-            disc.name = episodeMeta.name;
-
-            setEpisodeThumbnail(disc, episodeMeta.imdbID);
-        }
-    }
-
-    private void setEpisodeThumbnail(Disc disc, String imdbID){
-        if (imdbID.isEmpty()){
-            //setVideoThumbnail();
-            return;
-        }
-
-        try{
-            String imdbBase = "https://www.imdb.com/title/";
-            String mediaAll = "/mediaindex/?ref_=tt_mv_sm";
-            String posterSrc = null;
-
-            Document doc = Jsoup.connect(imdbBase + imdbID + mediaAll).timeout(6000).get();
-            Elements body = doc.select("div.media_index_thumb_list");
-            List<String> imagesUrls = new ArrayList<>();
-            for (Element element : body){
-                Elements elements = element.select("a");
-                int i = 0;
-                for (Element e : elements){
-                    if (i == 8)
-                        break;
-
-                    if (i != 0)
-                        imagesUrls.add("https://www.imdb.com" + e.attr("href"));
-                    i++;
-                }
-                break;
-            }
-
-            int i = 0;
-            for (String url : imagesUrls){
-                doc = Jsoup.connect(url).timeout(2000).get();
-                body = doc.select("div.media-viewer");
-                for (Element element : body){
-                    posterSrc = element.select("img").attr("src");
-                }
-
-                if (posterSrc != null){
-                    Image img = new Image(posterSrc);
-
-                    if (img.isError()){
-                        return;
-                    }
-
-                    File file = new File("src/main/resources/img/discCovers/" + disc.id + "_" + i + ".png");
-                    try{
-                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);
-                        ImageIO.write(renderedImage,"png", file);
-                    } catch (IOException e) {
-                        System.err.println("Disc downloaded thumbnail not saved");
-                        return;
-                    }
-                }
-                i++;
-            }
-
-            File img = new File("src/main/resources/img/discCovers/" + disc.id + "_0.png");
-            if (!img.exists()){
-                //setVideoThumbnail()
-                return;
-            }
-
-            disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "_0.png";
-        } catch (IOException e) {
-            System.err.println("AddDiscController: Error connecting to IMDB");
-        }
-
-        /*try{
-            String imdbBase = "https://www.imdb.com/title/";
-            String imdbPoster = "/mediaviewer";
-            String mediaAll = "/mediaindex/?ref_=tt_mv_sm";
-            String posterSrc = null;
-
-            Document doc = Jsoup.connect(imdbBase + imdbID + imdbPoster).timeout(6000).get();
-            Elements body = doc.select("div.media-viewer");
-            for (Element element : body){
-                posterSrc = element.select("img").attr("src");
-            }
-
-            if (posterSrc != null){
-                Image img = new Image(posterSrc);
-
-                if (img.isError()){
-                    //setVideoThumbnail();
-                    return;
-                }
-
-                File file = new File("src/main/resources/img/discCovers/" + disc.id + ".png");
-                try{
-                    RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);
-                    ImageIO.write(renderedImage,"png", file);
-                } catch (IOException e) {
-                    System.err.println("Disc downloaded thumbnail not saved");
-                    return;
-                }
-
-                disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + ".png";
-            }
-        } catch (IOException e) {
-            System.err.println("AddDiscController: Error connecting to IMDB");
-        }*/
     }
 }

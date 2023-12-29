@@ -175,38 +175,39 @@ public class SearchSeriesController {
 
             }
 
-            List<Episode> episodeList;
-            int i = 0;
-            while(true){
-                episodeList = api.queryEpisodesByAiredSeason(Long.parseLong(selectedSeries.id), i);
-                for (Episode episode : episodeList){
-                    long absoluteEpisode, episodeNumber, seasonNumber;
+            if (!App.seriesMetadataExists(selectedSeries.id)){
+                List<Episode> episodeList;
+                int i = 0;
+                while(true){
+                    episodeList = api.queryEpisodesByAiredSeason(Long.parseLong(selectedSeries.id), i);
+                    for (Episode episode : episodeList){
+                        long absoluteEpisode, episodeNumber, seasonNumber;
 
-                    try{
-                         absoluteEpisode = episode.getAbsoluteNumber();
-                    }catch (NullPointerException exception){
-                        absoluteEpisode = -1;
+                        try{
+                            absoluteEpisode = episode.getAbsoluteNumber();
+                        }catch (NullPointerException exception){
+                            absoluteEpisode = -1;
+                        }
+
+                        try{
+                            episodeNumber = episode.getAiredEpisodeNumber();
+                        }catch (NullPointerException exception){
+                            episodeNumber = -1;
+                        }
+
+                        try{
+                            seasonNumber = episode.getAiredSeason();
+                        }catch (NullPointerException exception){
+                            seasonNumber = -1;
+                        }
+
+                        System.out.println(absoluteEpisode + " - " + episodeNumber + " - " + seasonNumber);
+
+                        episodeMetadata.add(new EpisodeMetadata(Objects.requireNonNull(episode.getId()).toString(), episode.getImdbId(), episode.getSeriesId(), episode.getEpisodeName(), absoluteEpisode, episodeNumber, seasonNumber));
                     }
-
-                    try{
-                        episodeNumber = episode.getAiredEpisodeNumber();
-                    }catch (NullPointerException exception){
-                        episodeNumber = -1;
-                    }
-
-                    try{
-                        seasonNumber = episode.getAiredSeason();
-                    }catch (NullPointerException exception){
-                        seasonNumber = -1;
-                    }
-
-                    System.out.println(absoluteEpisode + " - " + episodeNumber + " - " + seasonNumber);
-
-                    episodeMetadata.add(new EpisodeMetadata(Objects.requireNonNull(episode.getId()).toString(), episode.getImdbId(), episode.getSeriesId(), episode.getEpisodeName(), absoluteEpisode, episodeNumber, seasonNumber));
+                    i++;
                 }
-                i++;
             }
-
         } catch (APIException | NullPointerException e) {
             if (!episodeMetadata.isEmpty()){
                 App.episodesMetadata.remove(episodeMetadata.get(0).seriesID);

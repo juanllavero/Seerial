@@ -265,7 +265,7 @@ public class AddCollectionController {
         series.thetvdbID = tvdbID;
 
         if (!series.getSeasons().isEmpty()){
-            for (int s : series.getSeasons()){
+            for (long s : series.getSeasons()){
                 Season season = App.findSeason(s);
                 if (season != null){
                     season.setCollectionName(nameField.getText());

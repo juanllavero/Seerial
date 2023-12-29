@@ -1,13 +1,6 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.*;
-import com.github.m0nk3y2k4.thetvdb.api.QueryParameters;
-import com.github.m0nk3y2k4.thetvdb.api.TheTVDBApi;
-import com.github.m0nk3y2k4.thetvdb.api.constants.Query;
-import com.github.m0nk3y2k4.thetvdb.api.exception.APIException;
-import com.github.m0nk3y2k4.thetvdb.api.model.data.Episode;
-import com.github.m0nk3y2k4.thetvdb.api.model.data.Language;
-import com.github.m0nk3y2k4.thetvdb.api.model.data.SeriesSearchResult;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -28,12 +21,6 @@ import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.*;
-
-import com.github.m0nk3y2k4.thetvdb.TheTVDBApiFactory;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 public class App extends Application {
     public static Map<String, List<EpisodeMetadata>> episodesMetadata = new HashMap<>();
@@ -164,6 +151,10 @@ public class App extends Application {
         stage.show();
     }
 
+    public static boolean seriesMetadataExists(String id){
+        return episodesMetadata.containsKey(id);
+    }
+
     public static void setPopUpProperties(Stage stage){
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(App.primaryStage);
@@ -246,12 +237,6 @@ public class App extends Application {
             gson.toJson(categories, writer);
         }
 
-        /*List<EpisodeMetadata> episodeMetadata = new ArrayList<>();
-
-        for (String key : episodesMetadata.keySet()){
-            episodeMetadata.addAll(episodesMetadata.get(key));
-        }*/
-
         try (Writer writer = new FileWriter(episodeMeta)) {
             Gson gson = new GsonBuilder().create();
             gson.toJson(episodesMetadata, writer);
@@ -271,20 +256,6 @@ public class App extends Application {
         }
 
         return null;
-    }
-
-    public static int getSeasonID(String seasonName, String seriesName){
-        for (Series s : series){
-            if (s.getName().equals(seriesName)){
-                for (Season season : seasons){
-                    if (season.getName().equals(seasonName)){
-                        return season.getId();
-                    }
-                }
-            }
-        }
-
-        return -1;
     }
 
     public static List<Series> getSeriesFromCategory(String cat){
@@ -385,15 +356,15 @@ public class App extends Application {
         return null;
     }
 
-    public static Season findSeason(int i){
+    public static Season findSeason(long id){
         for (Season s: seasons){
-            if (s.getId() == i)
+            if (s.getId() == id)
                 return s;
         }
         return null;
     }
 
-    public static Disc findDisc(int id){
+    public static Disc findDisc(long id){
         for (Disc d : discs){
             if (d.getId() == id)
                 return d;
@@ -411,7 +382,7 @@ public class App extends Application {
         SaveData();
     }
 
-    public static void removeSeason(int id){
+    public static void removeSeason(long id){
         Season s = findSeason(id);
         assert s != null;
 
@@ -427,8 +398,8 @@ public class App extends Application {
             throw new RuntimeException(e);
         }
 
-        List<Integer> dList = s.getDiscs();
-        for (int i : dList){
+        List<Long> dList = s.getDiscs();
+        for (long i : dList){
             discs.remove(findDisc(i));
         }
 

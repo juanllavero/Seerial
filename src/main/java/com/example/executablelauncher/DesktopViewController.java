@@ -1,12 +1,12 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Category;
-import com.example.executablelauncher.entities.Disc;
-import com.example.executablelauncher.entities.Season;
-import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.entities.*;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -36,11 +36,20 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
+import javax.imageio.ImageIO;
+import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DesktopViewController {
     //region FXML ATTRIBUTES
@@ -75,13 +84,10 @@ public class DesktopViewController {
     private ChoiceBox<String> categorySelector;
 
     @FXML
-    private VBox centralVBox;
-
-    @FXML
     private Button closeButton;
 
     @FXML
-    private VBox detailsBox;
+    private VBox seasonsEpisodesBox;
 
     @FXML
     private FlowPane discContainer;
@@ -202,6 +208,12 @@ public class DesktopViewController {
 
     @FXML
     private Label episodesField;
+
+    @FXML
+    private HBox downloadingContentWindow;
+
+    @FXML
+    private Label downloadingContentText;
     //endregion
 
     //region ATTRIBUTES
@@ -214,7 +226,6 @@ public class DesktopViewController {
     private List<Disc> discList = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
     private List<Button> seasonsButtons = new ArrayList<>();
-    private List<Button> discButtons = new ArrayList<>();
     public Disc selectedDisc = null;
     private Series selectedSeries = null;
     private Season selectedSeason = null;
@@ -224,6 +235,15 @@ public class DesktopViewController {
     private double xOffset = 0;
     private double yOffset = 0;
     private double ASPECT_RATIO = 16.0 / 9.0;
+    private int downloadedMetadataCount = 0;
+    private int downloadedMetadataTotal = 0;
+    //endregion
+
+    //region DISC VALUES
+    private List<File> selectedFiles = null;
+    private File selectedFolder = null;
+    private String text = "";
+    private String typeValue = "";
     //endregion
 
     public void initValues(){
@@ -237,6 +257,8 @@ public class DesktopViewController {
         setDragWindow(topBar);
 
         selectionOptions.setVisible(false);
+
+        downloadingContentWindow.setVisible(false);
 
         menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
             hideMenu();
@@ -297,13 +319,15 @@ public class DesktopViewController {
 
         seriesScrollPane.setPrefHeight(screenHeight);
         seriesContainer.setPrefHeight(screenHeight);
-        discContainer.setPrefHeight(screenHeight);
-        seasonScroll.setPrefHeight(screenHeight);
-        seasonScroll.prefWidthProperty().bind(mainBox.prefWidthProperty());
-        centralVBox.prefHeightProperty().bind(seasonScroll.prefHeightProperty());
-        seasonInfoPane.prefHeightProperty().bind(centralVBox.heightProperty());
-        seasonInfoPane.prefWidthProperty().bind(mainBox.prefWidthProperty());
-        seasonLogoBox.setPrefHeight(screenHeight * 0.6);
+
+        //discContainer.setPrefHeight(screenHeight);
+        //seasonScroll.setPrefHeight(screenHeight);
+        //seasonScroll.prefWidthProperty().bind(mainBox.prefWidthProperty());
+        //centralVBox.prefHeightProperty().bind(seasonScroll.prefHeightProperty());
+        //seasonInfoPane.prefHeightProperty().bind(centralVBox.heightProperty());
+        //seasonInfoPane.prefWidthProperty().bind(mainBox.prefWidthProperty());
+        //seasonLogoBox.setPrefHeight(screenHeight * 0.6);
+        //seasonsEpisodesBox.prefHeightProperty().bind(discContainer.prefHeightProperty());
         seasonInfoPane.getChildren().add(0, seasonBackground);
         seasonInfoPane.getChildren().add(1, seasonBackgroundNoise);
 
@@ -371,13 +395,13 @@ public class DesktopViewController {
         if (selectedSeries != s){
             selectedSeries = s;
             selectSeriesButton(seriesButtons.get(getSeriesIndex(s)));
-            centralVBox.setVisible(true);
+            seasonScroll.setVisible(true);
 
 
             if (!s.getSeasons().isEmpty()){
                 seasonList.clear();
-                for (int i : s.getSeasons()){
-                    Season season = App.findSeason(i);
+                for (long id : s.getSeasons()){
+                    Season season = App.findSeason(id);
                     if (season != null)
                         seasonList.add(season);
                 }
@@ -395,7 +419,7 @@ public class DesktopViewController {
                     discContainer.getChildren().clear();
                 }
             }else{
-                centralVBox.setVisible(false);
+                seasonScroll.setVisible(false);
             }
         }
     }
@@ -501,8 +525,7 @@ public class DesktopViewController {
     private void showDiscs(Season s) {
         discList.clear();
         discContainer.getChildren().clear();
-        discButtons.clear();
-        for (int i : s.getDiscs()){
+        for (long i : s.getDiscs()){
             Disc d = App.findDisc(i);
             if (d != null){
                 discList.add(d);
@@ -512,54 +535,28 @@ public class DesktopViewController {
         if (!discList.isEmpty()){
             discList.sort(new Utils.DiscComparator());
             for (Disc d : discList){
-                try {
-                    FXMLLoader fxmlLoader = new FXMLLoader();
-                    fxmlLoader.setLocation(getClass().getResource("discCard.fxml"));
-                    Pane cardBox = fxmlLoader.load();
-                    DiscController discController = fxmlLoader.getController();
-                    discController.setDesktopParentParent(this);
-                    discController.setData(d);
-
-                    /*btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
-                        Disc disc = getDiscFromButton(btn);
-                        if (event.getButton() == MouseButton.SECONDARY) {
-                            if (disc != null)
-                                openDiscMenu(event, disc);
-                        }else{
-                            if (event.isControlDown())
-                                controlSelectDisc(disc, btn);
-                            else if (event.isShiftDown())
-                                shiftSelectDisc(disc, btn);
-                            else
-                                selectDisc(disc);
-                        }
-                    });*/
-
-                    discContainer.getChildren().add(cardBox);
-                    discControllers.add(discController);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                addEpisodeCard(d);
             }
         }
     }
 
+    public void showDownloadWindow(int total){
+        downloadedMetadataCount = 0;
+        downloadedMetadataTotal = total;
+        downloadingContentText.setText("Downloading images " + downloadedMetadataCount + "/" + downloadedMetadataTotal);
+        downloadingContentWindow.setVisible(true);
+    }
 
+    public void hideDownloadWindow(){
+        downloadingContentWindow.setVisible(false);
+    }
 
     public Season getCurrentSeason(){
         return selectedSeason;
     }
 
-    private Disc getDiscFromButton(Button btn){
-        for (int i = 0; i < discButtons.size(); i++){
-            if (discButtons.get(i).getText().equals(btn.getText()))
-                return discList.get(i);
-        }
-        return null;
-    }
-
     public void blankSelection(){
-        centralVBox.setVisible(false);
+        seasonScroll.setVisible(false);
     }
 
     private int getSeriesIndex(Series s){
@@ -737,7 +734,12 @@ public class DesktopViewController {
     }
     @FXML
     void deleteSelected(ActionEvent event) {
-
+        for (Disc disc : selectedDiscs){
+            removeDisc(disc);
+        }
+        selectedDiscs.clear();
+        selectedDisc = null;
+        selectionOptions.setVisible(false);
     }
 
     @FXML
@@ -888,11 +890,250 @@ public class DesktopViewController {
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setScene(new Scene(root1));
             App.setPopUpProperties(stage);
-            stage.show();
+            stage.showAndWait();
+
+            backgroundShadow.setVisible(false);
+
+            if (selectedFiles != null){
+                showDownloadWindow(Math.max(selectedFiles.size(), 1));
+                addDiscs(selectedFiles,selectedFolder,text,typeValue);
+            }
+
+            this.selectedFiles = null;
+            this.selectedFolder = null;
+            this.text = "";
+            this.typeValue = "";
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         hideMenu();
+    }
+    public void addDisc(Disc newDisc){
+        addEpisodeCard(newDisc);
+    }
+    private void addEpisodeCard(Disc disc){
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(getClass().getResource("discCard.fxml"));
+            Pane cardBox = fxmlLoader.load();
+            DiscController discController = fxmlLoader.getController();
+            discController.setDesktopParentParent(this);
+            discController.setData(disc);
+
+            discContainer.getChildren().add(cardBox);
+            discControllers.add(discController);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void addDiscSetValues(List<File> selectedFiles, File selectedFolder, String text, String typeValue) {
+        this.selectedFiles = selectedFiles;
+        this.selectedFolder = selectedFolder;
+        this.text = text;
+        this.typeValue = typeValue;
+    }
+    public void addDiscs(List<File> selectedFiles, File selectedFolder, String text, String typeValue) {
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() {
+                if (text.equals(App.textBundle.getString("multipleSelection")))
+                    for (File file : selectedFiles)
+                        setDiscInfo(file, false, typeValue);
+                else
+                    setDiscInfo(selectedFolder, true, typeValue);
+
+                return null;
+            }
+        };
+
+        //Start the process in a new thread
+        new Thread(task).start();
+    }
+    private void setDiscInfo(File file, boolean folder, String type) {
+        Platform.runLater(() -> {
+            Disc newDisc = new Disc();
+
+            newDisc.setSeasonID(getCurrentSeason().getId());
+
+            if (!folder){
+                String fullName = file.getName().substring(0, file.getName().length() - 4);
+
+                final String regexSeasonEpisode = "(?i)(?<season>S[0-9]{1,3}+)(?<episode>E[0-9]{1,4})";
+                final String regexOnlyEpisode = "(?i)(?<episode>[0-9]{1,4})";
+
+                final Pattern pattern = Pattern.compile(regexSeasonEpisode, Pattern.MULTILINE);
+                final Matcher matcher = pattern.matcher(fullName);
+
+                if (!matcher.find()){
+                    Pattern newPattern = Pattern.compile(regexOnlyEpisode, Pattern.MULTILINE);
+                    Matcher newMatch = newPattern.matcher(fullName);
+
+                    if (newMatch.find()){
+                        setEpisodeNameAndThumbnail(newDisc, "NO_SEASON", newMatch.group("episode"));
+                        newDisc.setEpisodeNumber(newMatch.group("episode"));
+                    }else{
+                        newDisc.setName(fullName);
+                        newDisc.setEpisodeNumber("");
+                    }
+                }else{
+                    setEpisodeNameAndThumbnail(newDisc, matcher.group("season").substring(1), matcher.group("episode").substring(1));
+                    newDisc.setEpisodeNumber(matcher.group("episode").substring(1));
+                }
+            }else{
+                newDisc.setName(App.textBundle.getString("disc") + " " + Objects.requireNonNull(App.findSeason(newDisc.getSeasonID())).getDiscs().size() + 1);
+                newDisc.setEpisodeNumber("");
+            }
+
+            newDisc.setType(type);
+            newDisc.setExecutableSrc(file.getAbsolutePath());
+
+            App.addDisc(newDisc);
+            addDisc(newDisc);
+        });
+    }
+
+    private void setEpisodeNameAndThumbnail(Disc disc, String season, String episode){
+        Season s = App.findSeason(disc.seasonID);
+        assert s != null;
+        Series series = App.findSeriesByName(s.collectionName);
+        assert series != null;
+        String tvdbId = String.valueOf(series.thetvdbID);
+
+        List<EpisodeMetadata> episodeMetadata = App.episodesMetadata.get(tvdbId);
+
+        if (episodeMetadata != null){
+            EpisodeMetadata episodeMeta = null;
+
+            int episodeToFind = Integer.parseInt(episode);
+            int seasonToFind = -1;
+            if (!season.equals("NO_SEASON"))
+                seasonToFind = Integer.parseInt(season);
+
+            for (EpisodeMetadata ep : episodeMetadata){
+                if (season.equals("NO_SEASON")){
+                    if (ep.absoluteEpisode == episodeToFind){
+                        episodeMeta = ep;
+                        break;
+                    }
+                }else{
+                    if (ep.seasonNumber == seasonToFind && ep.episodeNumber == episodeToFind){
+                        episodeMeta = ep;
+                        break;
+                    }
+                }
+            }
+
+            if (episodeMeta == null){
+                disc.name = "";
+                disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+                updateImages();
+                downloadedMetadataCount++;
+                downloadingContentText.setText("Downloading images " + downloadedMetadataCount + "/" + downloadedMetadataTotal);
+                if (downloadedMetadataCount == downloadedMetadataTotal)
+                    hideDownloadWindow();
+                return;
+            }
+
+            disc.name = episodeMeta.name;
+
+            if (episodeMeta.imdbID.isEmpty()){
+                disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+                updateImages();
+                downloadedMetadataCount++;
+                downloadingContentText.setText("Downloading images " + downloadedMetadataCount + "/" + downloadedMetadataTotal);
+                if (downloadedMetadataCount == downloadedMetadataTotal)
+                    hideDownloadWindow();
+                return;
+            }
+
+            EpisodeMetadata finalEpisodeMeta = episodeMeta;
+            Task<Void> task = new Task<>() {
+                @Override
+                protected Void call() {
+                    try{
+                        String imdbBase = "https://www.imdb.com/title/";
+                        String mediaAll = "/mediaindex/?ref_=tt_mv_sm";
+                        String posterSrc = null;
+
+                        Document doc = Jsoup.connect(imdbBase + finalEpisodeMeta.imdbID + mediaAll).timeout(6000).get();
+                        Elements body = doc.select("div.media_index_thumb_list");
+                        List<String> imagesUrls = new ArrayList<>();
+                        for (Element element : body){
+                            Elements elements = element.select("a");
+                            int i = 0;
+                            for (Element e : elements){
+                                if (i == 8)
+                                    break;
+
+                                imagesUrls.add("https://www.imdb.com" + e.attr("href"));
+                                i++;
+                            }
+                            break;
+                        }
+
+                        int i = 0;
+                        for (String url : imagesUrls){
+                            doc = Jsoup.connect(url).timeout(6000).get();
+                            body = doc.select("div.media-viewer");
+                            for (Element element : body){
+                                posterSrc = element.select("img").attr("src");
+                            }
+
+                            if (posterSrc != null){
+                                Image img = new Image(posterSrc);
+
+                                if (!img.isError()){
+                                    File file = new File("src/main/resources/img/discCovers/" + disc.id + "_" + i + ".png");
+                                    try{
+                                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);
+                                        ImageIO.write(renderedImage,"png", file);
+                                    } catch (IOException e) {
+                                        System.err.println("Disc downloaded thumbnail not saved");
+                                    }
+                                }
+                            }
+                            i++;
+                        }
+                    } catch (IOException e) {
+                        System.err.println("AddDiscController: Error connecting to IMDB");
+                    }
+
+                    File img = new File("src/main/resources/img/discCovers/" + disc.id + "_0.png");
+                    if (!img.exists()){
+                        disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+                    }else{
+                        disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "_0.png";
+                    }
+
+                    return null;
+                }
+            };
+
+            //Run when the process ends
+            task.setOnSucceeded(e -> {
+                updateImages();
+                downloadedMetadataCount++;
+                downloadingContentText.setText("Downloading images " + downloadedMetadataCount + "/" + downloadedMetadataTotal);
+                if (downloadedMetadataCount == downloadedMetadataTotal)
+                    hideDownloadWindow();
+            });
+
+            //Start the process in a new thread
+            new Thread(task).start();
+        }else{
+            disc.name = "";
+            disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+        }
+    }
+
+    private void updateImages(){
+        Platform.runLater(() -> {
+            for (DiscController discController : discControllers) {
+                discController.setThumbnail();
+            }
+        });
     }
     //endregion
 
@@ -1027,17 +1268,19 @@ public class DesktopViewController {
         removeDisc(selectedDisc);
     }
     void removeDisc(Disc d) {
-        if (selectedDiscs.size() > 1){
-            for (Disc disc : selectedDiscs){
-                discList.remove(disc);
-                App.removeDisc(disc);
-                selectedSeason.removeDisc(disc);
-            }
-        }else if (d != null){
-            discList.remove(d);
-            App.removeDisc(d);
-            selectedSeason.removeDisc(d);
+        if (d == null)
+            return;
+
+        int index = discList.indexOf(d);
+
+        if (index != -1) {
+            discContainer.getChildren().remove(index);
+            discControllers.remove(index);
         }
+
+        discList.remove(d);
+        App.removeDisc(d);
+        selectedSeason.removeDisc(d);
 
         selectSeason(selectedSeason);
         hideMenu();
