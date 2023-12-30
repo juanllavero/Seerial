@@ -15,6 +15,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import com.google.gson.Gson;
 import javafx.stage.StageStyle;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -46,95 +47,6 @@ public class App extends Application {
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
         LoadData();
 
-        /*TheTVDBApi api = TheTVDBApiFactory.createApi("f46a28ea-ef53--9e7b-31e32b7743ab");
-
-        try{
-
-
-            api.setLanguage("es");
-
-            List<SeriesSearchResult> seriesSearch = api.searchSeriesByName("Attack on Titan");
-
-            for (SeriesSearchResult s : seriesSearch) {
-                System.out.println(s.getSeriesName() + " - " + s.getId());
-            }
-
-
-            //TheTVDB
-            String tvdbSearch = "https://www.thetvdb.com/api/GetSeries.php?seriesname=";
-            String searchTitle = "naruto";
-            String endSearch = "&language=all";
-
-            Document doc = Jsoup.connect(tvdbSearch + searchTitle + endSearch).timeout(6000).get();
-            Elements seriesList = doc.getAllElements();
-
-
-            long seriesID = 267440;
-            QueryParameters query = TheTVDBApiFactory.createQueryParameters();
-            query.addParameter(Query.Series.AIREDSEASON, "3");
-
-            List<Episode> seasonThree = api.queryEpisodesByAiredSeason(seriesID, 3);
-
-            System.out.println("And again, all the episodes of season 3:");
-            seasonThree.stream().forEach(e -> System.out.println(
-                        e.getAiredSeason() + "." + e.getAiredEpisodeNumber() + ": " + e.getEpisodeName() + e.getImdbId()));
-        } catch (APIException e) {
-            System.err.println("App: Couldn't find episodes");
-        }*/
-
-        //IMDB
-        /*String imdbBase = "https://www.imdb.com/title/";
-        String imdbPoster = "/mediaviewer";
-        String posterSrc = "";
-
-        Document doc = Jsoup.connect(imdbBase + "tt8733180" + imdbPoster).timeout(6000).get();
-        Elements body = doc.select("div.media-viewer");
-        for (Element element : body){
-            posterSrc = element.select("img").attr("src");
-        }*/
-
-
-        /*Document doc= Jsoup.connect("https://www.imdb.com/find/?s=tt&q=the%20eminence%20in%20shadow&ref_=nv_sr_sm").timeout(6000).get();
-        Elements body = doc.select("ul.ipc-metadata-list");
-        System.out.println(body.select("div.ipc-metadata-list-summary-item__tc").size() + " search results");
-        int counter=1;
-        for (Element e : body.select("div.ipc-metadata-list-summary-item__tc"))
-        {
-            System.out.println(counter);
-            String title = e.select("a.ipc-metadata-list-summary-item__t").text();
-            String url = e.select("a.ipc-metadata-list-summary-item__t").attr("href");
-            Elements elements = e.select("ul span");
-            String year = "", type = "";
-            if (elements.size() > 1){
-                year = elements.get(0).text();
-                type = elements.get(1).text();
-            }else if (elements.size() == 1){
-                year = elements.get(0).text();
-                type = "";
-            }
-
-            System.out.println("Title: " + title);
-            System.out.println("Year: " + year);
-            System.out.println("Type: " + type);
-            System.out.println("URL: " + url + "\n");
-            counter++;
-        }
-
-        doc= Jsoup.connect("https://www.imdb.com" + "/title/tt0988824/episodes/?season=1").timeout(6000).get();
-        body = doc.select("section.sc-58f3e8aa-0");
-        System.out.println(body.select("div.sc-9115db22-1").size() + " search results");
-        counter=1;
-        for (Element e : body.select("div.sc-9115db22-1"))
-        {
-            System.out.println(counter);
-            String title = e.select("div.ipc-title__text").text();
-            String img = e.select("img.ipc-image").attr("src");
-
-            System.out.println("Year: " + title);
-            System.out.println("Img: " + img+ "\n");
-            counter++;
-        }*/
-
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
         stage.setTitle(textBundle.getString("desktopMode"));
@@ -142,7 +54,7 @@ public class App extends Application {
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
         stage.setScene(scene);
-        stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 2);
+        stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
         stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
         DesktopViewController desktopViewController = fxmlLoader.getController();
         desktopViewController.initValues();
@@ -417,6 +329,13 @@ public class App extends Application {
         Season s = findSeason(d.getSeasonID());
         if (s != null)
             s.removeDisc(d);
+
+        try{
+            FileUtils.deleteDirectory(new File("src/main/resources/img/discCovers/" + d.id + "/"));
+        } catch (IOException e) {
+            System.err.println("App: Error deleting directory: src/main/resources/img/discCovers/" + d.id + "/");
+        }
+
         discs.remove(d);
     }
 

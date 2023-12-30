@@ -15,6 +15,7 @@ module com.example.executablelauncher {
     requires com.sun.jna.platform;
     requires com.sun.jna;
     requires thetvdb.java.api;
+    requires thumbnailator;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

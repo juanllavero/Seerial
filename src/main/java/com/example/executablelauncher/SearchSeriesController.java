@@ -201,8 +201,6 @@ public class SearchSeriesController {
                             seasonNumber = -1;
                         }
 
-                        System.out.println(absoluteEpisode + " - " + episodeNumber + " - " + seasonNumber);
-
                         episodeMetadata.add(new EpisodeMetadata(Objects.requireNonNull(episode.getId()).toString(), episode.getImdbId(), episode.getSeriesId(), episode.getEpisodeName(), absoluteEpisode, episodeNumber, seasonNumber));
                     }
                     i++;

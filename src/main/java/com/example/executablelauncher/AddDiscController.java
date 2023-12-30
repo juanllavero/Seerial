@@ -107,20 +107,18 @@ public class AddDiscController {
         nameField.setText(d.getName());
         selectedImage = new File(d.imgSrc);
 
+        executableField.setDisable(true);
+        loadButton.setVisible(false);
+
         showImages();
     }
 
     private void showImages(){
         //Add images to view
-        File dir = new File("src/main/resources/img/discCovers/");
+        File dir = new File("src/main/resources/img/discCovers/" + discToEdit.id);
         File[] files = dir.listFiles();
         assert files != null;
-        for (File f : files){
-            String[] name = f.getName().split("_");
-            if (name[0].equals(Long.toString(discToEdit.getId()))){
-                imagesFiles.add(f);
-            }
-        }
+        imagesFiles.addAll(Arrays.asList(files));
 
         for (File f : imagesFiles){
             try{
@@ -227,8 +225,9 @@ public class AddDiscController {
         if (save){
             if (selectedImage != null && discToEdit != null){
                 discToEdit.name = nameField.getText();
-                discToEdit.imgSrc = "src/main/resources/img/discCovers/" + selectedImage.getName();
+                discToEdit.imgSrc = "src/main/resources/img/discCovers/" + discToEdit.id + "/" + selectedImage.getName();
                 controllerParent.hideBackgroundShadow();
+                controllerParent.updateDisc(discToEdit);
             }else{
                 typeValue = typeField.getValue();
                 controllerParent.addDiscSetValues(selectedFiles, selectedFolder, executableField.getText(), typeValue);

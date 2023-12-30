@@ -8,7 +8,6 @@ public class EpisodeMetadata {
     public long absoluteEpisode;
     public long episodeNumber;
     public long seasonNumber;
-    public String posterSrc = "";
 
     public EpisodeMetadata(String tvdbID, String imdbID, String seriesID, String name, long absoluteEpisode, long episodeNumber, long seasonNumber) {
         this.tvdbID = tvdbID;

@@ -141,14 +141,135 @@
             </BorderPane>
          </top>
          <center>
-            <ScrollPane fx:id="seasonScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="seasonScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="30.0" />
                </BorderPane.margin>
                <content>
-                  <StackPane fx:id="seasonInfoPane" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="transparent" stylesheets="@styles.css">
+                  <StackPane fx:id="seasonInfoPane" styleClass="transparent" stylesheets="@styles.css">
                      <children>
-                        <BorderPane StackPane.alignment="CENTER">
+                        <BorderPane fx:id="seasonBorderPane" StackPane.alignment="CENTER">
+                           <padding>
+                              <Insets bottom="200.0" left="200.0" right="200.0" top="50.0" />
+                           </padding>
+                           <top>
+                              <VBox fx:id="seasonInfoInside" alignment="BASELINE_CENTER" BorderPane.alignment="CENTER">
+                                 <children>
+                                    <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT">
+                                       <children>
+                                          <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
+                                             <image>
+                                                <Image url="@../../../img/logoTest.png" />
+                                             </image>
+                                             <HBox.margin>
+                                                <Insets bottom="5.0" left="20.0" />
+                                             </HBox.margin>
+                                          </ImageView>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="30.0" />
+                                       </padding>
+                                       <VBox.margin>
+                                          <Insets top="450.0" />
+                                       </VBox.margin>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label fx:id="seasonName" text="Season Name" textFill="WHITE">
+                                             <font>
+                                                <Font name="System Bold" size="32.0" />
+                                             </font>
+                                             <HBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </HBox.margin>
+                                             <effect>
+                                                <DropShadow />
+                                             </effect>
+                                          </Label>
+                                          <Button contentDisplay="CENTER" mnemonicParsing="false" onMouseClicked="#editSeason" styleClass="desktopButton" stylesheets="@styles.css">
+                                             <graphic>
+                                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../../../img/icons/edit.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                             <HBox.margin>
+                                                <Insets left="20.0" />
+                                             </HBox.margin>
+                                          </Button>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" />
+                                 </padding>
+                                 <BorderPane.margin>
+                                    <Insets bottom="10.0" />
+                                 </BorderPane.margin>
+                              </VBox>
+                           </top>
+                           <StackPane.margin>
+                              <Insets bottom="20.0" />
+                           </StackPane.margin>
+                           <center>
+                              <VBox fx:id="seasonsEpisodesBox" stylesheets="@styles.css" BorderPane.alignment="TOP_LEFT">
+                                 <children>
+                                    <HBox fx:id="seasonContainer" />
+                                    <BorderPane fx:id="selectionOptions" styleClass="selectionOptions" stylesheets="@styles.css" visible="false">
+                                       <left>
+                                          <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+                                             <children>
+                                                <Label fx:id="elementsSelectedText" text="1 element selected" textFill="#960f20" />
+                                                <Button fx:id="deleteSelectedButton" mnemonicParsing="false" onAction="#deleteSelected" styleClass="selectionOptionsButtonDelete" stylesheets="@styles.css" text="Eliminar" />
+                                             </children>
+                                             <BorderPane.margin>
+                                                <Insets left="5.0" />
+                                             </BorderPane.margin>
+                                          </HBox>
+                                       </left>
+                                       <right>
+                                          <HBox BorderPane.alignment="CENTER">
+                                             <children>
+                                                <Button fx:id="selectAllButton" mnemonicParsing="false" onAction="#selectAll" styleClass="selectionOptionsButton" stylesheets="@styles.css" text="Select all">
+                                                   <graphic>
+                                                      <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../../../img/icons/circle.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                                <Button fx:id="deselectAllButton" mnemonicParsing="false" onAction="#deselectAll" styleClass="selectionOptionsButton" stylesheets="@styles.css" text="Deselect all">
+                                                   <graphic>
+                                                      <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../../../img/icons/close.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                   </graphic>
+                                                </Button>
+                                             </children>
+                                          </HBox>
+                                       </right>
+                                       <padding>
+                                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                       </padding>
+                                       <VBox.margin>
+                                          <Insets top="5.0" />
+                                       </VBox.margin>
+                                    </BorderPane>
+                                    <FlowPane fx:id="discContainer" hgap="20.0" rowValignment="TOP" vgap="20.0">
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" top="10.0" />
+                                       </VBox.margin>
+                                       <padding>
+                                          <Insets bottom="10.0" />
+                                       </padding>
+                                    </FlowPane>
+                                 </children>
+                              </VBox>
+                           </center>
                            <right>
                               <VBox fx:id="detailsBox" BorderPane.alignment="CENTER">
                                  <children>
@@ -229,132 +350,8 @@
                                        </VBox.margin>
                                     </ImageView>
                                  </children>
-                                 <BorderPane.margin>
-                                    <Insets left="20.0" />
-                                 </BorderPane.margin>
                               </VBox>
                            </right>
-                           <padding>
-                              <Insets bottom="200.0" left="200.0" right="200.0" top="50.0" />
-                           </padding>
-                           <top>
-                              <VBox fx:id="seasonInfoInside" alignment="BASELINE_CENTER" BorderPane.alignment="CENTER">
-                                 <children>
-                                    <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT">
-                                       <children>
-                                          <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
-                                             <image>
-                                                <Image url="@../../../img/logoTest.png" />
-                                             </image>
-                                             <HBox.margin>
-                                                <Insets bottom="5.0" left="20.0" />
-                                             </HBox.margin>
-                                          </ImageView>
-                                       </children>
-                                       <padding>
-                                          <Insets bottom="30.0" />
-                                       </padding>
-                                       <VBox.margin>
-                                          <Insets top="450.0" />
-                                       </VBox.margin>
-                                    </HBox>
-                                    <HBox alignment="CENTER_LEFT">
-                                       <children>
-                                          <Label fx:id="seasonName" text="Season Name" textFill="WHITE">
-                                             <font>
-                                                <Font name="System Bold" size="32.0" />
-                                             </font>
-                                             <HBox.margin>
-                                                <Insets bottom="5.0" />
-                                             </HBox.margin>
-                                             <effect>
-                                                <DropShadow />
-                                             </effect>
-                                          </Label>
-                                          <Button contentDisplay="CENTER" mnemonicParsing="false" onMouseClicked="#editSeason" styleClass="desktopButton" stylesheets="@styles.css">
-                                             <graphic>
-                                                <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
-                                                   <image>
-                                                      <Image url="@../../../img/icons/edit.png" />
-                                                   </image>
-                                                </ImageView>
-                                             </graphic>
-                                             <HBox.margin>
-                                                <Insets left="20.0" />
-                                             </HBox.margin>
-                                          </Button>
-                                       </children>
-                                    </HBox>
-                                 </children>
-                                 <padding>
-                                    <Insets bottom="10.0" />
-                                 </padding>
-                                 <BorderPane.margin>
-                                    <Insets bottom="10.0" />
-                                 </BorderPane.margin>
-                              </VBox>
-                           </top>
-                           <center>
-                              <VBox fx:id="seasonsEpisodesBox" BorderPane.alignment="TOP_CENTER">
-                                 <children>
-                                    <HBox fx:id="seasonContainer" />
-                                    <BorderPane fx:id="selectionOptions" styleClass="selectionOptions" stylesheets="@styles.css" visible="false">
-                                       <left>
-                                          <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
-                                             <children>
-                                                <Label fx:id="elementsSelectedText" text="1 element selected" textFill="#960f20" />
-                                                <Button fx:id="deleteSelectedButton" mnemonicParsing="false" onAction="#deleteSelected" styleClass="selectionOptionsButtonDelete" stylesheets="@styles.css" text="Eliminar" />
-                                             </children>
-                                             <BorderPane.margin>
-                                                <Insets left="5.0" />
-                                             </BorderPane.margin>
-                                          </HBox>
-                                       </left>
-                                       <right>
-                                          <HBox BorderPane.alignment="CENTER">
-                                             <children>
-                                                <Button fx:id="selectAllButton" mnemonicParsing="false" onAction="#selectAll" styleClass="selectionOptionsButton" stylesheets="@styles.css" text="Select all">
-                                                   <graphic>
-                                                      <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                            <Image url="@../../../img/icons/circle.png" />
-                                                         </image>
-                                                      </ImageView>
-                                                   </graphic>
-                                                </Button>
-                                                <Button fx:id="deselectAllButton" mnemonicParsing="false" onAction="#deselectAll" styleClass="selectionOptionsButton" stylesheets="@styles.css" text="Deselect all">
-                                                   <graphic>
-                                                      <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                                         <image>
-                                                            <Image url="@../../../img/icons/close.png" />
-                                                         </image>
-                                                      </ImageView>
-                                                   </graphic>
-                                                </Button>
-                                             </children>
-                                          </HBox>
-                                       </right>
-                                       <padding>
-                                          <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                       </padding>
-                                       <VBox.margin>
-                                          <Insets top="5.0" />
-                                       </VBox.margin>
-                                    </BorderPane>
-                                    <FlowPane fx:id="discContainer" hgap="20.0" maxHeight="-Infinity" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS">
-                                       <VBox.margin>
-                                          <Insets bottom="10.0" top="10.0" />
-                                       </VBox.margin>
-                                       <padding>
-                                          <Insets bottom="10.0" />
-                                       </padding>
-                                    </FlowPane>
-                                 </children>
-                                 <BorderPane.margin>
-                                    <Insets bottom="20.0" />
-                                 </BorderPane.margin>
-                              </VBox>
-                           </center>
                         </BorderPane>
                      </children>
                   </StackPane>

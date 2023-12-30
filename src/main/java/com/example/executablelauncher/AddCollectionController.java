@@ -1,5 +1,6 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Disc;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import javafx.embed.swing.SwingFXUtils;
@@ -27,6 +28,8 @@ import java.net.MalformedURLException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -285,7 +288,7 @@ public class AddCollectionController {
                 File f = new File(series.getCoverSrc());
                 if (f.exists())
                     Files.delete(FileSystems.getDefault().getPath(series.getCoverSrc()));
-                File newCover = new File("src/main/resources/img/seriesCovers/"+ nameField.getText() + "_cover.png");
+                File newCover = new File("src/main/resources/img/seriesCovers/"+ series.getId() + "_cover.png");
                 try{
                     Files.copy(selectedFile.toPath(), newCover.toPath(), REPLACE_EXISTING);
                 }catch (IOException e){
@@ -304,11 +307,47 @@ public class AddCollectionController {
 
         series.setCategory(categoryField.getValue());
 
-        if (seriesToEdit != null){
-            seriesToEdit = null;
-        }else{
+        if (seriesToEdit == null){
             App.addCollection(series);
             controllerParent.addSeries(series);
+        }else{
+            if (!seriesToEdit.getSeasons().isEmpty() && seriesToEdit.thetvdbID != -1){
+                for (long seasonId : seriesToEdit.getSeasons()){
+                    Season season = App.findSeason(seasonId);
+                    if (season != null){
+                        if (!season.getDiscs().isEmpty()){
+                            for (long discId : season.getDiscs()){
+                                Disc disc = App.findDisc(discId);
+                                if (disc != null){
+                                    if (disc.imgSrc.equals("src/main/resources/img/Default_video_thumbnail.jpg") && !disc.type.equals("folder")){
+                                        File file = new File(disc.executableSrc);
+                                        String fullName = file.getName().substring(0, file.getName().length() - 4);
+
+                                        final String regexSeasonEpisode = "(?i)(?<season>S[0-9]{1,3}+)(?<episode>E[0-9]{1,4})";
+                                        final String regexOnlyEpisode = "(?i)(?<episode>[0-9]{1,4})";
+
+                                        final Pattern pattern = Pattern.compile(regexSeasonEpisode, Pattern.MULTILINE);
+                                        final Matcher matcher = pattern.matcher(fullName);
+
+                                        if (!matcher.find()){
+                                            Pattern newPattern = Pattern.compile(regexOnlyEpisode, Pattern.MULTILINE);
+                                            Matcher newMatch = newPattern.matcher(fullName);
+
+                                            if (newMatch.find()){
+                                                controllerParent.setEpisodeNameAndThumbnail(disc, "NO_SEASON", newMatch.group("episode"));
+                                                disc.setEpisodeNumber(newMatch.group("episode"));
+                                            }
+                                        }else{
+                                            controllerParent.setEpisodeNameAndThumbnail(disc, matcher.group("season").substring(1), matcher.group("episode").substring(1));
+                                            disc.setEpisodeNumber(matcher.group("episode").substring(1));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         controllerParent.hideBackgroundShadow();

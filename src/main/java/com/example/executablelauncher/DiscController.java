@@ -1,6 +1,7 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Disc;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.*;
@@ -12,6 +13,11 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
+import net.coobird.thumbnailator.Thumbnails;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class DiscController {
     @FXML
@@ -210,11 +216,15 @@ public class DiscController {
         double targetWidth = thumbnail.getFitWidth();
         double targetHeight = thumbnail.getFitHeight();
 
-        Image originalImage = new Image("file:" + disc.imgSrc);
+        File newFile = new File(disc.imgSrc);
+        if (!newFile.exists())
+            disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+
+        Image originalImage = new Image("file:" + disc.imgSrc, targetWidth, targetHeight, true, true);
 
         oldThumbnailPath = disc.imgSrc;
 
-        double aspectRatio = targetWidth / targetHeight;
+        /*double aspectRatio = targetWidth / targetHeight;
         double originalWidth = originalImage.getWidth();
         double originalHeight = originalImage.getHeight();
 
@@ -242,8 +252,27 @@ public class DiscController {
                 int sourceY = (int) (startY + y * (cropHeight / targetHeight));
                 pixelWriter.setArgb(x, y, pixelReader.getArgb(sourceX, sourceY));
             }
+        }*/
+
+        try{
+            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(originalImage, null);
+
+            //Compress image
+            BufferedImage resizedImage = Thumbnails.of(bufferedImage)
+                    .size((int) targetWidth, (int) targetHeight)
+                    .outputFormat("jpg")
+                    .outputQuality(1)
+                    .asBufferedImage();
+
+            originalImage = SwingFXUtils.toFXImage(resizedImage, null);
+            bufferedImage.flush();
+            resizedImage.flush();
+        } catch (IOException e) {
+            System.err.println("DiscController: Error compressing image");
         }
 
-        thumbnail.setImage(croppedImage);
+        thumbnail.setImage(originalImage);
+        thumbnail.setPreserveRatio(false);
+        thumbnail.setSmooth(true);
     }
 }

@@ -36,15 +36,19 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import net.coobird.thumbnailator.Thumbnails;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -214,6 +218,9 @@ public class DesktopViewController {
 
     @FXML
     private Label downloadingContentText;
+
+    @FXML
+    private BorderPane seasonBorderPane;
     //endregion
 
     //region ATTRIBUTES
@@ -320,14 +327,14 @@ public class DesktopViewController {
         seriesScrollPane.setPrefHeight(screenHeight);
         seriesContainer.setPrefHeight(screenHeight);
 
-        //discContainer.setPrefHeight(screenHeight);
-        //seasonScroll.setPrefHeight(screenHeight);
-        //seasonScroll.prefWidthProperty().bind(mainBox.prefWidthProperty());
-        //centralVBox.prefHeightProperty().bind(seasonScroll.prefHeightProperty());
-        //seasonInfoPane.prefHeightProperty().bind(centralVBox.heightProperty());
-        //seasonInfoPane.prefWidthProperty().bind(mainBox.prefWidthProperty());
-        //seasonLogoBox.setPrefHeight(screenHeight * 0.6);
-        //seasonsEpisodesBox.prefHeightProperty().bind(discContainer.prefHeightProperty());
+        seasonsEpisodesBox.minHeightProperty().bind(discContainer.heightProperty());
+        seasonsEpisodesBox.prefHeightProperty().bind(discContainer.heightProperty());
+        seasonsEpisodesBox.maxHeightProperty().bind(discContainer.heightProperty());
+        seasonBorderPane.prefHeightProperty().bind(seasonsEpisodesBox.heightProperty());
+        seasonBorderPane.maxHeightProperty().bind(seasonsEpisodesBox.heightProperty());
+        seasonInfoPane.minHeightProperty().bind(seasonBorderPane.heightProperty());
+        seasonInfoPane.prefHeightProperty().bind(seasonBorderPane.heightProperty());
+        seasonInfoPane.maxHeightProperty().bind(seasonBorderPane.heightProperty());
         seasonInfoPane.getChildren().add(0, seasonBackground);
         seasonInfoPane.getChildren().add(1, seasonBackgroundNoise);
 
@@ -393,6 +400,8 @@ public class DesktopViewController {
 
     public void selectSeries(Series s) {
         if (selectedSeries != s){
+            selectedDiscs.clear();
+            selectionOptions.setVisible(false);
             selectedSeries = s;
             selectSeriesButton(seriesButtons.get(getSeriesIndex(s)));
             seasonScroll.setVisible(true);
@@ -433,6 +442,8 @@ public class DesktopViewController {
     }
 
     private void fillSeasonInfo() {
+        selectedDiscs.clear();
+        selectionOptions.setVisible(false);
         Image i = new Image("file:" + "src/main/resources/img/backgrounds/" + selectedSeason.getId() + "_desktopBlur.png");
         ASPECT_RATIO = i.getWidth() / i.getHeight();
         globalBackground.setImage(i);
@@ -475,9 +486,23 @@ public class DesktopViewController {
 
         try{
             File file = new File(selectedSeries.getCoverSrc());
-            seriesCover.setImage(new Image(file.toURI().toURL().toExternalForm()));
+            Image image = new Image(file.toURI().toURL().toExternalForm(), 200, 251, true, true);
+            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
+
+            //Compress image
+            BufferedImage resizedImage = Thumbnails.of(bufferedImage)
+                    .size(200, 251)
+                    .outputFormat("jpg")
+                    .asBufferedImage();
+
+            Image compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
+            bufferedImage.flush();
+            resizedImage.flush();
+            seriesCover.setImage(compressedImage);
         } catch (MalformedURLException e) {
             System.err.println("Series cover not found");
+        } catch (IOException e) {
+            System.err.println("DesktopView: Series Cover not properly compressed");
         }
 
         seasonName.setText(selectedSeason.getName());
@@ -994,7 +1019,7 @@ public class DesktopViewController {
         });
     }
 
-    private void setEpisodeNameAndThumbnail(Disc disc, String season, String episode){
+    public void setEpisodeNameAndThumbnail(Disc disc, String season, String episode){
         Season s = App.findSeason(disc.seasonID);
         assert s != null;
         Series series = App.findSeriesByName(s.collectionName);
@@ -1067,11 +1092,14 @@ public class DesktopViewController {
                                 if (i == 8)
                                     break;
 
-                                imagesUrls.add("https://www.imdb.com" + e.attr("href"));
+                                if (i != 1)
+                                    imagesUrls.add("https://www.imdb.com" + e.attr("href"));
                                 i++;
                             }
                             break;
                         }
+
+                        Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + disc.id + "/"));
 
                         int i = 0;
                         for (String url : imagesUrls){
@@ -1082,13 +1110,34 @@ public class DesktopViewController {
                             }
 
                             if (posterSrc != null){
-                                Image img = new Image(posterSrc);
+                                Image originalImage = new Image(posterSrc, 480, 270, true, true);
 
-                                if (!img.isError()){
-                                    File file = new File("src/main/resources/img/discCovers/" + disc.id + "_" + i + ".png");
+                                double maxWidth = 480;
+                                double maxHeight = 270;
+                                double originalWidth = originalImage.getWidth();
+                                double originalHeight = originalImage.getHeight();
+
+                                Image compressedImage;
+                                if (originalWidth > maxWidth || originalHeight > maxHeight) {
+                                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(originalImage, null);
+
+                                    BufferedImage resizedImage = Thumbnails.of(bufferedImage)
+                                            .size((int) maxWidth, (int) maxHeight)
+                                            .outputFormat("jpg")
+                                            .asBufferedImage();
+
+                                    compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
+                                    bufferedImage.flush();
+                                    resizedImage.flush();
+                                }else{
+                                    compressedImage = originalImage;
+                                }
+
+                                if (!originalImage.isError()){
+                                    File file = new File("src/main/resources/img/discCovers/" + disc.id + "/" + i + ".png");
                                     try{
-                                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(img, null);
-                                        ImageIO.write(renderedImage,"png", file);
+                                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(compressedImage, null);
+                                        ImageIO.write(renderedImage,"jpg", file);
                                     } catch (IOException e) {
                                         System.err.println("Disc downloaded thumbnail not saved");
                                     }
@@ -1100,11 +1149,11 @@ public class DesktopViewController {
                         System.err.println("AddDiscController: Error connecting to IMDB");
                     }
 
-                    File img = new File("src/main/resources/img/discCovers/" + disc.id + "_0.png");
+                    File img = new File("src/main/resources/img/discCovers/" + disc.id + "/0.png");
                     if (!img.exists()){
                         disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
                     }else{
-                        disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "_0.png";
+                        disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "/0.png";
                     }
 
                     return null;
@@ -1128,12 +1177,20 @@ public class DesktopViewController {
         }
     }
 
-    private void updateImages(){
+    public void updateImages(){
         Platform.runLater(() -> {
             for (DiscController discController : discControllers) {
                 discController.setThumbnail();
             }
         });
+    }
+    public void updateDisc(Disc d){
+        for (DiscController discController : discControllers) {
+            if (discController.disc.id == d.id){
+                discController.setData(d);
+                return;
+            }
+        }
     }
     //endregion
 
