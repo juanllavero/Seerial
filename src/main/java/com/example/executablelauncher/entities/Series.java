@@ -1,25 +1,30 @@
 package com.example.executablelauncher.entities;
 
+import com.example.executablelauncher.App;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Series implements Serializable {
-    public static AtomicLong NextID = new AtomicLong();
-    public final long id;
+    public final String id;
     public long thetvdbID = 0;
     public String name = "";
     public String category = "";
     public int order = 0;
     public String coverSrc = "";
-    public List<Long> seasons = new ArrayList<>();
+    public List<String> seasons = new ArrayList<>();
 
     public Series() {
-        this.id = NextID.getAndIncrement();
+        String uuid = UUID.randomUUID().toString();
+        while (App.isRepeatedSeriesID(uuid))
+            uuid = UUID.randomUUID().toString();
+        id = uuid;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
@@ -39,7 +44,7 @@ public class Series implements Serializable {
         this.coverSrc = coverSrc;
     }
 
-    public List<Long> getSeasons() {
+    public List<String> getSeasons() {
         return seasons;
     }
 
@@ -47,13 +52,8 @@ public class Series implements Serializable {
         this.seasons.add(season.getId());
     }
 
-    public void removeSeason(long id){
-        for (int i = 0; i < seasons.size(); i++){
-            if (seasons.get(i) == id) {
-                seasons.remove(i);
-                break;
-            }
-        }
+    public void removeSeason(String id){
+        seasons.remove(id);
     }
 
     public void clearSeasons(){

@@ -25,9 +25,9 @@ import java.util.*;
 
 public class App extends Application {
     public static Map<String, List<EpisodeMetadata>> episodesMetadata = new HashMap<>();
-    public static List<Series> series = new ArrayList<>();
-    public static List<Season> seasons = new ArrayList<>();
-    public static List<Disc> discs = new ArrayList<>();
+    public static Map<String, Series> series = new HashMap<>();
+    public static Map<String, Season> seasons = new HashMap<>();
+    public static Map<String, Disc> discs = new HashMap<>();
     public static List<Category> categories = new ArrayList<>();
     public static List<Locale> languages = new ArrayList<>();
     public static Locale globalLanguage;
@@ -63,6 +63,17 @@ public class App extends Application {
         stage.show();
     }
 
+    public static boolean isRepeatedID(String uuid){
+        return discs.containsKey(uuid);
+    }
+    public static boolean isRepeatedSeriesID(String uuid){
+        return series.containsKey(uuid);
+    }
+
+    public static boolean isRepeatedSeasonID(String uuid){
+        return seasons.containsKey(uuid);
+    }
+
     public static boolean seriesMetadataExists(String id){
         return episodesMetadata.containsKey(id);
     }
@@ -91,19 +102,16 @@ public class App extends Application {
 
         try{
             JsonReader reader = new JsonReader(new FileReader(collectionsFile));
-            Series[] sList = gson.fromJson(reader,Series[].class);
-            if (sList != null)
-                series.addAll(List.of(sList));
+            Type type = new TypeToken<Map<String, Series>>() {}.getType();
+            series = new Gson().fromJson(reader, type);
 
             reader = new JsonReader(new FileReader(seasonsFile));
-            Season[] seasonList = gson.fromJson(reader, Season[].class);
-            if (seasonList != null)
-                seasons.addAll(List.of(seasonList));
+            type = new TypeToken<Map<String, Season>>() {}.getType();
+            seasons = new Gson().fromJson(reader, type);
 
             reader = new JsonReader(new FileReader(discsFile));
-            Disc[] dList = gson.fromJson(reader, Disc[].class);
-            if (dList != null)
-                discs.addAll(List.of(dList));
+            type = new TypeToken<Map<String, Disc>>() {}.getType();
+            discs = new Gson().fromJson(reader, type);
 
             reader = new JsonReader(new FileReader(catFile));
             Category[] catList = gson.fromJson(reader, Category[].class);
@@ -111,7 +119,7 @@ public class App extends Application {
                 categories.addAll(List.of(catList));
 
             reader = new JsonReader(new FileReader(episodeMeta));
-            Type type = new TypeToken<Map<String, List<EpisodeMetadata>>>() {}.getType();
+            type = new TypeToken<Map<String, List<EpisodeMetadata>>>() {}.getType();
             episodesMetadata = new Gson().fromJson(reader, type);
         } catch (FileNotFoundException e) {
             System.err.println("Json files not found");
@@ -162,7 +170,7 @@ public class App extends Application {
     }
 
     public static Series findSeriesByName(String sName){
-        for (Series s: series){
+        for (Series s: series.values()){
             if (s.getName().equals(sName))
                 return s;
         }
@@ -172,7 +180,7 @@ public class App extends Application {
 
     public static List<Series> getSeriesFromCategory(String cat){
         List<Series> seriesList = new ArrayList<>();
-        for (Series s : series){
+        for (Series s : series.values()){
             if (s != null && s.getCategory().toUpperCase().equals(cat)){
                 seriesList.add(s);
             }
@@ -217,7 +225,7 @@ public class App extends Application {
         if (!name.equals("NO CATEGORY")){
             categories.removeIf(cat -> cat.name.equals(name));
 
-            for (Series s : series){
+            for (Series s : series.values()){
                 if (s.getCategory().toUpperCase().equals(name)){
                     s.setCategory("NO CATEGORY");
                 }
@@ -242,46 +250,38 @@ public class App extends Application {
     }
 
     public static void addCollection(Series col){
-        series.add(col);
+        series.put(col.id, col);
     }
 
     public static void addSeason(Season season, String seriesName){
-        seasons.add(season);
+        seasons.put(season.id, season);
 
-        for (Series s : series){
+        for (Series s : series.values()){
             if (s.getName().equals(seriesName))
                 s.addSeason(season);
         }
     }
 
     public static void addDisc(Disc d){
-        discs.add(d);
+        discs.put(d.id, d);
 
         Objects.requireNonNull(findSeason(d.getSeasonID())).setDisc(d);
     }
 
     public static Series findSeries(Series s){
-        for (Series i : series){
+        for (Series i : series.values()){
             if (i.getName().equals(s.getName()))
                 return i;
         }
         return null;
     }
 
-    public static Season findSeason(long id){
-        for (Season s: seasons){
-            if (s.getId() == id)
-                return s;
-        }
-        return null;
+    public static Season findSeason(String id){
+        return seasons.get(id);
     }
 
-    public static Disc findDisc(long id){
-        for (Disc d : discs){
-            if (d.getId() == id)
-                return d;
-        }
-        return null;
+    public static Disc findDisc(String id){
+        return discs.get(id);
     }
 
     public static void removeCollection(Series col) throws IOException {
@@ -290,12 +290,12 @@ public class App extends Application {
 
         Files.delete(FileSystems.getDefault().getPath(s.getCoverSrc()));
         s.clearSeasons();
-        series.remove(s);
+        series.remove(s.id);
         SaveData();
     }
 
-    public static void removeSeason(long id){
-        Season s = findSeason(id);
+    public static void removeSeason(String id){
+        Season s = seasons.get(id);
         assert s != null;
 
         try{
@@ -310,25 +310,25 @@ public class App extends Application {
             throw new RuntimeException(e);
         }
 
-        List<Long> dList = s.getDiscs();
-        for (long i : dList){
-            discs.remove(findDisc(i));
+        List<String> dList = s.getDiscs();
+        for (String i : dList){
+            discs.remove(i);
         }
 
-        for (Series serie: series){
+        for (Series serie: series.values()){
             if (serie.getSeasons().contains(s.getId())) {
                 serie.removeSeason(s.getId());
                 break;
             }
         }
 
-        seasons.remove(s);
+        seasons.remove(s.id);
     }
 
     public static void removeDisc(Disc d){
         Season s = findSeason(d.getSeasonID());
         if (s != null)
-            s.removeDisc(d);
+            s.removeDisc(d.id);
 
         try{
             FileUtils.deleteDirectory(new File("src/main/resources/img/discCovers/" + d.id + "/"));
@@ -336,11 +336,11 @@ public class App extends Application {
             System.err.println("App: Error deleting directory: src/main/resources/img/discCovers/" + d.id + "/");
         }
 
-        discs.remove(d);
+        discs.remove(d.id);
     }
 
     public static boolean nameExist(String name){
-        for (Series s : series){
+        for (Series s : series.values()){
             if (s.getName().equals(name))
                 return true;
         }
@@ -348,8 +348,9 @@ public class App extends Application {
     }
 
     public static List<Series> getCollection(){
-        series.sort(new Utils.SeriesComparator());
-        return series;
+        List<Series> seriesList = new ArrayList<>(series.values().stream().toList());
+        seriesList.sort(new Utils.SeriesComparator());
+        return seriesList;
     }
 
     public static void showErrorMessage(String title, String header, String content){

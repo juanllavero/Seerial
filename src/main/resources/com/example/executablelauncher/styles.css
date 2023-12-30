@@ -80,14 +80,14 @@
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: -fx-main-color;
+    -fx-border-color: #960F20;
 }
 
 .downloadedImageButtonSelected{
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: -fx-main-color;
+    -fx-border-color: #960F20;
 }
 
 .selectionOptions{

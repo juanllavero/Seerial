@@ -234,7 +234,7 @@ public class ImageDownloaderController {
         if (isCover){
             imageView.setFitHeight(300);
         }else{
-            imageView.setFitWidth(300);
+            imageView.setFitWidth(200);
         }
 
         Button btn = new Button();

@@ -268,7 +268,7 @@ public class AddCollectionController {
         series.thetvdbID = tvdbID;
 
         if (!series.getSeasons().isEmpty()){
-            for (long s : series.getSeasons()){
+            for (String s : series.getSeasons()){
                 Season season = App.findSeason(s);
                 if (season != null){
                     season.setCollectionName(nameField.getText());
@@ -312,11 +312,11 @@ public class AddCollectionController {
             controllerParent.addSeries(series);
         }else{
             if (!seriesToEdit.getSeasons().isEmpty() && seriesToEdit.thetvdbID != -1){
-                for (long seasonId : seriesToEdit.getSeasons()){
+                for (String seasonId : seriesToEdit.getSeasons()){
                     Season season = App.findSeason(seasonId);
                     if (season != null){
                         if (!season.getDiscs().isEmpty()){
-                            for (long discId : season.getDiscs()){
+                            for (String discId : season.getDiscs()){
                                 Disc disc = App.findDisc(discId);
                                 if (disc != null){
                                     if (disc.imgSrc.equals("src/main/resources/img/Default_video_thumbnail.jpg") && !disc.type.equals("folder")){

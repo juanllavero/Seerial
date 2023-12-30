@@ -1,23 +1,26 @@
 package com.example.executablelauncher.entities;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
+import com.example.executablelauncher.App;
 
 public class Disc implements Serializable {
-    public static AtomicLong NextID = new AtomicLong();
-    public final long id;
+    public final String id;
     public String name = "";
     public String episodeNumber = "";
     public String executableSrc = "";
     public String type = "";    //Folder or File
-    public long seasonID = -1;
+    public String seasonID = "";
     public String imgSrc = "";
 
     public Disc() {
-        this.id = NextID.getAndIncrement();
+        String uuid = UUID.randomUUID().toString();
+        while (App.isRepeatedID(uuid))
+            uuid = UUID.randomUUID().toString();
+        id = uuid;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
@@ -37,11 +40,11 @@ public class Disc implements Serializable {
         this.type = type;
     }
 
-    public long getSeasonID() {
+    public String getSeasonID() {
         return seasonID;
     }
 
-    public void setSeasonID(long seasonID) {
+    public void setSeasonID(String seasonID) {
         this.seasonID = seasonID;
     }
 

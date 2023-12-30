@@ -409,7 +409,7 @@ public class DesktopViewController {
 
             if (!s.getSeasons().isEmpty()){
                 seasonList.clear();
-                for (long id : s.getSeasons()){
+                for (String id : s.getSeasons()){
                     Season season = App.findSeason(id);
                     if (season != null)
                         seasonList.add(season);
@@ -550,7 +550,7 @@ public class DesktopViewController {
     private void showDiscs(Season s) {
         discList.clear();
         discContainer.getChildren().clear();
-        for (long i : s.getDiscs()){
+        for (String i : s.getDiscs()){
             Disc d = App.findDisc(i);
             if (d != null){
                 discList.add(d);
@@ -1337,7 +1337,7 @@ public class DesktopViewController {
 
         discList.remove(d);
         App.removeDisc(d);
-        selectedSeason.removeDisc(d);
+        selectedSeason.removeDisc(d.id);
 
         selectSeason(selectedSeason);
         hideMenu();

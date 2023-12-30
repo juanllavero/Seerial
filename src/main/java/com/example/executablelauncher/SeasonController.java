@@ -101,7 +101,7 @@ public class SeasonController {
     private List<Disc> discs = new ArrayList<>();
     private List<Pane> discsButtons = new ArrayList<>();
     private int currentSeason = 0;
-    public long currentEpisoceID = -1;
+    public String currentEpisoceID = "";
     private Disc selectedDisc = null;
     private boolean showEpisodes = false;
     private boolean optionsSelected = false;
@@ -221,8 +221,8 @@ public class SeasonController {
         discsControllers.clear();
         discsButtons.clear();
         discs.clear();
-        List<Long> discs = season.getDiscs();
-        for (long i : discs){
+        List<String> discs = season.getDiscs();
+        for (String i : discs){
             Disc d = App.findDisc(i);
             addEpisodeCard(d);
         }
@@ -244,9 +244,9 @@ public class SeasonController {
         nextSeasonButton.setVisible(currentSeason != seasons.size() - 1);
     }
 
-    public void setSeasons(List<Long> seasonList){
+    public void setSeasons(List<String> seasonList){
         if (seasons != null){
-            for (long id : seasonList){
+            for (String id : seasonList){
                 seasons.add(App.findSeason(id));
             }
         }
@@ -474,7 +474,7 @@ public class SeasonController {
 
     @FXML
     void removeSeason(){
-        long currentID = seasons.get(currentSeason).getId();
+        String currentID = seasons.get(currentSeason).getId();
 
         seasons.remove(seasons.get(currentSeason));
         App.removeSeason(currentID);
@@ -527,7 +527,7 @@ public class SeasonController {
     void play(){
         if (!seasons.get(currentSeason).getDiscs().isEmpty()){
             System.out.println("AAA");
-            if (currentEpisoceID == -1){
+            if (currentEpisoceID.isEmpty()){
                 currentEpisoceID = Objects.requireNonNull(App.findDisc(seasons.get(currentSeason).getDiscs().get(0))).getId();
             }
             Disc d = App.findDisc(currentEpisoceID);

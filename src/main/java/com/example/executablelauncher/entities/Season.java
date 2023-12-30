@@ -1,13 +1,14 @@
 package com.example.executablelauncher.entities;
 
+import com.example.executablelauncher.App;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
 
 public class Season implements Serializable {
-    public static AtomicLong NextID = new AtomicLong();
-    public final long id;
+    public final String id;
     public String name = "";
     public String year = "";
     public String logoSrc = "";
@@ -18,13 +19,16 @@ public class Season implements Serializable {
     public String fullScreenBlurImageSrc = "";
     public String desktopBackgroundEffect = "";
     public int order = 0;
-    public final List<Long> discs = new ArrayList<>();
+    public final List<String> discs = new ArrayList<>();
 
     public Season() {
-        this.id = NextID.getAndIncrement();
+        String uuid = UUID.randomUUID().toString();
+        while (App.isRepeatedSeasonID(uuid))
+            uuid = UUID.randomUUID().toString();
+        id = uuid;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
@@ -92,7 +96,7 @@ public class Season implements Serializable {
         this.order = order;
     }
 
-    public List<Long> getDiscs() {
+    public List<String> getDiscs() {
         return discs;
     }
 
@@ -100,15 +104,8 @@ public class Season implements Serializable {
         this.discs.add(disc.getId());
     }
 
-    public void removeDisc(Disc d){
-        int i = 0;
-        for (long disc : discs){
-            if (disc == d.getId()) {
-                discs.remove(i);
-                break;
-            }
-            i++;
-        }
+    public void removeDisc(String id){
+        discs.remove(id);
     }
 
     public void addDisc(Disc d){

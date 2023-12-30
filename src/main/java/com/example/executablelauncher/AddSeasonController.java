@@ -158,6 +158,24 @@ public class AddSeasonController {
 
     public void setCollection(Series s){
         collection = s;
+
+        if (!collection.getSeasons().isEmpty()){
+            Season season = App.findSeason(collection.getSeasons().get(0));
+            if (season != null){
+                if (!season.getLogoSrc().isEmpty()) {
+                    File file = new File(season.getLogoSrc());
+                    File newLogo = new File("src/main/resources/img/DownloadCache/logoCopy.png");
+                    try{
+                        Files.copy(file.toPath(), newLogo.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        loadLogo(newLogo.getAbsolutePath());
+                    } catch (IOException e) {
+                        System.err.println("AddSeasonController: Error trying to copy old Logo");
+                    }
+                }
+            }
+        }
+
+
         initValues();
     }
 
@@ -742,7 +760,7 @@ public class AddSeasonController {
         }
     }
 
-    private String setTransparencyEffect(String src, long seasonId){
+    private String setTransparencyEffect(String src, String seasonId){
         try {
             //Load image
             BufferedImage originalImage = ImageIO.read(new File(src));
@@ -786,7 +804,7 @@ public class AddSeasonController {
         return "src/main/resources/img/backgrounds/" + seasonId + "_transparencyEffect.png";
     }
 
-    private void setDesktopBackgroundBlur(long seasonId){
+    private void setDesktopBackgroundBlur(String seasonId){
         try {
             BufferedImage backgroundEffect = ImageIO.read(new File("src/main/resources/img/Background.png"));
             BufferedImage originalImage = ImageIO.read(new File("src/main/resources/img/backgrounds/" + seasonId + "_desktopBlur.png"));
