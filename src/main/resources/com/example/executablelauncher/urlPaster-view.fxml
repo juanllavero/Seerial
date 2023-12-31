@@ -4,11 +4,12 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="209.0" prefWidth="328.0" styleClass="darkerBackground" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.UrlPasterController">
    <top>
@@ -24,7 +25,14 @@
             </Label>
          </left>
          <right>
-            <Button mnemonicParsing="false" onAction="#cancelButton" prefHeight="25.0" prefWidth="25.0" BorderPane.alignment="CENTER" />
+            <Button mnemonicParsing="false" onAction="#cancelButton" prefHeight="25.0" prefWidth="25.0" styleClass="closeButton" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+               <graphic>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../img/icons/close.png" />
+                     </image>
+                  </ImageView>
+               </graphic></Button>
          </right>
          <padding>
             <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
@@ -34,12 +42,12 @@
    <bottom>
       <HBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="addButton" mnemonicParsing="false" onAction="#save" styleClass="roundButton" stylesheets="@styles.css" text="Add">
+            <Button fx:id="addButton" mnemonicParsing="false" onAction="#save" styleClass="desktopButton" stylesheets="@styles.css" text="Add" textFill="WHITE">
                <HBox.margin>
                   <Insets right="30.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancelButton" styleClass="roundButton" stylesheets="@styles.css" text="Cancel" />
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancelButton" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE" />
          </children>
          <padding>
             <Insets bottom="20.0" left="10.0" right="10.0" top="10.0" />

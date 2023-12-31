@@ -183,8 +183,6 @@ public class Controller implements Initializable {
             btn.setText(cat);
             btn.getStyleClass().add("CatButton");
             HBox.setMargin(btn, new Insets(0, 5, 0, 0));
-            DropShadow ds = new DropShadow();
-            btn.setEffect(ds);
 
             btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
                 playCategoriesSound();
@@ -484,7 +482,7 @@ public class Controller implements Initializable {
                 seasonController.setParent(this);
                 Series newSeries = App.findSeries(s);
                 if (newSeries != null)
-                    seasonController.setSeasons(newSeries.getSeasons());
+                    seasonController.setSeasons(newSeries.getSeasons(), newSeries.playSameMusic);
                 Stage stage = (Stage) mainPane.getScene().getWindow();
                 stage.setTitle(App.textBundle.getString("season"));
                 stage.setScene(new Scene(root));

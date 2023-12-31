@@ -19,6 +19,7 @@ public class Season implements Serializable {
     public String fullScreenBlurImageSrc = "";
     public String desktopBackgroundEffect = "";
     public int order = 0;
+    public boolean showName = true;
     public final List<String> discs = new ArrayList<>();
 
     public Season() {

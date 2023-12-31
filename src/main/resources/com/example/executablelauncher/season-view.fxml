@@ -47,6 +47,9 @@
                      </image>
                   </ImageView>
                </graphic>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
             </Button>
          </right>
          <left>
@@ -58,6 +61,9 @@
                      </image>
                   </ImageView>
                </graphic>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
             </Button>
          </left>
          <center>
@@ -65,12 +71,15 @@
                <children>
                   <ImageView fx:id="logoImage" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../../../img/icons/options.png" />
+                        <Image url="@../../../img/logos/d0b8365f-f76c-485d-a46a-f720abf65b71_sl.png" />
                      </image>
+                     <VBox.margin>
+                        <Insets bottom="30.0" />
+                     </VBox.margin>
                   </ImageView>
                   <Label fx:id="nameField" text="Season 1" textFill="#dadada">
                      <VBox.margin>
-                        <Insets top="20.0" />
+                        <Insets />
                      </VBox.margin>
                      <font>
                         <Font name="System Bold" size="20.0" />
@@ -95,7 +104,8 @@
                         <Button fx:id="playButton" accessibleRole="IMAGE_VIEW" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="45.0" prefWidth="199.0" styleClass="seeButton" stylesheets="@styles.css" text="See" textAlignment="CENTER">
                            <font>
                               <Font size="18.0" />
-                           </font></Button>
+                           </font>
+                        </Button>
                         <Button fx:id="optionsButton" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#openMenu" prefHeight="47.0" prefWidth="47.0" styleClass="optionsButton" stylesheets="@styles.css" textAlignment="CENTER">
                            <graphic>
                               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
@@ -130,6 +140,11 @@
                            </image>
                         </ImageView>
                         <ImageView fx:id="episodeShadow2" fitHeight="300.0" fitWidth="1920.0" pickOnBounds="true">
+                           <image>
+                              <Image url="@../../../img/desktopBackgroundShadow.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="episodeShadow3" fitHeight="300.0" fitWidth="1920.0" pickOnBounds="true">
                            <image>
                               <Image url="@../../../img/desktopBackgroundShadow.png" />
                            </image>

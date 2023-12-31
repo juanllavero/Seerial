@@ -66,6 +66,9 @@ public class SeasonController {
     private ImageView episodeShadow2;
 
     @FXML
+    private ImageView episodeShadow3;
+
+    @FXML
     private ScrollPane episodeScroll;
 
     @FXML
@@ -96,6 +99,7 @@ public class SeasonController {
     private Button optionsButton;
 
     private Controller controllerParent;
+    private Label nameFiledSaved = null;
 
     private List<Season> seasons = new ArrayList<>();
     private List<Disc> discs = new ArrayList<>();
@@ -109,12 +113,11 @@ public class SeasonController {
 
     private MediaPlayer mp = null;
 
-    Timeline alertTimer = null;
-
     int pos = 0;
     final int minPos = 0;
     final int maxPos = 100;
     private boolean isVideo = false;
+    private boolean playSameMusic = false;
     private List<DiscController> discsControllers = new ArrayList<>();
 
     public void setParent(Controller c){
@@ -123,14 +126,16 @@ public class SeasonController {
 
     private void updateInfo(Season season){
         if (mp != null){
-            mp.stop();
+            if (isVideo && !playSameMusic)
+                mp.stop();
         }
 
-        alertTimer = new Timeline(new KeyFrame(Duration.seconds(3), event ->{
-            playVideo();
-        }));
-
-        nameField.setText(season.getName());
+        if (!season.showName && infoBox.getChildren().size() == 4){
+            infoBox.getChildren().remove(1);
+        }else if (season.showName && infoBox.getChildren().size() == 3){
+            infoBox.getChildren().add(1, nameFiledSaved);
+            nameField.setText(season.getName());
+        }
         yearField.setText(season.getYear());
 
         //Set Background Image
@@ -181,7 +186,7 @@ public class SeasonController {
             seriesTitle.setTextFill(Color.color(1, 1, 1));
             seriesTitle.setEffect(new DropShadow());
             infoBox.getChildren().add(0, seriesTitle);
-        }else{
+        }else {
             Image logo = new Image("file:" + season.getLogoSrc(), screenWidth * 0.25, screenHeight * 0.25, true, true);
             logoImage.setImage(logo);
             logoImage.setFitWidth(screenWidth * 0.15);
@@ -194,27 +199,18 @@ public class SeasonController {
             mp = new MediaPlayer(media);
             backgroundVideo.setMediaPlayer(mp);
             backgroundVideo.setVisible(false);
-
-            mp.setOnEndOfMedia(() -> {
-                mp.seek(Duration.ZERO);
-                mp.play();
-            });
-
             isVideo = true;
 
-            alertTimer.play();
+            setMediaPlayer();
         }else if (!season.getMusicSrc().isEmpty()){
-            File file = new File(season.getMusicSrc());
-            Media media = new Media(file.toURI().toString());
-            mp = new MediaPlayer(media);
+            if (!playSameMusic || (currentSeason == 0 && mp == null)){
+                File file = new File(season.getMusicSrc());
+                Media media = new Media(file.toURI().toString());
+                mp = new MediaPlayer(media);
+                isVideo = false;
 
-            mp.setOnEndOfMedia(() -> {
-                mp.seek(Duration.ZERO);
-                mp.play();
-            });
-
-            isVideo = false;
-            alertTimer.play();
+                setMediaPlayer();
+            }
         }
 
         cardContainer.getChildren().clear();
@@ -239,17 +235,34 @@ public class SeasonController {
         selectPlayButton();
     }
 
+    private void setMediaPlayer(){
+        mp.setOnEndOfMedia(() -> {
+            mp.seek(Duration.ZERO);
+            mp.play();
+        });
+
+        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
+                    playVideo();
+                })
+        );
+        timeline.play();
+    }
+
     private void updateButtons(){
         lastSeasonButton.setVisible(currentSeason != 0);
         nextSeasonButton.setVisible(currentSeason != seasons.size() - 1);
     }
 
-    public void setSeasons(List<String> seasonList){
+    public void setSeasons(List<String> seasonList, boolean playSameMusic){
+        this.playSameMusic = playSameMusic;
         if (seasons != null){
             for (String id : seasonList){
                 seasons.add(App.findSeason(id));
             }
         }
+
+        nameFiledSaved = nameField;
 
         menuShadow.setFitWidth(Screen.getPrimary().getBounds().getWidth());
         menuShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
@@ -323,6 +336,8 @@ public class SeasonController {
         episodeShadow.setFitHeight(500);
         episodeShadow2.fitWidthProperty().bind(episodeSection.widthProperty());
         episodeShadow2.setFitHeight(500);
+        episodeShadow3.fitWidthProperty().bind(episodeSection.widthProperty());
+        episodeShadow3.setFitHeight(500);
 
         episodeScroll.setOnScroll(event -> {
 
@@ -353,7 +368,6 @@ public class SeasonController {
                         backgroundVideo.setPreserveRatio(false);
                     }
 
-
                     backgroundVideo.setVisible(true);
 
                     //Fade In Transition
@@ -361,6 +375,10 @@ public class SeasonController {
                     fadeIn.setFromValue(0);
                     fadeIn.setToValue(1.0);
                     fadeIn.play();
+                    mp.stop();
+                    mp.seek(mp.getStartTime());
+                    mp.play();
+                }else{
                     mp.stop();
                     mp.seek(mp.getStartTime());
                     mp.play();
@@ -424,7 +442,7 @@ public class SeasonController {
     void goBack(KeyEvent event){
         if (mp != null)
             mp.stop();
-        alertTimer.stop();
+        //alertTimer.stop();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();

@@ -52,7 +52,11 @@ public class DiscController {
 
     public void setData(Disc d) {
         name.setText(d.getName());
-        number.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber());
+        if (d.getEpisodeNumber().isEmpty()){
+            number.setText("");
+        }else{
+            number.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber());
+        }
         disc = d;
 
         clearSelection();
@@ -61,13 +65,13 @@ public class DiscController {
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
 
-        if (screenWidth < 1920){
+        /*if (screenWidth < 1920){
             name.setFont(new Font("System", 20));
             number.setFont(new Font("System", 14));
         }else if (screenWidth >= 2048){
-            name.setFont(new Font("System", 26));
-            number.setFont(new Font("System", 20));
-        }
+            name.setFont(new Font("System", 23));
+            number.setFont(new Font("System", 18));
+        }*/
 
         thumbnailStackPane.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (playImage.isVisible()){

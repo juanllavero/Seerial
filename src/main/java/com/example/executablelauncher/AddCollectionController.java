@@ -9,10 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -73,6 +70,9 @@ public class AddCollectionController {
     @FXML
     private Label title;
 
+    @FXML
+    private CheckBox playSameMusic;
+
     public Series seriesToEdit = null;
     private DesktopViewController controllerParent;
     private File selectedFile = null;
@@ -92,6 +92,8 @@ public class AddCollectionController {
 
         categoryField.getItems().addAll(App.getCategories());
         categoryField.setValue(s.getCategory());
+
+        playSameMusic.setSelected(s.playSameMusic);
 
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));
@@ -305,6 +307,7 @@ public class AddCollectionController {
             series.setOrder(Integer.parseInt(orderField.getText()));
         }
 
+        series.playSameMusic = playSameMusic.isSelected();
         series.setCategory(categoryField.getValue());
 
         if (seriesToEdit == null){

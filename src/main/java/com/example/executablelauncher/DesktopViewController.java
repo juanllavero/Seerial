@@ -327,14 +327,21 @@ public class DesktopViewController {
         seriesScrollPane.setPrefHeight(screenHeight);
         seriesContainer.setPrefHeight(screenHeight);
 
-        seasonsEpisodesBox.minHeightProperty().bind(discContainer.heightProperty());
+        /*
+        seasonsEpisodesBox.setMinHeight(discContainer.getMinHeight());
         seasonsEpisodesBox.prefHeightProperty().bind(discContainer.heightProperty());
         seasonsEpisodesBox.maxHeightProperty().bind(discContainer.heightProperty());
         seasonBorderPane.prefHeightProperty().bind(seasonsEpisodesBox.heightProperty());
-        seasonBorderPane.maxHeightProperty().bind(seasonsEpisodesBox.heightProperty());
-        seasonInfoPane.minHeightProperty().bind(seasonBorderPane.heightProperty());
+        //seasonBorderPane.maxHeightProperty().bind(seasonsEpisodesBox.heightProperty());
+        //seasonInfoPane.minHeightProperty().bind(seasonBorderPane.heightProperty());
         seasonInfoPane.prefHeightProperty().bind(seasonBorderPane.heightProperty());
-        seasonInfoPane.maxHeightProperty().bind(seasonBorderPane.heightProperty());
+        //seasonInfoPane.maxHeightProperty().bind(seasonBorderPane.heightProperty());
+        */
+
+        discContainer.prefHeightProperty().bind(seasonsEpisodesBox.heightProperty());
+        discContainer.prefWidthProperty().bind(seasonsEpisodesBox.widthProperty());
+
+
         seasonInfoPane.getChildren().add(0, seasonBackground);
         seasonInfoPane.getChildren().add(1, seasonBackgroundNoise);
 
@@ -401,11 +408,10 @@ public class DesktopViewController {
     public void selectSeries(Series s) {
         if (selectedSeries != s){
             selectedDiscs.clear();
+            seasonScroll.setVisible(true);
             selectionOptions.setVisible(false);
             selectedSeries = s;
             selectSeriesButton(seriesButtons.get(getSeriesIndex(s)));
-            seasonScroll.setVisible(true);
-
 
             if (!s.getSeasons().isEmpty()){
                 seasonList.clear();
@@ -435,8 +441,8 @@ public class DesktopViewController {
 
     private void fadeInTransition(ImageView imageV){
         //Fade In Transition
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), imageV);
-        fadeIn.setFromValue(0.5);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1.5), imageV);
+        fadeIn.setFromValue(0);
         fadeIn.setToValue(1.0);
         fadeIn.play();
     }
@@ -545,11 +551,15 @@ public class DesktopViewController {
         }
     }
 
-
+    public void updateSeasons(){
+        selectedSeries = App.findSeries(selectedSeries);
+        selectSeries(selectedSeries);
+    }
 
     private void showDiscs(Season s) {
         discList.clear();
         discContainer.getChildren().clear();
+        discControllers.clear();
         for (String i : s.getDiscs()){
             Disc d = App.findDisc(i);
             if (d != null){
@@ -669,7 +679,7 @@ public class DesktopViewController {
         }
     }
 
-    private void selectSeason(Season s) {
+    public void selectSeason(Season s) {
         if (selectedSeason != s){
             selectedSeason = s;
 
@@ -919,8 +929,9 @@ public class DesktopViewController {
 
             backgroundShadow.setVisible(false);
 
-            if (selectedFiles != null){
-                showDownloadWindow(Math.max(selectedFiles.size(), 1));
+            if (selectedFiles != null || selectedFolder != null){
+                if (selectedFiles != null)
+                    showDownloadWindow(Math.max(selectedFiles.size(), 1));
                 addDiscs(selectedFiles,selectedFolder,text,typeValue);
             }
 
@@ -967,7 +978,7 @@ public class DesktopViewController {
                     for (File file : selectedFiles)
                         setDiscInfo(file, false, typeValue);
                 else
-                    setDiscInfo(selectedFolder, true, typeValue);
+                    setDiscInfo(selectedFolder, typeValue.equals("Folder"), typeValue);
 
                 return null;
             }
@@ -1013,6 +1024,7 @@ public class DesktopViewController {
 
             newDisc.setType(type);
             newDisc.setExecutableSrc(file.getAbsolutePath());
+            newDisc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
 
             App.addDisc(newDisc);
             addDisc(newDisc);
@@ -1301,15 +1313,19 @@ public class DesktopViewController {
         updateCategories();
     }
     @FXML
-    void removeCollection(MouseEvent event) throws IOException {
-        if (selectedSeries != null){
-            seriesList.remove(selectedSeries);
-            App.removeCollection(selectedSeries);
-            selectedSeries = null;
-            seriesList = App.getCollection();
-            showSeries();
+    void removeCollection(MouseEvent event) {
+        try {
+            if (selectedSeries != null){
+                seriesList.remove(selectedSeries);
+                App.removeCollection(selectedSeries);
+                selectedSeries = null;
+                seriesList = App.getCollection();
+                showSeries();
+            }
+            hideMenu();
+        } catch (IOException e) {
+            System.err.println("DesktopViewController: Error trying to remove collection");
         }
-        hideMenu();
     }
     @FXML
     void removeSeason(MouseEvent event){

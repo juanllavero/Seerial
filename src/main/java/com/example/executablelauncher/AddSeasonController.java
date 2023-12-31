@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.GaussianBlur;
@@ -102,6 +103,9 @@ public class AddSeasonController {
     @FXML
     private ImageView backgroundImageView;
 
+    @FXML
+    private CheckBox showName;
+
     private Series collection = null;
     public Season seasonToEdit = null;
     private File selectedLogo = null;
@@ -151,6 +155,8 @@ public class AddSeasonController {
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));
 
+        showName.setSelected(s.showName);
+
         initValues();
         title.setText(App.textBundle.getString("seasonWindowTitleEdit"));
         addButton.setText(App.buttonsBundle.getString("saveButton"));
@@ -174,7 +180,6 @@ public class AddSeasonController {
                 }
             }
         }
-
 
         initValues();
     }
@@ -417,9 +422,11 @@ public class AddSeasonController {
     void removeBackground(ActionEvent event) {
         selectedBackground = null;
         backgroundImageView.setImage(null);
-        seasonToEdit.setBackgroundSrc("");
-        seasonToEdit.setDesktopBackgroundEffect("");
-        seasonToEdit.setFullScreenBlurImageSrc("");
+        if (seasonToEdit != null){
+            seasonToEdit.setBackgroundSrc("");
+            seasonToEdit.setDesktopBackgroundEffect("");
+            seasonToEdit.setFullScreenBlurImageSrc("");
+        }
         oldBackgroundPath = "";
     }
 
@@ -492,7 +499,7 @@ public class AddSeasonController {
         season.setName(nameField.getText());
         season.setYear(yearField.getText());
         season.setCollectionName(collection.getName());
-
+        season.showName = showName.isSelected();
 
         //Save Background
         String newName = "";
@@ -562,8 +569,10 @@ public class AddSeasonController {
             season.setOrder(Integer.parseInt(orderField.getText()));
         }
 
-        if (seasonToEdit == null)
+        if (seasonToEdit == null){
             App.addSeason(season, season.getCollectionName());
+            parentController.updateSeasons();
+        }
 
         parentController.hideBackgroundShadow();
         parentController.refreshSeason(season);
@@ -705,7 +714,7 @@ public class AddSeasonController {
             File newLogo = new File("src/main/resources/img/logos/" + s.getId() + "_sl.png");
 
             try{
-                Files.copy(selectedLogo.toPath(), newLogo.toPath());
+                Files.copy(selectedLogo.toPath(), newLogo.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
                 System.err.println("Logo not copied");
             }

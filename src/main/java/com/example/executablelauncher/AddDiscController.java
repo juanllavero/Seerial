@@ -116,38 +116,39 @@ public class AddDiscController {
     private void showImages(){
         //Add images to view
         File dir = new File("src/main/resources/img/discCovers/" + discToEdit.id);
-        File[] files = dir.listFiles();
-        assert files != null;
-        imagesFiles.addAll(Arrays.asList(files));
+        if (dir.exists()){
+            File[] files = dir.listFiles();
+            assert files != null;
+            imagesFiles.addAll(Arrays.asList(files));
 
-        for (File f : imagesFiles){
-            try{
-                Image img = new Image(f.toURI().toURL().toExternalForm(), 150, 84, true, true);
-                Button btn = new Button();
-                ImageView image = new ImageView(img);
-                HBox imageContainer = new HBox();
-                imageContainer.setAlignment(Pos.CENTER);
-                imageContainer.setPrefWidth(150);
-                imageContainer.setPrefHeight(84);
-                imageContainer.getChildren().add(image);
-                imageContainer.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
+            for (File f : imagesFiles){
+                try{
+                    Image img = new Image(f.toURI().toURL().toExternalForm(), 150, 84, true, true);
+                    Button btn = new Button();
+                    ImageView image = new ImageView(img);
+                    HBox imageContainer = new HBox();
+                    imageContainer.setAlignment(Pos.CENTER);
+                    imageContainer.setPrefWidth(150);
+                    imageContainer.setPrefHeight(84);
+                    imageContainer.getChildren().add(image);
+                    imageContainer.setBackground(new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY)));
 
-                btn.setGraphic(imageContainer);
-                btn.setText("");
-                btn.getStyleClass().add("downloadedImageButton");
-                btn.setPadding(new Insets(2));
+                    btn.setGraphic(imageContainer);
+                    btn.setText("");
+                    btn.getStyleClass().add("downloadedImageButton");
+                    btn.setPadding(new Insets(2));
 
-                btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
-                    selectButton(btn);
-                });
+                    btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                        selectButton(btn);
+                    });
 
-                imagesContainer.getChildren().add(btn);
-            } catch (MalformedURLException e) {
-                System.err.println("AddDiscController: Error loading image thumbnail");
+                    imagesContainer.getChildren().add(btn);
+                } catch (MalformedURLException e) {
+                    System.err.println("AddDiscController: Error loading image thumbnail");
+                }
             }
-
-
         }
+
     }
 
     private void selectButton(Button btn){
@@ -176,19 +177,22 @@ public class AddDiscController {
     void loadExe(MouseEvent event) {
         if (typeField.getValue().equals(App.textBundle.getString("folder"))){
             DirectoryChooser directoryChooser = new DirectoryChooser();
-            selectedFolder = directoryChooser.showDialog((Stage)((Button) event.getSource()).getScene().getWindow());
-            executableField.setText(selectedFolder.getAbsolutePath());
+            selectedFolder = directoryChooser.showDialog(((Button) event.getSource()).getScene().getWindow());
+            if (selectedFolder != null)
+                executableField.setText(selectedFolder.getAbsolutePath());
         }else{
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle(App.textBundle.getString("selectFile"));
             fileChooser.setInitialDirectory(new File("C:\\"));
             fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allFiles"), "*.mkv", "*.mp4", "*.iso", "*.ISO", "*.m2ts", "*.exe", "*.bat"));
             if (discToEdit != null) {
-                selectedFolder = fileChooser.showOpenDialog((Stage) ((Button) event.getSource()).getScene().getWindow());
-                executableField.setText(selectedFolder.getAbsolutePath());
+                selectedFolder = fileChooser.showOpenDialog(((Button) event.getSource()).getScene().getWindow());
+                if (selectedFolder != null)
+                    executableField.setText(selectedFolder.getAbsolutePath());
             }else {
-                selectedFiles = fileChooser.showOpenMultipleDialog((Stage) ((Button) event.getSource()).getScene().getWindow());
-                executableField.setText(App.textBundle.getString("multipleSelection"));
+                selectedFiles = fileChooser.showOpenMultipleDialog(((Button) event.getSource()).getScene().getWindow());
+                if (selectedFiles != null)
+                    executableField.setText(App.textBundle.getString("multipleSelection"));
             }
         }
     }
@@ -210,12 +214,12 @@ public class AddDiscController {
             save = false;
             App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("fileNotFound"));
         }else if (!executableField.getText().equals(App.textBundle.getString("multipleSelection")) && selectedFolder != null){
-            if (selectedFolder.exists()){
+            if (!selectedFolder.isDirectory()) {
                 String fileExtension = executableField.getText().substring(executableField.getText().length() - 4);
                 fileExtension = fileExtension.toLowerCase();
 
                 if (!fileExtension.equals(".mkv") && !fileExtension.equals(".mp4") && !fileExtension.equals("m2ts")
-                        && !fileExtension.equals(".iso") && !fileExtension.equals(".exe") && !fileExtension.equals(".bat")){
+                        && !fileExtension.equals(".iso") && !fileExtension.equals(".exe") && !fileExtension.equals(".bat")) {
                     save = false;
                     App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("extensionNotAllowed"));
                 }
@@ -223,9 +227,10 @@ public class AddDiscController {
         }
 
         if (save){
-            if (selectedImage != null && discToEdit != null){
+            if (discToEdit != null){
                 discToEdit.name = nameField.getText();
-                discToEdit.imgSrc = "src/main/resources/img/discCovers/" + discToEdit.id + "/" + selectedImage.getName();
+                if (selectedImage != null)
+                    discToEdit.imgSrc = "src/main/resources/img/discCovers/" + discToEdit.id + "/" + selectedImage.getName();
                 controllerParent.hideBackgroundShadow();
                 controllerParent.updateDisc(discToEdit);
             }else{
