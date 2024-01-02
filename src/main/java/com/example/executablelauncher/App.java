@@ -1,9 +1,16 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.*;
+import com.github.m0nk3y2k4.thetvdb.api.model.data.Episode;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import info.movito.themoviedbapi.*;
+import info.movito.themoviedbapi.model.Artwork;
+import info.movito.themoviedbapi.model.MovieImages;
+import info.movito.themoviedbapi.model.tv.TvEpisode;
+import info.movito.themoviedbapi.model.tv.TvSeason;
+import info.movito.themoviedbapi.model.tv.TvSeries;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,6 +23,8 @@ import javafx.stage.Stage;
 import com.google.gson.Gson;
 import javafx.stage.StageStyle;
 import org.apache.commons.io.FileUtils;
+import info.movito.themoviedbapi.model.MovieDb;
+import info.movito.themoviedbapi.model.core.MovieResultsPage;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -47,6 +56,67 @@ public class App extends Application {
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
         LoadData();
 
+
+
+        TmdbApi tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
+
+        /*
+
+        // Título de la película que quieres buscar
+        String tituloBusqueda = "El Señor de los anillos: La comunidad del anillo";
+
+        // Realiza la búsqueda de películas por título
+        MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(tituloBusqueda, 1, "es", false, 0);
+
+        if (movieResults.getTotalResults() > 0) {
+            // Obtiene la primera película encontrada
+            MovieDb movie = movieResults.getResults().get(0);
+            System.out.println("Título: " + movie.getTitle());
+            System.out.println("Resumen: " + movie.getOverview());
+            // Otros campos disponibles en la clase MovieDb
+        } else {
+            System.out.println("No se encontró ninguna película con el título proporcionado.");
+        }
+
+        */
+
+
+        // Título de la serie que quieres buscar
+        String tituloBusquedaSerie = "Naruto Shippuden";
+
+        // Realiza la búsqueda de series por título
+        TvResultsPage tvResults = tmdbApi.getSearch().searchTv(tituloBusquedaSerie, 1, "es", true, 1);
+
+        if (tvResults.getTotalResults() > 0) {
+            // Obtiene la primera serie encontrada
+            TvSeries tvSeries = tvResults.getResults().get(0);
+            System.out.println("Nombre: " + tvSeries.getName());
+            System.out.println("Resumen: " + tvSeries.getOverview());
+
+            TmdbTV series = tmdbApi.getTvSeries();
+            TvSeries show = series.getSeries(tvSeries.getId(), "es");
+            System.out.println("Number of seasons: " + show.getNumberOfSeasons());
+
+            System.out.println(show.getSeasons().get(0).getName());
+
+            TmdbTvSeasons tvSeasons = tmdbApi.getTvSeasons();
+            TvSeason season = tvSeasons.getSeason(tvSeries.getId(), 1, "es", TmdbTvSeasons.SeasonMethod.values());
+            System.out.println(season.getEpisodes().size());
+
+
+            MovieImages imageS = tmdbApi.getTvEpisodes().getEpisode(tvSeries.getId(), 0, 1, null).getImages();
+
+        } else {
+            System.out.println("No se encontró ninguna serie con el título proporcionado.");
+        }
+
+
+        String imageBaseURL = "https://image.tmdb.org/t/p/original";
+
+        //--> Serie --> Posters (en -> nl) --> Backgrounds (nl -> en) --> Temporadas --> Episodios --> Miniaturas (nl)
+
+
+        /*
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
         stage.setTitle(textBundle.getString("desktopMode"));
@@ -60,7 +130,7 @@ public class App extends Application {
         desktopViewController.initValues();
         primaryStage = stage;
         FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
-        stage.show();
+        stage.show();*/
     }
 
     public static boolean isRepeatedID(String uuid){
@@ -86,7 +156,7 @@ public class App extends Application {
     public static List<String> getLanguages(){
         List<String> langs = new ArrayList<>();
         for (Locale locale : languages){
-            langs.add(locale.getLanguage());
+            langs.add(locale.getDisplayLanguage());
         }
         return langs;
     }
@@ -208,14 +278,17 @@ public class App extends Application {
         return catList;
     }
 
-    public static void addCategory(String c, boolean showOnFullscreen){
-        categories.add(new Category(c, showOnFullscreen));
+    public static void addCategory(String n, String lang, String t, List<String> f, boolean s){
+        categories.add(new Category(n, lang, t, f, s));
     }
 
-    public static void editCategory(String c, boolean showOnFullscreen){
+    public static void editCategory(String c, String lang, String type, List<String> folders, boolean showOnFullscreen){
         for (Category cat : categories){
             if (cat.name.equals(c)){
                 cat.name = c;
+                cat.language = lang;
+                cat.type = type;
+                cat.folders = folders;
                 cat.showOnFullscreen = showOnFullscreen;
             }
         }
@@ -253,13 +326,12 @@ public class App extends Application {
         series.put(col.id, col);
     }
 
-    public static void addSeason(Season season, String seriesName){
+    public static void addSeason(Season season, String seriesId){
         seasons.put(season.id, season);
 
-        for (Series s : series.values()){
-            if (s.getName().equals(seriesName))
-                s.addSeason(season);
-        }
+        Series s = series.get(seriesId);
+        if (s != null)
+            s.addSeason(season);
     }
 
     public static void addDisc(Disc d){

@@ -11,10 +11,30 @@
     -fx-main-color: #960F20;
     -fx-light-color: #EDF2F4;
     -fx-dark-color: #0E0F19;
-    -fx-dark-grey-color: #24252E;
-    -fx-grey-color: #383941;
-    -fx-light-grey-color: #4A4B52;
-    -fx-lighter-grey-color: #5A5B62;
+    -fx-dark-grey-color: #222222;
+    -fx-grey-color: #282828;
+    -fx-light-grey-color: #323232;
+    -fx-lighter-grey-color: #5e5e5e;
+}
+
+.borderSectionsColor{
+    -fx-background-color: -fx-light-grey-color;
+}
+
+.midSectionDarkColor{
+    -fx-background-color: -fx-dark-grey-color;
+}
+
+.midSectionLightColor{
+    -fx-background-color: -fx-grey-color;
+}
+
+.selectionLightColor{
+    -fx-background-color: -fx-lighter-grey-color;
+}
+
+.textFieldColor{
+    -fx-background-color: -fx-lighter-grey-color;
 }
 
 .transparent{
@@ -45,13 +65,22 @@
     -fx-background-color: -fx-main-color;
 }
 
+.editButton{
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.editButton:hover{
+    -fx-background-color: -fx-lighter-grey-color;
+}
+
+.buttonSelected{
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-main-color;
+}
 
 .selected{
     -fx-background-color: #b8b8b8;
-}
-
-.roundButton{
-    
 }
 
 .translucentBackground{
@@ -91,7 +120,7 @@
 }
 
 .selectionOptions{
-    -fx-background-color: rgba(0, 0, 0, 0.58);
+    -fx-background-color: -fx-dark-color;
     -fx-border-width: 1px;
     -fx-border-color: -fx-main-color;
     -fx-border-radius: 5px;
@@ -155,13 +184,6 @@
     -fx-background-color: -fx-lighter-grey-color;
     -fx-text-fill: white;
     -fx-font-size: 18px;
-}
-
-.desktopButtonActive{
-    -fx-background-color: -fx-main-color;
-    -fx-text-fill: white;
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
 }
 
 .seasonButton{
@@ -333,19 +355,35 @@
     -fx-border-radius: 4, 3, 2;
 }
 
+.folderContainer{
+    -fx-background-color: -fx-lighter-grey-color;
+    -fx-background-radius: 5px;
+}
+
+.folderRemove{
+    -fx-background-color: transparent;
+}
+
+.folderRemove:hover{
+    -fx-background-color: -fx-grey-color;
+}
+
 .desktopButton{
-    -fx-background-color: #0e0e0e;
+    -fx-background-color: -fx-lighter-grey-color;
     -fx-background-radius: 4 3 2;
 }
 
 .desktopButton:hover{
-    -fx-background-color: #5b5b5b;
+    -fx-background-color: #737373;
 }
-/*
-.desktopButton{
-    -fx-background-color: #5b5b5b;
+
+.desktopButtonActive{
+    -fx-background-color: -fx-main-color;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
 }
-*/
+
 .borderLines{
     -fx-border-color: #A9A9A9FF;
     -fx-border-width: 0 0 0 0.5;

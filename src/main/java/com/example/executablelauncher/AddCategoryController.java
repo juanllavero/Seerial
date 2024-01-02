@@ -1,22 +1,67 @@
 package com.example.executablelauncher;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 public class AddCategoryController {
+    @FXML
+    private Button addFolderButton;
+
     @FXML
     private Button cancelButton;
 
     @FXML
-    private Label categoryError;
+    private Button generalViewButton;
 
     @FXML
-    private TextField categoryField;
+    private Button foldersViewButton;
+
+    @FXML
+    private Button concetsTypeButton;
+
+    @FXML
+    private ScrollPane folderBox;
+
+    @FXML
+    private VBox folderContainer;
+
+    @FXML
+    private Label folderText;
+
+    @FXML
+    private VBox generalBox;
+
+    @FXML
+    private ChoiceBox<String> languageChoice;
+
+    @FXML
+    private Label languageText;
+
+    @FXML
+    private Button moviesTypeButton;
+
+    @FXML
+    private TextField nameField;
+
+    @FXML
+    private Label nameText;
 
     @FXML
     private Button saveButton;
@@ -25,67 +70,211 @@ public class AddCategoryController {
     private CheckBox showOnFullscreen;
 
     @FXML
-    private Label textFieldTitle;
+    private Button showsTypeButton;
 
     @FXML
     private Label title;
 
+    @FXML
+    private Label typeText;
+
     private DesktopViewController parentController;
     private boolean toEdit = false;
-    private String catName;
+    private String catName = "";
+    private String type = "";
+    private List<String> folders = new ArrayList<>();
+    private boolean inGeneralView = true;
 
     @FXML
-    void cancelButton(MouseEvent event) {
+    void cancelButton(ActionEvent event) {
         parentController.hideBackgroundShadow();
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
         stage.close();
     }
 
-    public void setValues(String catName, boolean showFS){
-        title.setText(App.textBundle.getString("categoryWindowTitleEdit"));
-        categoryField.setText(catName);
-        showOnFullscreen.setSelected(showFS);
-        toEdit = true;
-        this.catName = catName;
-
-        saveButton.setText(App.buttonsBundle.getString("saveButton"));
-        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
-    }
-
     public void initValues(){
         title.setText(App.textBundle.getString("categoryWindowTitle"));
-        showOnFullscreen.setSelected(false);
+        generalBox.setVisible(true);
+        folderBox.setVisible(false);
+        showOnFullscreen.setSelected(true);
         toEdit = false;
-        saveButton.setText(App.buttonsBundle.getString("saveButton"));
+        saveButton.setText(App.buttonsBundle.getString("next"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
+
+        languageChoice.getItems().addAll(App.getLanguages());
+        languageChoice.setValue(App.globalLanguage.getDisplayLanguage());
+
+        setMoviesType();
+        showGeneralView();
+    }
+
+    public void setValues(String catName, String lang, String type, List<String> folders, boolean showFS){
+        title.setText(App.textBundle.getString("categoryWindowTitleEdit"));
+        nameText.setText(catName);
+        showOnFullscreen.setSelected(showFS);
+        generalBox.setVisible(true);
+        folderBox.setVisible(false);
+        toEdit = true;
+        this.type = type;
+        this.catName = catName;
+        this.folders = folders;
+        languageChoice.getItems().addAll(App.getLanguages());
+        Locale locale = Locale.forLanguageTag(lang);
+        languageChoice.setValue(locale.getDisplayLanguage());
+
+        saveButton.setText(App.buttonsBundle.getString("next"));
+        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
+        showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
+
+        if (type.equals("Movies")){
+            setMoviesType();
+            showsTypeButton.setDisable(true);
+            concetsTypeButton.setDisable(true);
+        }else if (type.equals("Shows")){
+            setShowsType();
+            moviesTypeButton.setDisable(true);
+            concetsTypeButton.setDisable(true);
+        }else{
+            setConcetsType();
+            moviesTypeButton.setDisable(true);
+            showsTypeButton.setDisable(true);
+        }
+
+        showGeneralView();
     }
 
     @FXML
-    void save(MouseEvent event) {
-        if (toEdit){
-            if (!catName.equals(categoryField.getText()) && App.categoryExist(categoryField.getText())) {
-                categoryError.setText(App.textBundle.getString("categoryExists"));
-            }else if (categoryField.getText().isEmpty()){
-                categoryError.setText(App.textBundle.getString("emptyField"));
-            }else{
-                App.editCategory(categoryField.getText(), showOnFullscreen.isSelected());
-                parentController.updateCategories();
-                parentController.hideBackgroundShadow();
-                cancelButton(event);
-            }
+    void nextOrSave(ActionEvent event) {
+        if (inGeneralView){
+            showFoldersView();
         }else{
-            if (App.categoryExist(categoryField.getText())){
-                categoryError.setText(App.textBundle.getString("categoryExists"));
-            }else if (categoryField.getText().isEmpty()){
-                categoryError.setText(App.textBundle.getString("emptyField"));
-            }else{
-                App.addCategory(categoryField.getText(), showOnFullscreen.isSelected());
-                parentController.updateCategories();
-                parentController.hideBackgroundShadow();
-                cancelButton(event);
+            if (folders.isEmpty()){
+                App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("foldersEmpty"));
+                return;
             }
+
+            if (nameField.getText().isEmpty()) {
+                App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("emptyName"));
+                return;
+            }
+
+            if ((!catName.equals(nameField.getText()) && App.categoryExist(nameField.getText())) || App.categoryExist(nameField.getText())){
+                App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("categoryExists"));
+                return;
+            }
+
+            if (toEdit)
+                App.editCategory(nameField.getText(), Locale.forLanguageTag(languageChoice.getValue()).getLanguage(), type, folders, showOnFullscreen.isSelected());
+            else
+                App.addCategory(nameField.getText(), Locale.forLanguageTag(languageChoice.getValue()).getLanguage(), type, folders, showOnFullscreen.isSelected());
+
+            parentController.loadCategory(nameField.getText());
+            parentController.hideBackgroundShadow();
+            cancelButton(event);
         }
+    }
+
+    @FXML
+    void setMoviesType() {
+        type = "Movies";
+        clearTypeSelection();
+        moviesTypeButton.getStyleClass().clear();
+        moviesTypeButton.getStyleClass().add("buttonSelected");
+    }
+
+    @FXML
+    void setShowsType() {
+        type = "Shows";
+        clearTypeSelection();
+        showsTypeButton.getStyleClass().clear();
+        showsTypeButton.getStyleClass().add("buttonSelected");
+    }
+
+    @FXML
+    void setConcetsType() {
+        type = "Concerts";
+        clearTypeSelection();
+        concetsTypeButton.getStyleClass().clear();
+        concetsTypeButton.getStyleClass().add("buttonSelected");
+    }
+
+    private void clearTypeSelection(){
+        moviesTypeButton.getStyleClass().clear();
+        moviesTypeButton.getStyleClass().add("editButton");
+        showsTypeButton.getStyleClass().clear();
+        showsTypeButton.getStyleClass().add("editButton");
+        concetsTypeButton.getStyleClass().clear();
+        concetsTypeButton.getStyleClass().add("editButton");
+    }
+
+    @FXML
+    void showFoldersView() {
+        saveButton.setText(App.buttonsBundle.getString("saveButton"));
+        generalBox.setVisible(false);
+        folderBox.setVisible(true);
+        inGeneralView = false;
+
+        foldersViewButton.getStyleClass().clear();
+        foldersViewButton.getStyleClass().add("buttonSelected");
+
+        generalViewButton.getStyleClass().clear();
+        generalViewButton.getStyleClass().add("editButton");
+
+        for (String folder : folders){
+            showFolder(folder);
+        }
+    }
+
+    @FXML
+    void showGeneralView() {
+        saveButton.setText(App.buttonsBundle.getString("next"));
+        folderBox.setVisible(false);
+        generalBox.setVisible(true);
+        inGeneralView = true;
+
+        generalViewButton.getStyleClass().clear();
+        generalViewButton.getStyleClass().add("buttonSelected");
+
+        foldersViewButton.getStyleClass().clear();
+        foldersViewButton.getStyleClass().add("editButton");
+    }
+
+    @FXML
+    void addFolder(ActionEvent event){
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        File folder = directoryChooser.showDialog(((Button) event.getSource()).getScene().getWindow());
+        if (folder != null) {
+            folders.add(folder.getAbsolutePath());
+            showFolder(folder.getAbsolutePath());
+        }
+    }
+
+    private void showFolder(String folder){
+        BorderPane folderPane = new BorderPane();
+        folderPane.getStyleClass().add("folderContainer");
+        folderPane.setPadding(new Insets(2));
+        Label folderSrc = new Label(folder);
+        folderSrc.setTextAlignment(TextAlignment.CENTER);
+        folderSrc.setAlignment(Pos.CENTER);
+        folderSrc.setTextFill(Color.WHITE);
+        Image img = new Image("file:src/main/resources/img/icons/close.png");
+        ImageView image = new ImageView(img);
+        image.setFitWidth(20);
+        image.setFitHeight(20);
+
+        Button btn = new Button();
+        btn.setGraphic(image);
+        btn.getStyleClass().add("folderRemove");
+        btn.setOnMouseClicked(event -> {
+            folders.remove(folderSrc.getText());
+            folderContainer.getChildren().remove(folderPane);
+        });
+
+        folderPane.setLeft(folderSrc);
+        folderPane.setRight(btn);
+
+        folderContainer.getChildren().add(folderPane);
     }
 
     public void setParent(DesktopViewController desktopViewController) {

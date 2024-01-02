@@ -16,6 +16,8 @@ module com.example.executablelauncher {
     requires com.sun.jna;
     requires thetvdb.java.api;
     requires thumbnailator;
+    requires info.movito.themoviedbapi;
+    requires org.slf4j;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

@@ -1,6 +1,12 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.*;
+import info.movito.themoviedbapi.*;
+import info.movito.themoviedbapi.model.Artwork;
+import info.movito.themoviedbapi.model.MovieImages;
+import info.movito.themoviedbapi.model.tv.TvEpisode;
+import info.movito.themoviedbapi.model.tv.TvSeason;
+import info.movito.themoviedbapi.model.tv.TvSeries;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -50,6 +56,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -238,7 +245,7 @@ public class DesktopViewController {
     private Season selectedSeason = null;
     private List<Disc> selectedDiscs = new ArrayList<>();
     private List<DiscController> discControllers = new ArrayList<>();
-    private String currentCategory = "";
+    private Category currentCategory;
     private double xOffset = 0;
     private double yOffset = 0;
     private double ASPECT_RATIO = 16.0 / 9.0;
@@ -251,6 +258,9 @@ public class DesktopViewController {
     private File selectedFolder = null;
     private String text = "";
     private String typeValue = "";
+    TmdbApi tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
+    TmdbTV seriesMetadata;                                                              //Saves all series from TheMovieDB
+    TmdbMovies moviesMetadata;                                                          //Saves all movies from TheMovieDB
     //endregion
 
     public void initValues(){
@@ -652,7 +662,7 @@ public class DesktopViewController {
     //region SELECTION
     public void selectCategory(String category){
         seriesContainer.getChildren().clear();
-        currentCategory = category;
+        currentCategory = App.findCategory(category);
         seriesList = App.getSeriesFromCategory(category);
         showSeries();
     }
@@ -842,9 +852,305 @@ public class DesktopViewController {
     //endregion
 
     //region ADD SECTION
+    public void loadCategory(String name){
+        categorySelector.getItems().add(name);
+        categorySelector.setValue(name);
+
+        currentCategory = App.findCategory(name);
+
+        if (currentCategory == null)
+            return;
+
+        if (currentCategory.type.equals("Shows"))
+            seriesMetadata = tmdbApi.getTvSeries();
+        else
+            moviesMetadata = tmdbApi.getMovies();
+
+        List<String> folders = currentCategory.folders;
+        for (String folderSrc : folders){
+            File folder = new File(folderSrc);
+
+            if (!folder.exists())
+                continue;
+
+            File[] files = folder.listFiles();
+
+            if (files == null)
+                continue;
+
+            for (File f : files){
+                if (currentCategory.type.equals("Shows"))
+                    addTVShow(f);
+                else
+                    addMovieOrConcert(f);
+            }
+        }
+    }
+    private void addTVShow(File directory){
+        if (directory.isFile())
+            return;
+
+        File[] filesInDir = directory.listFiles();
+        if (filesInDir == null)
+            return;
+
+        //CREATE SERIES
+        Series newSeries = searchFirstSeries(directory.getName());
+
+        boolean seriesNotFound = false;
+        List<TvSeason> seasonsList = new ArrayList<>();
+
+        //region CREATE SEASONS
+        if (newSeries.themdbID == -1){
+            seriesNotFound = true;
+            Season newSeason = new Season();
+            newSeason.name = directory.getName();
+            newSeason.collectionName = newSeries.name;
+            App.addSeason(newSeason, newSeries.id);
+        }else{
+            for (int i = 0; i <= newSeries.seasonsNumber; i++){
+                TmdbTvSeasons tvSeasons = tmdbApi.getTvSeasons();
+                TvSeason season = tvSeasons.getSeason(newSeries.themdbID, i, currentCategory.language, TmdbTvSeasons.SeasonMethod.values());
+
+                if (season == null)
+                    continue;
+
+                seasonsList.add(season);
+                Season newSeason = new Season();
+                newSeason.name = season.getName();
+                newSeason.collectionName = newSeries.name;
+
+                newSeason.order = i;
+
+                if (i == 0)
+                    newSeason.order = newSeries.seasonsNumber + 1;
+
+                App.addSeason(newSeason, newSeries.id);
+            }
+        }
+        //endregion
+
+        //Process background images
+        if (!seriesNotFound){
+            Task<Void> imageProcessing = new Task<>() {
+                @Override
+                protected Void call() {
+
+                    for (String seasonID : newSeries.getSeasons()){
+                        Season season = App.findSeason(seasonID);
+                        AddSeasonController controller = new AddSeasonController();
+                        controller.setCollection(newSeries);
+                        controller.setSeason(season);
+                        controller.loadBackground("src/main/resources/img/DownloadCache/" + seasonID + ".png");
+                        controller.saveBackground(season);
+                    }
+                    return null;
+                }
+            };
+
+            new Thread(imageProcessing).start();
+        }
+
+        List<File> folders = new ArrayList<>();
+
+        //Files in root directory of the Show
+        List<File> filesInRoot = new ArrayList<>();
+        for (File file : filesInDir){
+            if (file.isDirectory())
+                folders.add(file);
+            else
+                filesInRoot.add(file);
+        }
+
+        final String regexSeason = "(?i)(?<season>S[0-9]{1,3})";
+        final Pattern pattern = Pattern.compile(regexSeason, Pattern.MULTILINE);
+
+        for (File file : folders){
+            final Matcher matcher = pattern.matcher(file.getName());
+
+            if (!matcher.find())
+                continue;
+
+            File[] episodeFiles = file.listFiles();
+
+            if (episodeFiles == null)
+                continue;
+
+            for (File episodeFile : episodeFiles){
+                if (episodeFile.isFile() && validVideoFile(episodeFile))
+                        processEpisode(newSeries, episodeFile, seasonsList);
+            }
+        }
+
+        for (File file : filesInRoot){
+            if (validVideoFile(file))
+                processEpisode(newSeries, file, seasonsList);
+        }
+    }
+    private boolean validVideoFile(File file){
+        String videoExtension = file.getName().substring(file.getName().length() - 4);
+        videoExtension = videoExtension.toLowerCase();
+
+        return videoExtension.equals(".mkv") || videoExtension.equals(".mp4") || videoExtension.equals(".avi") || videoExtension.equals(".mov")
+                || videoExtension.equals(".wmv") || videoExtension.equals("mpeg") || videoExtension.equals("m2ts") || videoExtension.equals(".iso");
+    }
+    private void processEpisode(Series series, File file, List<TvSeason> seasonsMetadata){
+        Disc newDisc = new Disc();
+
+        String fullName = file.getName().substring(0, file.getName().lastIndexOf("."));
+        String extension = file.getName().substring(file.getName().length() - 3);
+
+        if (extension.equals("iso")){
+            newDisc.name = fullName;
+            newDisc.seasonID = series.getSeasons().get(0);
+            newDisc.executableSrc = file.getAbsolutePath();
+            newDisc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+            return;
+        }
+
+        final String regexSeasonEpisode = "(?i)(?<season>S[0-9]{1,3}+)(?<episode>E[0-9]{1,4})";
+        final String regexOnlyEpisode = "(?i)(?<episode>[0-9]{1,4})";
+
+        final Pattern pattern = Pattern.compile(regexSeasonEpisode, Pattern.MULTILINE);
+        final Matcher matcher = pattern.matcher(fullName);
+
+        if (!matcher.find()){
+            Pattern newPattern = Pattern.compile(regexOnlyEpisode, Pattern.MULTILINE);
+            Matcher newMatch = newPattern.matcher(fullName);
+
+            if (newMatch.find()){
+
+                int absoluteNumber = Integer.parseInt(newMatch.group("episode"));
+                int j = 0;
+                int k = 0;
+                for (int i = 0; i < absoluteNumber; i++){
+                    if (k == seasonsMetadata.get(j).getEpisodes().size() - 1){
+                        j++;
+                        k = 0;
+                    }else{
+                        k++;
+                    }
+                }
+
+                TvEpisode episode = seasonsMetadata.get(j).getEpisodes().get(k);
+
+                setEpisodeData(newDisc, Integer.toString(j), Integer.toString(k), episode);
+                newDisc.setEpisodeNumber(newMatch.group("episode"));
+            }else{
+                newDisc.setName(fullName);
+                newDisc.setEpisodeNumber("");
+            }
+        }else{
+            TvEpisode episode = seasonsMetadata.get(Integer.parseInt(matcher.group("season").substring(1))).getEpisodes().get(Integer.parseInt(matcher.group("episode").substring(1)));
+            setEpisodeData(newDisc, matcher.group("season").substring(1), matcher.group("episode").substring(1), episode);
+            newDisc.setEpisodeNumber(matcher.group("episode").substring(1));
+        }
+
+        newDisc.setExecutableSrc(file.getAbsolutePath());
+        newDisc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+
+        App.addDisc(newDisc);
+    }
+    private void setEpisodeData(Disc disc, String season, String episode, TvEpisode episodeMetadata){
+            asdasfasdf
+    }
+    private Series searchFirstSeries(String seriesName){
+        Series newSeries = new Series();
+
+        TvResultsPage tvResults = tmdbApi.getSearch().searchTv(seriesName, 1, currentCategory.language, true, 1);
+
+        if (tvResults.getTotalResults() > 0) {
+            TvSeries tvSeries = tvResults.getResults().get(0);
+            newSeries.name = tvSeries.getName();
+            newSeries.resume = tvSeries.getOverview();
+            newSeries.themdbID = tvSeries.getId();
+
+            TvSeries show = seriesMetadata.getSeries(tvSeries.getId(), "es");
+            newSeries.seasonsNumber = show.getNumberOfSeasons();
+            //region SAVE IMAGES
+            //Save posters and background images
+            MovieImages images = seriesMetadata.getImages(tvSeries.getId(), null);
+            if (images != null){
+                List<Artwork> covers = images.getPosters();
+                for (Artwork cover : covers){
+                    //Guardar imagen y añadir a serie
+                    asdasd
+                }
+
+                List<Artwork> backgrounds = images.getBackdrops();
+                if (!backgrounds.isEmpty()){
+                    Artwork background = backgrounds.get(0);
+                    //Guardar imagen y añadir a serie
+                }
+            }
+
+            //Save english posters
+            images = seriesMetadata.getImages(tvSeries.getId(), "en");
+            if (images != null){
+                List<Artwork> covers = images.getPosters();
+                for (Artwork cover : covers){
+                    //Guardar imagen y añadir a serie
+                }
+            }
+            //endregion
+
+            return newSeries;
+        } else {
+            System.err.println("DesktopViewController: No shows found for name" + seriesName);
+        }
+
+        newSeries.name = seriesName;
+        return newSeries;
+    }
+    private void addMovieOrConcert(File f){
+        String seriesName;
+        String seasonName;
+        if (!f.isDirectory()){
+            seriesName = f.getName();
+            seasonName = f.getName();
+            processMovieOrConcert(f, seriesName, seasonName);
+        }else {
+            File[] filesInDir = f.listFiles();
+            if (filesInDir == null)
+                return;
+
+            seriesName = f.getName();
+            List<File> folders = new ArrayList<>();
+            List<File> filesInRoot = new ArrayList<>();
+            for (File file : filesInDir){
+                if (file.isDirectory())
+                    folders.add(file);
+                else
+                    filesInRoot.add(file);
+            }
+
+            if (!folders.isEmpty()){
+                for (File folder : folders){
+                    File[] filesInFolder = folder.listFiles();
+                    if (filesInFolder == null)
+                        continue;
+
+                    seasonName = folder.getName();
+                    for (File file : filesInFolder){
+                        processMovieOrConcert(file, seriesName, seasonName);
+                    }
+                }
+            }else if (!filesInRoot.isEmpty()){
+                seasonName = f.getName();
+
+                for (File file : filesInRoot){
+                    if (file.isFile())
+                        processMovieOrConcert(file, seriesName, seasonName);
+                }
+            }
+        }
+    }
+    private void processMovieOrConcert(File file, String seriesName, String seasonName){
+
+    }
     public void addSeries(Series s){
         seriesList.add(s);
-        selectCategory(currentCategory);
+        selectCategory(currentCategory.name);
     }
     @FXML
     void addCategory(MouseEvent event) {
@@ -1209,18 +1515,14 @@ public class DesktopViewController {
     //region EDIT SECTION
     @FXML
     void editCategory(MouseEvent event) {
-        if (currentCategory.equals("NO CATEGORY"))
-            return;
-
-        Category cat = App.findCategory(currentCategory);
-        if (cat != null){
+        if (currentCategory != null){
             showBackgroundShadow();
             try{
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCategory-view.fxml"));
                 Parent root1 = fxmlLoader.load();
                 AddCategoryController addCategoryController = fxmlLoader.getController();
                 addCategoryController.setParent(this);
-                addCategoryController.setValues(cat.name, cat.showOnFullscreen);
+                addCategoryController.setValues(currentCategory.name, currentCategory.language, currentCategory.type, currentCategory.folders, currentCategory.showOnFullscreen);
                 Stage stage = new Stage();
                 stage.setTitle("Edit Category");
                 stage.initStyle(StageStyle.UNDECORATED);
@@ -1309,7 +1611,7 @@ public class DesktopViewController {
     //region REMOVE SECTION
     @FXML
     void removeCategory(MouseEvent event) {
-        App.removeCategory(currentCategory);
+        App.removeCategory(currentCategory.name);
         updateCategories();
     }
     @FXML
