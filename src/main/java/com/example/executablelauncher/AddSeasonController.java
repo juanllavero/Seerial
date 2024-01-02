@@ -587,7 +587,7 @@ public class AddSeasonController {
         stage.close();
     }
 
-    private void saveBackground(Season s){
+    public void saveBackground(Season s){
         if (selectedBackground != null){
             //Clear old images
             try{

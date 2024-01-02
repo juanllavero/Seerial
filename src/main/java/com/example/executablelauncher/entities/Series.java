@@ -11,12 +11,15 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Series implements Serializable {
     public final String id;
     public long thetvdbID = 0;
+    public int themdbID = -1;
     public String name = "";
+    public String resume = "";
     public String category = "";
     public int order = 0;
     public String coverSrc = "";
     public boolean playSameMusic = false;
     public List<String> seasons = new ArrayList<>();
+    public int seasonsNumber = 0;
 
     public Series() {
         String uuid = UUID.randomUUID().toString();
@@ -50,7 +53,7 @@ public class Series implements Serializable {
     }
 
     public void addSeason(Season season) {
-        this.seasons.add(season.getId());
+        this.seasons.add(season.id);
     }
 
     public void removeSeason(String id){

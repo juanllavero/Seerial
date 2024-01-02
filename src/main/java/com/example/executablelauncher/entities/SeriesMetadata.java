@@ -2,6 +2,7 @@ package com.example.executablelauncher.entities;
 
 public class SeriesMetadata {
     public String name = "";
+    public String resume = "";
     public String year = "";
     public String id;
 

@@ -290,7 +290,7 @@ public class AddCollectionController {
                 File f = new File(series.getCoverSrc());
                 if (f.exists())
                     Files.delete(FileSystems.getDefault().getPath(series.getCoverSrc()));
-                File newCover = new File("src/main/resources/img/seriesCovers/"+ series.getId() + "_cover.png");
+                File newCover = new File("src/main/resources/img/seriesCovers/" + series.getId() + "_cover.png");
                 try{
                     Files.copy(selectedFile.toPath(), newCover.toPath(), REPLACE_EXISTING);
                 }catch (IOException e){
