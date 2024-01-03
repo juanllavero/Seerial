@@ -45,6 +45,7 @@ build/
 ## Local images, audio and video files ###
 /src/main/resources/img/backgrounds/
 /src/main/resources/img/discCovers/
+/src/main/resources/img/DownloadCache/
 /src/main/resources/img/logos/
 /src/main/resources/img/seriesCovers/
 /src/main/resources/music/
