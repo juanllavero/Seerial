@@ -161,7 +161,7 @@
                                     <HBox fx:id="seasonContainer" />
                                     <FlowPane fx:id="discContainer" hgap="20.0" prefWrapLength="375.0" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS">
                                        <VBox.margin>
-                                          <Insets />
+                                          <Insets top="20.0" />
                                        </VBox.margin>
                                     </FlowPane>
                                  </children>

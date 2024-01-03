@@ -102,8 +102,12 @@ public class AddCategoryController {
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
 
-        languageChoice.getItems().addAll(App.getLanguages());
-        languageChoice.setValue(App.globalLanguage.getDisplayLanguage());
+        List<Locale> languages = App.tmdbLanguages;
+        for (Locale locale : languages){
+            languageChoice.getItems().add(locale.getDisplayName());
+        }
+
+        languageChoice.setValue(languageChoice.getItems().get(0));
 
         setMoviesType();
         showGeneralView();
@@ -119,9 +123,14 @@ public class AddCategoryController {
         this.type = type;
         this.catName = catName;
         this.folders = folders;
-        languageChoice.getItems().addAll(App.getLanguages());
+
+        List<Locale> languages = App.tmdbLanguages;
+        for (Locale locale : languages){
+            languageChoice.getItems().add(locale.getDisplayName());
+        }
+
         Locale locale = Locale.forLanguageTag(lang);
-        languageChoice.setValue(locale.getDisplayLanguage());
+        languageChoice.setValue(locale.getDisplayName());
 
         saveButton.setText(App.buttonsBundle.getString("next"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
@@ -164,10 +173,18 @@ public class AddCategoryController {
                 return;
             }
 
+            String language = "es-ES";
+            List<Locale> languages = App.tmdbLanguages;
+            for (Locale locale : languages){
+                if (locale.getDisplayName().equals(languageChoice.getValue())){
+                    language = locale.toString();
+                }
+            }
+
             if (toEdit)
-                App.editCategory(nameField.getText(), Locale.forLanguageTag(languageChoice.getValue()).getLanguage(), type, folders, showOnFullscreen.isSelected());
+                App.editCategory(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
             else
-                App.addCategory(nameField.getText(), Locale.forLanguageTag(languageChoice.getValue()).getLanguage(), type, folders, showOnFullscreen.isSelected());
+                App.addCategory(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
 
             parentController.loadCategory(nameField.getText());
             parentController.hideBackgroundShadow();

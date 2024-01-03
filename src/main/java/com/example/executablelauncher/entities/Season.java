@@ -16,9 +16,9 @@ public class Season implements Serializable {
     public String videoSrc = "";
     public String musicSrc = "";
     public String collectionName = "";
-    public String fullScreenBlurImageSrc = "";
-    public String desktopBackgroundEffect = "";
     public int order = 0;
+    public int themdbID = -1;
+    public String resume = "";
     public boolean showName = true;
     public final List<String> discs = new ArrayList<>();
 
@@ -111,21 +111,5 @@ public class Season implements Serializable {
 
     public void addDisc(Disc d){
         discs.add(d.getId());
-    }
-
-    public String getFullScreenBlurImageSrc() {
-        return fullScreenBlurImageSrc;
-    }
-
-    public void setFullScreenBlurImageSrc(String fullScreenBlurImageSrc) {
-        this.fullScreenBlurImageSrc = fullScreenBlurImageSrc;
-    }
-
-    public String getDesktopBackgroundEffect() {
-        return desktopBackgroundEffect;
-    }
-
-    public void setDesktopBackgroundEffect(String desktopBackgroundEffect) {
-        this.desktopBackgroundEffect = desktopBackgroundEffect;
     }
 }

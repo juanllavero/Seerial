@@ -41,8 +41,9 @@ public class MainMenuDesktopController {
         generalCatButton.setText(App.buttonsBundle.getString("generalButton"));
         languageText.setText(App.textBundle.getString("languageText"));
 
+        languageChoice.getItems().clear();
         languageChoice.getItems().addAll(App.getLanguages());
-        languageChoice.setValue(App.globalLanguage.getLanguage());
+        languageChoice.setValue(App.globalLanguage.getDisplayName());
     }
 
     @FXML

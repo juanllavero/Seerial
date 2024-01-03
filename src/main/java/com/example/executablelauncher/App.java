@@ -6,8 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import info.movito.themoviedbapi.*;
-import info.movito.themoviedbapi.model.Artwork;
-import info.movito.themoviedbapi.model.MovieImages;
+import info.movito.themoviedbapi.model.*;
 import info.movito.themoviedbapi.model.tv.TvEpisode;
 import info.movito.themoviedbapi.model.tv.TvSeason;
 import info.movito.themoviedbapi.model.tv.TvSeries;
@@ -16,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -23,7 +23,6 @@ import javafx.stage.Stage;
 import com.google.gson.Gson;
 import javafx.stage.StageStyle;
 import org.apache.commons.io.FileUtils;
-import info.movito.themoviedbapi.model.MovieDb;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 
 import java.io.*;
@@ -39,6 +38,7 @@ public class App extends Application {
     public static Map<String, Disc> discs = new HashMap<>();
     public static List<Category> categories = new ArrayList<>();
     public static List<Locale> languages = new ArrayList<>();
+    public static List<Locale> tmdbLanguages = new ArrayList<>();
     public static Locale globalLanguage;
     public static ResourceBundle buttonsBundle;
     public static ResourceBundle textBundle;
@@ -49,74 +49,23 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        languages.add(Locale.forLanguageTag("en"));
-        languages.add(Locale.forLanguageTag("es"));
-        globalLanguage = Locale.forLanguageTag("en");
+        languages.add(Locale.forLanguageTag("en-US"));
+        languages.add(Locale.forLanguageTag("es-ES"));
+        globalLanguage = Locale.forLanguageTag("en-US");
         buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
         LoadData();
 
+        //Set a few of TheMovieDB translations for metadata
+        tmdbLanguages = List.of(new Locale[]{
+                Locale.forLanguageTag("es-ES"),
+                Locale.forLanguageTag("es-MX"),
+                Locale.forLanguageTag("en-US"),
+                Locale.forLanguageTag("de-DE"),
+                Locale.forLanguageTag("it-IT"),
+                Locale.forLanguageTag("fr-FR")
+        });
 
-
-        TmdbApi tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
-
-        /*
-
-        // Título de la película que quieres buscar
-        String tituloBusqueda = "El Señor de los anillos: La comunidad del anillo";
-
-        // Realiza la búsqueda de películas por título
-        MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(tituloBusqueda, 1, "es", false, 0);
-
-        if (movieResults.getTotalResults() > 0) {
-            // Obtiene la primera película encontrada
-            MovieDb movie = movieResults.getResults().get(0);
-            System.out.println("Título: " + movie.getTitle());
-            System.out.println("Resumen: " + movie.getOverview());
-            // Otros campos disponibles en la clase MovieDb
-        } else {
-            System.out.println("No se encontró ninguna película con el título proporcionado.");
-        }
-
-        */
-
-
-        // Título de la serie que quieres buscar
-        String tituloBusquedaSerie = "Naruto Shippuden";
-
-        // Realiza la búsqueda de series por título
-        TvResultsPage tvResults = tmdbApi.getSearch().searchTv(tituloBusquedaSerie, 1, "es", true, 1);
-
-        if (tvResults.getTotalResults() > 0) {
-            // Obtiene la primera serie encontrada
-            TvSeries tvSeries = tvResults.getResults().get(0);
-            System.out.println("Nombre: " + tvSeries.getName());
-            System.out.println("Resumen: " + tvSeries.getOverview());
-
-            TmdbTV series = tmdbApi.getTvSeries();
-            TvSeries show = series.getSeries(tvSeries.getId(), "es");
-            System.out.println("Number of seasons: " + show.getNumberOfSeasons());
-
-            System.out.println(show.getSeasons().get(0).getName());
-
-            TmdbTvSeasons tvSeasons = tmdbApi.getTvSeasons();
-            TvSeason season = tvSeasons.getSeason(tvSeries.getId(), 1, "es", TmdbTvSeasons.SeasonMethod.values());
-            System.out.println(season.getEpisodes().size());
-
-
-            MovieImages imageS = tmdbApi.getTvEpisodes().getEpisode(tvSeries.getId(), 0, 1, null).getImages();
-
-        } else {
-            System.out.println("No se encontró ninguna serie con el título proporcionado.");
-        }
-
-
-        String imageBaseURL = "https://image.tmdb.org/t/p/original";
-
-        //--> Serie --> Posters (en -> nl) --> Backgrounds (nl -> en) --> Temporadas --> Episodios --> Miniaturas (nl)
-
-
-        /*
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
         stage.setTitle(textBundle.getString("desktopMode"));
@@ -130,7 +79,7 @@ public class App extends Application {
         desktopViewController.initValues();
         primaryStage = stage;
         FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
-        stage.show();*/
+        stage.show();
     }
 
     public static boolean isRepeatedID(String uuid){
@@ -156,7 +105,7 @@ public class App extends Application {
     public static List<String> getLanguages(){
         List<String> langs = new ArrayList<>();
         for (Locale locale : languages){
-            langs.add(locale.getDisplayLanguage());
+            langs.add(locale.getDisplayName());
         }
         return langs;
     }
@@ -234,7 +183,14 @@ public class App extends Application {
     }
 
     public static void changeLanguage(String lang){
-        globalLanguage = Locale.forLanguageTag(lang);
+
+        for (Locale language : languages){
+            if (language.getDisplayName().equals(lang)){
+                globalLanguage = language;
+                break;
+            }
+        }
+
         buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
     }
@@ -249,11 +205,13 @@ public class App extends Application {
     }
 
     public static List<Series> getSeriesFromCategory(String cat){
+        Category category = findCategory(cat);
+        if (category == null)
+            return null;
+
         List<Series> seriesList = new ArrayList<>();
-        for (Series s : series.values()){
-            if (s != null && s.getCategory().toUpperCase().equals(cat)){
-                seriesList.add(s);
-            }
+        for(String seriesID : category.series){
+            seriesList.add(findSeries(seriesID));
         }
 
         seriesList.sort(new Utils.SeriesComparator());
@@ -295,15 +253,27 @@ public class App extends Application {
     }
 
     public static void removeCategory(String name){
-        if (!name.equals("NO CATEGORY")){
-            categories.removeIf(cat -> cat.name.equals(name));
+        Category category = null;
 
-            for (Series s : series.values()){
-                if (s.getCategory().toUpperCase().equals(name)){
-                    s.setCategory("NO CATEGORY");
-                }
+        for (Category cat : categories){
+            if (cat.name.equals(name)){
+                category = cat;
+                break;
             }
         }
+
+        if (category == null)
+            return;
+
+        for (String seriesID : category.series){
+            try{
+                removeCollection(App.findSeries(seriesID));
+            } catch (IOException e) {
+                System.err.println("removeCategory error");
+            }
+        }
+
+        categories.remove(category);
     }
 
     public static Category findCategory(String name){
@@ -340,12 +310,8 @@ public class App extends Application {
         Objects.requireNonNull(findSeason(d.getSeasonID())).setDisc(d);
     }
 
-    public static Series findSeries(Series s){
-        for (Series i : series.values()){
-            if (i.getName().equals(s.getName()))
-                return i;
-        }
-        return null;
+    public static Series findSeries(String id){
+        return series.get(id);
     }
 
     public static Season findSeason(String id){
@@ -357,8 +323,12 @@ public class App extends Application {
     }
 
     public static void removeCollection(Series col) throws IOException {
-        Series s = findSeries(col);
+        Series s = findSeries(col.id);
         assert s != null;
+
+        for (String seasonID : col.seasons){
+            removeSeason(seasonID);
+        }
 
         Files.delete(FileSystems.getDefault().getPath(s.getCoverSrc()));
         s.clearSeasons();
@@ -371,7 +341,7 @@ public class App extends Application {
         assert s != null;
 
         try{
-            Files.delete(FileSystems.getDefault().getPath(s.getBackgroundSrc()));
+            FileUtils.deleteDirectory(new File("src/main/resources/img/backgrounds/" + id + "/"));
             if (!s.getLogoSrc().isEmpty())
                 Files.delete(FileSystems.getDefault().getPath(s.getLogoSrc()));
             if (!s.getMusicSrc().isEmpty())
@@ -384,7 +354,7 @@ public class App extends Application {
 
         List<String> dList = s.getDiscs();
         for (String i : dList){
-            discs.remove(i);
+            removeDisc(App.findDisc(i));
         }
 
         for (Series serie: series.values()){

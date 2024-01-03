@@ -337,11 +337,11 @@ public class AddCollectionController {
                                             Matcher newMatch = newPattern.matcher(fullName);
 
                                             if (newMatch.find()){
-                                                controllerParent.setEpisodeNameAndThumbnail(disc, "NO_SEASON", newMatch.group("episode"));
+                                                //controllerParent.setEpisodeNameAndThumbnail(disc, "NO_SEASON", newMatch.group("episode"));
                                                 disc.setEpisodeNumber(newMatch.group("episode"));
                                             }
                                         }else{
-                                            controllerParent.setEpisodeNameAndThumbnail(disc, matcher.group("season").substring(1), matcher.group("episode").substring(1));
+                                            //controllerParent.setEpisodeNameAndThumbnail(disc, matcher.group("season").substring(1), matcher.group("episode").substring(1));
                                             disc.setEpisodeNumber(matcher.group("episode").substring(1));
                                         }
                                     }

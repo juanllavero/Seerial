@@ -235,7 +235,7 @@ public class AddDiscController {
                 controllerParent.updateDisc(discToEdit);
             }else{
                 typeValue = typeField.getValue();
-                controllerParent.addDiscSetValues(selectedFiles, selectedFolder, executableField.getText(), typeValue);
+                //controllerParent.addDiscSetValues(selectedFiles, selectedFolder, executableField.getText(), typeValue);
             }
 
             Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();

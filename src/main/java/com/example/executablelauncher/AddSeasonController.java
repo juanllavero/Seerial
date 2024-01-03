@@ -424,8 +424,6 @@ public class AddSeasonController {
         backgroundImageView.setImage(null);
         if (seasonToEdit != null){
             seasonToEdit.setBackgroundSrc("");
-            seasonToEdit.setDesktopBackgroundEffect("");
-            seasonToEdit.setFullScreenBlurImageSrc("");
         }
         oldBackgroundPath = "";
     }
@@ -509,7 +507,8 @@ public class AddSeasonController {
         if (!oldBackgroundPath.isEmpty())
             oldName = oldBackgroundPath.substring(oldBackgroundPath.lastIndexOf("/")+1);
         if (oldBackgroundPath.isEmpty() || !newName.equals(oldName) || croppedImage){
-            saveBackground(season);
+            if (selectedBackground != null)
+                parentController.saveBackground(season, seasonToEdit != null, selectedBackground.getAbsolutePath(), croppedImage);
         }
 
         //Save Logo
@@ -587,128 +586,6 @@ public class AddSeasonController {
         stage.close();
     }
 
-    public void saveBackground(Season s){
-        if (selectedBackground != null){
-            //Clear old images
-            try{
-                File f;
-                if (!croppedImage){
-                    f = new File(s.getBackgroundSrc());
-                    if (f.exists())
-                        Files.delete(f.toPath());
-                }
-                f = new File("src/main/resources/img/backgrounds/" + s.getId() + "_fullBlur.png");
-                if (f.exists())
-                    Files.delete(f.toPath());
-                f = new File("src/main/resources/img/backgrounds/" + s.getId() + "_transparencyEffect.png");
-                if (f.exists())
-                    Files.delete(f.toPath());
-                f = new File("src/main/resources/img/backgrounds/" + s.getId() + "_desktopBlur.png");
-                if (f.exists())
-                    Files.delete(f.toPath());
-            } catch (IOException e) {
-                System.err.println("AddSeasonController: Error removing old images");
-            }
-
-            File newBackground;
-            if (!croppedImage || seasonToEdit == null){
-                newBackground = new File("src/main/resources/img/backgrounds/" + s.getId() + "_sb.png");
-
-                try{
-                    Files.copy(selectedBackground.toPath(), newBackground.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }catch (IOException e){
-                    System.err.println("Background not copied");
-                }
-
-                s.setBackgroundSrc("src/main/resources/img/backgrounds/" + newBackground.getName());
-            }else{
-                newBackground = new File(seasonToEdit.getBackgroundSrc());
-            }
-
-            Image image = null;
-            try{
-                image = new Image(newBackground.toURI().toURL().toExternalForm());
-            } catch (MalformedURLException e) {
-                System.err.println("Background image not created");
-            }
-
-            ImageView backgroundBlur = new ImageView(image);
-            GaussianBlur blur = new GaussianBlur();
-            blur.setRadius(27);
-            backgroundBlur.setEffect(blur);
-
-            File backgroundFullscreenBlur = new File("src/main/resources/img/backgrounds/" + s.getId() + "_fullBlur.png");
-            BufferedImage bImageFull = SwingFXUtils.fromFXImage(backgroundBlur.snapshot(null, null), null);
-
-            try {
-                ImageIO.write(bImageFull, "png", backgroundFullscreenBlur);
-            } catch (IOException e) {
-                System.err.println("Blur image fullscreen error");
-            }
-
-            bImageFull.flush();
-
-            File file = new File(backgroundFullscreenBlur.getAbsolutePath());
-            try{
-                image = new Image(file.toURI().toURL().toExternalForm());
-            } catch (MalformedURLException e) {
-                System.err.println("Background image creation error");
-            }
-            assert image != null;
-            PixelReader reader = image.getPixelReader();
-            WritableImage newImage = new WritableImage(reader
-                    , (int) (image.getWidth() * 0.03), (int) (image.getHeight() * 0.05)
-                    , (int) (image.getWidth() * 0.93), (int) (image.getHeight() * 0.9));
-
-            try{
-                RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
-                ImageIO.write(renderedImage,"png", file);
-            } catch (IOException e) {
-                System.err.println("Background image copy error");
-            }
-
-            ImageView backgroundBlurDesktop = new ImageView(image);
-            blur.setRadius(80);
-            backgroundBlurDesktop.setEffect(blur);
-
-            File backgroundDesktopBlur = new File("src/main/resources/img/backgrounds/" + s.getId() + "_desktopBlur.png");
-            BufferedImage bImageDesktop = SwingFXUtils.fromFXImage(backgroundBlurDesktop.snapshot(null, null), null);
-
-            try {
-                ImageIO.write(bImageDesktop, "png", backgroundDesktopBlur);
-            } catch (IOException e) {
-                System.err.println("Blur image desktop error");
-            }
-
-            bImageDesktop.flush();
-
-            file = new File(backgroundDesktopBlur.getAbsolutePath());
-            try{
-                image = new Image(file.toURI().toURL().toExternalForm());
-            } catch (MalformedURLException e) {
-                System.err.println("Background image creation error");
-            }
-
-            reader = image.getPixelReader();
-            newImage = new WritableImage(reader
-                    , (int) (image.getWidth() * 0.08), (int) (image.getHeight() * 0.1)
-                    , (int) (image.getWidth() * 0.86), (int) (image.getHeight() * 0.8));
-
-            try{
-                RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
-                ImageIO.write(renderedImage,"png", file);
-            } catch (IOException e) {
-                System.err.println("Background image copy error");
-            }
-
-            s.setFullScreenBlurImageSrc("src/main/resources/img/backgrounds/" + backgroundFullscreenBlur.getName());
-
-            s.setDesktopBackgroundEffect(setTransparencyEffect(s.getBackgroundSrc(), s.getId()));
-
-            setDesktopBackgroundBlur(s.getId());
-        }
-    }
-
     private void saveLogo(Season s){
         if (selectedLogo != null){
             File newLogo = new File("src/main/resources/img/logos/" + s.getId() + "_sl.png");
@@ -767,115 +644,5 @@ public class AddSeasonController {
         }else{
             s.setMusicSrc("");
         }
-    }
-
-    private String setTransparencyEffect(String src, String seasonId){
-        try {
-            //Load image
-            BufferedImage originalImage = ImageIO.read(new File(src));
-            int width = originalImage.getWidth();
-            int height = originalImage.getHeight();
-
-            //Create copy
-            BufferedImage blendedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-            //Apply gradual opacity
-            for (int y = 0; y < height; y++) {
-                float opacity = 1.0f - ((float) y / (height / 1.15f));
-
-                //Make sure the opacity value is valid
-                opacity = Math.min(1.0f, Math.max(0.0f, opacity));
-
-                for (int x = 0; x < width; x++) {
-                    //Obtain original pixel's color
-                    Color originalColor = new Color(originalImage.getRGB(x, y), true);
-
-                    //Apply opacity
-                    int blendedAlpha = (int) (originalColor.getAlpha() * opacity);
-
-                    //Create new color with opacity
-                    Color blendedColor = new Color(originalColor.getRed(), originalColor.getGreen(),
-                            originalColor.getBlue(), blendedAlpha);
-
-                    //Apply color to the new image
-                    blendedImage.setRGB(x, y, blendedColor.getRGB());
-                }
-            }
-
-            //Save the image with the progressive transparency effect
-            ImageIO.write(blendedImage, "png"
-                    , new File("src/main/resources/img/backgrounds/" + seasonId + "_transparencyEffect.png"));
-            originalImage.flush();
-            blendedImage.flush();
-        } catch (IOException e) {
-            System.err.println("AddSeasonController: error applying transparency effect to background");
-        }
-        return "src/main/resources/img/backgrounds/" + seasonId + "_transparencyEffect.png";
-    }
-
-    private void setDesktopBackgroundBlur(String seasonId){
-        try {
-            BufferedImage backgroundEffect = ImageIO.read(new File("src/main/resources/img/Background.png"));
-            BufferedImage originalImage = ImageIO.read(new File("src/main/resources/img/backgrounds/" + seasonId + "_desktopBlur.png"));
-
-            float contrastFactor = 0.1f;
-            BufferedImage highContrastImage = applyContrast(backgroundEffect, contrastFactor);
-
-            BufferedImage resultImage = applyNoiseEffect(highContrastImage, originalImage);
-            resultImage = applyNoiseEffect(resultImage, originalImage);
-
-            ImageIO.write(resultImage, "png", new File("src/main/resources/img/backgrounds/" + seasonId + "_desktopBlur.png"));
-            backgroundEffect.flush();
-            originalImage.flush();
-            highContrastImage.flush();
-            resultImage.flush();
-        } catch (IOException e) {
-            System.err.println("AddSeasonController: Error creating Desktop Blur and Noise Effects");
-        }
-    }
-
-    private static BufferedImage scaleImageTo(BufferedImage originalImage, int targetWidth, int targetHeight) {
-        java.awt.Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, java.awt.Image.SCALE_SMOOTH);
-
-        BufferedImage scaledBufferedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = scaledBufferedImage.createGraphics();
-        g2d.drawImage(scaledImage, 0, 0, null);
-        g2d.dispose();
-
-        return scaledBufferedImage;
-    }
-
-    private static BufferedImage applyNoiseEffect(BufferedImage originalImage, BufferedImage noiseImage) {
-        BufferedImage scaledNoiseImage = scaleImageTo(noiseImage, originalImage.getWidth(), originalImage.getHeight());
-
-        int width = Math.min(originalImage.getWidth(), scaledNoiseImage.getWidth());
-        int height = Math.min(originalImage.getHeight(), scaledNoiseImage.getHeight());
-
-        BufferedImage resultImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-        float blendFactor = 0.2f;
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                Color originalColor = new Color(originalImage.getRGB(x, y), true);
-
-                Color noiseColor = new Color(scaledNoiseImage.getRGB(x, y));
-
-                int blendedRed = (int) (originalColor.getRed() * (1 - blendFactor) + noiseColor.getRed() * blendFactor);
-                int blendedGreen = (int) (originalColor.getGreen() * (1 - blendFactor) + noiseColor.getGreen() * blendFactor);
-                int blendedBlue = (int) (originalColor.getBlue() * (1 - blendFactor) + noiseColor.getBlue() * blendFactor);
-                int blendedAlpha = originalColor.getAlpha();
-
-                Color blendedColor = new Color(blendedRed, blendedGreen, blendedBlue, blendedAlpha);
-                resultImage.setRGB(x, y, blendedColor.getRGB());
-            }
-        }
-
-        return resultImage;
-    }
-
-    private static BufferedImage applyContrast(BufferedImage image, float contrastFactor) {
-        RescaleOp rescaleOp = new RescaleOp(contrastFactor, 0, null);
-        return rescaleOp.filter(image, null);
     }
 }

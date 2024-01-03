@@ -7,6 +7,7 @@ import com.example.executablelauncher.App;
 public class Disc implements Serializable {
     public final String id;
     public String name = "";
+    public String resume = "";
     public String episodeNumber = "";
     public String executableSrc = "";
     public String type = "";    //Folder or File

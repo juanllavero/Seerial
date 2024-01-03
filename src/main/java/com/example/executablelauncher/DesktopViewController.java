@@ -3,7 +3,9 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.*;
 import info.movito.themoviedbapi.*;
 import info.movito.themoviedbapi.model.Artwork;
+import info.movito.themoviedbapi.model.MovieDb;
 import info.movito.themoviedbapi.model.MovieImages;
+import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import info.movito.themoviedbapi.model.tv.TvEpisode;
 import info.movito.themoviedbapi.model.tv.TvSeason;
 import info.movito.themoviedbapi.model.tv.TvSeries;
@@ -27,8 +29,11 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -49,12 +54,15 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.awt.image.RescaleOp;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -253,11 +261,7 @@ public class DesktopViewController {
     private int downloadedMetadataTotal = 0;
     //endregion
 
-    //region DISC VALUES
-    private List<File> selectedFiles = null;
-    private File selectedFolder = null;
-    private String text = "";
-    private String typeValue = "";
+    //region THEMOVIEDB ATTRIBUTES
     TmdbApi tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
     TmdbTV seriesMetadata;                                                              //Saves all series from TheMovieDB
     TmdbMovies moviesMetadata;                                                          //Saves all movies from TheMovieDB
@@ -381,10 +385,16 @@ public class DesktopViewController {
         backgroundShadow.fitWidthProperty().bind(mainBox.widthProperty());
         backgroundShadow.fitHeightProperty().bind(mainBox.heightProperty());
         backgroundShadow.setPreserveRatio(false);
+
+        updateCategories();
     }
 
     public void showSeries(){
         seriesButtons.clear();
+
+        if (seriesList == null)
+            return;
+
         for (Series s : seriesList){
             Button seriesButton = new Button();
             seriesButton.setText(s.getName());
@@ -460,10 +470,10 @@ public class DesktopViewController {
     private void fillSeasonInfo() {
         selectedDiscs.clear();
         selectionOptions.setVisible(false);
-        Image i = new Image("file:" + "src/main/resources/img/backgrounds/" + selectedSeason.getId() + "_desktopBlur.png");
+        Image i = new Image("file:" + "src/main/resources/img/backgrounds/" + selectedSeason.getId() + "/" + "desktopBlur.png");
         ASPECT_RATIO = i.getWidth() / i.getHeight();
         globalBackground.setImage(i);
-        ImageView img = new ImageView(new Image("file:" + selectedSeason.getDesktopBackgroundEffect()));
+        ImageView img = new ImageView(new Image("file:" + "src/main/resources/img/backgrounds/" + selectedSeason.getId() + "/" + "transparencyEffect.png"));
         img.setPreserveRatio(true);
         seasonBackground.setImageView(img);
         fadeInTransition(globalBackground);
@@ -501,20 +511,22 @@ public class DesktopViewController {
         }
 
         try{
-            File file = new File(selectedSeries.getCoverSrc());
-            Image image = new Image(file.toURI().toURL().toExternalForm(), 200, 251, true, true);
-            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
+            if (!selectedSeries.getCoverSrc().isEmpty()){
+                File file = new File(selectedSeries.getCoverSrc());
+                Image image = new Image(file.toURI().toURL().toExternalForm(), 200, 251, true, true);
+                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
 
-            //Compress image
-            BufferedImage resizedImage = Thumbnails.of(bufferedImage)
-                    .size(200, 251)
-                    .outputFormat("jpg")
-                    .asBufferedImage();
+                //Compress image
+                BufferedImage resizedImage = Thumbnails.of(bufferedImage)
+                        .size(200, 251)
+                        .outputFormat("jpg")
+                        .asBufferedImage();
 
-            Image compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
-            bufferedImage.flush();
-            resizedImage.flush();
-            seriesCover.setImage(compressedImage);
+                Image compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
+                bufferedImage.flush();
+                resizedImage.flush();
+                seriesCover.setImage(compressedImage);
+            }
         } catch (MalformedURLException e) {
             System.err.println("Series cover not found");
         } catch (IOException e) {
@@ -529,7 +541,7 @@ public class DesktopViewController {
             selectedSeason = App.findSeason(selectedSeason.getId());
             selectSeason(selectedSeason);
         }else{
-            selectedSeries = App.findSeries(selectedSeries);
+            selectedSeries = App.findSeries(selectedSeries.id);
             selectSeries(selectedSeries);
         }
     }
@@ -562,7 +574,7 @@ public class DesktopViewController {
     }
 
     public void updateSeasons(){
-        selectedSeries = App.findSeries(selectedSeries);
+        selectedSeries = App.findSeries(selectedSeries.id);
         selectSeries(selectedSeries);
     }
 
@@ -623,14 +635,19 @@ public class DesktopViewController {
         });
     }
 
+    public void refreshSeason(Season s){
+        selectedSeason = null;
+        selectSeason(s);
+    }
+
     //region UPDATE VALUES
     public void updateCategories(){
         List<String> categories = App.getCategories();
         categorySelector.getItems().clear();
         categorySelector.getItems().addAll(categories);
-        if (categories.size() > 1){
-            categorySelector.setValue(categories.get(1));
-            selectCategory(categories.get(1));
+        if (!categories.isEmpty()){
+            categorySelector.setValue(categories.get(0));
+            selectCategory(categories.get(0));
         }
     }
     public void updateLanguage(){
@@ -688,7 +705,6 @@ public class DesktopViewController {
             selectSeason(season);
         }
     }
-
     public void selectSeason(Season s) {
         if (selectedSeason != s){
             selectedSeason = s;
@@ -702,7 +718,6 @@ public class DesktopViewController {
             }
         }
     }
-
     void selectSeriesButton(Button btn){
         //Clear Selected Button
         for (Button b : seriesButtons){
@@ -726,14 +741,247 @@ public class DesktopViewController {
             selectSeries(series);
         }
     }
-    //endregion
     public boolean isDiscSelected(){
         return !selectedDiscs.isEmpty();
     }
-    public void refreshSeason(Season s){
-        selectedSeason = null;
-        selectSeason(s);
+    //endregion
+
+    //region IMAGE EFFECTS
+    public void saveBackground(Season s, boolean edit, String imageToCopy, boolean croppedImage){
+        try{
+            Files.createDirectories(Paths.get("src/main/resources/img/backgrounds/" + s.id + "/"));
+        } catch (IOException e) {
+            System.err.println("saveBackground: Directory could not be created");
+        }
+
+        //Clear old images
+        try{
+            File f;
+            if (!croppedImage){
+                f = new File(s.getBackgroundSrc());
+                if (f.exists())
+                    Files.delete(f.toPath());
+            }
+            f = new File("src/main/resources/img/backgrounds/" + s.id + "/" + "fullBlur.png");
+            if (f.exists())
+                Files.delete(f.toPath());
+            f = new File("src/main/resources/img/backgrounds/" + s.id + "/" + "transparencyEffect.png");
+            if (f.exists())
+                Files.delete(f.toPath());
+            f = new File("src/main/resources/img/backgrounds/" + s.id + "/" + "desktopBlur.png");
+            if (f.exists())
+                Files.delete(f.toPath());
+        } catch (IOException e) {
+            System.err.println("AddSeasonController: Error removing old images");
+        }
+
+        File newBackground;
+        if (!croppedImage || !edit){
+            newBackground = new File("src/main/resources/img/backgrounds/" + s.id + "/background.png");
+
+            try{
+                File file = new File(imageToCopy);
+                Files.copy(file.toPath(), newBackground.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }catch (IOException e){
+                System.err.println("Background not copied");
+            }
+
+            s.setBackgroundSrc("src/main/resources/img/backgrounds/" + s.id + "/background.png");
+        }else{
+            newBackground = new File(s.getBackgroundSrc());
+        }
+
+        Image image = null;
+        try{
+            image = new Image(newBackground.toURI().toURL().toExternalForm());
+        } catch (MalformedURLException e) {
+            System.err.println("Background image not created");
+        }
+
+        ImageView backgroundBlur = new ImageView(image);
+        GaussianBlur blur = new GaussianBlur();
+        blur.setRadius(27);
+        backgroundBlur.setEffect(blur);
+
+        File backgroundFullscreenBlur = new File("src/main/resources/img/backgrounds/" + s.id + "/fullBlur.png");
+        BufferedImage bImageFull = SwingFXUtils.fromFXImage(backgroundBlur.snapshot(null, null), null);
+
+        try {
+            ImageIO.write(bImageFull, "png", backgroundFullscreenBlur);
+        } catch (IOException e) {
+            System.err.println("Blur image fullscreen error");
+        }
+
+        bImageFull.flush();
+
+        File file = new File(backgroundFullscreenBlur.getAbsolutePath());
+        try{
+            image = new Image(file.toURI().toURL().toExternalForm());
+        } catch (MalformedURLException e) {
+            System.err.println("Background image creation error");
+        }
+
+        if (image == null)
+            return;
+
+        PixelReader reader = image.getPixelReader();
+        WritableImage newImage = new WritableImage(reader
+                , (int) (image.getWidth() * 0.03), (int) (image.getHeight() * 0.05)
+                , (int) (image.getWidth() * 0.93), (int) (image.getHeight() * 0.9));
+
+        try{
+            RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
+            ImageIO.write(renderedImage,"png", file);
+        } catch (IOException e) {
+            System.err.println("Background image copy error");
+        }
+
+        ImageView backgroundBlurDesktop = new ImageView(image);
+        blur.setRadius(80);
+        backgroundBlurDesktop.setEffect(blur);
+
+        File backgroundDesktopBlur = new File("src/main/resources/img/backgrounds/" + s.id + "/" + "desktopBlur.png");
+        BufferedImage bImageDesktop = SwingFXUtils.fromFXImage(backgroundBlurDesktop.snapshot(null, null), null);
+
+        try {
+            ImageIO.write(bImageDesktop, "png", backgroundDesktopBlur);
+        } catch (IOException e) {
+            System.err.println("Blur image desktop error");
+        }
+
+        bImageDesktop.flush();
+
+        file = new File(backgroundDesktopBlur.getAbsolutePath());
+        try{
+            image = new Image(file.toURI().toURL().toExternalForm());
+        } catch (MalformedURLException e) {
+            System.err.println("Background image creation error");
+        }
+
+        reader = image.getPixelReader();
+        newImage = new WritableImage(reader
+                , (int) (image.getWidth() * 0.08), (int) (image.getHeight() * 0.1)
+                , (int) (image.getWidth() * 0.86), (int) (image.getHeight() * 0.8));
+
+        try{
+            RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
+            ImageIO.write(renderedImage,"png", file);
+        } catch (IOException e) {
+            System.err.println("Background image copy error");
+        }
+
+        setTransparencyEffect(s.getBackgroundSrc(), s.id);
+        setDesktopBackgroundBlur(s.id);
     }
+    private void setTransparencyEffect(String src, String seasonId){
+        try {
+            //Load image
+            BufferedImage originalImage = ImageIO.read(new File(src));
+            int width = originalImage.getWidth();
+            int height = originalImage.getHeight();
+
+            //Create copy
+            BufferedImage blendedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+            //Apply gradual opacity
+            for (int y = 0; y < height; y++) {
+                float opacity = 1.0f - ((float) y / (height / 1.15f));
+
+                //Make sure the opacity value is valid
+                opacity = Math.min(1.0f, Math.max(0.0f, opacity));
+
+                for (int x = 0; x < width; x++) {
+                    //Obtain original pixel's color
+                    java.awt.Color originalColor = new java.awt.Color(originalImage.getRGB(x, y), true);
+
+                    //Apply opacity
+                    int blendedAlpha = (int) (originalColor.getAlpha() * opacity);
+
+                    //Create new color with opacity
+                    java.awt.Color blendedColor = new java.awt.Color(originalColor.getRed(), originalColor.getGreen(),
+                            originalColor.getBlue(), blendedAlpha);
+
+                    //Apply color to the new image
+                    blendedImage.setRGB(x, y, blendedColor.getRGB());
+                }
+            }
+
+            //Save the image with the progressive transparency effect
+            ImageIO.write(blendedImage, "png"
+                    , new File("src/main/resources/img/backgrounds/" + seasonId + "/" + "transparencyEffect.png"));
+            originalImage.flush();
+            blendedImage.flush();
+        } catch (IOException e) {
+            System.err.println("AddSeasonController: error applying transparency effect to background");
+        }
+    }
+
+    private void setDesktopBackgroundBlur(String seasonId){
+        try {
+            BufferedImage backgroundEffect = ImageIO.read(new File("src/main/resources/img/Background.png"));
+            BufferedImage originalImage = ImageIO.read(new File("src/main/resources/img/backgrounds/" + seasonId + "/" + "desktopBlur.png"));
+
+            float contrastFactor = 0.1f;
+            BufferedImage highContrastImage = applyContrast(backgroundEffect, contrastFactor);
+
+            BufferedImage resultImage = applyNoiseEffect(highContrastImage, originalImage);
+            resultImage = applyNoiseEffect(resultImage, originalImage);
+
+            ImageIO.write(resultImage, "jpg", new File("src/main/resources/img/backgrounds/" + seasonId + "/" + "desktopBlur.png"));
+            backgroundEffect.flush();
+            originalImage.flush();
+            highContrastImage.flush();
+            resultImage.flush();
+        } catch (IOException e) {
+            System.err.println("AddSeasonController: Error creating Desktop Blur and Noise Effects");
+        }
+    }
+
+    private static BufferedImage scaleImageTo(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        java.awt.Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, java.awt.Image.SCALE_SMOOTH);
+
+        BufferedImage scaledBufferedImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = scaledBufferedImage.createGraphics();
+        g2d.drawImage(scaledImage, 0, 0, null);
+        g2d.dispose();
+
+        return scaledBufferedImage;
+    }
+
+    private static BufferedImage applyNoiseEffect(BufferedImage originalImage, BufferedImage noiseImage) {
+        BufferedImage scaledNoiseImage = scaleImageTo(noiseImage, originalImage.getWidth(), originalImage.getHeight());
+
+        int width = Math.min(originalImage.getWidth(), scaledNoiseImage.getWidth());
+        int height = Math.min(originalImage.getHeight(), scaledNoiseImage.getHeight());
+
+        BufferedImage resultImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        float blendFactor = 0.2f;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                java.awt.Color originalColor = new java.awt.Color(originalImage.getRGB(x, y), true);
+
+                java.awt.Color noiseColor = new java.awt.Color(scaledNoiseImage.getRGB(x, y));
+
+                int blendedRed = (int) (originalColor.getRed() * (1 - blendFactor) + noiseColor.getRed() * blendFactor);
+                int blendedGreen = (int) (originalColor.getGreen() * (1 - blendFactor) + noiseColor.getGreen() * blendFactor);
+                int blendedBlue = (int) (originalColor.getBlue() * (1 - blendFactor) + noiseColor.getBlue() * blendFactor);
+                int blendedAlpha = originalColor.getAlpha();
+
+                java.awt.Color blendedColor = new java.awt.Color(blendedRed, blendedGreen, blendedBlue, blendedAlpha);
+                resultImage.setRGB(x, y, blendedColor.getRGB());
+            }
+        }
+
+        return resultImage;
+    }
+
+    private static BufferedImage applyContrast(BufferedImage image, float contrastFactor) {
+        RescaleOp rescaleOp = new RescaleOp(contrastFactor, 0, null);
+        return rescaleOp.filter(image, null);
+    }
+    //endregion
 
     //region PLAY EPISODE
     public void playEpisode(Disc disc) {
@@ -851,7 +1099,7 @@ public class DesktopViewController {
     }
     //endregion
 
-    //region ADD SECTION
+    //region AUTOMATED FILE SEARCH
     public void loadCategory(String name){
         categorySelector.getItems().add(name);
         categorySelector.setValue(name);
@@ -885,6 +1133,8 @@ public class DesktopViewController {
                     addMovieOrConcert(f);
             }
         }
+
+        updateCategories();
     }
     private void addTVShow(File directory){
         if (directory.isFile())
@@ -896,6 +1146,8 @@ public class DesktopViewController {
 
         //CREATE SERIES
         Series newSeries = searchFirstSeries(directory.getName());
+        App.addCollection(newSeries);
+        currentCategory.series.add(newSeries.id);
 
         boolean seriesNotFound = false;
         List<TvSeason> seasonsList = new ArrayList<>();
@@ -930,25 +1182,24 @@ public class DesktopViewController {
         }
         //endregion
 
+        System.out.println("Seasons created");
+
         //Process background images
         if (!seriesNotFound){
-            Task<Void> imageProcessing = new Task<>() {
+            /*Task<Void> imageProcessing = new Task<>() {
                 @Override
                 protected Void call() {
 
-                    for (String seasonID : newSeries.getSeasons()){
-                        Season season = App.findSeason(seasonID);
-                        AddSeasonController controller = new AddSeasonController();
-                        controller.setCollection(newSeries);
-                        controller.setSeason(season);
-                        controller.loadBackground("src/main/resources/img/DownloadCache/" + seasonID + ".png");
-                        controller.saveBackground(season);
-                    }
+
                     return null;
                 }
             };
 
-            new Thread(imageProcessing).start();
+            new Thread(imageProcessing).start();*/
+            for (String seasonID : newSeries.getSeasons()) {
+                Season season = App.findSeason(seasonID);
+                saveBackground(season, false, "src/main/resources/img/DownloadCache/" + newSeries.id + ".png", false);
+            }
         }
 
         List<File> folders = new ArrayList<>();
@@ -978,7 +1229,7 @@ public class DesktopViewController {
 
             for (File episodeFile : episodeFiles){
                 if (episodeFile.isFile() && validVideoFile(episodeFile))
-                        processEpisode(newSeries, episodeFile, seasonsList);
+                    processEpisode(newSeries, episodeFile, seasonsList);
             }
         }
 
@@ -1021,38 +1272,109 @@ public class DesktopViewController {
             if (newMatch.find()){
 
                 int absoluteNumber = Integer.parseInt(newMatch.group("episode"));
-                int j = 0;
-                int k = 0;
-                for (int i = 0; i < absoluteNumber; i++){
-                    if (k == seasonsMetadata.get(j).getEpisodes().size() - 1){
+                int j = 1;
+                int k = 1;
+                for (int i = 1; i < absoluteNumber; i++){
+                    if (k == seasonsMetadata.get(j).getEpisodes().size()){
                         j++;
-                        k = 0;
+                        k = 1;
                     }else{
                         k++;
                     }
                 }
 
-                TvEpisode episode = seasonsMetadata.get(j).getEpisodes().get(k);
+                TvEpisode episode = seasonsMetadata.get(j).getEpisodes().get(k - 1);
 
-                setEpisodeData(newDisc, Integer.toString(j), Integer.toString(k), episode);
                 newDisc.setEpisodeNumber(newMatch.group("episode"));
+                newDisc.seasonID = series.getSeasons().get(j);
+                setEpisodeData(newDisc, episode, series);
             }else{
                 newDisc.setName(fullName);
                 newDisc.setEpisodeNumber("");
             }
         }else{
-            TvEpisode episode = seasonsMetadata.get(Integer.parseInt(matcher.group("season").substring(1))).getEpisodes().get(Integer.parseInt(matcher.group("episode").substring(1)));
-            setEpisodeData(newDisc, matcher.group("season").substring(1), matcher.group("episode").substring(1), episode);
+            int seasonNumber = Integer.parseInt(matcher.group("season").substring(1));
+            if (Integer.parseInt(matcher.group("season").substring(1)) >= seasonsMetadata.size())
+                seasonNumber = seasonsMetadata.size() - 1;
+
+            TvEpisode episode = seasonsMetadata.get(seasonNumber).getEpisodes().get(Integer.parseInt(matcher.group("episode").substring(1)));
             newDisc.setEpisodeNumber(matcher.group("episode").substring(1));
+            newDisc.seasonID = series.getSeasons().get(seasonNumber);
+            setEpisodeData(newDisc, episode, series);
         }
 
         newDisc.setExecutableSrc(file.getAbsolutePath());
-        newDisc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
-
         App.addDisc(newDisc);
     }
-    private void setEpisodeData(Disc disc, String season, String episode, TvEpisode episodeMetadata){
-            asdasfasdf
+    private void setEpisodeData(Disc disc, TvEpisode episodeMetadata, Series show){
+        disc.name = episodeMetadata.getName();
+        disc.resume = episodeMetadata.getOverview();
+
+        String imageBaseURL = "https://image.tmdb.org/t/p/original";
+
+        try{
+            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + disc.id + "/"));
+        } catch (IOException e) {
+            System.err.println("setEpisodeData: Directory could not be created");
+        }
+
+        MovieImages images = tmdbApi.getTvEpisodes().getEpisode(show.themdbID, episodeMetadata.getSeasonNumber(), episodeMetadata.getEpisodeNumber(), null, TmdbTvEpisodes.EpisodeMethod.images).getImages();
+        List<Artwork> thumbnails = images.getStills();
+
+        List<String> thumbnailsUrls = new ArrayList<>();
+        if (thumbnails != null){
+            for (Artwork artwork : thumbnails){
+                thumbnailsUrls.add(imageBaseURL + artwork.getFilePath());
+            }
+        }
+
+        //region THUMBNAIL DOWNLOADER
+        for (int i = 0; i < thumbnailsUrls.size(); i++){
+            try{
+                Image originalImage = new Image(thumbnailsUrls.get(i), 480, 270, true, true);
+
+                double maxWidth = 480;
+                double maxHeight = 270;
+                double originalWidth = originalImage.getWidth();
+                double originalHeight = originalImage.getHeight();
+
+                Image compressedImage;
+                if (originalWidth > maxWidth || originalHeight > maxHeight) {
+                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(originalImage, null);
+
+                    BufferedImage resizedImage = Thumbnails.of(bufferedImage)
+                            .size((int) maxWidth, (int) maxHeight)
+                            .outputFormat("jpg")
+                            .asBufferedImage();
+
+                    compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
+                    bufferedImage.flush();
+                    resizedImage.flush();
+                }else{
+                    compressedImage = originalImage;
+                }
+
+                if (!originalImage.isError()){
+                    File file = new File("src/main/resources/img/discCovers/" + disc.id + "/" + i + ".png");
+                    try{
+                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(compressedImage, null);
+                        ImageIO.write(renderedImage,"jpg", file);
+                    } catch (IOException e) {
+                        System.err.println("DesktopViewController: Disc downloaded thumbnail not saved");
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("DesktopViewController: Error compressing image");
+            }
+        }
+        //endregion
+
+        File img = new File("src/main/resources/img/discCovers/" + disc.id + "/0.png");
+        if (!img.exists()){
+            disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+        }else{
+            disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "/0.png";
+        }
     }
     private Series searchFirstSeries(String seriesName){
         Series newSeries = new Series();
@@ -1065,56 +1387,75 @@ public class DesktopViewController {
             newSeries.resume = tvSeries.getOverview();
             newSeries.themdbID = tvSeries.getId();
 
-            TvSeries show = seriesMetadata.getSeries(tvSeries.getId(), "es");
+            TvSeries show = seriesMetadata.getSeries(tvSeries.getId(), currentCategory.language);
             newSeries.seasonsNumber = show.getNumberOfSeasons();
-            //region SAVE IMAGES
-            //Save posters and background images
-            MovieImages images = seriesMetadata.getImages(tvSeries.getId(), null);
-            if (images != null){
-                List<Artwork> covers = images.getPosters();
-                for (Artwork cover : covers){
-                    //Guardar imagen y añadir a serie
-                    asdasd
-                }
 
-                List<Artwork> backgrounds = images.getBackdrops();
-                if (!backgrounds.isEmpty()){
-                    Artwork background = backgrounds.get(0);
-                    //Guardar imagen y añadir a serie
-                }
-            }
-
-            //Save english posters
-            images = seriesMetadata.getImages(tvSeries.getId(), "en");
-            if (images != null){
-                List<Artwork> covers = images.getPosters();
-                for (Artwork cover : covers){
-                    //Guardar imagen y añadir a serie
-                }
-            }
-            //endregion
+            downloadImages(newSeries, tvSeries.getId(), seriesMetadata.getImages(tvSeries.getId(), null));
 
             return newSeries;
-        } else {
-            System.err.println("DesktopViewController: No shows found for name" + seriesName);
         }
 
         newSeries.name = seriesName;
         return newSeries;
     }
+    private void saveCover(Series newSeries, int i, Image originalImage) {
+        try{
+            Files.createDirectories(Paths.get("src/main/resources/img/seriesCovers/" + newSeries.id + "/"));
+        } catch (IOException e) {
+            System.err.println("Directory could not be created");
+        }
+
+        if (!originalImage.isError()){
+            File file = new File("src/main/resources/img/seriesCovers/" + newSeries.id + "/" + i + ".png");
+            try{
+                RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
+                ImageIO.write(renderedImage,"png", file);
+            } catch (IOException e) {
+                System.err.println("DesktopViewController: Downloaded cover not saved");
+            }
+        }
+    }
     private void addMovieOrConcert(File f){
-        String seriesName;
-        String seasonName;
         if (!f.isDirectory()){
-            seriesName = f.getName();
-            seasonName = f.getName();
-            processMovieOrConcert(f, seriesName, seasonName);
+            //region MOVIE FILE ONLY
+            if (!validVideoFile(f)){
+                return;
+            }
+
+            //Create Series
+            Series newSeries = searchFirstMovie(f.getName().substring(0, f.getName().lastIndexOf(".")));
+            Season newSeason = new Season();
+            if (newSeries.themdbID == -1){
+                newSeason.name = f.getName().substring(0, f.getName().lastIndexOf("."));
+                newSeason.collectionName = newSeries.name;
+
+                App.addCollection(newSeries);
+                App.addSeason(newSeason, newSeries.id);
+                currentCategory.series.add(newSeries.id);
+
+                if (!f.isDirectory() && validVideoFile(f))
+                    saveDiscWithoutMetadata(f, newSeason);
+            }else{
+                newSeason.name = newSeries.name;
+                newSeason.collectionName = newSeries.name;
+                newSeason.themdbID = newSeries.themdbID;
+
+                downloadImages(newSeries, newSeries.themdbID, moviesMetadata.getImages(newSeries.themdbID, null));
+                saveBackground(newSeason, false, "src/main/resources/img/DownloadCache/" + newSeries.themdbID + ".png", false);
+
+                App.addCollection(newSeries);
+                App.addSeason(newSeason, newSeries.id);
+                currentCategory.series.add(newSeries.id);
+
+                if (!f.isDirectory())
+                    processMovieOrConcert(f, newSeason);
+            }
+            //endregion
         }else {
             File[] filesInDir = f.listFiles();
             if (filesInDir == null)
                 return;
 
-            seriesName = f.getName();
             List<File> folders = new ArrayList<>();
             List<File> filesInRoot = new ArrayList<>();
             for (File file : filesInDir){
@@ -1125,29 +1466,301 @@ public class DesktopViewController {
             }
 
             if (!folders.isEmpty()){
+                //region FOLDERS CORRESPONDING DIFFERENT MOVIES FROM A COLLECTION
+                //Create new collection for the movies inside
+                Series newSeries = new Series();
+                newSeries.name = f.getName();
+                currentCategory.series.add(newSeries.id);
+                App.addCollection(newSeries);
+
                 for (File folder : folders){
                     File[] filesInFolder = folder.listFiles();
                     if (filesInFolder == null)
                         continue;
 
-                    seasonName = folder.getName();
-                    for (File file : filesInFolder){
-                        processMovieOrConcert(file, seriesName, seasonName);
+                    MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(folder.getName(), 1, currentCategory.language, true, 1);
+
+                    if (movieResults.getTotalResults() > 0) {
+                        //Load Movie metadata as Season data
+                        MovieDb movie = movieResults.getResults().get(0);
+                        Season newSeason = new Season();
+                        newSeason.name = movie.getTitle();
+                        newSeason.resume = movie.getOverview();
+                        newSeason.themdbID = movie.getId();
+                        newSeason.collectionName = newSeries.name;
+
+                        downloadImages(newSeries, newSeason.themdbID, moviesMetadata.getImages(movie.getId(), null));
+                        saveBackground(newSeason, false, "src/main/resources/img/DownloadCache/" + newSeason.themdbID + ".png", false);
+
+                        App.addSeason(newSeason, newSeries.id);
+
+                        for (File file : filesInFolder){
+                            if (!file.isDirectory() && validVideoFile(file))
+                                processMovieOrConcert(file, newSeason);
+                        }
+                    }else{
+                        Season newSeason = new Season();
+                        newSeason.name = folder.getName();
+                        newSeason.collectionName = newSeries.name;
+
+                        App.addSeason(newSeason, newSeries.id);
+
+                        for (File file : filesInFolder){
+                            if (!file.isDirectory() && validVideoFile(file))
+                                saveDiscWithoutMetadata(file, newSeason);
+                        }
                     }
                 }
+                //endregion
             }else if (!filesInRoot.isEmpty()){
-                seasonName = f.getName();
+                //region MOVIE FILE/CONCERT FILES INSIDE FOLDER
+                //Create Series
+                Series newSeries = searchFirstMovie(f.getName());
+                Season newSeason = new Season();
+                if (newSeries.themdbID == -1){
+                    newSeason.name = f.getName();
+                    newSeason.collectionName = newSeries.name;
 
-                for (File file : filesInRoot){
-                    if (file.isFile())
-                        processMovieOrConcert(file, seriesName, seasonName);
+                    App.addCollection(newSeries);
+                    App.addSeason(newSeason, newSeries.id);
+                    currentCategory.series.add(newSeries.id);
+
+                    for (File file : filesInRoot){
+                        if (file.isFile() && validVideoFile(file))
+                            saveDiscWithoutMetadata(file, newSeason);
+                    }
+                }else{
+                    newSeason.name = newSeries.name;
+                    newSeason.collectionName = newSeries.name;
+                    newSeason.themdbID = newSeries.themdbID;
+
+                    downloadImages(newSeries, newSeason.themdbID, moviesMetadata.getImages(newSeason.themdbID, null));
+                    saveBackground(newSeason, false, "src/main/resources/img/DownloadCache/" + newSeason.themdbID + ".png", false);
+
+                    App.addCollection(newSeries);
+                    App.addSeason(newSeason, newSeries.id);
+                    currentCategory.series.add(newSeries.id);
+
+                    for (File file : filesInRoot){
+                        if (file.isFile() && validVideoFile(file))
+                            processMovieOrConcert(file, newSeason);
+                    }
                 }
+                //endregion
             }
         }
     }
-    private void processMovieOrConcert(File file, String seriesName, String seasonName){
-
+    private void saveDiscWithoutMetadata(File f, Season newSeason) {
+        Disc newDisc = new Disc();
+        newDisc.name = f.getName().substring(0, f.getName().lastIndexOf("."));
+        newDisc.executableSrc = f.getAbsolutePath();
+        newDisc.seasonID = newSeason.id;
+        newDisc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+        App.addDisc(newDisc);
     }
+    private void processMovieOrConcert(File file, Season season){
+        Disc newDisc = new Disc();
+
+        newDisc.name = file.getName().substring(0, file.getName().lastIndexOf("."));
+        newDisc.episodeNumber = String.valueOf(season.getDiscs().size());
+        newDisc.seasonID = season.id;
+        newDisc.executableSrc = file.getAbsolutePath();
+
+        setMovieThumbnail(newDisc, season.themdbID);
+        App.addDisc(newDisc);
+    }
+    private void setMovieThumbnail(Disc disc, int themdbID){
+        String imageBaseURL = "https://image.tmdb.org/t/p/original";
+
+        try{
+            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + disc.id + "/"));
+        } catch (IOException e) {
+            System.err.println("setEpisodeData: Directory could not be created");
+        }
+
+        MovieImages images =tmdbApi.getMovies().getImages(themdbID, null);
+        List<Artwork> thumbnails = images.getBackdrops();
+
+        List<String> thumbnailsUrls = new ArrayList<>();
+        if (thumbnails != null){
+            for (Artwork artwork : thumbnails){
+                thumbnailsUrls.add(imageBaseURL + artwork.getFilePath());
+            }
+        }
+
+        //region THUMBNAIL DOWNLOADER
+        for (int i = 0; i < thumbnailsUrls.size(); i++){
+            try{
+                Image originalImage = new Image(thumbnailsUrls.get(i), 480, 270, true, true);
+
+                double maxWidth = 480;
+                double maxHeight = 270;
+                double originalWidth = originalImage.getWidth();
+                double originalHeight = originalImage.getHeight();
+
+                Image compressedImage;
+                if (originalWidth > maxWidth || originalHeight > maxHeight) {
+                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(originalImage, null);
+
+                    BufferedImage resizedImage = Thumbnails.of(bufferedImage)
+                            .size((int) maxWidth, (int) maxHeight)
+                            .outputFormat("jpg")
+                            .asBufferedImage();
+
+                    compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
+                    bufferedImage.flush();
+                    resizedImage.flush();
+                }else{
+                    compressedImage = originalImage;
+                }
+
+                if (!originalImage.isError()){
+                    File file = new File("src/main/resources/img/discCovers/" + disc.id + "/" + i + ".png");
+                    try{
+                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(compressedImage, null);
+                        ImageIO.write(renderedImage,"jpg", file);
+                    } catch (IOException e) {
+                        System.err.println("DesktopViewController: Disc downloaded thumbnail not saved");
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("DesktopViewController: Error compressing image");
+            }
+        }
+        //endregion
+
+        File img = new File("src/main/resources/img/discCovers/" + disc.id + "/0.png");
+        if (!img.exists()){
+            disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+        }else{
+            disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "/0.png";
+        }
+    }
+    private Series searchFirstMovie(String seriesName){
+        Series newSeries = new Series();
+
+        int index = seriesName.lastIndexOf("(");
+        if (index != -1){
+            seriesName = seriesName.substring(0, index - 1);
+        }
+
+        MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(seriesName, 1, currentCategory.language, true, 1);
+
+        if (movieResults.getTotalResults() > 0) {
+            MovieDb movie = movieResults.getResults().get(0);
+            newSeries.name = movie.getTitle();
+            newSeries.resume = movie.getOverview();
+            newSeries.themdbID = movie.getId();
+
+            return newSeries;
+        }
+
+        newSeries.name = seriesName;
+        return newSeries;
+    }
+    private void downloadImages(Series series, int tmdbID, MovieImages images){
+        //region SAVE IMAGES
+        String imageBaseURL = "https://image.tmdb.org/t/p/original";
+
+        //Save posters and background images
+        if (images != null){
+            List<Artwork> covers = images.getPosters();
+            int j = 0;
+            for (int i = 0; i < covers.size(); i++){
+                if (j == 10)
+                    break;
+
+                Image originalImage = new Image(imageBaseURL + covers.get(i).getFilePath());
+                saveCover(series, i, originalImage);
+                j++;
+            }
+
+            List<Artwork> backgrounds = images.getBackdrops();
+            if (!backgrounds.isEmpty()){
+                Artwork background;
+                if (currentCategory.type.equals("Shows"))
+                    background = backgrounds.get(0);
+                else
+                    background = backgrounds.get(backgrounds.size() - 1);
+                Image originalImage = new Image(imageBaseURL + background.getFilePath());
+
+                if (!originalImage.isError()){
+                    File file;
+                    if (currentCategory.type.equals("Shows"))
+                        file = new File("src/main/resources/img/DownloadCache/" + series.id + ".png");
+                    else
+                        file = new File("src/main/resources/img/DownloadCache/" + tmdbID + ".png");
+                    try{
+                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
+                        ImageIO.write(renderedImage,"png", file);
+                    } catch (IOException e) {
+                        System.err.println("DesktopViewController: Downloaded background not saved");
+                    }
+                }
+            }
+        }
+
+        File posterDir = new File("src/main/resources/img/seriesCovers/" + series.id + "/");
+        File[] coverFiles = posterDir.listFiles();
+        if (coverFiles != null){
+            for (File file : coverFiles){
+                if (file.exists()){
+                    series.coverSrc = "src/main/resources/img/seriesCovers/" + series.id + "/" + file.getName();
+                    break;
+                }
+            }
+        }
+
+        //Save english posters
+        if (currentCategory.type.equals("Shows"))
+            images = seriesMetadata.getImages(tmdbID, "en");
+        else
+            images = moviesMetadata.getImages(tmdbID, "en");
+        if (images != null){
+            List<Artwork> covers = images.getPosters();
+            File coversDir = new File("src/main/resources/img/seriesCovers/");
+            if (coversDir.listFiles() != null){
+                int i = Objects.requireNonNull(coversDir.listFiles()).length;
+                int j = 0;
+                for (Artwork cover : covers){
+                    if (j == 10)
+                        break;
+
+                    Image originalImage = new Image(imageBaseURL + cover.getFilePath());
+                    saveCover(series, i, originalImage);
+                    i++;
+                    j++;
+                }
+            }
+        }
+
+        //Save current language posters
+        if (!currentCategory.type.equals("Shows")){
+            //Save english posters
+            images = moviesMetadata.getImages(tmdbID, currentCategory.language);
+            if (images != null){
+                List<Artwork> covers = images.getPosters();
+                File coversDir = new File("src/main/resources/img/seriesCovers/");
+                if (coversDir.listFiles() != null){
+                    int i = Objects.requireNonNull(coversDir.listFiles()).length;
+                    int j = 0;
+                    for (Artwork cover : covers){
+                        if (j == 10)
+                            break;
+
+                        Image originalImage = new Image(imageBaseURL + cover.getFilePath());
+                        saveCover(series, i, originalImage);
+                        i++;
+                        j++;
+                    }
+                }
+            }
+        }
+        //endregion
+    }
+    //endregion
+
+    //region ADD SECTION
     public void addSeries(Series s){
         seriesList.add(s);
         selectCategory(currentCategory.name);
@@ -1234,18 +1847,6 @@ public class DesktopViewController {
             stage.showAndWait();
 
             backgroundShadow.setVisible(false);
-
-            if (selectedFiles != null || selectedFolder != null){
-                if (selectedFiles != null)
-                    showDownloadWindow(Math.max(selectedFiles.size(), 1));
-                addDiscs(selectedFiles,selectedFolder,text,typeValue);
-            }
-
-            this.selectedFiles = null;
-            this.selectedFolder = null;
-            this.text = "";
-            this.typeValue = "";
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -1269,242 +1870,9 @@ public class DesktopViewController {
             throw new RuntimeException(e);
         }
     }
-
-    public void addDiscSetValues(List<File> selectedFiles, File selectedFolder, String text, String typeValue) {
-        this.selectedFiles = selectedFiles;
-        this.selectedFolder = selectedFolder;
-        this.text = text;
-        this.typeValue = typeValue;
-    }
-    public void addDiscs(List<File> selectedFiles, File selectedFolder, String text, String typeValue) {
-        Task<Void> task = new Task<>() {
-            @Override
-            protected Void call() {
-                if (text.equals(App.textBundle.getString("multipleSelection")))
-                    for (File file : selectedFiles)
-                        setDiscInfo(file, false, typeValue);
-                else
-                    setDiscInfo(selectedFolder, typeValue.equals("Folder"), typeValue);
-
-                return null;
-            }
-        };
-
-        //Start the process in a new thread
-        new Thread(task).start();
-    }
-    private void setDiscInfo(File file, boolean folder, String type) {
-        Platform.runLater(() -> {
-            Disc newDisc = new Disc();
-
-            newDisc.setSeasonID(getCurrentSeason().getId());
-
-            if (!folder){
-                String fullName = file.getName().substring(0, file.getName().length() - 4);
-
-                final String regexSeasonEpisode = "(?i)(?<season>S[0-9]{1,3}+)(?<episode>E[0-9]{1,4})";
-                final String regexOnlyEpisode = "(?i)(?<episode>[0-9]{1,4})";
-
-                final Pattern pattern = Pattern.compile(regexSeasonEpisode, Pattern.MULTILINE);
-                final Matcher matcher = pattern.matcher(fullName);
-
-                if (!matcher.find()){
-                    Pattern newPattern = Pattern.compile(regexOnlyEpisode, Pattern.MULTILINE);
-                    Matcher newMatch = newPattern.matcher(fullName);
-
-                    if (newMatch.find()){
-                        setEpisodeNameAndThumbnail(newDisc, "NO_SEASON", newMatch.group("episode"));
-                        newDisc.setEpisodeNumber(newMatch.group("episode"));
-                    }else{
-                        newDisc.setName(fullName);
-                        newDisc.setEpisodeNumber("");
-                    }
-                }else{
-                    setEpisodeNameAndThumbnail(newDisc, matcher.group("season").substring(1), matcher.group("episode").substring(1));
-                    newDisc.setEpisodeNumber(matcher.group("episode").substring(1));
-                }
-            }else{
-                newDisc.setName(App.textBundle.getString("disc") + " " + Objects.requireNonNull(App.findSeason(newDisc.getSeasonID())).getDiscs().size() + 1);
-                newDisc.setEpisodeNumber("");
-            }
-
-            newDisc.setType(type);
-            newDisc.setExecutableSrc(file.getAbsolutePath());
-            newDisc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
-
-            App.addDisc(newDisc);
-            addDisc(newDisc);
-        });
-    }
-
-    public void setEpisodeNameAndThumbnail(Disc disc, String season, String episode){
-        Season s = App.findSeason(disc.seasonID);
-        assert s != null;
-        Series series = App.findSeriesByName(s.collectionName);
-        assert series != null;
-        String tvdbId = String.valueOf(series.thetvdbID);
-
-        List<EpisodeMetadata> episodeMetadata = App.episodesMetadata.get(tvdbId);
-
-        if (episodeMetadata != null){
-            EpisodeMetadata episodeMeta = null;
-
-            int episodeToFind = Integer.parseInt(episode);
-            int seasonToFind = -1;
-            if (!season.equals("NO_SEASON"))
-                seasonToFind = Integer.parseInt(season);
-
-            for (EpisodeMetadata ep : episodeMetadata){
-                if (season.equals("NO_SEASON")){
-                    if (ep.absoluteEpisode == episodeToFind){
-                        episodeMeta = ep;
-                        break;
-                    }
-                }else{
-                    if (ep.seasonNumber == seasonToFind && ep.episodeNumber == episodeToFind){
-                        episodeMeta = ep;
-                        break;
-                    }
-                }
-            }
-
-            if (episodeMeta == null){
-                disc.name = "";
-                disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
-                updateImages();
-                downloadedMetadataCount++;
-                downloadingContentText.setText("Downloading images " + downloadedMetadataCount + "/" + downloadedMetadataTotal);
-                if (downloadedMetadataCount == downloadedMetadataTotal)
-                    hideDownloadWindow();
-                return;
-            }
-
-            disc.name = episodeMeta.name;
-
-            if (episodeMeta.imdbID.isEmpty()){
-                disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
-                updateImages();
-                downloadedMetadataCount++;
-                downloadingContentText.setText("Downloading images " + downloadedMetadataCount + "/" + downloadedMetadataTotal);
-                if (downloadedMetadataCount == downloadedMetadataTotal)
-                    hideDownloadWindow();
-                return;
-            }
-
-            EpisodeMetadata finalEpisodeMeta = episodeMeta;
-            Task<Void> task = new Task<>() {
-                @Override
-                protected Void call() {
-                    try{
-                        String imdbBase = "https://www.imdb.com/title/";
-                        String mediaAll = "/mediaindex/?ref_=tt_mv_sm";
-                        String posterSrc = null;
-
-                        Document doc = Jsoup.connect(imdbBase + finalEpisodeMeta.imdbID + mediaAll).timeout(6000).get();
-                        Elements body = doc.select("div.media_index_thumb_list");
-                        List<String> imagesUrls = new ArrayList<>();
-                        for (Element element : body){
-                            Elements elements = element.select("a");
-                            int i = 0;
-                            for (Element e : elements){
-                                if (i == 8)
-                                    break;
-
-                                if (i != 1)
-                                    imagesUrls.add("https://www.imdb.com" + e.attr("href"));
-                                i++;
-                            }
-                            break;
-                        }
-
-                        Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + disc.id + "/"));
-
-                        int i = 0;
-                        for (String url : imagesUrls){
-                            doc = Jsoup.connect(url).timeout(6000).get();
-                            body = doc.select("div.media-viewer");
-                            for (Element element : body){
-                                posterSrc = element.select("img").attr("src");
-                            }
-
-                            if (posterSrc != null){
-                                Image originalImage = new Image(posterSrc, 480, 270, true, true);
-
-                                double maxWidth = 480;
-                                double maxHeight = 270;
-                                double originalWidth = originalImage.getWidth();
-                                double originalHeight = originalImage.getHeight();
-
-                                Image compressedImage;
-                                if (originalWidth > maxWidth || originalHeight > maxHeight) {
-                                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(originalImage, null);
-
-                                    BufferedImage resizedImage = Thumbnails.of(bufferedImage)
-                                            .size((int) maxWidth, (int) maxHeight)
-                                            .outputFormat("jpg")
-                                            .asBufferedImage();
-
-                                    compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
-                                    bufferedImage.flush();
-                                    resizedImage.flush();
-                                }else{
-                                    compressedImage = originalImage;
-                                }
-
-                                if (!originalImage.isError()){
-                                    File file = new File("src/main/resources/img/discCovers/" + disc.id + "/" + i + ".png");
-                                    try{
-                                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(compressedImage, null);
-                                        ImageIO.write(renderedImage,"jpg", file);
-                                    } catch (IOException e) {
-                                        System.err.println("Disc downloaded thumbnail not saved");
-                                    }
-                                }
-                            }
-                            i++;
-                        }
-                    } catch (IOException e) {
-                        System.err.println("AddDiscController: Error connecting to IMDB");
-                    }
-
-                    File img = new File("src/main/resources/img/discCovers/" + disc.id + "/0.png");
-                    if (!img.exists()){
-                        disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
-                    }else{
-                        disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "/0.png";
-                    }
-
-                    return null;
-                }
-            };
-
-            //Run when the process ends
-            task.setOnSucceeded(e -> {
-                updateImages();
-                downloadedMetadataCount++;
-                downloadingContentText.setText("Downloading images " + downloadedMetadataCount + "/" + downloadedMetadataTotal);
-                if (downloadedMetadataCount == downloadedMetadataTotal)
-                    hideDownloadWindow();
-            });
-
-            //Start the process in a new thread
-            new Thread(task).start();
-        }else{
-            disc.name = "";
-            disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
-        }
-    }
-
-    public void updateImages(){
-        Platform.runLater(() -> {
-            for (DiscController discController : discControllers) {
-                discController.setThumbnail();
-            }
-        });
-    }
     public void updateDisc(Disc d){
         for (DiscController discController : discControllers) {
-            if (discController.disc.id == d.id){
+            if (discController.disc.id.equals(d.id)){
                 discController.setData(d);
                 return;
             }

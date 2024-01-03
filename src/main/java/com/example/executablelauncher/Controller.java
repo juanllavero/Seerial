@@ -240,7 +240,7 @@ public class Controller implements Initializable {
         String src;
         if (!collectionList.isEmpty() && !collectionList.get(0).getSeasons().isEmpty()){
             seriesToEdit = collectionList.get(0);
-            src = "file:" + (Objects.requireNonNull(App.findSeason(collectionList.get(0).getSeasons().get(0))).getFullScreenBlurImageSrc());
+            src = "file:src/main/resources/img/backgrounds/" + (Objects.requireNonNull(App.findSeason(collectionList.get(0).getSeasons().get(0))).id) + "/fullBlur.png";
         }else{
             src = "file:src/main/resources/img/backgroundDefault.jpeg";
         }
@@ -291,13 +291,13 @@ public class Controller implements Initializable {
             if (!s.getSeasons().isEmpty()){
                 Season season = App.findSeason(s.getSeasons().get(0));
                 if (season != null){
-                    Image image = new Image("file:" + season.getFullScreenBlurImageSrc());
+                    Image image = new Image("file:src/main/resources/img/backgrounds" + season.id + "/background.png");
                     backgroundImage.setImage(image);
                     //backgroundImage.setPreserveRatio(true);
                     backgroundImage.setSmooth(true);
                     backgroundImage.setCache(true);
 
-                    ImageView background = new ImageView(new Image("file:" + season.getFullScreenBlurImageSrc(),
+                    ImageView background = new ImageView(new Image("file:src/main/resources/img/backgrounds/" + season.id + "/fullBlur.png",
                             Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true));
 
                     BackgroundImage myBI= new BackgroundImage(getCroppedImage(background),
@@ -352,6 +352,9 @@ public class Controller implements Initializable {
         double yOffset = 0;
 
         PixelReader pixelReader = img.getImage().getPixelReader();
+
+        if (newWidth == 0 || newHeight == 0)
+            return null;
 
         return new WritableImage(pixelReader, 0, 0, (int) newWidth, (int) newHeight);
     }
@@ -480,7 +483,7 @@ public class Controller implements Initializable {
                 Parent root = fxmlLoader.load();
                 SeasonController seasonController = fxmlLoader.getController();
                 seasonController.setParent(this);
-                Series newSeries = App.findSeries(s);
+                Series newSeries = App.findSeries(s.id);
                 if (newSeries != null)
                     seasonController.setSeasons(newSeries.getSeasons(), newSeries.playSameMusic);
                 Stage stage = (Stage) mainPane.getScene().getWindow();
