@@ -7,7 +7,7 @@ import com.example.executablelauncher.entities.Series;
 import java.util.Comparator;
 
 public class Utils {
-    private static int CompareSeriesOrSeasons(int order, int order2, String name, String name2) {
+    private static int CompareMedia(int order, int order2, String name, String name2) {
         if (order != 0 && order2 == 0)
             return -1;
 
@@ -23,21 +23,21 @@ public class Utils {
     public static class SeriesComparator implements Comparator<Series> {
         @Override
         public int compare(Series a, Series b) {
-            return CompareSeriesOrSeasons(a.getOrder(), b.getOrder(), a.getName(), b.getName());
+            return CompareMedia(a.getOrder(), b.getOrder(), a.getName(), b.getName());
         }
     }
 
     public static class SeasonComparator implements Comparator<Season> {
         @Override
         public int compare(Season a, Season b) {
-            return CompareSeriesOrSeasons(a.getOrder(), b.getOrder(), a.getName(), b.getName());
+            return CompareMedia(a.getOrder(), b.getOrder(), a.getName(), b.getName());
         }
     }
 
     public static class DiscComparator implements Comparator<Disc> {
         @Override
         public int compare(Disc a, Disc b) {
-            return CharSequence.compare(a.getEpisodeNumber(), b.getEpisodeNumber());
+            return CompareMedia(a.getOrder(), b.getOrder(), a.getName(), b.getName());
         }
     }
 

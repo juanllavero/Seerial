@@ -16,7 +16,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 
@@ -78,12 +77,12 @@ public class ImageDownloaderController {
     private List<Button> downloadedImages = new ArrayList<>();
     private List<File> imagesFiles = new ArrayList<>();
     private File selectedFile = null;
-    private AddSeasonController seasonParent = null;
+    private EditSeasonController seasonParent = null;
     private Stage loadingStage = null;
     private Stage stage = null;
     private String filters = "";
 
-    public void setSeasonParent(AddSeasonController parent){
+    public void setSeasonParent(EditSeasonController parent){
         seasonParent = parent;
     }
 

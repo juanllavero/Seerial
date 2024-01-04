@@ -31,10 +31,14 @@ public class UrlPasterController {
     private TextField urlField;
 
     private boolean isLogo = false;
-    private AddSeasonController addSeasonController = null;
+    private EditSeasonController addSeasonController = null;
+    private EditDiscController editDiscController = null;
 
-    public void setParent(AddSeasonController controller){
+    public void setParent(EditSeasonController controller){
         addSeasonController = controller;
+    }
+    public void setDiscParent(EditDiscController controller){
+        editDiscController = controller;
     }
 
     public void initValues(boolean isLogo){
@@ -65,10 +69,14 @@ public class UrlPasterController {
             System.err.println("Image not saved");
         }
 
-        if (isLogo)
-            addSeasonController.loadLogo("src/main/resources/img/DownloadCache/newUrlImage.png");
-        else
-            addSeasonController.loadBackground("src/main/resources/img/DownloadCache/newUrlImage.png");
+        if (addSeasonController != null){
+            if (isLogo)
+                addSeasonController.loadLogo("src/main/resources/img/DownloadCache/newUrlImage.png");
+            else
+                addSeasonController.loadBackground("src/main/resources/img/DownloadCache/newUrlImage.png");
+        }else{
+            editDiscController.loadImage("src/main/resources/img/DownloadCache/newUrlImage.png");
+        }
 
         cancelButton(event);
     }

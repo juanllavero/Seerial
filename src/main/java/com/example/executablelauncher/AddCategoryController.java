@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class AddCategoryController {
+    //region FXML ATTRIBUTES
     @FXML
     private Button addFolderButton;
 
@@ -77,6 +78,7 @@ public class AddCategoryController {
 
     @FXML
     private Label typeText;
+    //endregion
 
     private DesktopViewController parentController;
     private boolean toEdit = false;
@@ -85,6 +87,7 @@ public class AddCategoryController {
     private List<String> folders = new ArrayList<>();
     private boolean inGeneralView = true;
 
+    //region INITIALIZATION
     @FXML
     void cancelButton(ActionEvent event) {
         parentController.hideBackgroundShadow();
@@ -115,7 +118,7 @@ public class AddCategoryController {
 
     public void setValues(String catName, String lang, String type, List<String> folders, boolean showFS){
         title.setText(App.textBundle.getString("categoryWindowTitleEdit"));
-        nameText.setText(catName);
+        nameField.setText(catName);
         showOnFullscreen.setSelected(showFS);
         generalBox.setVisible(true);
         folderBox.setVisible(false);
@@ -152,6 +155,7 @@ public class AddCategoryController {
 
         showGeneralView();
     }
+    //endregion
 
     @FXML
     void nextOrSave(ActionEvent event) {
@@ -238,6 +242,7 @@ public class AddCategoryController {
         generalViewButton.getStyleClass().clear();
         generalViewButton.getStyleClass().add("editButton");
 
+        folderContainer.getChildren().clear();
         for (String folder : folders){
             showFolder(folder);
         }

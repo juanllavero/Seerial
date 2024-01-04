@@ -8,9 +8,9 @@ public class Disc implements Serializable {
     public final String id;
     public String name = "";
     public String resume = "";
+    public int order = 0;
     public String episodeNumber = "";
     public String executableSrc = "";
-    public String type = "";    //Folder or File
     public String seasonID = "";
     public String imgSrc = "";
 
@@ -33,12 +33,12 @@ public class Disc implements Serializable {
         this.name = name;
     }
 
-    public String getType() {
-        return type;
+    public int getOrder() {
+        return order;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     public String getSeasonID() {

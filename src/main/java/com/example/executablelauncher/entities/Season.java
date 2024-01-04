@@ -15,7 +15,7 @@ public class Season implements Serializable {
     public String backgroundSrc = "";
     public String videoSrc = "";
     public String musicSrc = "";
-    public String collectionName = "";
+    public String seriesID = "";
     public int order = 0;
     public int themdbID = -1;
     public String resume = "";
@@ -49,12 +49,12 @@ public class Season implements Serializable {
         this.year = year;
     }
 
-    public String getCollectionName() {
-        return collectionName;
+    public String getSeriesID() {
+        return seriesID;
     }
 
-    public void setCollectionName(String collectionName) {
-        this.collectionName = collectionName;
+    public void setSeriesID(String seriesID) {
+        this.seriesID = seriesID;
     }
 
     public String getLogoSrc() {

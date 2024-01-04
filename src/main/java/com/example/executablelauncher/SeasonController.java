@@ -3,8 +3,6 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Disc;
 import com.example.executablelauncher.entities.Season;
 import javafx.animation.FadeTransition;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -180,7 +178,7 @@ public class SeasonController {
 
         if (season.getLogoSrc().isEmpty()){
             infoBox.getChildren().remove(0);
-            Label seriesTitle = new Label(season.getCollectionName());
+            Label seriesTitle = new Label(App.findSeries(season.getSeriesID()).name);
             seriesTitle.setFont(new Font("Arial", 58));
             seriesTitle.setStyle("-fx-font-weight: bold");
             seriesTitle.setTextFill(Color.color(1, 1, 1));
@@ -417,7 +415,7 @@ public class SeasonController {
         String command = null;
         String extension = disc.getExecutableSrc().substring(disc.getExecutableSrc().length() - 3);
 
-        if (disc.getType().equals("Folder") || extension.equals("iso") || extension.equals("ISO"))
+        if (extension.equals("iso") || extension.equals("ISO"))
             command = "bluray:///" + disc.getExecutableSrc();
         else
             command = disc.getExecutableSrc();

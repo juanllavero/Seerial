@@ -900,9 +900,9 @@ public class OldDesignController {
     void addCollection(MouseEvent event){
         showBackgroundShadow();
         try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCollection-view.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editCollection-view.fxml"));
             Parent root1 = fxmlLoader.load();
-            AddCollectionController addColController = fxmlLoader.getController();
+            EditCollectionController addColController = fxmlLoader.getController();
             addColController.setParentController(this);
             addColController.initializeCategories();
             Stage stage = new Stage();
@@ -929,9 +929,9 @@ public class OldDesignController {
         showBackgroundShadow();
         if (selectedSeries != null){
             try{
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCollection-view.fxml"));
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editCollection-view.fxml"));
                 Parent root1 = fxmlLoader.load();
-                AddCollectionController addColController = fxmlLoader.getController();
+                EditCollectionController addColController = fxmlLoader.getController();
                 addColController.setParentController(this);
                 addColController.setSeries(selectedSeries);
                 Stage stage = new Stage();
@@ -953,9 +953,9 @@ public class OldDesignController {
     void addSeason(){
         showBackgroundShadow();
         try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addSeason-view.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editSeason-view.fxml"));
             Parent root1 = fxmlLoader.load();
-            AddSeasonController addSeasonController = fxmlLoader.getController();
+            EditSeasonController addSeasonController = fxmlLoader.getController();
             addSeasonController.setParentController(this);
             addSeasonController.setCollection(selectedSeries);
             Stage stage = new Stage();
@@ -978,7 +978,7 @@ public class OldDesignController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addDisc-view.fxml"));
             Parent root1 = fxmlLoader.load();
-            AddDiscController addDiscController = fxmlLoader.getController();
+            EditDiscController addDiscController = fxmlLoader.getController();
             addDiscController.setParentController(this);
             addDiscController.InitValues();
             Stage stage = new Stage();
@@ -1001,9 +1001,9 @@ public class OldDesignController {
     void editSeason(MouseEvent event){
         showBackgroundShadow();
         try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addSeason-view.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editSeason-view.fxml"));
             Parent root1 = fxmlLoader.load();
-            AddSeasonController addSeasonController = fxmlLoader.getController();
+            EditSeasonController addSeasonController = fxmlLoader.getController();
             addSeasonController.setParentController(this);
             addSeasonController.setSeason(selectedSeason);
             Stage stage = new Stage();
@@ -1037,7 +1037,7 @@ public class OldDesignController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addDisc-view.fxml"));
             Parent root1 = fxmlLoader.load();
-            AddDiscController addDiscController = fxmlLoader.getController();
+            EditDiscController addDiscController = fxmlLoader.getController();
             addDiscController.setParentController(this);
             addDiscController.setDisc(discToEdit);
             Stage stage = new Stage();

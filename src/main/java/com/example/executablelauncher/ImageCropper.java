@@ -27,8 +27,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static com.example.executablelauncher.App.lastDirectory;
-
 public class ImageCropper {
     @FXML
     private Button cropButton;
@@ -69,12 +67,12 @@ public class ImageCropper {
     public String savePath;
     private WritableImage imageToSave = null;
     private WritableImage croppedImage = null;
-    private AddCollectionController parentController = null;
-    private AddSeasonController seasonController = null;
+    private EditCollectionController parentController = null;
+    private EditSeasonController seasonController = null;
 
-    public void setSeasonParent(AddSeasonController s){ seasonController = s; }
+    public void setSeasonParent(EditSeasonController s){ seasonController = s; }
 
-    public void setCollectionParent(AddCollectionController s){ parentController = s; }
+    public void setCollectionParent(EditCollectionController s){ parentController = s; }
 
     public void initValues(String path, boolean isBackground) {
         savePath = path;
@@ -230,7 +228,7 @@ public class ImageCropper {
         }
 
         if (parentController != null) {
-            parentController.setImageFile(file.getAbsolutePath());
+            parentController.loadImage(file.getAbsolutePath());
         }else {
             seasonController.loadBackground(file.getAbsolutePath());
             seasonController.setCroppedImage(true);

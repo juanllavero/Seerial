@@ -35,6 +35,12 @@
 
 .textFieldColor{
     -fx-background-color: -fx-lighter-grey-color;
+    -fx-text-fill: -fx-light-color;
+}
+
+.textFieldColor:focused{
+    -fx-background-color: -fx-light-color;
+    -fx-text-fill: -fx-lighter-grey-color;
 }
 
 .transparent{
@@ -368,6 +374,15 @@
     -fx-background-color: -fx-grey-color;
 }
 
+.removeButton{
+    -fx-background-color: #d52f3b;
+    -fx-background-radius: 4 3 2;
+}
+
+.removeButton:hover{
+    -fx-background-color: #ff001c;
+}
+
 .desktopButton{
     -fx-background-color: -fx-lighter-grey-color;
     -fx-background-radius: 4 3 2;
@@ -475,7 +490,7 @@
 
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track{
-    -fx-background-color: rgba(0, 0, 0, 0.26);
+    -fx-background-color: -fx-dark-grey-color;
     -fx-border-color :transparent;
     -fx-background-radius : 0.0em;
     -fx-border-radius :2.0em;

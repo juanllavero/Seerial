@@ -18,9 +18,13 @@ module com.example.executablelauncher {
     requires thumbnailator;
     requires info.movito.themoviedbapi;
     requires org.slf4j;
+    requires okhttp3;
+    requires com.fasterxml.jackson.databind;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;
     exports com.example.executablelauncher.entities;
     opens com.example.executablelauncher.entities to javafx.fxml;
+    exports com.example.executablelauncher.tmdbMetadata;
+    opens com.example.executablelauncher.tmdbMetadata to javafx.fxml;
 }

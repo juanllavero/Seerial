@@ -1,29 +1,21 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.*;
-import com.github.m0nk3y2k4.thetvdb.api.model.data.Episode;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import info.movito.themoviedbapi.*;
-import info.movito.themoviedbapi.model.*;
-import info.movito.themoviedbapi.model.tv.TvEpisode;
-import info.movito.themoviedbapi.model.tv.TvSeason;
-import info.movito.themoviedbapi.model.tv.TvSeries;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import com.google.gson.Gson;
 import javafx.stage.StageStyle;
 import org.apache.commons.io.FileUtils;
-import info.movito.themoviedbapi.model.core.MovieResultsPage;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -32,7 +24,6 @@ import java.nio.file.Files;
 import java.util.*;
 
 public class App extends Application {
-    public static Map<String, List<EpisodeMetadata>> episodesMetadata = new HashMap<>();
     public static Map<String, Series> series = new HashMap<>();
     public static Map<String, Season> seasons = new HashMap<>();
     public static Map<String, Disc> discs = new HashMap<>();
@@ -93,10 +84,6 @@ public class App extends Application {
         return seasons.containsKey(uuid);
     }
 
-    public static boolean seriesMetadataExists(String id){
-        return episodesMetadata.containsKey(id);
-    }
-
     public static void setPopUpProperties(Stage stage){
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(App.primaryStage);
@@ -115,7 +102,6 @@ public class App extends Application {
         String seasonsFile = "Seasons.json";
         String discsFile = "Discs.json";
         String catFile = "Categories.json";
-        String episodeMeta = "EpisodeMetadata.json";
 
         Gson gson = new Gson();
 
@@ -136,10 +122,6 @@ public class App extends Application {
             Category[] catList = gson.fromJson(reader, Category[].class);
             if (catList != null)
                 categories.addAll(List.of(catList));
-
-            reader = new JsonReader(new FileReader(episodeMeta));
-            type = new TypeToken<Map<String, List<EpisodeMetadata>>>() {}.getType();
-            episodesMetadata = new Gson().fromJson(reader, type);
         } catch (FileNotFoundException e) {
             System.err.println("Json files not found");
         }
@@ -154,7 +136,6 @@ public class App extends Application {
         String seasonsFile = "Seasons.json";
         String discsFile = "Discs.json";
         String catFile = "Categories.json";
-        String episodeMeta = "EpisodeMetadata.json";
 
         try (Writer writer = new FileWriter(collectionsFile)) {
             Gson gson = new GsonBuilder().create();
@@ -175,11 +156,6 @@ public class App extends Application {
             Gson gson = new GsonBuilder().create();
             gson.toJson(categories, writer);
         }
-
-        try (Writer writer = new FileWriter(episodeMeta)) {
-            Gson gson = new GsonBuilder().create();
-            gson.toJson(episodesMetadata, writer);
-        }
     }
 
     public static void changeLanguage(String lang){
@@ -193,15 +169,6 @@ public class App extends Application {
 
         buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
-    }
-
-    public static Series findSeriesByName(String sName){
-        for (Series s: series.values()){
-            if (s.getName().equals(sName))
-                return s;
-        }
-
-        return null;
     }
 
     public static List<Series> getSeriesFromCategory(String cat){
@@ -353,8 +320,10 @@ public class App extends Application {
         }
 
         List<String> dList = s.getDiscs();
-        for (String i : dList){
-            removeDisc(App.findDisc(i));
+        if (dList != null){
+            for (String i : dList){
+                removeDisc(App.findDisc(i));
+            }
         }
 
         for (Series serie: series.values()){

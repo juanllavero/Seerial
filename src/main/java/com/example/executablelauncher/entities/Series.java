@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Series implements Serializable {
     public final String id;
-    public long thetvdbID = 0;
     public int themdbID = -1;
     public String name = "";
     public String resume = "";

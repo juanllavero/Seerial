@@ -19,7 +19,7 @@
 
 <StackPane fx:id="mainBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
    <children>
-      <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="2027.0" opacity="0.88" pickOnBounds="true">
+      <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="2027.0" pickOnBounds="true">
          <image>
             <Image url="@../../../img/backgroundDefault.png" />
          </image>
@@ -34,13 +34,18 @@
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
+      <ImageView fx:id="globalBackgroundShadow2" fitHeight="1080.0" fitWidth="1920.0" opacity="0.5" pickOnBounds="true">
+         <image>
+            <Image url="@../../../img/desktopBackgroundShadow.png" />
+         </image>
+      </ImageView>
       <BorderPane fx:id="mainBorderPane">
          <top>
             <BorderPane fx:id="topBar" BorderPane.alignment="CENTER">
                <left>
                   <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                      <children>
-                        <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopButton" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
                               <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -54,7 +59,7 @@
                               <Insets left="10.0" />
                            </HBox.margin>
                         </ChoiceBox>
-                        <Button mnemonicParsing="false" onMouseClicked="#addCategory" styleClass="desktopButton" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onMouseClicked="#addCategory" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
                               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -66,7 +71,7 @@
                               <Insets left="5.0" right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button mnemonicParsing="false" onMouseClicked="#editCategory" styleClass="desktopButton" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onMouseClicked="#editCategory" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
                               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -78,7 +83,7 @@
                               <Insets right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button mnemonicParsing="false" onMouseClicked="#removeCategory" styleClass="desktopButton" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onMouseClicked="#removeCategory" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
                               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -148,28 +153,27 @@
                <content>
                   <StackPane fx:id="seasonInfoPane" styleClass="transparent" stylesheets="@styles.css">
                      <children>
-                        <BorderPane fx:id="seasonBorderPane" StackPane.alignment="CENTER">
-                           <padding>
-                              <Insets bottom="200.0" left="200.0" right="100.0" top="50.0" />
-                           </padding>
+                        <BorderPane fx:id="seasonBorderPane" maxHeight="-Infinity" minHeight="-Infinity" StackPane.alignment="CENTER">
                            <StackPane.margin>
                               <Insets bottom="20.0" />
                            </StackPane.margin>
-                           <center>
-                              <VBox fx:id="seasonsEpisodesBox" stylesheets="@styles.css" BorderPane.alignment="TOP_LEFT">
+                           <top>
+                              <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" prefHeight="500.0" prefWidth="1195.0" BorderPane.alignment="CENTER">
                                  <children>
-                                    <HBox fx:id="seasonContainer" />
-                                    <FlowPane fx:id="discContainer" hgap="20.0" prefWrapLength="375.0" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS">
-                                       <VBox.margin>
-                                          <Insets top="20.0" />
-                                       </VBox.margin>
-                                    </FlowPane>
+                                    <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
+                                       <image>
+                                          <Image url="@../../../img/logoTest.png" />
+                                       </image>
+                                       <HBox.margin>
+                                          <Insets bottom="5.0" left="20.0" />
+                                       </HBox.margin>
+                                    </ImageView>
                                  </children>
-                                 <BorderPane.margin>
-                                    <Insets right="10.0" />
-                                 </BorderPane.margin>
-                              </VBox>
-                           </center>
+                                 <padding>
+                                    <Insets bottom="30.0" />
+                                 </padding>
+                              </HBox>
+                           </top>
                            <right>
                               <VBox fx:id="detailsBox" BorderPane.alignment="CENTER">
                                  <children>
@@ -293,31 +297,22 @@
                                        </VBox.margin>
                                     </ImageView>
                                  </children>
-                                 <BorderPane.margin>
-                                    <Insets />
-                                 </BorderPane.margin>
                               </VBox>
                            </right>
-                           <top>
-                              <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" prefHeight="500.0" prefWidth="1195.0" BorderPane.alignment="TOP_LEFT">
+                           <center>
+                              <VBox fx:id="seasonsEpisodesBox" spacing="20.0" stylesheets="@styles.css" BorderPane.alignment="TOP_LEFT">
                                  <children>
-                                    <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
-                                       <image>
-                                          <Image url="@../../../img/logoTest.png" />
-                                       </image>
-                                       <HBox.margin>
-                                          <Insets bottom="5.0" left="20.0" />
-                                       </HBox.margin>
-                                    </ImageView>
+                                    <HBox fx:id="seasonContainer" />
+                                    <FlowPane fx:id="discContainer" hgap="20.0" nodeOrientation="LEFT_TO_RIGHT" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS" />
                                  </children>
                                  <padding>
-                                    <Insets bottom="30.0" />
+                                    <Insets bottom="10.0" />
                                  </padding>
-                                 <BorderPane.margin>
-                                    <Insets bottom="50.0" />
-                                 </BorderPane.margin>
-                              </HBox>
-                           </top>
+                              </VBox>
+                           </center>
+                           <padding>
+                              <Insets bottom="20.0" left="200.0" right="100.0" top="50.0" />
+                           </padding>
                         </BorderPane>
                      </children>
                   </StackPane>
@@ -325,7 +320,7 @@
             </ScrollPane>
          </center>
          <left>
-            <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="350.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="350.0" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="30.0" />
                </BorderPane.margin>
@@ -343,7 +338,7 @@
             </ScrollPane>
          </left>
       </BorderPane>
-      <HBox fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" StackPane.alignment="TOP_CENTER">
+      <HBox alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="37.0" prefWidth="739.0" StackPane.alignment="TOP_CENTER">
          <children>
             <BorderPane fx:id="selectionOptions" prefHeight="37.0" prefWidth="1241.0" styleClass="selectionOptions" stylesheets="@styles.css">
                <left>
@@ -387,7 +382,7 @@
             </BorderPane>
          </children>
          <StackPane.margin>
-            <Insets top="100.0" />
+            <Insets left="500.0" top="100.0" />
          </StackPane.margin>
       </HBox>
       <HBox fx:id="downloadingContentWindow" alignment="CENTER_RIGHT" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 10;" styleClass="darkerBackground" stylesheets="@styles.css" StackPane.alignment="BOTTOM_RIGHT">
@@ -408,23 +403,8 @@
       </HBox>
       <Pane fx:id="menuParentPane" prefHeight="200.0" prefWidth="1280.0" visible="false">
          <children>
-            <VBox fx:id="mainMenu" layoutX="42.0" layoutY="124.0" style="-fx-background-radius: 5px;" styleClass="darkerBackground" stylesheets="@styles.css">
+            <VBox fx:id="mainMenu" layoutX="42.0" layoutY="124.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
-                  <Button fx:id="addCollectionButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#addCollection" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Add Collection" textFill="WHITE">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/add.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <VBox.margin>
-                        <Insets left="2.0" right="2.0" />
-                     </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
                   <Button fx:id="settingsButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#openSettings" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Settings" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
@@ -472,28 +452,13 @@
                   <Insets bottom="2.0" top="2.0" />
                </padding>
             </VBox>
-            <VBox fx:id="seriesMenu" layoutX="61.0" layoutY="434.0" style="-fx-background-radius: 5px;" styleClass="darkerBackground" stylesheets="@styles.css">
+            <VBox fx:id="seriesMenu" layoutX="61.0" layoutY="434.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
                   <Button fx:id="editColButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeries" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../../../img/icons/edit.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <VBox.margin>
-                        <Insets left="2.0" right="2.0" />
-                     </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="addSeasonButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#addSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Add Season" textFill="WHITE">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/add.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -524,28 +489,13 @@
                   <Insets bottom="2.0" top="2.0" />
                </padding>
             </VBox>
-            <VBox fx:id="seasonMenu" layoutX="493.0" layoutY="479.0" style="-fx-background-radius: 5px;" styleClass="darkerBackground" stylesheets="@styles.css">
+            <VBox fx:id="seasonMenu" layoutX="493.0" layoutY="479.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
                   <Button fx:id="editSeasonButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../../../img/icons/edit.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <VBox.margin>
-                        <Insets left="2.0" right="2.0" />
-                     </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="addDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#addDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Add Episodes" textFill="WHITE">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/add.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -576,7 +526,7 @@
                   <Insets bottom="2.0" top="2.0" />
                </padding>
             </VBox>
-            <VBox fx:id="discMenu" layoutX="960.0" layoutY="332.0" style="-fx-background-radius: 5px;" styleClass="darkerBackground" stylesheets="@styles.css">
+            <VBox fx:id="discMenu" layoutX="960.0" layoutY="332.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
                   <Button fx:id="editDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
                      <graphic>
