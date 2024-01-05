@@ -5,14 +5,16 @@ import com.example.executablelauncher.entities.Series;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -26,13 +28,20 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import static com.example.executablelauncher.App.*;
 
 public class EditSeasonController {
+    //region FXML ATTRIBUTES
     @FXML
-    private Button addButton;
+    private ImageView backgroundImageView;
+
+    @FXML
+    private Label backgroundResolution;
 
     @FXML
     private Label backgroundText;
@@ -41,16 +50,22 @@ public class EditSeasonController {
     private Button cancelButton;
 
     @FXML
-    private Label logoText;
+    private Button downloadImagesButton;
+
+    @FXML
+    private VBox generalBox;
+
+    @FXML
+    private Button generalViewButton;
+
+    @FXML
+    private ScrollPane logosBox;
+
+    @FXML
+    private Button logosViewButton;
 
     @FXML
     private Button musicButton;
-
-    @FXML
-    private Label logoResolution;
-
-    @FXML
-    private Label backgroundResolution;
 
     @FXML
     private TextField musicField;
@@ -68,13 +83,22 @@ public class EditSeasonController {
     private TextField orderField;
 
     @FXML
+    private FlowPane imagesContainer;
+
+    @FXML
+    private Button saveButton;
+
+    @FXML
+    private Button selectImageButton;
+
+    @FXML
+    private CheckBox showName;
+
+    @FXML
     private Label sortingText;
 
     @FXML
     private Label title;
-
-    @FXML
-    private Label videText;
 
     @FXML
     private Button videoButton;
@@ -83,37 +107,32 @@ public class EditSeasonController {
     private TextField videoField;
 
     @FXML
+    private Label videoText;
+
+    @FXML
     private TextField yearField;
 
     @FXML
     private Label yearText;
+    //endregion
 
-    @FXML
-    private ImageView logoImageView;
-
-    @FXML
-    private ImageView backgroundImageView;
-
-    @FXML
-    private CheckBox showName;
-
-    private Series collection = null;
+    //region ATTRIBUTES
     public Season seasonToEdit = null;
+    public String seriesName = "";
+    private List<File> logoFiles = new ArrayList<>();
     private File selectedLogo = null;
     private File selectedBackground = null;
     private File selectedVideo = null;
     private File selectedMusic = null;
     private DesktopViewController parentController = null;
     private FileChooser fileChooser = new FileChooser();
-    private boolean isLogo = false;
-    private boolean isBackground = false;
 
     //Old values to check
-    private String oldLogoPath = "";
     private String oldBackgroundPath = "";
     private String oldVideoPath = "";
     private String oldMusicPath = "";
     private boolean croppedImage = false;
+    //endregion
 
     //region INITIALIZATION
     public void setParentController(DesktopViewController parent){
@@ -123,15 +142,13 @@ public class EditSeasonController {
     public void setSeason(Season s){
         seasonToEdit = s;
 
+        selectedLogo = new File(s.logoSrc);
         oldBackgroundPath = s.getBackgroundSrc();
-        oldLogoPath = s.getLogoSrc();
         oldVideoPath = s.getVideoSrc();
         oldMusicPath = s.getMusicSrc();
 
         nameField.setText(s.getName());
         yearField.setText((s.getYear()));
-        if (!s.getLogoSrc().isEmpty())
-            loadLogo(s.getLogoSrc());
         if (!s.getBackgroundSrc().isEmpty())
             loadBackground(s.getBackgroundSrc());
         if (!s.getVideoSrc().isEmpty())
@@ -142,7 +159,8 @@ public class EditSeasonController {
             musicField.setText(s.getMusicSrc());
         else
             musicField.setText("");
-        collection = App.findSeries(s.getSeriesID());
+
+        seriesName = findSeries(s.getSeriesID()).name;
 
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));
@@ -150,16 +168,16 @@ public class EditSeasonController {
         showName.setSelected(s.showName);
 
         initValues();
+        showGeneralView();
     }
     private void initValues(){
         nameText.setText(App.textBundle.getString("name"));
-        logoText.setText(App.textBundle.getString("logo"));
         yearText.setText(App.textBundle.getString("year"));
+        saveButton.setText(buttonsBundle.getString("saveButton"));
         musicButton.setText(buttonsBundle.getString("loadButton"));
         videoButton.setText(buttonsBundle.getString("loadButton"));
-        addButton.setText(App.buttonsBundle.getString("saveButton"));
         sortingText.setText(App.textBundle.getString("sortingOrder"));
-        videText.setText(App.textBundle.getString("backgroundVideo"));
+        videoText.setText(App.textBundle.getString("backgroundVideo"));
         musicText.setText(App.textBundle.getString("backgroundMusic"));
         title.setText(App.textBundle.getString("seasonWindowTitleEdit"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
@@ -187,16 +205,25 @@ public class EditSeasonController {
         File file = new File(src);
         if (file.exists()) {
             selectedLogo = file;
-            try{
-                Image img = new Image(file.toURI().toURL().toExternalForm());
-                logoResolution.setText((int)img.getWidth() + "x" + (int)img.getHeight());
-                logoImageView.setImage(img);
-            } catch (MalformedURLException e) {
-                selectedLogo = null;
-                System.err.println("Logo not loaded");
+
+            int number = 0;
+
+            for (File f : logoFiles){
+                if (Integer.parseInt(f.getName().substring(0, f.getName().lastIndexOf("."))) > number){
+                    number = Integer.parseInt(f.getName().substring(0, f.getName().lastIndexOf(".")));
+                }
             }
-        }else{
-            selectedLogo = null;
+
+            File newFile = new File("src/main/resources/img/logos/" + seasonToEdit.id + "/" + (number + 1) + ".png");
+
+            try{
+                Files.copy(selectedLogo.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }catch (IOException e){
+                System.err.println("Thumbnail not copied");
+            }
+
+            logoFiles.add(file);
+            addImage(file);
         }
     }
     public void loadBackground(String src){
@@ -266,12 +293,12 @@ public class EditSeasonController {
     }
     @FXML
     void downloadBackground(ActionEvent event) {
-        openImagesDownloader(collection.getName() + " " + nameField.getText() + " wallpaper", String.valueOf((int)Screen.getPrimary().getBounds().getWidth())
+        openImagesDownloader(seriesName + " wallpaper", String.valueOf((int)Screen.getPrimary().getBounds().getWidth())
                 , String.valueOf((int)Screen.getPrimary().getBounds().getHeight()), false, false, false);
     }
     @FXML
     void downloadLogo(ActionEvent event) {
-        openImagesDownloader(collection.getName() + " logo", Integer.toString(353), Integer.toString(122), false, true, true);
+        openImagesDownloader(seriesName + " logo", Integer.toString(353), Integer.toString(122), false, true, true);
     }
     private void openImagesDownloader(String searchText, String width, String height, boolean isCover, boolean isLogo, boolean transparent){
         try{
@@ -326,13 +353,90 @@ public class EditSeasonController {
         }
         oldBackgroundPath = "";
     }
+    //endregion
 
+    //region SECTIONS
+    private void showImages() {
+        if (logoFiles.isEmpty())
+            loadImages();
+    }
+    private void loadImages(){
+        //Add images to view
+        File dir = new File("src/main/resources/img/logos/" + seasonToEdit.id);
+        if (dir.exists()){
+            File[] files = dir.listFiles();
+            assert files != null;
+            logoFiles.addAll(Arrays.asList(files));
+
+            for (File f : logoFiles){
+                addImage(f);
+
+                if (selectedLogo != null && selectedLogo.getAbsolutePath().equals(f.getAbsolutePath())){
+                    selectButton((Button) imagesContainer.getChildren().get(logoFiles.indexOf(f)));
+                }
+            }
+        }
+    }
+    private void addImage(File file){
+        try{
+            Image img = new Image(file.toURI().toURL().toExternalForm(), 150, 84, true, true);
+            ImageView image = new ImageView(img);
+
+            Button btn = new Button();
+            btn.setGraphic(image);
+            btn.setText("");
+            btn.getStyleClass().add("downloadedImageButton");
+            btn.setPadding(new Insets(2));
+
+            btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                selectButton(btn);
+            });
+
+            imagesContainer.getChildren().add(btn);
+        } catch (MalformedURLException e) {
+            System.err.println("EditDiscController: Error loading image thumbnail");
+        }
+    }
+    private void selectButton(Button btn){
+        int index = 0;
+        int i = 0;
+        for (Node n : imagesContainer.getChildren()){
+            Button b = (Button)n;
+            b.getStyleClass().clear();
+            b.getStyleClass().add("downloadedImageButton");
+            if (b == btn)
+                index = i;
+            i++;
+        }
+
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("downloadedImageButtonSelected");
+
+        selectedLogo = logoFiles.get(index);
+    }
     @FXML
-    void removeLogo(ActionEvent event) {
-        selectedLogo = null;
-        logoImageView.setImage(null);
-        seasonToEdit.setLogoSrc("");
-        oldLogoPath = "";
+    void showGeneralView() {
+        logosBox.setVisible(false);
+        generalBox.setVisible(true);
+
+        generalViewButton.getStyleClass().clear();
+        generalViewButton.getStyleClass().add("buttonSelected");
+
+        logosViewButton.getStyleClass().clear();
+        logosViewButton.getStyleClass().add("editButton");
+    }
+    @FXML
+    void showLogosView() {
+        logosBox.setVisible(true);
+        generalBox.setVisible(false);
+
+        logosViewButton.getStyleClass().clear();
+        logosViewButton.getStyleClass().add("buttonSelected");
+
+        generalViewButton.getStyleClass().clear();
+        generalViewButton.getStyleClass().add("editButton");
+
+        showImages();
     }
     //endregion
 
@@ -426,7 +530,6 @@ public class EditSeasonController {
 
         seasonToEdit.setName(nameField.getText());
         seasonToEdit.setYear(yearField.getText());
-        seasonToEdit.setSeriesID(collection.id);
         seasonToEdit.showName = showName.isSelected();
 
         //Save Background
@@ -439,23 +542,6 @@ public class EditSeasonController {
         if (oldBackgroundPath.isEmpty() || !newName.equals(oldName) || croppedImage){
             if (selectedBackground != null)
                 parentController.saveBackground(seasonToEdit, seasonToEdit != null, selectedBackground.getAbsolutePath(), croppedImage);
-        }
-
-        //Save Logo
-        if (selectedLogo != null)
-            newName = selectedLogo.getName();
-        oldName = "";
-        if (!oldLogoPath.isEmpty())
-            oldName = oldLogoPath.substring(oldLogoPath.lastIndexOf("/")+1);
-        if (oldLogoPath.isEmpty() || !newName.equals(oldName)){
-            try {
-                File f = new File(seasonToEdit.getLogoSrc());
-                if (f.exists())
-                    Files.delete(FileSystems.getDefault().getPath(seasonToEdit.getLogoSrc()));
-                saveLogo(seasonToEdit);
-            } catch (IOException e) {
-                System.err.println("Logo not deleted");
-            }
         }
 
         //Save Video
@@ -498,24 +584,16 @@ public class EditSeasonController {
             seasonToEdit.setOrder(Integer.parseInt(orderField.getText()));
         }
 
+        //Save Logo
+        if (selectedLogo != null)
+            seasonToEdit.logoSrc = "src/main/resources/img/logos/" + seasonToEdit.id + "/" + selectedLogo.getName();
+
         parentController.hideBackgroundShadow();
         parentController.refreshSeason(seasonToEdit);
         parentController.clearImageCache();
 
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
         stage.close();
-    }
-    private void saveLogo(Season s){
-        if (selectedLogo != null){
-            File newLogo = new File("src/main/resources/img/logos/" + s.getId() + "_sl.png");
-
-            try{
-                Files.copy(selectedLogo.toPath(), newLogo.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }catch (IOException e){
-                System.err.println("Logo not copied");
-            }
-            s.setLogoSrc("src/main/resources/img/logos/" + newLogo.getName());
-        }
     }
     private void saveVideo(Season s){
         if (!videoField.getText().isEmpty()){

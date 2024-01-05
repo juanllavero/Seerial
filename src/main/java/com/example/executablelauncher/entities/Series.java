@@ -16,6 +16,7 @@ public class Series implements Serializable {
     public String category = "";
     public int order = 0;
     public String coverSrc = "";
+    public String year = "";
     public boolean playSameMusic = false;
     public List<String> seasons = new ArrayList<>();
     public int seasonsNumber = 0;
@@ -57,10 +58,6 @@ public class Series implements Serializable {
 
     public void removeSeason(String id){
         seasons.remove(id);
-    }
-
-    public void clearSeasons(){
-        seasons.clear();
     }
 
     public String getCategory() {

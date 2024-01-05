@@ -71,6 +71,14 @@
     -fx-background-color: -fx-main-color;
 }
 
+.searchResultButton{
+    -fx-background-color: transparent;
+}
+
+.searchResultButton:hover{
+    -fx-background-color: rgba(197, 197, 197, 0.16);
+}
+
 .editButton{
     -fx-background-color: transparent;
     -fx-text-fill: white;

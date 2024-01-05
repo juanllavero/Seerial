@@ -50,7 +50,6 @@ public class App extends Application {
         //Set a few of TheMovieDB translations for metadata
         tmdbLanguages = List.of(new Locale[]{
                 Locale.forLanguageTag("es-ES"),
-                Locale.forLanguageTag("es-MX"),
                 Locale.forLanguageTag("en-US"),
                 Locale.forLanguageTag("de-DE"),
                 Locale.forLanguageTag("it-IT"),
@@ -110,13 +109,22 @@ public class App extends Application {
             Type type = new TypeToken<Map<String, Series>>() {}.getType();
             series = new Gson().fromJson(reader, type);
 
+            if (series == null)
+                series = new HashMap<>();
+
             reader = new JsonReader(new FileReader(seasonsFile));
             type = new TypeToken<Map<String, Season>>() {}.getType();
             seasons = new Gson().fromJson(reader, type);
 
+            if (seasons == null)
+                seasons = new HashMap<>();
+
             reader = new JsonReader(new FileReader(discsFile));
             type = new TypeToken<Map<String, Disc>>() {}.getType();
             discs = new Gson().fromJson(reader, type);
+
+            if (discs == null)
+                discs = new HashMap<>();
 
             reader = new JsonReader(new FileReader(catFile));
             Category[] catList = gson.fromJson(reader, Category[].class);
@@ -219,30 +227,6 @@ public class App extends Application {
         }
     }
 
-    public static void removeCategory(String name){
-        Category category = null;
-
-        for (Category cat : categories){
-            if (cat.name.equals(name)){
-                category = cat;
-                break;
-            }
-        }
-
-        if (category == null)
-            return;
-
-        for (String seriesID : category.series){
-            try{
-                removeCollection(App.findSeries(seriesID));
-            } catch (IOException e) {
-                System.err.println("removeCategory error");
-            }
-        }
-
-        categories.remove(category);
-    }
-
     public static Category findCategory(String name){
         for (Category c : categories){
             if (c.name.equals(name))
@@ -289,80 +273,86 @@ public class App extends Application {
         return discs.get(id);
     }
 
-    public static void removeCollection(Series col) throws IOException {
-        Series s = findSeries(col.id);
-        assert s != null;
+    //region REMOVE
+    public static void removeCategory(String name){
+        Category category = null;
 
-        for (String seasonID : col.seasons){
-            removeSeason(seasonID);
-        }
-
-        Files.delete(FileSystems.getDefault().getPath(s.getCoverSrc()));
-        s.clearSeasons();
-        series.remove(s.id);
-        SaveData();
-    }
-
-    public static void removeSeason(String id){
-        Season s = seasons.get(id);
-        assert s != null;
-
-        try{
-            FileUtils.deleteDirectory(new File("src/main/resources/img/backgrounds/" + id + "/"));
-            if (!s.getLogoSrc().isEmpty())
-                Files.delete(FileSystems.getDefault().getPath(s.getLogoSrc()));
-            if (!s.getMusicSrc().isEmpty())
-                Files.delete(FileSystems.getDefault().getPath(s.getMusicSrc()));
-            if (!s.getVideoSrc().isEmpty())
-                Files.delete(FileSystems.getDefault().getPath(s.getVideoSrc()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        List<String> dList = s.getDiscs();
-        if (dList != null){
-            for (String i : dList){
-                removeDisc(App.findDisc(i));
-            }
-        }
-
-        for (Series serie: series.values()){
-            if (serie.getSeasons().contains(s.getId())) {
-                serie.removeSeason(s.getId());
+        for (Category cat : categories){
+            if (cat.name.equals(name)){
+                category = cat;
                 break;
             }
         }
 
-        seasons.remove(s.id);
+        if (category == null)
+            return;
+
+        List<String> seriesIDs = new ArrayList<>(category.series);
+        for (String seriesID : seriesIDs){
+            Series s = series.get(seriesID);
+            if (s != null)
+                removeCollection(s, category);
+        }
+
+        categories.remove(category);
     }
 
-    public static void removeDisc(Disc d){
-        Season s = findSeason(d.getSeasonID());
-        if (s != null)
-            s.removeDisc(d.id);
+    public static void removeCollection(Series s, Category category) {
+        List<String> seasonIDs = new ArrayList<>(s.seasons);
+        for (String seasonID : seasonIDs){
+            Season season = seasons.get(seasonID);
+
+            if (season != null)
+                removeSeason(season, s);
+        }
 
         try{
-            FileUtils.deleteDirectory(new File("src/main/resources/img/discCovers/" + d.id + "/"));
+            FileUtils.deleteDirectory(new File("src/main/resources/img/seriesCovers/" + s.id));
         } catch (IOException e) {
-            System.err.println("App: Error deleting directory: src/main/resources/img/discCovers/" + d.id + "/");
+            System.err.println("App.removeCollection: Error deleting cover images directory");
+        }
+        category.series.remove(s.id);
+        series.remove(s.id);
+    }
+
+    public static void removeSeason(Season season, Series series){
+        List<String> discsIDs = new ArrayList<>(season.discs);
+        for (String discID : discsIDs){
+            Disc disc = discs.get(discID);
+
+            if (disc != null)
+                removeDisc(disc, season);
         }
 
-        discs.remove(d.id);
-    }
+        series.removeSeason(season.id);
+        series.seasonsNumber--;
 
-    public static boolean nameExist(String name){
-        for (Series s : series.values()){
-            if (s.getName().equals(name))
-                return true;
+        try{
+            FileUtils.deleteDirectory(new File("src/main/resources/img/backgrounds/" + season.id));
+            FileUtils.deleteDirectory(new File("src/main/resources/img/logos/" + season.id));
+            if (!season.getMusicSrc().isEmpty())
+                Files.delete(FileSystems.getDefault().getPath(season.getMusicSrc()));
+            if (!season.getVideoSrc().isEmpty())
+                Files.delete(FileSystems.getDefault().getPath(season.getVideoSrc()));
+        } catch (IOException e) {
+            System.err.println("App.removeSeason: Error deleting images files and directories");
         }
-        return false;
+
+        seasons.remove(season.id);
     }
 
-    public static List<Series> getCollection(){
-        List<Series> seriesList = new ArrayList<>(series.values().stream().toList());
-        seriesList.sort(new Utils.SeriesComparator());
-        return seriesList;
+    public static void removeDisc(Disc disc, Season season){
+        season.removeDisc(disc.id);
+
+        try{
+            FileUtils.deleteDirectory(new File("src/main/resources/img/discCovers/" + disc.id));
+        } catch (IOException e) {
+            System.err.println("App.removeDisc: Error deleting directory: src/main/resources/img/discCovers/" + disc.id);
+        }
+
+        discs.remove(disc.id);
     }
+    //endregion
 
     public static void showErrorMessage(String title, String header, String content){
         Alert alert = new Alert(Alert.AlertType.ERROR);

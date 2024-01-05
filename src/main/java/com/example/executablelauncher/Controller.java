@@ -428,7 +428,7 @@ public class Controller implements Initializable {
     }
 
     public void Remove() throws IOException {
-        if (seriesToEdit != null){
+        /*if (seriesToEdit != null){
             int index = collectionList.indexOf(seriesToEdit);
             if (!cardContainer.getChildren().isEmpty() && cardContainer.getChildren().size() > index)
                 cardContainer.getChildren().remove(index);
@@ -437,7 +437,7 @@ public class Controller implements Initializable {
             Files.delete(FileSystems.getDefault().getPath(seriesToEdit.getCoverSrc()));
             seriesToEdit = null;
             defaultSelection();
-        }
+        }*/
         hideContextMenu();
     }
 

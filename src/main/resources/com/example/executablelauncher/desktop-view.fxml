@@ -401,7 +401,7 @@
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>
       </HBox>
-      <Pane fx:id="menuParentPane" prefHeight="200.0" prefWidth="1280.0" visible="false">
+      <Pane fx:id="menuParentPane" prefHeight="200.0" prefWidth="1280.0">
          <children>
             <VBox fx:id="mainMenu" layoutX="42.0" layoutY="124.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
@@ -455,13 +455,6 @@
             <VBox fx:id="seriesMenu" layoutX="61.0" layoutY="434.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
                   <Button fx:id="editColButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeries" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/edit.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
@@ -469,14 +462,12 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button fx:id="removeColButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeCollection" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Remove" textFill="WHITE">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/remove.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
+                  <Button fx:id="identificationShow" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#correctIdentificationShow" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Correct Identification" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="removeColButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeCollection" styleClass="closeButton" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
@@ -492,13 +483,6 @@
             <VBox fx:id="seasonMenu" layoutX="493.0" layoutY="479.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
                   <Button fx:id="editSeasonButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/edit.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
@@ -506,14 +490,12 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button fx:id="removeSeasonButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Remove" textFill="WHITE">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/remove.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
+                  <Button fx:id="identificationMovie" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#correctIdentificationMovie" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Correct Identification" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="removeSeasonButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeSeason" styleClass="closeButton" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
@@ -529,13 +511,6 @@
             <VBox fx:id="discMenu" layoutX="960.0" layoutY="332.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
                   <Button fx:id="editDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/edit.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
@@ -543,14 +518,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button fx:id="removeDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Remove" textFill="WHITE">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/icons/remove.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
+                  <Button fx:id="removeDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeDisc" styleClass="closeButton" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>

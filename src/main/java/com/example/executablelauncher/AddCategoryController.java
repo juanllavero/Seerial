@@ -177,11 +177,11 @@ public class AddCategoryController {
                 return;
             }
 
-            String language = "es-ES";
+            String language = "es";
             List<Locale> languages = App.tmdbLanguages;
             for (Locale locale : languages){
                 if (locale.getDisplayName().equals(languageChoice.getValue())){
-                    language = locale.toString();
+                    language = locale.getLanguage();
                 }
             }
 

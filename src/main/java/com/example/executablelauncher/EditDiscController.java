@@ -92,9 +92,7 @@ public class EditDiscController {
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         saveButton.setText(App.buttonsBundle.getString("saveButton"));
         fileText.setText(App.textBundle.getString("file"));
-
-        if (nameText != null)
-            nameText.setText(App.textBundle.getString("name"));
+        nameText.setText(App.textBundle.getString("name"));
 
         selectedImage = new File(d.imgSrc);
         nameField.setText(d.getName());

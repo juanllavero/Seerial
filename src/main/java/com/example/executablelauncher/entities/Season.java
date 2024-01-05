@@ -108,8 +108,4 @@ public class Season implements Serializable {
     public void removeDisc(String id){
         discs.remove(id);
     }
-
-    public void addDisc(Disc d){
-        discs.add(d.getId());
-    }
 }

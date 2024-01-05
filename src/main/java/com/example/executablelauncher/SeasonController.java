@@ -490,24 +490,7 @@ public class SeasonController {
 
     @FXML
     void removeSeason(){
-        String currentID = seasons.get(currentSeason).getId();
 
-        seasons.remove(seasons.get(currentSeason));
-        App.removeSeason(currentID);
-
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = (Stage) mainBox.getScene().getWindow();
-            stage.setTitle("ExecutableLauncher");
-            stage.setScene(new Scene(root));
-            stage.setMaximized(true);
-            stage.setWidth(Screen.getPrimary().getBounds().getWidth());
-            stage.setHeight(Screen.getPrimary().getBounds().getHeight());
-            stage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @FXML
