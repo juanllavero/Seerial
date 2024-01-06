@@ -385,10 +385,10 @@
             <Insets left="500.0" top="100.0" />
          </StackPane.margin>
       </HBox>
-      <HBox fx:id="downloadingContentWindow" alignment="CENTER_RIGHT" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 10;" styleClass="darkerBackground" stylesheets="@styles.css" StackPane.alignment="BOTTOM_RIGHT">
+      <HBox fx:id="downloadingContentWindow" alignment="CENTER_RIGHT" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 5;" styleClass="midSectionLightColor" stylesheets="@styles.css" StackPane.alignment="BOTTOM_RIGHT">
          <children>
             <ProgressIndicator prefHeight="32.0" prefWidth="51.0" />
-            <Label fx:id="downloadingContentText" text="Downloading images 1/2" textFill="WHITE">
+            <Label fx:id="downloadingContentText" text="Downloading metadata" textFill="WHITE">
                <HBox.margin>
                   <Insets right="20.0" />
                </HBox.margin>
@@ -400,6 +400,9 @@
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>
+         <effect>
+            <DropShadow />
+         </effect>
       </HBox>
       <Pane fx:id="menuParentPane" prefHeight="200.0" prefWidth="1280.0">
          <children>

@@ -17,8 +17,10 @@ import info.movito.themoviedbapi.model.tv.TvEpisode;
 import info.movito.themoviedbapi.model.tv.TvSeason;
 import info.movito.themoviedbapi.model.tv.TvSeries;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -261,8 +263,6 @@ public class DesktopViewController {
     private double xOffset = 0;
     private double yOffset = 0;
     private double ASPECT_RATIO = 16.0 / 9.0;
-    private int downloadedMetadataCount = 0;
-    private int downloadedMetadataTotal = 0;
     private boolean acceptRemove = false;
     //endregion
 
@@ -413,25 +413,7 @@ public class DesktopViewController {
             if (s == null)
                 continue;
 
-            Button seriesButton = new Button();
-            seriesButton.setText(s.getName());
-            seriesButton.setBackground(null);
-            seriesButton.getStyleClass().add("desktopTextButton");
-            seriesButton.setMaxWidth(Integer.MAX_VALUE);
-            seriesButton.setAlignment(Pos.BASELINE_LEFT);
-            seriesButton.setWrapText(true);
-
-            seriesButton.setPadding(new Insets(5, 5, 5, 5));
-
-            seriesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
-                selectSeriesButton(seriesButton);
-                if (event.getButton() == MouseButton.SECONDARY) {
-                    openSeriesMenu(event);
-                }
-            });
-
-            seriesContainer.getChildren().add(seriesButton);
-            seriesButtons.add(seriesButton);
+            addSeriesCard(s);
         }
 
         if (seriesList.isEmpty())
@@ -616,10 +598,8 @@ public class DesktopViewController {
         }
     }
 
-    public void showDownloadWindow(int total){
-        downloadedMetadataCount = 0;
-        downloadedMetadataTotal = total;
-        downloadingContentText.setText("Downloading images " + downloadedMetadataCount + "/" + downloadedMetadataTotal);
+    public void showDownloadWindow(){
+        downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindow.setVisible(true);
     }
 
@@ -1162,7 +1142,7 @@ public class DesktopViewController {
         hideBackgroundShadow();
     }
     public void correctIdentificationShow(TvSeries tvSeries){
-        asfsdfas
+
     }
     public void correctIdentificationMovie(MovieDb movie){
         selectedSeason.name = movie.getTitle();
@@ -1172,7 +1152,6 @@ public class DesktopViewController {
 
         try{
             FileUtils.deleteDirectory(new File("src/main/resources/img/logos/" + selectedSeason.id));
-            FileUtils.deleteDirectory(new File("src/main/resources/img/backgrounds/" + selectedSeason.id));
         } catch (IOException e) {
             System.err.println("DesktopViewController.correctIdentificationMovie: Error deleting directories");
         }
@@ -1186,7 +1165,7 @@ public class DesktopViewController {
 
         downloadLogos(selectedSeason, selectedSeason.themdbID);
         downloadImages(selectedSeries, selectedSeason.themdbID);
-        saveBackground(selectedSeason, false, "src/main/resources/img/DownloadCache/" + selectedSeries.id + ".png", false);
+        saveBackground(selectedSeason, false, "src/main/resources/img/DownloadCache/" + selectedSeason.themdbID + ".png", false);
 
         if (selectedSeason.getDiscs().size() == 1){
             Disc disc = App.findDisc(selectedSeason.getDiscs().get(0));
@@ -1222,6 +1201,10 @@ public class DesktopViewController {
 
     //region AUTOMATED FILE SEARCH
     public void loadCategory(String name){
+        backgroundShadow.setVisible(false);
+        downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
+        downloadingContentWindow.setVisible(true);
+
         categorySelector.getItems().add(name);
         categorySelector.setValue(name);
 
@@ -1230,35 +1213,69 @@ public class DesktopViewController {
         if (currentCategory == null)
             return;
 
-        if (currentCategory.type.equals("Shows"))
-            seriesMetadata = tmdbApi.getTvSeries();
-        else
-            moviesMetadata = tmdbApi.getMovies();
-
-        List<String> folders = currentCategory.folders;
-        for (String folderSrc : folders){
-            File folder = new File(folderSrc);
-
-            if (!folder.exists())
-                continue;
-
-            File[] files = folder.listFiles();
-
-            if (files == null)
-                continue;
-
-            for (File f : files){
-                if (currentCategory.type.equals("Shows"))
-                    addTVShow(f);
-                else
-                    addMovieOrConcert(f);
-            }
-        }
-
-        clearImageCache();
-
-        updateCategories();
+        loadElements();
     }
+
+    private void loadElements(){
+        Task<Void> loadElementsTask = new Task<>() {
+            @Override
+            protected Void call() {
+                if (currentCategory.type.equals("Shows"))
+                    seriesMetadata = tmdbApi.getTvSeries();
+                else
+                    moviesMetadata = tmdbApi.getMovies();
+
+                List<String> folders = currentCategory.folders;
+                int totalSize = folders.size();
+                int midElement = totalSize / 2;
+
+                loadHalfTask(folders, 0, midElement);
+                loadHalfTask(folders, midElement, totalSize);
+                return null;
+            }
+        };
+
+        loadElementsTask.setOnSucceeded(e -> {
+            clearImageCache();
+            hideDownloadWindow();
+        });
+
+        new Thread(loadElementsTask).start();
+    }
+
+    private void loadHalfTask(List<String> files, int start, int end){
+        Task<Void> loadHalfTask = new Task<>() {
+            @Override
+            protected Void call() {
+                for (int i = start; i < end; i++){
+                    searchLocalFiles(files, i);
+                }
+                return null;
+            }
+        };
+
+        new Thread(loadHalfTask).start();
+    }
+
+    private void searchLocalFiles(List<String> folders, int i) {
+        File folder = new File(folders.get(i));
+
+        if (!folder.exists())
+            return;
+
+        File[] files = folder.listFiles();
+
+        if (files == null)
+            return;
+
+        for (File f : files){
+            if (currentCategory.type.equals("Shows"))
+                addTVShow(f);
+            else
+                addMovieOrConcert(f);
+        }
+    }
+
     private void addTVShow(File directory){
         if (directory.isFile())
             return;
@@ -1360,6 +1377,8 @@ public class DesktopViewController {
         }
 
         episodesGroup = null;
+
+        addSeries(newSeries);
     }
     private SeasonsGroupMetadata getEpisodesGroup(int tmdbID){
         try{
@@ -1718,6 +1737,8 @@ public class DesktopViewController {
                 if (!f.isDirectory())
                     processMovieOrConcert(f, newSeason);
             }
+
+            addSeries(newSeries);
             //endregion
         }else {
             File[] filesInDir = f.listFiles();
@@ -1780,6 +1801,8 @@ public class DesktopViewController {
                         }
                     }
                 }
+
+                addSeries(newSeries);
                 //endregion
             }else if (!filesInRoot.isEmpty()){
                 //region MOVIE FILE/CONCERT FILES INSIDE FOLDER
@@ -1817,6 +1840,8 @@ public class DesktopViewController {
                             processMovieOrConcert(file, newSeason);
                     }
                 }
+
+                addSeries(newSeries);
                 //endregion
             }
         }
@@ -2099,8 +2124,35 @@ public class DesktopViewController {
 
     //region ADD SECTION
     public void addSeries(Series s){
-        seriesList.add(s);
-        selectCategory(currentCategory.name);
+        Platform.runLater(() -> {
+            seriesList.add(s);
+            addSeriesCard(s);
+        });
+        //selectCategory(currentCategory.name);
+
+        asdasfdsd
+
+    }
+    private void addSeriesCard(Series s){
+        Button seriesButton = new Button();
+        seriesButton.setText(s.getName());
+        seriesButton.setBackground(null);
+        seriesButton.getStyleClass().add("desktopTextButton");
+        seriesButton.setMaxWidth(Integer.MAX_VALUE);
+        seriesButton.setAlignment(Pos.BASELINE_LEFT);
+        seriesButton.setWrapText(true);
+
+        seriesButton.setPadding(new Insets(5, 5, 5, 5));
+
+        seriesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+            selectSeriesButton(seriesButton);
+            if (event.getButton() == MouseButton.SECONDARY) {
+                openSeriesMenu(event);
+            }
+        });
+
+        seriesContainer.getChildren().add(seriesButton);
+        seriesButtons.add(seriesButton);
     }
     @FXML
     void addCategory(MouseEvent event) {

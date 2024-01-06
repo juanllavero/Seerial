@@ -15,13 +15,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1096.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageDownloaderController">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1096.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageDownloaderController">
    <children>
       <BorderPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="686.0" prefWidth="1096.0" styleClass="lessDarkBackground" stylesheets="@styles.css">
          <center>
             <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" hmax="0.0" prefHeight="200.0" prefWidth="200.0" styleClass="darkerBackground" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <content>
-                  <FlowPane fx:id="imagesContainer" alignment="TOP_CENTER" hgap="10.0" prefHeight="247.0" prefWidth="598.0" prefWrapLength="300.0" styleClass="darkerBackground" stylesheets="@styles.css" vgap="10.0">
+                  <FlowPane fx:id="imagesContainer" alignment="TOP_CENTER" hgap="10.0" prefHeight="247.0" prefWidth="598.0" prefWrapLength="300.0" styleClass="midSectionLightColor" stylesheets="@styles.css" vgap="10.0">
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
@@ -30,7 +30,7 @@
             </ScrollPane>
          </center>
          <bottom>
-            <VBox alignment="CENTER" styleClass="lessDarkBackground" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+            <VBox alignment="CENTER" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <children>
                   <Button fx:id="loadMoreButton" mnemonicParsing="false" onAction="#loadMore" styleClass="desktopButton" stylesheets="@styles.css" text="Load more" textFill="WHITE">
                      <VBox.margin>
@@ -42,9 +42,9 @@
                         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                            <children>
                               <Label fx:id="resolutionText" text="Resolution: " textFill="WHITE" />
-                              <TextField fx:id="widthField" prefHeight="25.0" prefWidth="49.0" text="1920" />
+                              <TextField fx:id="widthField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1920" />
                               <Label text="X" />
-                              <TextField fx:id="heightField" prefHeight="25.0" prefWidth="49.0" text="1080" />
+                              <TextField fx:id="heightField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1080" />
                            </children>
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -52,7 +52,7 @@
                         </HBox>
                      </left>
                      <center>
-                        <TextField fx:id="searchTextField" BorderPane.alignment="CENTER">
+                        <TextField fx:id="searchTextField" styleClass="textFieldColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                            <BorderPane.margin>
                               <Insets right="5.0" />
                            </BorderPane.margin>
@@ -100,11 +100,11 @@
             </VBox>
          </bottom>
          <top>
-            <BorderPane stylesheets="@styles.css" BorderPane.alignment="CENTER">
+            <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <left>
                   <Label fx:id="title" text="Image Downloader" textFill="WHITE" BorderPane.alignment="CENTER">
                      <font>
-                        <Font size="14.0" />
+                        <Font size="18.0" />
                      </font>
                   </Label>
                </left>
@@ -117,7 +117,7 @@
             </BorderPane>
          </top>
       </BorderPane>
-      <BorderPane fx:id="downloadingPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="199.0" prefWidth="439.0" styleClass="lessDarkBackground" stylesheets="@styles.css">
+      <BorderPane fx:id="downloadingPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="199.0" prefWidth="439.0" styleClass="borderSectionsColor" stylesheets="@styles.css">
          <top>
             <Label fx:id="downloadingText" text="Downloading..." textFill="WHITE" BorderPane.alignment="CENTER">
                <BorderPane.margin>
