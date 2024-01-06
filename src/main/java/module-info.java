@@ -20,6 +20,7 @@ module com.example.executablelauncher {
     requires org.slf4j;
     requires okhttp3;
     requires com.fasterxml.jackson.databind;
+    requires imgscalr.lib;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

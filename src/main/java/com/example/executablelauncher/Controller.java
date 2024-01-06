@@ -164,8 +164,8 @@ public class Controller implements Initializable {
         backgroundImage.setFitWidth(screenWidth);
         backgroundImage.setPreserveRatio(false);
         
-        sideMenuBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
-        sideMenuBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth() / 4.5);
+        sideMenuBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight());
+        sideMenuBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth() / 6);
         sideMenu.prefHeightProperty().bind(sideMenuBox.prefHeightProperty());
         sideMenu.prefWidthProperty().bind(sideMenuBox.prefWidthProperty());
 
@@ -291,21 +291,21 @@ public class Controller implements Initializable {
             if (!s.getSeasons().isEmpty()){
                 Season season = App.findSeason(s.getSeasons().get(0));
                 if (season != null){
-                    Image image = new Image("file:src/main/resources/img/backgrounds" + season.id + "/background.png");
+                    /*Image image = new Image("file:src/main/resources/img/backgrounds/" + season.id + "/fullBlur.png");
                     backgroundImage.setImage(image);
                     //backgroundImage.setPreserveRatio(true);
                     backgroundImage.setSmooth(true);
-                    backgroundImage.setCache(true);
+                    backgroundImage.setCache(true);*/
 
                     ImageView background = new ImageView(new Image("file:src/main/resources/img/backgrounds/" + season.id + "/fullBlur.png",
                             Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true));
 
-                    BackgroundImage myBI= new BackgroundImage(getCroppedImage(background),
+                    BackgroundImage myBI= new BackgroundImage(Objects.requireNonNull(getCroppedImage(background)),
                             BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
                             BackgroundSize.DEFAULT);
                     mainBox.setBackground(new Background(myBI));
 
-                    backgroundImage.setImage(getCroppedImage(backgroundImage));
+                    backgroundImage.setImage(getCroppedImage(background));
                 }
 
                 //Node node = cardContainer.getChildren().get(collectionList.indexOf(s));

@@ -117,13 +117,13 @@
          <children>
             <AnchorPane StackPane.alignment="CENTER">
                <children>
-                  <AnchorPane fx:id="sideMenuBox" layoutX="975.0" prefHeight="720.0" prefWidth="300.0" AnchorPane.rightAnchor="50.0">
+                  <AnchorPane fx:id="sideMenuBox" layoutX="975.0" maxHeight="-Infinity" prefHeight="720.0" prefWidth="387.0" AnchorPane.rightAnchor="0.0">
                      <children>
-                        <VBox fx:id="sideMenu" layoutX="-70.0" stylesheets="@styles.css" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+                        <VBox fx:id="sideMenu" layoutX="-64.0" prefHeight="720.0" prefWidth="348.0" styleClass="midSectionLightColor" stylesheets="@styles.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <Label prefHeight="34.0" prefWidth="247.0" text="VideoLauncher" textFill="WHITE">
                                  <font>
-                                    <Font size="23.0" />
+                                    <Font size="28.0" />
                                  </font>
                                  <VBox.margin>
                                     <Insets bottom="10.0" left="15.0" />
@@ -131,7 +131,7 @@
                               </Label>
                               <Button fx:id="switchToDesktopButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#switchToDesktop" stylesheets="@styles.css" text="Switch to Desktop Mode" textFill="WHITE">
                                  <font>
-                                    <Font size="20.0" />
+                                    <Font size="24.0" />
                                  </font>
                                  <styleClass>
                                     <String fx:value="transparent" />
@@ -147,7 +147,7 @@
                               </Button>
                               <Button fx:id="exitButton" alignment="BASELINE_LEFT" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#close" stylesheets="@styles.css" text="Exit VideoLauncher" textFill="WHITE">
                                  <font>
-                                    <Font size="20.0" />
+                                    <Font size="24.0" />
                                  </font>
                                  <styleClass>
                                     <String fx:value="transparent" />
@@ -157,7 +157,7 @@
                                     <Insets bottom="2.0" left="2.0" right="2.0" />
                                  </VBox.margin>
                                  <graphic>
-                                    <ImageView fitHeight="28.0" fitWidth="28.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/close.png" />
                                        </image>
@@ -166,12 +166,11 @@
                               </Button>
                            </children>
                            <padding>
-                              <Insets top="10.0" />
+                              <Insets top="20.0" />
                            </padding>
-                           <styleClass>
-                              <String fx:value="greyGradient" />
-                              <String fx:value="roundedMenu" />
-                           </styleClass>
+                           <effect>
+                              <DropShadow />
+                           </effect>
                         </VBox>
                      </children>
                   </AnchorPane>

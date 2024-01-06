@@ -540,8 +540,9 @@ public class EditSeasonController {
         if (!oldBackgroundPath.isEmpty())
             oldName = oldBackgroundPath.substring(oldBackgroundPath.lastIndexOf("/")+1);
         if (oldBackgroundPath.isEmpty() || !newName.equals(oldName) || croppedImage){
-            if (selectedBackground != null)
-                parentController.saveBackground(seasonToEdit, seasonToEdit != null, selectedBackground.getAbsolutePath(), croppedImage);
+            if (selectedBackground != null){
+                //parentController.saveBackground(seasonToEdit, seasonToEdit != null, selectedBackground.getAbsolutePath(), croppedImage);              FIX EDIT AND CROP
+            }
         }
 
         //Save Video

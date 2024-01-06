@@ -9,6 +9,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
@@ -280,6 +281,9 @@ public class AddCategoryController {
         folderSrc.setTextAlignment(TextAlignment.CENTER);
         folderSrc.setAlignment(Pos.CENTER);
         folderSrc.setTextFill(Color.WHITE);
+        HBox box = new HBox(folderSrc);
+        box.setAlignment(Pos.CENTER);
+        box.setPadding(new Insets(0, 0, 0, 10));
         Image img = new Image("file:src/main/resources/img/icons/close.png");
         ImageView image = new ImageView(img);
         image.setFitWidth(20);
@@ -293,7 +297,7 @@ public class AddCategoryController {
             folderContainer.getChildren().remove(folderPane);
         });
 
-        folderPane.setLeft(folderSrc);
+        folderPane.setLeft(box);
         folderPane.setRight(btn);
 
         folderContainer.getChildren().add(folderPane);
