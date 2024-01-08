@@ -52,7 +52,7 @@
                      <children>
                         <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="25.0" fitWidth="20.0" pickOnBounds="true">
                                  <image>
                                     <Image url="@../../../img/icons/menu.png" />
                                  </image>
@@ -160,7 +160,7 @@
                      <children>
                         <VBox StackPane.alignment="TOP_LEFT">
                            <children>
-                              <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" fillHeight="false" prefHeight="500.0" prefWidth="1195.0">
+                              <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" fillHeight="false" prefHeight="450.0" prefWidth="1195.0">
                                  <children>
                                     <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
                                        <image>
@@ -313,7 +313,7 @@
                               </HBox>
                            </children>
                            <padding>
-                              <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+                              <Insets bottom="100.0" left="100.0" right="100.0" top="100.0" />
                            </padding>
                         </VBox>
                      </children>
@@ -346,7 +346,10 @@
                <left>
                   <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
                      <children>
-                        <Label fx:id="elementsSelectedText" text="1 element selected" textFill="#960f20" />
+                        <Label fx:id="elementsSelectedText" text="1 element selected" textFill="#417892">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font></Label>
                         <Button fx:id="deleteSelectedButton" mnemonicParsing="false" onAction="#deleteSelected" styleClass="selectionOptionsButtonDelete" stylesheets="@styles.css" text="Eliminar" />
                      </children>
                      <BorderPane.margin>

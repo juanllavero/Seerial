@@ -593,7 +593,7 @@ public class DesktopViewController {
         }
 
         if (!discList.isEmpty()){
-            discList.sort(new Utils.DiscComparator());
+            discList.sort(new Utils.DiscComparator().reversed());
             for (Disc d : discList){
                 addEpisodeCard(d);
             }
@@ -672,10 +672,13 @@ public class DesktopViewController {
 
         seriesList = App.getSeriesFromCategory(category);
 
-        if (currentCategory.type.equals("Shows"))
+        if (currentCategory.type.equals("Shows")) {
             identificationShow.setDisable(false);
-        else
+            identificationMovie.setDisable(true);
+        }else {
             identificationMovie.setDisable(false);
+            identificationShow.setDisable(true);
+        }
 
         showSeries();
     }
@@ -833,7 +836,7 @@ public class DesktopViewController {
                 WritableImage newImage = new WritableImage(reader, cropX, cropY, cropWidth, cropHeight);
 
                 File outputFile = new File(outputFilePath);
-                ImageIO.write(SwingFXUtils.fromFXImage(newImage, null), "jpg", outputFile);
+                ImageIO.write(SwingFXUtils.fromFXImage(newImage, null), "png", outputFile);
             } catch (MalformedURLException e) {
                 System.err.println("Image loading error");
             } catch (IOException e) {
@@ -2104,8 +2107,6 @@ public class DesktopViewController {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-            updateCategories();
         }
     }
     @FXML
@@ -2294,6 +2295,7 @@ public class DesktopViewController {
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("fullscreenMode"));
+            stage.getIcons().add(new Image("file:src/main/resources/img/icons/AppIcon.png"));
             Scene scene = new Scene(root);
             scene.setFill(Color.BLACK);
             //scene.setCursor(Cursor.NONE);

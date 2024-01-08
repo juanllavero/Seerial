@@ -18,29 +18,29 @@
 }
 
 .borderSectionsColor{
-    -fx-background-color: -fx-light-grey-color;
+    -fx-background-color: #323232;
 }
 
 .midSectionDarkColor{
-    -fx-background-color: -fx-dark-grey-color;
+    -fx-background-color: #222222;
 }
 
 .midSectionLightColor{
-    -fx-background-color: -fx-grey-color;
+    -fx-background-color: #282828;
 }
 
 .selectionLightColor{
-    -fx-background-color: -fx-lighter-grey-color;
+    -fx-background-color: #5e5e5e;
 }
 
 .textFieldColor{
-    -fx-background-color: -fx-lighter-grey-color;
-    -fx-text-fill: -fx-light-color;
+    -fx-background-color: #5e5e5e;
+    -fx-text-fill: #EDF2F4;
 }
 
 .textFieldColor:focused{
-    -fx-background-color: -fx-light-color;
-    -fx-text-fill: -fx-lighter-grey-color;
+    -fx-background-color: #EDF2F4;
+    -fx-text-fill: #5e5e5e;
 }
 
 .transparent{
@@ -68,7 +68,7 @@
 }
 
 .closeButton:hover{
-    -fx-background-color: -fx-main-color;
+    -fx-background-color: #417892;
 }
 
 .searchResultButton{
@@ -85,12 +85,12 @@
 }
 
 .editButton:hover{
-    -fx-background-color: -fx-lighter-grey-color;
+    -fx-background-color: #5e5e5e;
 }
 
 .buttonSelected{
     -fx-background-color: transparent;
-    -fx-text-fill: -fx-main-color;
+    -fx-text-fill: #417892;
 }
 
 .selected{
@@ -123,20 +123,20 @@
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: #960F20;
+    -fx-border-color: #417892;
 }
 
 .downloadedImageButtonSelected{
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: #960F20;
+    -fx-border-color: #417892;
 }
 
 .selectionOptions{
-    -fx-background-color: -fx-dark-color;
+    -fx-background-color: #0E0F19;
     -fx-border-width: 1px;
-    -fx-border-color: -fx-main-color;
+    -fx-border-color: #417892;
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
 }
@@ -147,7 +147,7 @@
 }
 
 .selectionOptionsButton:hover{
-    -fx-text-fill: -fx-light-color;
+    -fx-text-fill: #EDF2F4;
 }
 
 .selectionOptionsButtonDelete{
@@ -156,12 +156,12 @@
 }
 
 .selectionOptionsButtonDelete:hover{
-    -fx-text-fill: -fx-main-color;
+    -fx-text-fill: #417892;
 }
 
 .discSelected{
     -fx-background-color: transparent;
-    -fx-border-color: -fx-main-color;
+    -fx-border-color: #417892;
     -fx-border-width: 2px;
 }
 
@@ -174,7 +174,7 @@
 
 .discButton:hover{
     -fx-background-color: transparent;
-    -fx-border-color: -fx-main-color;
+    -fx-border-color: #417892;
     -fx-border-width: 1px;
     -fx-text-fill: #ffffff;
 }
@@ -195,7 +195,7 @@
 }
 
 .desktopTextButton:hover{
-    -fx-background-color: -fx-lighter-grey-color;
+    -fx-background-color: #5e5e5e;
     -fx-text-fill: white;
     -fx-font-size: 18px;
 }
@@ -240,7 +240,7 @@
 }
 
 .redColor{
-    -fx-background-color: -fx-main-color;
+    -fx-background-color: #417892;
 }
 
 .progress-bar {
@@ -370,7 +370,7 @@
 }
 
 .folderContainer{
-    -fx-background-color: -fx-lighter-grey-color;
+    -fx-background-color: #5e5e5e;
     -fx-background-radius: 5px;
 }
 
@@ -379,7 +379,7 @@
 }
 
 .folderRemove:hover{
-    -fx-background-color: -fx-grey-color;
+    -fx-background-color: #282828;
 }
 
 .removeButton{
@@ -392,7 +392,7 @@
 }
 
 .desktopButton{
-    -fx-background-color: -fx-lighter-grey-color;
+    -fx-background-color: #5e5e5e;
     -fx-background-radius: 4 3 2;
 }
 
@@ -401,7 +401,7 @@
 }
 
 .desktopButtonActive{
-    -fx-background-color: -fx-main-color;
+    -fx-background-color: #417892;
     -fx-text-fill: white;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
@@ -432,7 +432,7 @@
 }
 
 .CatButton:focused{
-    -fx-text-fill: -fx-dark-grey-color;
+    -fx-text-fill: #222222;
     -fx-background-color: #ffffff;
     -fx-background-radius: 5px;
 }
@@ -440,22 +440,22 @@
 .seriesSearchButton{
     -fx-text-fill: white;
     -fx-border-width: 1px;
-    -fx-border-color: -fx-lighter-grey-color;
+    -fx-border-color: #5e5e5e;
     -fx-background-color: transparent;
 }
 
 .seriesSearchButton:hover{
-    -fx-text-fill: -fx-lighter-grey-color;
+    -fx-text-fill: #5e5e5e;
     -fx-border-width: 1px;
-    -fx-border-color: -fx-lighter-grey-color;
+    -fx-border-color: #5e5e5e;
     -fx-background-color: transparent;
 }
 
 .seriesSearchButtonActive{
     -fx-text-fill: white;
     -fx-border-width: 1px;
-    -fx-border-color: -fx-lighter-grey-color;
-    -fx-background-color: -fx-grey-color;
+    -fx-border-color: #5e5e5e;
+    -fx-background-color: #282828;
 }
 
 .buttonGradient {
@@ -498,7 +498,7 @@
 
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track{
-    -fx-background-color: -fx-dark-grey-color;
+    -fx-background-color: #222222;
     -fx-border-color :transparent;
     -fx-background-radius : 0.0em;
     -fx-border-radius :2.0em;

@@ -297,8 +297,16 @@ public class Controller implements Initializable {
                     backgroundImage.setSmooth(true);
                     backgroundImage.setCache(true);*/
 
-                    ImageView background = new ImageView(new Image("file:src/main/resources/img/backgrounds/" + season.id + "/fullBlur.png",
-                            Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true));
+                    File fullBlur = new File("src/main/resources/img/backgrounds/" + season.id + "/fullBlur.png");
+
+                    ImageView background;
+                    if (!fullBlur.exists()){
+                        background = new ImageView(new Image("file:src/main/resources/img/backgrounds/" + season.id + "/background.png",
+                                Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true));
+                    }else{
+                        background = new ImageView(new Image("file:src/main/resources/img/backgrounds/" + season.id + "/fullBlur.png",
+                                Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true));
+                    }
 
                     BackgroundImage myBI= new BackgroundImage(Objects.requireNonNull(getCroppedImage(background)),
                             BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
@@ -539,6 +547,7 @@ public class Controller implements Initializable {
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("desktopMode"));
+            stage.getIcons().add(new Image("file:src/main/resources/img/icons/AppIcon.png"));
             stage.setScene(new Scene(root));
             stage.setMaximized(false);
             stage.initStyle(StageStyle.UNDECORATED);

@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -60,6 +61,7 @@ public class App extends Application {
         Parent root = fxmlLoader.load();
         stage.setTitle(textBundle.getString("desktopMode"));
         stage.initStyle(StageStyle.UNDECORATED);
+        stage.getIcons().add(new Image("file:src/main/resources/img/icons/AppIcon.png"));
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
         stage.setScene(scene);
