@@ -203,6 +203,7 @@ public class AddCategoryController {
         clearTypeSelection();
         moviesTypeButton.getStyleClass().clear();
         moviesTypeButton.getStyleClass().add("buttonSelected");
+        nameField.setText(App.textBundle.getString("movies"));
     }
 
     @FXML
@@ -211,6 +212,7 @@ public class AddCategoryController {
         clearTypeSelection();
         showsTypeButton.getStyleClass().clear();
         showsTypeButton.getStyleClass().add("buttonSelected");
+        nameField.setText(App.textBundle.getString("shows"));
     }
 
     @FXML
@@ -219,6 +221,7 @@ public class AddCategoryController {
         clearTypeSelection();
         concetsTypeButton.getStyleClass().clear();
         concetsTypeButton.getStyleClass().add("buttonSelected");
+        nameField.setText(App.textBundle.getString("concerts"));
     }
 
     private void clearTypeSelection(){

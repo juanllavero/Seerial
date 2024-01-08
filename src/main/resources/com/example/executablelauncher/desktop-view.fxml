@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.effect.DropShadow?>
@@ -150,19 +151,16 @@
             </BorderPane>
          </top>
          <center>
-            <ScrollPane fx:id="seasonScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="30.0" />
                </BorderPane.margin>
                <content>
-                  <StackPane fx:id="seasonInfoPane" styleClass="transparent" stylesheets="@styles.css">
+                  <StackPane fx:id="seasonInfoPane">
                      <children>
-                        <BorderPane fx:id="seasonBorderPane" maxHeight="-Infinity" minHeight="-Infinity" StackPane.alignment="CENTER">
-                           <StackPane.margin>
-                              <Insets bottom="20.0" />
-                           </StackPane.margin>
-                           <top>
-                              <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" prefHeight="500.0" prefWidth="1195.0" BorderPane.alignment="CENTER">
+                        <VBox StackPane.alignment="TOP_LEFT">
+                           <children>
+                              <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" fillHeight="false" prefHeight="500.0" prefWidth="1195.0">
                                  <children>
                                     <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
                                        <image>
@@ -177,147 +175,147 @@
                                     <Insets bottom="30.0" />
                                  </padding>
                               </HBox>
-                           </top>
-                           <right>
-                              <VBox fx:id="detailsBox" BorderPane.alignment="CENTER">
+                              <HBox prefHeight="100.0" prefWidth="200.0">
                                  <children>
-                                    <Label fx:id="detailsText" prefHeight="35.0" prefWidth="107.0" styleClass="seasonButtonActive" stylesheets="@styles.css" text="Details" textFill="WHITE">
-                                       <font>
-                                          <Font size="26.0" />
-                                       </font>
-                                       <effect>
-                                          <DropShadow />
-                                       </effect>
-                                    </Label>
-                                    <HBox prefHeight="133.0" prefWidth="401.0">
+                                    <VBox fx:id="seasonsEpisodesBox" spacing="20.0" stylesheets="@styles.css">
                                        <children>
-                                          <VBox prefHeight="133.0" prefWidth="160.0">
-                                             <children>
-                                                <Label fx:id="yearText" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="WHITE">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <VBox.margin>
-                                                      <Insets top="5.0" />
-                                                   </VBox.margin>
-                                                   <effect>
-                                                      <DropShadow />
-                                                   </effect>
-                                                </Label>
-                                                <Label fx:id="orderText" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="WHITE">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <VBox.margin>
-                                                      <Insets top="10.0" />
-                                                   </VBox.margin>
-                                                   <effect>
-                                                      <DropShadow />
-                                                   </effect>
-                                                </Label>
-                                                <Label fx:id="episodesText" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="WHITE">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <VBox.margin>
-                                                      <Insets top="10.0" />
-                                                   </VBox.margin>
-                                                   <effect>
-                                                      <DropShadow />
-                                                   </effect>
-                                                </Label>
-                                                <Label prefHeight="35.0" prefWidth="144.0" text="Season name" textFill="WHITE">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <VBox.margin>
-                                                      <Insets top="10.0" />
-                                                   </VBox.margin>
-                                                   <effect>
-                                                      <DropShadow />
-                                                   </effect>
-                                                </Label>
-                                             </children>
-                                          </VBox>
-                                          <VBox prefHeight="150.0" prefWidth="239.0">
-                                             <children>
-                                                <Label fx:id="yearField" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="#aeaeae">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <VBox.margin>
-                                                      <Insets top="5.0" />
-                                                   </VBox.margin>
-                                                   <effect>
-                                                      <DropShadow />
-                                                   </effect>
-                                                </Label>
-                                                <Label fx:id="orderField" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="#aeaeae">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <VBox.margin>
-                                                      <Insets top="10.0" />
-                                                   </VBox.margin>
-                                                   <effect>
-                                                      <DropShadow />
-                                                   </effect>
-                                                </Label>
-                                                <Label fx:id="episodesField" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="#aeaeae">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <VBox.margin>
-                                                      <Insets top="10.0" />
-                                                   </VBox.margin>
-                                                   <effect>
-                                                      <DropShadow />
-                                                   </effect>
-                                                </Label>
-                                                <Label fx:id="seasonName" prefHeight="27.0" prefWidth="239.0" text="Name of the season" textFill="#aeaeae" wrapText="true">
-                                                   <font>
-                                                      <Font size="18.0" />
-                                                   </font>
-                                                   <VBox.margin>
-                                                      <Insets top="10.0" />
-                                                   </VBox.margin>
-                                                   <effect>
-                                                      <DropShadow />
-                                                   </effect>
-                                                </Label>
-                                             </children>
-                                          </VBox>
+                                          <HBox fx:id="seasonContainer" />
+                                          <FlowPane fx:id="discContainer" hgap="20.0" nodeOrientation="LEFT_TO_RIGHT" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS" />
                                        </children>
-                                       <VBox.margin>
-                                          <Insets bottom="10.0" top="10.0" />
-                                       </VBox.margin>
-                                    </HBox>
-                                    <ImageView fx:id="seriesCover" fitHeight="319.0" fitWidth="308.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/testCover.png" />
-                                       </image>
-                                       <VBox.margin>
-                                          <Insets top="20.0" />
-                                       </VBox.margin>
-                                    </ImageView>
+                                       <padding>
+                                          <Insets bottom="10.0" />
+                                       </padding>
+                                    </VBox>
+                                    <VBox fx:id="detailsBox">
+                                       <children>
+                                          <Label fx:id="detailsText" prefHeight="35.0" prefWidth="107.0" styleClass="seasonButtonActive" stylesheets="@styles.css" text="Details" textFill="WHITE">
+                                             <font>
+                                                <Font size="26.0" />
+                                             </font>
+                                             <effect>
+                                                <DropShadow />
+                                             </effect>
+                                          </Label>
+                                          <HBox prefHeight="133.0" prefWidth="401.0">
+                                             <children>
+                                                <VBox prefHeight="133.0" prefWidth="160.0">
+                                                   <children>
+                                                      <Label fx:id="yearText" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="WHITE">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets top="5.0" />
+                                                         </VBox.margin>
+                                                         <effect>
+                                                            <DropShadow />
+                                                         </effect>
+                                                      </Label>
+                                                      <Label fx:id="orderText" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="WHITE">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets top="10.0" />
+                                                         </VBox.margin>
+                                                         <effect>
+                                                            <DropShadow />
+                                                         </effect>
+                                                      </Label>
+                                                      <Label fx:id="episodesText" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="WHITE">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets top="10.0" />
+                                                         </VBox.margin>
+                                                         <effect>
+                                                            <DropShadow />
+                                                         </effect>
+                                                      </Label>
+                                                      <Label prefHeight="35.0" prefWidth="144.0" text="Season name" textFill="WHITE">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets top="10.0" />
+                                                         </VBox.margin>
+                                                         <effect>
+                                                            <DropShadow />
+                                                         </effect>
+                                                      </Label>
+                                                   </children>
+                                                </VBox>
+                                                <VBox prefHeight="150.0" prefWidth="239.0">
+                                                   <children>
+                                                      <Label fx:id="yearField" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="#aeaeae">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets top="5.0" />
+                                                         </VBox.margin>
+                                                         <effect>
+                                                            <DropShadow />
+                                                         </effect>
+                                                      </Label>
+                                                      <Label fx:id="orderField" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="#aeaeae">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets top="10.0" />
+                                                         </VBox.margin>
+                                                         <effect>
+                                                            <DropShadow />
+                                                         </effect>
+                                                      </Label>
+                                                      <Label fx:id="episodesField" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="#aeaeae">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets top="10.0" />
+                                                         </VBox.margin>
+                                                         <effect>
+                                                            <DropShadow />
+                                                         </effect>
+                                                      </Label>
+                                                      <Label fx:id="seasonName" prefHeight="27.0" prefWidth="239.0" text="Name of the season" textFill="#aeaeae" wrapText="true">
+                                                         <font>
+                                                            <Font size="18.0" />
+                                                         </font>
+                                                         <VBox.margin>
+                                                            <Insets top="10.0" />
+                                                         </VBox.margin>
+                                                         <effect>
+                                                            <DropShadow />
+                                                         </effect>
+                                                      </Label>
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                             <VBox.margin>
+                                                <Insets bottom="10.0" top="10.0" />
+                                             </VBox.margin>
+                                          </HBox>
+                                          <ImageView fx:id="seriesCover" fitHeight="319.0" fitWidth="308.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/testCover.png" />
+                                             </image>
+                                             <VBox.margin>
+                                                <Insets top="20.0" />
+                                             </VBox.margin>
+                                          </ImageView>
+                                       </children>
+                                    </VBox>
                                  </children>
-                              </VBox>
-                           </right>
-                           <center>
-                              <VBox fx:id="seasonsEpisodesBox" spacing="20.0" stylesheets="@styles.css" BorderPane.alignment="TOP_LEFT">
-                                 <children>
-                                    <HBox fx:id="seasonContainer" />
-                                    <FlowPane fx:id="discContainer" hgap="20.0" nodeOrientation="LEFT_TO_RIGHT" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS" />
-                                 </children>
-                                 <padding>
-                                    <Insets bottom="10.0" />
-                                 </padding>
-                              </VBox>
-                           </center>
+                              </HBox>
+                           </children>
                            <padding>
-                              <Insets bottom="20.0" left="200.0" right="100.0" top="50.0" />
+                              <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
                            </padding>
-                        </BorderPane>
+                        </VBox>
                      </children>
                   </StackPane>
                </content>
@@ -389,6 +387,11 @@
             <Insets left="500.0" top="100.0" />
          </StackPane.margin>
       </HBox>
+      <ImageView fx:id="backgroundShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" visible="false">
+         <image>
+            <Image url="@../../../img/desktopBackgroundShadow.png" />
+         </image>
+      </ImageView>
       <HBox fx:id="downloadingContentWindow" alignment="CENTER_RIGHT" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 5;" styleClass="midSectionLightColor" stylesheets="@styles.css" StackPane.alignment="BOTTOM_RIGHT">
          <children>
             <ProgressIndicator prefHeight="32.0" prefWidth="51.0" />
@@ -540,10 +543,21 @@
             </VBox>
          </children>
       </Pane>
-      <ImageView fx:id="backgroundShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" visible="false">
-         <image>
-            <Image url="@../../../img/desktopBackgroundShadow.png" />
-         </image>
-      </ImageView>
+      <VBox fx:id="downloadingContentWindowStatic" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 5;" styleClass="midSectionLightColor" stylesheets="@styles.css" StackPane.alignment="CENTER">
+         <children>
+            <Label fx:id="downloadingContentTextStatic" text="Downloading metadata" textFill="WHITE">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
+            <ProgressBar prefWidth="300.0" />
+         </children>
+         <padding>
+            <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
+         </padding>
+         <effect>
+            <DropShadow />
+         </effect>
+      </VBox>
    </children>
 </StackPane>

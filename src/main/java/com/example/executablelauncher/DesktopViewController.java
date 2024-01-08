@@ -243,6 +243,12 @@ public class DesktopViewController {
     private Label downloadingContentText;
 
     @FXML
+    private VBox downloadingContentWindowStatic;
+
+    @FXML
+    private Label downloadingContentTextStatic;
+
+    @FXML
     private BorderPane seasonBorderPane;
     //endregion
 
@@ -274,6 +280,8 @@ public class DesktopViewController {
     TmdbTV seriesMetadata;                                                              //Saves all series from TheMovieDB
     TmdbMovies moviesMetadata;                                                          //Saves all movies from TheMovieDB
     SeasonsGroupMetadata episodesGroup = null;                                          //Create metadata holders for episode groups
+    MovieDb movieMetadataToCorrect = null;                                              //Metadata of the movie that is going to be correctly identified
+    TvSeries seriesMetadataToCorrect = null;                                            //Metadata of the show that is going to be correctly identified
     //endregion
 
     public void initValues(){
@@ -289,6 +297,7 @@ public class DesktopViewController {
         selectionOptions.setVisible(false);
 
         downloadingContentWindow.setVisible(false);
+        downloadingContentWindowStatic.setVisible(false);
 
         menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
             hideMenu();
@@ -351,16 +360,20 @@ public class DesktopViewController {
         seriesContainer.setPrefHeight(screenHeight);
 
 
-        seasonScroll.prefHeightProperty().bind(discContainer.heightProperty());
+        //seasonScroll.prefHeightProperty().bind(seasonInfoPane.heightProperty());
+        //seasonScroll.setMinHeight(screenHeight);
 
         //seasonsEpisodesBox.setMinHeight(discContainer.getMinHeight());
         //seasonsEpisodesBox.prefHeightProperty().bind(discContainer.heightProperty());
         //seasonsEpisodesBox.maxHeightProperty().bind(discContainer.heightProperty());
-        seasonBorderPane.prefHeightProperty().bind(seasonsEpisodesBox.heightProperty().add(seasonLogoBox.heightProperty()));
+        //seasonBorderPane.prefHeightProperty().bind(seasonsEpisodesBox.heightProperty().add(seasonLogoBox.heightProperty()));
         //seasonBorderPane.maxHeightProperty().bind(seasonsEpisodesBox.heightProperty().add(seasonLogoBox.heightProperty()));
-        //seasonInfoPane.minHeightProperty().bind(seasonBorderPane.heightProperty());
-        seasonInfoPane.prefHeightProperty().bind(seasonBorderPane.heightProperty());
+        //seasonScroll.minHeightProperty().bind(seasonBackground.heightProperty());
+        //seasonInfoPane.minHeightProperty().bind(seasonBackground.heightProperty().add(seasonsEpisodesBox.heightProperty()));
+        //seasonInfoPane.prefHeightProperty().bind(seasonBackground.heightProperty().add(seasonsEpisodesBox.heightProperty()));
         //seasonInfoPane.maxHeightProperty().bind(seasonBorderPane.heightProperty());
+
+        seasonsEpisodesBox.setPrefWidth(Integer.MAX_VALUE);
 
 
         //discContainer.prefHeightProperty().bind(seasonsEpisodesBox.heightProperty());
@@ -942,7 +955,7 @@ public class DesktopViewController {
 
     //region IDENTIFICATION
     @FXML
-    void correctIdentificationShow(){
+    void correctIdentificationShow(ActionEvent event){
         showBackgroundShadow();
         hideMenu();
         try{
@@ -955,14 +968,18 @@ public class DesktopViewController {
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setScene(new Scene(root1));
             App.setPopUpProperties(stage);
-            stage.show();
+            stage.showAndWait();
+
+            hideBackgroundShadow();
+
+            if (seriesMetadataToCorrect != null)
+                correctIdentificationShow();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        hideBackgroundShadow();
     }
     @FXML
-    void correctIdentificationMovie(){
+    void correctIdentificationMovie(ActionEvent event){
         showBackgroundShadow();
         hideMenu();
         try{
@@ -975,67 +992,95 @@ public class DesktopViewController {
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setScene(new Scene(root1));
             App.setPopUpProperties(stage);
-            stage.show();
+            stage.showAndWait();
+
+            hideBackgroundShadow();
+
+            if (movieMetadataToCorrect != null)
+                correctIdentificationMovie();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        hideBackgroundShadow();
     }
-    public void correctIdentificationShow(TvSeries tvSeries){
-
+    public void correctIdentificationShow(){
     }
-    public void correctIdentificationMovie(MovieDb movie){
-        selectedSeason.name = movie.getTitle();
-        selectedSeason.year = movie.getReleaseDate();
-        selectedSeason.themdbID = movie.getId();
-        selectedSeason.resume = movie.getOverview();
+    public void correctIdentificationMovie(){
+        showBackgroundShadow();
+        downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
+        downloadingContentWindowStatic.setVisible(true);
+        Task<Void> correctIdentificationTask = new Task<>() {
+            @Override
+            protected Void call() {
+                selectedSeason.name = movieMetadataToCorrect.getTitle();
+                selectedSeason.year = movieMetadataToCorrect.getReleaseDate();
+                selectedSeason.themdbID = movieMetadataToCorrect.getId();
+                selectedSeason.resume = movieMetadataToCorrect.getOverview();
 
-        try{
-            FileUtils.deleteDirectory(new File("src/main/resources/img/logos/" + selectedSeason.id));
-        } catch (IOException e) {
-            System.err.println("DesktopViewController.correctIdentificationMovie: Error deleting directories");
-        }
+                try{
+                    FileUtils.deleteDirectory(new File("src/main/resources/img/logos/" + selectedSeason.id));
+                } catch (IOException e) {
+                    System.err.println("DesktopViewController.correctIdentificationMovie: Error deleting directories");
+                }
 
-        try{
-            Files.createDirectories(Paths.get("src/main/resources/img/logos/" + selectedSeason.id + "/"));
-            Files.createDirectories(Paths.get("src/main/resources/img/backgrounds/" + selectedSeason.id + "/"));
-        } catch (IOException e) {
-            System.err.println("correctIdentificationMovie: Directory could not be created");
-        }
+                try{
+                    Files.createDirectories(Paths.get("src/main/resources/img/logos/" + selectedSeason.id + "/"));
+                    Files.createDirectories(Paths.get("src/main/resources/img/backgrounds/" + selectedSeason.id + "/"));
+                } catch (IOException e) {
+                    System.err.println("correctIdentificationMovie: Directory could not be created");
+                }
 
-        downloadLogos(selectedSeason, selectedSeason.themdbID);
-        downloadImages(selectedSeries, selectedSeason.themdbID);
-        saveBackground(selectedSeason, "src/main/resources/img/DownloadCache/" + selectedSeason.themdbID + ".png");
+                downloadLogos(selectedSeason, selectedSeason.themdbID);
+                downloadImages(selectedSeries, selectedSeason.themdbID);
+                saveBackground(selectedSeason, "src/main/resources/img/DownloadCache/" + selectedSeason.themdbID + ".png");
 
-        if (selectedSeason.getDiscs().size() == 1){
-            Disc disc = App.findDisc(selectedSeason.getDiscs().get(0));
+                if (selectedSeason.getDiscs().size() == 1){
+                    Disc disc = App.findDisc(selectedSeason.getDiscs().get(0));
 
-            if (disc != null){
-                disc.name = selectedSeason.name;
-                disc.resume = selectedSeason.resume;
+                    if (disc != null){
+                        disc.name = selectedSeason.name;
+                        disc.resume = selectedSeason.resume;
+                    }
+                }
+
+                for (String discID : selectedSeason.getDiscs()){
+                    Disc disc = App.findDisc(discID);
+
+                    if (disc == null)
+                        continue;
+
+                    try{
+                        FileUtils.deleteDirectory(new File("src/main/resources/img/discCovers/" + discID));
+                    } catch (IOException e) {
+                        System.err.println("DesktopViewController.correctIdentificationMovie: Error deleting thumbnails");
+                    }
+
+                    try{
+                        Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + discID + "/"));
+                    } catch (IOException e) {
+                        System.err.println("correctIdentificationMovie: Directory could not be created");
+                    }
+
+                    setMovieThumbnail(disc, selectedSeason.themdbID);
+                }
+                return null;
             }
-        }
+        };
 
-        for (String discID : selectedSeason.getDiscs()){
-            Disc disc = App.findDisc(discID);
+        correctIdentificationTask.setOnSucceeded(event -> {
+            backgroundShadow.setVisible(false);
+            downloadingContentWindowStatic.setVisible(false);
+            movieMetadataToCorrect = null;
+            fillSeasonInfo();
+            showDiscs(selectedSeason);
+        });
 
-            if (disc == null)
-                continue;
-
-            try{
-                FileUtils.deleteDirectory(new File("src/main/resources/img/discCovers/" + discID));
-            } catch (IOException e) {
-                System.err.println("DesktopViewController.correctIdentificationMovie: Error deleting thumbnails");
-            }
-
-            try{
-                Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + discID + "/"));
-            } catch (IOException e) {
-                System.err.println("correctIdentificationMovie: Directory could not be created");
-            }
-
-            setMovieThumbnail(disc, selectedSeason.themdbID);
-        }
+        new Thread(correctIdentificationTask).start();
+    }
+    public void setCorrectIdentificationShow(TvSeries tvSeries){
+        seriesMetadataToCorrect = tvSeries;
+    }
+    public void setCorrectIdentificationMovie(MovieDb movie){
+        movieMetadataToCorrect = movie;
     }
     //endregion
 
@@ -2010,8 +2055,6 @@ public class DesktopViewController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        updateCategories();
     }
     public void addDisc(Disc newDisc){
         addEpisodeCard(newDisc);

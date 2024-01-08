@@ -144,9 +144,10 @@ public class SearchSeriesController {
                     else
                         System.out.println("Selected series with name: " + resultMovies.get(resultsCards.indexOf(cardBox)).getTitle());*/
                     if (isShow)
-                        parentController.correctIdentificationShow(resultShows.get(resultsCards.indexOf(cardBox)));
+                        parentController.setCorrectIdentificationShow(resultShows.get(resultsCards.indexOf(cardBox)));
                     else
-                        parentController.correctIdentificationMovie(resultMovies.get(resultsCards.indexOf(cardBox)));
+                        parentController.setCorrectIdentificationMovie(resultMovies.get(resultsCards.indexOf(cardBox)));
+                    cancelButton();
                 });
 
                 resultsCards.add(cardBox);

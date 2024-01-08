@@ -483,12 +483,6 @@ public class EditSeasonController {
             return;
         }
 
-        //Process year
-        if (!yearField.getText().isEmpty() && !yearField.getText().matches("\\d{3,}")){
-            App.showErrorMessage("Invalid data", "", textBundle.getString("yearError"));
-            return;
-        }
-
         //Process video
         if (!videoField.getText().isEmpty()){
             File video = new File(videoField.getText());
