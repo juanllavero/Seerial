@@ -78,12 +78,16 @@ public class ImageDownloaderController {
     private List<File> imagesFiles = new ArrayList<>();
     private File selectedFile = null;
     private EditSeasonController seasonParent = null;
+    private EditCollectionController seriesParent = null;
     private Stage loadingStage = null;
     private Stage stage = null;
     private String filters = "";
 
     public void setSeasonParent(EditSeasonController parent){
         seasonParent = parent;
+    }
+    public void setSeriesParent(EditCollectionController parent){
+        seriesParent = parent;
     }
 
     public void initValues(Stage stage, String searchText, String width, String height, boolean isCover, boolean isLogo, boolean transparent){
@@ -294,6 +298,8 @@ public class ImageDownloaderController {
                 seasonParent.loadLogo(selectedFile.getAbsolutePath());
             else
                 seasonParent.loadBackground(selectedFile.getAbsolutePath());
+        }else{
+            seriesParent.loadLogo(selectedFile.getAbsolutePath());
         }
         cancel(event);
     }

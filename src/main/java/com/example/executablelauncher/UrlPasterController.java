@@ -32,10 +32,14 @@ public class UrlPasterController {
 
     private boolean isLogo = false;
     private EditSeasonController addSeasonController = null;
+    private EditCollectionController editSeriesController = null;
     private EditDiscController editDiscController = null;
 
     public void setParent(EditSeasonController controller){
         addSeasonController = controller;
+    }
+    public void setParent(EditCollectionController controller){
+        editSeriesController = controller;
     }
     public void setDiscParent(EditDiscController controller){
         editDiscController = controller;
@@ -61,7 +65,8 @@ public class UrlPasterController {
         if (newImage.isError())
             System.out.println("Error loading image from " + urlField.getText());
 
-        File file = new File("src/main/resources/img/DownloadCache/newUrlImage.png");
+        String imageURL = "src/main/resources/img/DownloadCache/newUrlImage.png";
+        File file = new File(imageURL);
         try{
             RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);
             ImageIO.write(renderedImage,"png", file);
@@ -71,11 +76,13 @@ public class UrlPasterController {
 
         if (addSeasonController != null){
             if (isLogo)
-                addSeasonController.loadLogo("src/main/resources/img/DownloadCache/newUrlImage.png");
+                addSeasonController.loadLogo(imageURL);
             else
-                addSeasonController.loadBackground("src/main/resources/img/DownloadCache/newUrlImage.png");
+                addSeasonController.loadBackground(imageURL);
+        }else if (editDiscController != null){
+            editDiscController.loadImage(imageURL);
         }else{
-            editDiscController.loadImage("src/main/resources/img/DownloadCache/newUrlImage.png");
+            editSeriesController.loadLogo(imageURL);
         }
 
         cancelButton(event);

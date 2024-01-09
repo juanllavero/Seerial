@@ -16,6 +16,7 @@ public class Series implements Serializable {
     public String category = "";
     public int order = 0;
     public String coverSrc = "";
+    public String logoSrc = "";
     public String year = "";
     public boolean playSameMusic = false;
     public List<String> seasons = new ArrayList<>();

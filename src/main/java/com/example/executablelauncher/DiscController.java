@@ -3,6 +3,7 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Disc;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.*;
 import javafx.scene.input.KeyCode;
@@ -44,6 +45,9 @@ public class DiscController {
     @FXML
     private StackPane thumbnailStackPane;
 
+    @FXML
+    private Button playButton;
+
     public Disc disc;
     private SeasonController parentController = null;
     private DesktopViewController desktopParent = null;
@@ -74,7 +78,7 @@ public class DiscController {
         }*/
 
         thumbnailStackPane.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (playImage.isVisible()){
+            if (playButton.isVisible()){
                 if (event.getCode().equals(KeyCode.ENTER)){
                     if (desktopParent != null)
                         desktopParent.playEpisode(disc);
@@ -87,7 +91,7 @@ public class DiscController {
         });
 
         thumbnailStackPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
-            if (playImage.isVisible()){
+            if (playButton.isVisible()){
                 if (event.getButton().equals(MouseButton.PRIMARY)){
                     if (parentController != null)
                         parentController.playEpisode(disc);
@@ -95,19 +99,9 @@ public class DiscController {
             }
         });
 
-        playImage.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
+        playButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (desktopParent != null)
                 desktopParent.playEpisode(disc);
-        });
-
-        playImage.setOnMouseEntered(e -> {
-            Image img = new Image("file:src/main/resources/img/icons/playHover.png");
-            playImage.setImage(img);
-        });
-
-        playImage.setOnMouseExited(e -> {
-            Image img = new Image("file:src/main/resources/img/icons/play.png");
-            playImage.setImage(img);
         });
 
         thumbnailStackPane.setOnMouseEntered(e -> {
@@ -117,7 +111,7 @@ public class DiscController {
         thumbnailStackPane.setOnMouseExited(e -> {
             if (discSelected){
                 discMenu.setVisible(false);
-                playImage.setVisible(false);
+                playButton.setVisible(false);
                 selectDiscButton.setVisible(true);
             }else{
                 clearSelection();
@@ -135,6 +129,14 @@ public class DiscController {
             if (event.getButton() == MouseButton.PRIMARY && desktopParent.isDiscSelected()) {
                 selectDiscDesktop();
             }
+        });
+
+        playButton.setOnMouseEntered(e -> {
+            playImage.setImage(new Image("file:src/main/resources/img/icons/playHover.png"));
+        });
+
+        playButton.setOnMouseExited(e -> {
+            playImage.setImage(new Image("file:src/main/resources/img/icons/play.png"));
         });
     }
 
@@ -170,7 +172,7 @@ public class DiscController {
     public void selectDiscFullScreen(){
         discSelected = true;
         thumbnailShadow.setVisible(true);
-        playImage.setVisible(true);
+        playButton.setVisible(true);
         selectDiscButton.setVisible(false);
         discMenu.setVisible(false);
     }
@@ -179,12 +181,10 @@ public class DiscController {
         desktopParent.selectDisc(disc);
         if (discSelected){
             clearSelection();
-            thumbnailStackPane.getStyleClass().add("discButton");
-            selectDiscButton.setImage(new Image("file:src/main/resources/img/icons/circle.png"));
         }else{
             discSelected = true;
             thumbnailShadow.setVisible(true);
-            playImage.setVisible(false);
+            playButton.setVisible(false);
             discMenu.setVisible(false);
             selectDiscButton.setVisible(true);
             thumbnailStackPane.getStyleClass().add("discSelected");
@@ -197,10 +197,10 @@ public class DiscController {
         selectDiscButton.setVisible(true);
 
         if (!desktopParent.isDiscSelected()){
-            playImage.setVisible(true);
+            playButton.setVisible(true);
             discMenu.setVisible(true);
         }else{
-            playImage.setVisible(false);
+            playButton.setVisible(false);
             discMenu.setVisible(false);
         }
     }
@@ -208,9 +208,11 @@ public class DiscController {
     public void clearSelection(){
         discSelected = false;
         thumbnailShadow.setVisible(false);
-        playImage.setVisible(false);
+        playButton.setVisible(false);
         selectDiscButton.setVisible(false);
         discMenu.setVisible(false);
+        thumbnailStackPane.getStyleClass().add("discButton");
+        selectDiscButton.setImage(new Image("file:src/main/resources/img/icons/circle.png"));
     }
 
     public void setThumbnail(){

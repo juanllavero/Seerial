@@ -164,14 +164,14 @@ public class SeasonController {
         }
 
         // Calcular la posición de inicio del recorte
-        double xOffset = 0;
-        double yOffset = 0;
+        int xOffset = 0;
+        int yOffset = (int) ((originalHeight - newHeight) / 2);
 
         // Obtener el lector de píxeles de la imagen original
         PixelReader pixelReader = backgroundImage.getImage().getPixelReader();
 
         // Crear una nueva imagen recortada utilizando WritableImage
-        WritableImage croppedImage = new WritableImage(pixelReader, 0, 0, (int) newWidth, (int) newHeight);
+        WritableImage croppedImage = new WritableImage(pixelReader, xOffset, 0, (int) newWidth, (int) newHeight);
 
         // Crear el nuevo ImageView con la imagen recortada
         backgroundImage.setImage(croppedImage);

@@ -186,7 +186,7 @@
                                           <Insets bottom="10.0" />
                                        </padding>
                                     </VBox>
-                                    <VBox fx:id="detailsBox">
+                                    <VBox fx:id="detailsBox" minWidth="400.0">
                                        <children>
                                           <Label fx:id="detailsText" prefHeight="35.0" prefWidth="107.0" styleClass="seasonButtonActive" stylesheets="@styles.css" text="Details" textFill="WHITE">
                                              <font>
@@ -208,7 +208,7 @@
                                                             <Insets top="5.0" />
                                                          </VBox.margin>
                                                          <effect>
-                                                            <DropShadow />
+                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
                                                       <Label fx:id="orderText" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="WHITE">
@@ -219,7 +219,7 @@
                                                             <Insets top="10.0" />
                                                          </VBox.margin>
                                                          <effect>
-                                                            <DropShadow />
+                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
                                                       <Label fx:id="episodesText" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="WHITE">
@@ -230,7 +230,7 @@
                                                             <Insets top="10.0" />
                                                          </VBox.margin>
                                                          <effect>
-                                                            <DropShadow />
+                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
                                                       <Label prefHeight="35.0" prefWidth="144.0" text="Season name" textFill="WHITE">
@@ -241,7 +241,7 @@
                                                             <Insets top="10.0" />
                                                          </VBox.margin>
                                                          <effect>
-                                                            <DropShadow />
+                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
                                                    </children>
@@ -256,7 +256,7 @@
                                                             <Insets top="5.0" />
                                                          </VBox.margin>
                                                          <effect>
-                                                            <DropShadow />
+                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
                                                       <Label fx:id="orderField" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="#aeaeae">
@@ -267,7 +267,7 @@
                                                             <Insets top="10.0" />
                                                          </VBox.margin>
                                                          <effect>
-                                                            <DropShadow />
+                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
                                                       <Label fx:id="episodesField" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="#aeaeae">
@@ -278,7 +278,7 @@
                                                             <Insets top="10.0" />
                                                          </VBox.margin>
                                                          <effect>
-                                                            <DropShadow />
+                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
                                                       <Label fx:id="seasonName" prefHeight="27.0" prefWidth="239.0" text="Name of the season" textFill="#aeaeae" wrapText="true">
@@ -289,7 +289,7 @@
                                                             <Insets top="10.0" />
                                                          </VBox.margin>
                                                          <effect>
-                                                            <DropShadow />
+                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
                                                    </children>

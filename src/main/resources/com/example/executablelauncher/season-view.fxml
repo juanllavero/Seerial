@@ -108,7 +108,7 @@
                         </Button>
                         <Button fx:id="optionsButton" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#openMenu" prefHeight="47.0" prefWidth="47.0" styleClass="optionsButton" stylesheets="@styles.css" textAlignment="CENTER">
                            <graphic>
-                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
                                  <image>
                                     <Image url="@../../../img/icons/options.png" />
                                  </image>

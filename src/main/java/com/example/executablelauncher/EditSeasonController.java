@@ -139,10 +139,16 @@ public class EditSeasonController {
         parentController = parent;
     }
 
-    public void setSeason(Season s){
+    public void setSeason(Season s, boolean isShow){
         seasonToEdit = s;
 
-        selectedLogo = new File(s.logoSrc);
+        if (isShow){
+            logosViewButton.setVisible(false);
+        }else{
+            selectedLogo = new File(s.logoSrc);
+            logosViewButton.setVisible(true);
+        }
+
         oldBackgroundPath = s.getBackgroundSrc();
         oldVideoPath = s.getVideoSrc();
         oldMusicPath = s.getMusicSrc();

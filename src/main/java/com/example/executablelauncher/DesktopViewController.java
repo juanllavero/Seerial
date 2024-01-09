@@ -505,26 +505,23 @@ public class DesktopViewController {
         orderField.setText(Integer.toString(selectedSeason.getOrder()));
         episodesField.setText(Integer.toString(selectedSeason.getDiscs().size()));
 
-        if (selectedSeason.getLogoSrc().isEmpty()){
-            seasonLogoBox.getChildren().remove(0);
-            Label seasonLogoText = new Label(selectedSeries.getName());
-            seasonLogoText.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 42));
-            seasonLogoText.setTextFill(Color.color(1, 1, 1));
-            seasonLogoText.setEffect(new DropShadow());
-            seasonLogoText.setPadding(new Insets(0, 0, 0, 15));
-            seasonLogoBox.getChildren().add(seasonLogoText);
+        if (currentCategory.type.equals("Shows")){
+            if (selectedSeries.logoSrc.isEmpty()){
+                setTextNoLogo();
+            }else{
+                seasonLogoBox.getChildren().remove(0);
+                seasonLogo = new ImageView();
+                File file = new File(selectedSeries.logoSrc);
+                setLogoNoText(file);
+            }
         }else{
-            seasonLogoBox.getChildren().remove(0);
-            seasonLogo = new ImageView();
-            File file = new File(selectedSeason.getLogoSrc());
-            try{
-                seasonLogo.setImage(new Image(file.toURI().toURL().toExternalForm()));
-                seasonLogo.setFitHeight(300);
-                seasonLogo.setFitWidth(600);
-                seasonLogo.setPreserveRatio(true);
-                seasonLogoBox.getChildren().add(seasonLogo);
-            } catch (MalformedURLException e) {
-                System.err.println("DesktopViewController: Logo not loaded");
+            if (selectedSeason.getLogoSrc().isEmpty()){
+                setTextNoLogo();
+            }else{
+                seasonLogoBox.getChildren().remove(0);
+                seasonLogo = new ImageView();
+                File file = new File(selectedSeason.getLogoSrc());
+                setLogoNoText(file);
             }
         }
 
@@ -552,6 +549,28 @@ public class DesktopViewController {
         }
 
         seasonName.setText(selectedSeason.getName());
+    }
+
+    private void setLogoNoText(File file) {
+        try{
+            seasonLogo.setImage(new Image(file.toURI().toURL().toExternalForm()));
+            seasonLogo.setFitHeight(300);
+            seasonLogo.setFitWidth(600);
+            seasonLogo.setPreserveRatio(true);
+            seasonLogoBox.getChildren().add(seasonLogo);
+        } catch (MalformedURLException e) {
+            System.err.println("DesktopViewController: Logo not loaded");
+        }
+    }
+
+    private void setTextNoLogo() {
+        seasonLogoBox.getChildren().remove(0);
+        Label seasonLogoText = new Label(selectedSeries.getName());
+        seasonLogoText.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 42));
+        seasonLogoText.setTextFill(Color.color(1, 1, 1));
+        seasonLogoText.setEffect(new DropShadow());
+        seasonLogoText.setPadding(new Insets(0, 0, 0, 15));
+        seasonLogoBox.getChildren().add(seasonLogoText);
     }
 
     private void showSeasons() {
@@ -1006,6 +1025,89 @@ public class DesktopViewController {
         }
     }
     public void correctIdentificationShow(){
+        showBackgroundShadow();
+        downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
+        downloadingContentWindowStatic.setVisible(true);
+        Task<Void> correctIdentificationTask = new Task<>() {
+            @Override
+            protected Void call() {
+                selectedSeries.name = seriesMetadataToCorrect.getName();
+                selectedSeries.year = seriesMetadataToCorrect.getFirstAirDate();
+                selectedSeries.themdbID = seriesMetadataToCorrect.getId();
+                selectedSeries.resume = seriesMetadataToCorrect.getOverview();
+
+                try{
+                    FileUtils.deleteDirectory(new File("src/main/resources/img/seriesCovers/" + selectedSeries.id));
+                } catch (IOException e) {
+                    System.err.println("DesktopViewController.correctIdentificationShow: Error deleting directories");
+                }
+
+                for (String seasonID : selectedSeries.getSeasons()){
+                    Season season = App.findSeason(seasonID);
+
+                    if (season == null)
+                        continue;
+
+                    try{
+                        FileUtils.deleteDirectory(new File("src/main/resources/img/logos/" + season.id));
+                    } catch (IOException e) {
+                        System.err.println("DesktopViewController.correctIdentificationShow: Error deleting directories");
+                    }
+
+                    try{
+                        Files.createDirectories(Paths.get("src/main/resources/img/logos/" + season.id + "/"));
+                        Files.createDirectories(Paths.get("src/main/resources/img/backgrounds/" + season.id + "/"));
+                    } catch (IOException e) {
+                        System.err.println("correctIdentificationShow: Directory could not be created");
+                    }
+
+                    downloadLogos(selectedSeries, season, selectedSeason.themdbID);
+                    downloadImages(selectedSeries, selectedSeason.themdbID);
+                    saveBackground(season, "src/main/resources/img/DownloadCache/" + selectedSeason.themdbID + ".png");
+
+                    if (selectedSeason.getDiscs().size() == 1){
+                        Disc disc = App.findDisc(selectedSeason.getDiscs().get(0));
+
+                        if (disc != null){
+                            disc.name = selectedSeason.name;
+                            disc.resume = selectedSeason.resume;
+                        }
+                    }
+
+                    for (String discID : selectedSeason.getDiscs()){
+                        Disc disc = App.findDisc(discID);
+
+                        if (disc == null)
+                            continue;
+
+                        try{
+                            FileUtils.deleteDirectory(new File("src/main/resources/img/discCovers/" + discID));
+                        } catch (IOException e) {
+                            System.err.println("DesktopViewController.correctIdentificationShow: Error deleting thumbnails");
+                        }
+
+                        try{
+                            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + discID + "/"));
+                        } catch (IOException e) {
+                            System.err.println("correctIdentificationShow: Directory could not be created");
+                        }
+
+                        setMovieThumbnail(disc, selectedSeason.themdbID);
+                    }
+                }
+                return null;
+            }
+        };
+
+        correctIdentificationTask.setOnSucceeded(event -> {
+            backgroundShadow.setVisible(false);
+            downloadingContentWindowStatic.setVisible(false);
+            movieMetadataToCorrect = null;
+            fillSeasonInfo();
+            showDiscs(selectedSeason);
+        });
+
+        new Thread(correctIdentificationTask).start();
     }
     public void correctIdentificationMovie(){
         showBackgroundShadow();
@@ -1032,7 +1134,7 @@ public class DesktopViewController {
                     System.err.println("correctIdentificationMovie: Directory could not be created");
                 }
 
-                downloadLogos(selectedSeason, selectedSeason.themdbID);
+                downloadLogos(selectedSeries, selectedSeason, selectedSeason.themdbID);
                 downloadImages(selectedSeries, selectedSeason.themdbID);
                 saveBackground(selectedSeason, "src/main/resources/img/DownloadCache/" + selectedSeason.themdbID + ".png");
 
@@ -1176,6 +1278,8 @@ public class DesktopViewController {
         App.addCollection(newSeries);
         currentCategory.series.add(newSeries.id);
 
+
+
         boolean seriesNotFound = false;
         List<TvSeason> seasonsMetadata = new ArrayList<>();
 
@@ -1219,21 +1323,15 @@ public class DesktopViewController {
         //endregion
 
         //Process background images
+        int i = 0;
         if (!seriesNotFound){
-            /*Task<Void> imageProcessing = new Task<>() {
-                @Override
-                protected Void call() {
-
-
-                    return null;
-                }
-            };
-
-            new Thread(imageProcessing).start();*/
             for (String seasonID : newSeries.getSeasons()) {
                 Season season = App.findSeason(seasonID);
                 saveBackground(season, "src/main/resources/img/DownloadCache/" + newSeries.id + ".png");
-                downloadLogos(season, newSeries.themdbID);
+
+                if (i == 0)
+                    downloadLogos(newSeries, season, newSeries.themdbID);
+                i++;
             }
         }
 
@@ -1544,15 +1642,15 @@ public class DesktopViewController {
             }
         }
     }
-    private void saveLogo(Season newSeason, int i, Image originalImage) {
+    private void saveLogo(String id, int i, Image originalImage) {
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/logos/" + newSeason.id + "/"));
+            Files.createDirectories(Paths.get("src/main/resources/img/logos/" + id + "/"));
         } catch (IOException e) {
             System.err.println("Directory could not be created");
         }
 
         if (!originalImage.isError()){
-            File file = new File("src/main/resources/img/logos/" + newSeason.id + "/" + i + ".png");
+            File file = new File("src/main/resources/img/logos/" + id + "/" + i + ".png");
             try{
                 RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
                 ImageIO.write(renderedImage,"png", file);
@@ -1588,7 +1686,7 @@ public class DesktopViewController {
                 newSeason.year = newSeries.year;
 
                 downloadImages(newSeries, newSeries.themdbID);
-                downloadLogos(newSeason, newSeries.themdbID);
+                downloadLogos(newSeries, newSeason, newSeries.themdbID);
                 saveBackground(newSeason, "src/main/resources/img/DownloadCache/" + newSeries.themdbID + ".png");
 
                 App.addCollection(newSeries);
@@ -1640,7 +1738,7 @@ public class DesktopViewController {
                         newSeason.seriesID = newSeries.id;
 
                         downloadImages(newSeries, newSeason.themdbID);
-                        downloadLogos(newSeason, newSeason.themdbID);
+                        downloadLogos(newSeries, newSeason, newSeason.themdbID);
                         saveBackground(newSeason, "src/main/resources/img/DownloadCache/" + newSeason.themdbID + ".png");
 
                         App.addSeason(newSeason, newSeries.id);
@@ -1689,7 +1787,7 @@ public class DesktopViewController {
                     newSeason.themdbID = newSeries.themdbID;
 
                     downloadImages(newSeries, newSeason.themdbID);
-                    downloadLogos(newSeason, newSeason.themdbID);
+                    downloadLogos(newSeries, newSeason, newSeason.themdbID);
                     saveBackground(newSeason, "src/main/resources/img/DownloadCache/" + newSeason.themdbID + ".png");
 
                     App.addCollection(newSeries);
@@ -1930,10 +2028,17 @@ public class DesktopViewController {
         }
         //endregion
     }
-    private void downloadLogos(Season season, int tmdbID){
+    private void downloadLogos(Series series, Season season, int tmdbID){
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
         String type = "tv";
         String languages = "null%2Cja%2Cen";
+
+        String id;
+
+        if (currentCategory.type.equals("Shows"))
+            id = series.id;
+        else
+            id = season.id;
 
         if (!currentCategory.type.equals("Shows")){
             type = "movie";
@@ -1968,7 +2073,7 @@ public class DesktopViewController {
                 List<Logo> logosList = images.logos;
                 if (!logosList.isEmpty()){
                     Image originalImage = new Image(imageBaseURL + logosList.get(0).file_path);
-                    saveLogo(season, 0, originalImage);
+                    saveLogo(id, 0, originalImage);
 
                     Task<Void> logosTask = new Task<>() {
                         @Override
@@ -1979,7 +2084,7 @@ public class DesktopViewController {
                                     break;
 
                                 Image originalImage = new Image(imageBaseURL + logosList.get(i).file_path);
-                                saveLogo(season, processedFiles, originalImage);
+                                saveLogo(id, processedFiles, originalImage);
 
                                 processedFiles++;
                             }
@@ -1990,9 +2095,12 @@ public class DesktopViewController {
                     new Thread(logosTask).start();
                 }
 
-                File posterDir = new File("src/main/resources/img/logos/" + season.id + "/0.png");
+                File posterDir = new File("src/main/resources/img/logos/" + id + "/0.png");
                 if (posterDir.exists()){
-                    season.logoSrc = "src/main/resources/img/logos/" + season.id + "/0.png";
+                    if (currentCategory.type.equals("Shows"))
+                        series.logoSrc = "src/main/resources/img/logos/" + id + "/0.png";
+                    else
+                        season.logoSrc = "src/main/resources/img/logos/" + id + "/0.png";
                 }
                 //endregion
             } else {
@@ -2118,7 +2226,7 @@ public class DesktopViewController {
                 Parent root1 = fxmlLoader.load();
                 EditCollectionController addColController = fxmlLoader.getController();
                 addColController.setParentController(this);
-                addColController.setSeries(selectedSeries);
+                addColController.setSeries(selectedSeries, currentCategory.type.equals("Shows"));
                 Stage stage = new Stage();
                 stage.setTitle(App.textBundle.getString("collectionWindowTitleEdit"));
                 stage.initStyle(StageStyle.UNDECORATED);
@@ -2141,7 +2249,7 @@ public class DesktopViewController {
             Parent root1 = fxmlLoader.load();
             EditSeasonController addSeasonController = fxmlLoader.getController();
             addSeasonController.setParentController(this);
-            addSeasonController.setSeason(selectedSeason);
+            addSeasonController.setSeason(selectedSeason, currentCategory.type.equals("Shows"));
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("seasonWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);

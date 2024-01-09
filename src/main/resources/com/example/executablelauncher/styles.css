@@ -68,7 +68,7 @@
 }
 
 .closeButton:hover{
-    -fx-background-color: #417892;
+    -fx-background-color: #ce1e30;
 }
 
 .searchResultButton{
@@ -90,7 +90,23 @@
 
 .buttonSelected{
     -fx-background-color: transparent;
-    -fx-text-fill: #417892;
+    -fx-text-fill: #8EDCE6;
+}
+
+.playButton{
+    -fx-background-color: rgba(0, 0, 0, 0.32);
+    -fx-background-radius: 50px;
+    -fx-border-width: 2px;
+    -fx-border-radius: 50px;
+    -fx-border-color: white;
+}
+
+.playButton:hover{
+    -fx-background-color: #8EDCE6;
+    -fx-background-radius: 50px;
+    -fx-border-width: 2px;
+    -fx-border-radius: 50px;
+    -fx-border-color: #8EDCE6;
 }
 
 .selected{
@@ -123,20 +139,20 @@
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: #417892;
+    -fx-border-color: #8EDCE6;
 }
 
 .downloadedImageButtonSelected{
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-border-width: 3px;
-    -fx-border-color: #417892;
+    -fx-border-color: #8EDCE6;
 }
 
 .selectionOptions{
     -fx-background-color: #0E0F19;
     -fx-border-width: 1px;
-    -fx-border-color: #417892;
+    -fx-border-color: #8EDCE6;
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
 }
@@ -156,12 +172,12 @@
 }
 
 .selectionOptionsButtonDelete:hover{
-    -fx-text-fill: #417892;
+    -fx-text-fill: #ff001c;
 }
 
 .discSelected{
     -fx-background-color: transparent;
-    -fx-border-color: #417892;
+    -fx-border-color: #8EDCE6;
     -fx-border-width: 2px;
 }
 
@@ -174,7 +190,7 @@
 
 .discButton:hover{
     -fx-background-color: transparent;
-    -fx-border-color: #417892;
+    -fx-border-color: #8EDCE6;
     -fx-border-width: 1px;
     -fx-text-fill: #ffffff;
 }
@@ -195,7 +211,7 @@
 }
 
 .desktopTextButton:hover{
-    -fx-background-color: #5e5e5e;
+    -fx-background-color: rgba(0, 0, 0, 0.47);
     -fx-text-fill: white;
     -fx-font-size: 18px;
 }
@@ -240,11 +256,11 @@
 }
 
 .redColor{
-    -fx-background-color: #417892;
+    -fx-background-color: #ff001c;
 }
 
 .progress-bar {
-    -fx-accent: rgba(0, 138, 230, 0.85);
+    -fx-accent: #8EDCE6;
 }
 
 .progress-bar .bar {
@@ -401,8 +417,8 @@
 }
 
 .desktopButtonActive{
-    -fx-background-color: #417892;
-    -fx-text-fill: white;
+    -fx-background-color: #8EDCE6;
+    -fx-text-fill: #000000;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
 }
@@ -422,13 +438,14 @@
 
 .CatButton{
     -fx-background-color: transparent;
-    -fx-text-fill: rgb(159, 159, 159);
+    -fx-text-fill: white;
+    -fx-effect: dropShadow(gaussian, black, 10, 0.0, 0, 0);
     -fx-font-family: Impact, bold;
     -fx-font-size: 24px;
 }
 
 .CatButton:hover{
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: #a2a2a2;
 }
 
 .CatButton:focused{

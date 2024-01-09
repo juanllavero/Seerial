@@ -96,7 +96,7 @@
                      <children>
                         <Button fx:id="moviesTypeButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#setMoviesType" styleClass="editButton" stylesheets="@styles.css" text="Movies">
                            <graphic>
-                              <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true" smooth="false">
                                  <image>
                                     <Image url="@../../../img/icons/movies.png" />
                                  </image></ImageView>
@@ -107,20 +107,9 @@
                         </Button>
                         <Button fx:id="showsTypeButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#setShowsType" styleClass="editButton" text="Shows">
                            <graphic>
-                              <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true" smooth="false">
                                  <image>
                                     <Image url="@../../../img/icons/shows.png" />
-                                 </image></ImageView>
-                           </graphic>
-                           <padding>
-                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
-                           </padding>
-                        </Button>
-                        <Button fx:id="concetsTypeButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#setConcetsType" styleClass="editButton" text="Concets">
-                           <graphic>
-                              <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../img/icons/concert.png" />
                                  </image></ImageView>
                            </graphic>
                            <padding>

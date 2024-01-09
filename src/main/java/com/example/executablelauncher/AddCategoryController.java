@@ -37,9 +37,6 @@ public class AddCategoryController {
     private Button foldersViewButton;
 
     @FXML
-    private Button concetsTypeButton;
-
-    @FXML
     private ScrollPane folderBox;
 
     @FXML
@@ -144,15 +141,13 @@ public class AddCategoryController {
         if (type.equals("Movies")){
             setMoviesType();
             showsTypeButton.setDisable(true);
-            concetsTypeButton.setDisable(true);
+            showsTypeButton.setOpacity(0.5);
+            moviesTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/moviesSelected.png"))));
         }else if (type.equals("Shows")){
             setShowsType();
             moviesTypeButton.setDisable(true);
-            concetsTypeButton.setDisable(true);
-        }else{
-            setConcetsType();
-            moviesTypeButton.setDisable(true);
-            showsTypeButton.setDisable(true);
+            moviesTypeButton.setOpacity(0.5);
+            showsTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/showsSelected.png"))));
         }
 
         showGeneralView();
@@ -205,6 +200,8 @@ public class AddCategoryController {
         moviesTypeButton.getStyleClass().clear();
         moviesTypeButton.getStyleClass().add("buttonSelected");
         nameField.setText(App.textBundle.getString("movies"));
+        moviesTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/moviesSelected.png"))));
+        showsTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/shows.png"))));
     }
 
     @FXML
@@ -214,15 +211,8 @@ public class AddCategoryController {
         showsTypeButton.getStyleClass().clear();
         showsTypeButton.getStyleClass().add("buttonSelected");
         nameField.setText(App.textBundle.getString("shows"));
-    }
-
-    @FXML
-    void setConcetsType() {
-        type = "Concerts";
-        clearTypeSelection();
-        concetsTypeButton.getStyleClass().clear();
-        concetsTypeButton.getStyleClass().add("buttonSelected");
-        nameField.setText(App.textBundle.getString("concerts"));
+        moviesTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/movies.png"))));
+        showsTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/showsSelected.png"))));
     }
 
     private void clearTypeSelection(){
@@ -230,8 +220,6 @@ public class AddCategoryController {
         moviesTypeButton.getStyleClass().add("editButton");
         showsTypeButton.getStyleClass().clear();
         showsTypeButton.getStyleClass().add("editButton");
-        concetsTypeButton.getStyleClass().clear();
-        concetsTypeButton.getStyleClass().add("editButton");
     }
 
     @FXML
