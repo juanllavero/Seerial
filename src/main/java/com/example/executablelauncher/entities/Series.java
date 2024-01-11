@@ -6,18 +6,21 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Series implements Serializable {
     public final String id;
     public int themdbID = -1;
     public String name = "";
-    public String resume = "";
+    public String overview = "";
+    public float score = 0;
+    public int runtime = 0;
+    public String tagline = "";
+    public String year = "";
     public String category = "";
+    public List<String> genres = new ArrayList<>();
     public int order = 0;
     public String coverSrc = "";
     public String logoSrc = "";
-    public String year = "";
     public boolean playSameMusic = false;
     public List<String> seasons = new ArrayList<>();
     public int seasonsNumber = 0;
@@ -75,5 +78,22 @@ public class Series implements Serializable {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public String getGenres(){
+        StringBuilder genresString = new StringBuilder();
+
+        if (genres.size() == 1){
+            genresString = new StringBuilder(genres.get(0));
+        }else{
+            for (int i = 0; i < genres.size(); i++){
+                if (i != 0)
+                    genresString.append(", ");
+
+                genresString.append(genres.get(i));
+            }
+        }
+
+        return genresString.toString();
     }
 }

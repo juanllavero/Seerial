@@ -1,9 +1,11 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Category;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import javafx.animation.*;
 import javafx.event.ActionEvent;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.PixelReader;
@@ -45,9 +47,6 @@ import javafx.util.Duration;
 public class Controller implements Initializable {
     @FXML
     private FlowPane cardContainer;
-
-    @FXML
-    private HBox hBox;
 
     @FXML
     private BorderPane mainPane;
@@ -100,6 +99,7 @@ public class Controller implements Initializable {
 
     private MediaPlayer backgroundMusicPlayer;
     private List<Timeline> coverBorderTimelines = new ArrayList<>();
+    private String categoryType = null;
 
     @FXML
     private void close(ActionEvent event) throws IOException {
@@ -111,15 +111,12 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        cardContainer.setPadding(new Insets(15, 15, 15, 100));
         sideMenuParent.setVisible(false);
 
         exitButton.setText(App.buttonsBundle.getString("exitFullscreen"));
         switchToDesktopButton.setText(App.buttonsBundle.getString("switchToDesktop"));
 
         playBackgroundSound();
-
-
 
         //Open/Close Side Menu
         sideMenu.setVisible(false);
@@ -149,16 +146,10 @@ public class Controller implements Initializable {
         //Fit width and height of components to window size
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
-        mainBox.prefWidth(screenWidth);
-        mainBox.prefHeight(screenHeight);
-        mainPane.prefWidthProperty().bind(mainBox.prefWidthProperty());
-        mainPane.prefHeightProperty().bind(mainBox.prefHeightProperty());
-        hBox.prefWidthProperty().bind(mainPane.widthProperty());
-        hBox.prefHeightProperty().bind(mainPane.heightProperty());
-        scrollPane.prefWidthProperty().bind(hBox.widthProperty());
-        cardContainer.prefWidthProperty().bind(hBox.widthProperty());
-        scrollPane.prefHeightProperty().bind(hBox.heightProperty());
-        cardContainer.prefHeightProperty().bind(hBox.heightProperty());
+        //mainBox.prefWidth(screenWidth);
+        //mainBox.prefHeight(screenHeight);
+        //mainPane.prefWidthProperty().bind(mainBox.prefWidthProperty());
+        //mainPane.prefHeightProperty().bind(mainBox.prefHeightProperty());
         topBorderPane.prefWidthProperty().bind(topBar.widthProperty());
         backgroundImage.setFitHeight(screenHeight);
         backgroundImage.setFitWidth(screenWidth);
@@ -228,6 +219,8 @@ public class Controller implements Initializable {
     }
 
     public void showSeriesFrom(String cat){
+        Category category = App.findCategory(cat);
+        categoryType = category.type;
         cardContainer.getChildren().clear();
         seriesButtons.clear();
         collectionList = App.getSeriesFromCategory(cat);
@@ -368,47 +361,27 @@ public class Controller implements Initializable {
     }
 
     private void addCard(Series s){
-        /*
-        cardBox.setBackground(Background.EMPTY);
-
-        Color[] colors = Stream.of("#d7d7d7", "#e5e5e5",  "#e0e0e0", "#d4d4d4", "#c9c9c9", "#bcbcbc", "#afafaf", "#a0a0a0", "#939393"
-                        , "#797979", "#737373", "#6a6a6a", "#5f5f5f", "#545454", "#494949", "#444444", "#3a3a3a", "#343434", "#2c2c2c", "#2c2c2c"
-                , "#343434", "#3a3a3a", "#444444", "#494949", "#545454", "#5f5f5f", "#6a6a6a", "#737373", "#797979", "#939393", "#a0a0a0", "#afafaf"
-                , "#bcbcbc", "#c9c9c9", "#d4d4d4", "#e0e0e0", "#e5e5e5", "#d7d7d7")
-                .map(Color::web)
-                .toArray(Color[]::new);
-
-        int[] mills = {-100};
-        KeyFrame[] keyFrames = Stream.iterate(0, i -> i+1)
-                .limit(100)
-                .map(i -> new LinearGradient(0, 1, 0, 1, true, CycleMethod.NO_CYCLE
-                        , new Stop(0, colors[i%colors.length]), new Stop(1, colors[(i+1)%colors.length])))
-                .map(lg -> new Border(new BorderStroke(lg, BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(3))))
-                .map(b -> new KeyFrame(Duration.millis(mills[0]+=100), new KeyValue(cardVBox.borderProperty(), b, Interpolator.EASE_IN)))
-                .toArray(KeyFrame[]::new);
-
-        Timeline timeline = new Timeline(keyFrames);
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        coverBorderTimelines.add(timeline);
-
-        cardContainer.getChildren().add(cardVBox);*/
-
-        Image img = new Image("file:" + s.getCoverSrc(), 273, 351, false, true);
+        Image img = new Image("file:" + s.getCoverSrc(), 260, 350, false, true);
         ImageView image = new ImageView(img);
 
         Button btn = new Button();
         btn.setGraphic(image);
-        btn.setPrefHeight(364);
-        btn.setPrefWidth(286);
-        btn.setPadding(new Insets(0, 1, 2, 0));
         btn.setAlignment(Pos.CENTER);
+        btn.setContentDisplay(ContentDisplay.CENTER);
+
+        btn.setPadding(new Insets(0));
         btn.getStyleClass().add("seriesCoverButton");
         seriesButtons.add(btn);
 
         btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
+                btn.setScaleX(1.1);
+                btn.setScaleY(1.1);
                 selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
                 playInteractionSound();
+            }else{
+                btn.setScaleX(1);
+                btn.setScaleY(1);
             }
         });
 
@@ -425,8 +398,8 @@ public class Controller implements Initializable {
 
         btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (event.getButton().equals(MouseButton.PRIMARY)){
-                //selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
-                //playInteractionSound();
+                selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
+                playInteractionSound();
             }else if (event.getButton().equals(MouseButton.SECONDARY)){
                 showSeriesMenu();
             }
@@ -493,7 +466,7 @@ public class Controller implements Initializable {
                 seasonController.setParent(this);
                 Series newSeries = App.findSeries(s.id);
                 if (newSeries != null)
-                    seasonController.setSeasons(newSeries.getSeasons(), newSeries.playSameMusic);
+                    seasonController.setSeasons(seriesToEdit, newSeries.getSeasons(), newSeries.playSameMusic, categoryType.equals("Shows"));
                 Stage stage = (Stage) mainPane.getScene().getWindow();
                 stage.setTitle(App.textBundle.getString("season"));
                 stage.setScene(new Scene(root));
@@ -551,7 +524,7 @@ public class Controller implements Initializable {
             stage.setScene(new Scene(root));
             stage.setMaximized(false);
             stage.initStyle(StageStyle.UNDECORATED);
-            stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 2);
+            stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
             stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
 
             DesktopViewController desktopViewController = fxmlLoader.getController();

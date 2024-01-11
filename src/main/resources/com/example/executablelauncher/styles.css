@@ -93,6 +93,47 @@
     -fx-text-fill: #8EDCE6;
 }
 
+.fullscreenButton{
+    -fx-background-color: rgba(255, 255, 255, 0.21);
+    -fx-background-radius: 50px;
+}
+
+.fullscreenButton:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.51);
+}
+
+.fullscreenButton:focused{
+    -fx-background-color: white;
+}
+
+.fullscreenButtonTransparent{
+    -fx-background-color: transparent;
+    -fx-background-radius: 50px;
+}
+
+.fullscreenButtonTransparent:hover {
+    -fx-background-color: rgba(107, 107, 107, 0.43);
+}
+
+.fullscreenButtonTransparent:focused{
+    -fx-background-color: rgba(0, 0, 0, 0.53);
+}
+
+.overviewButton{
+    -fx-background-color: transparent;
+    -fx-background-radius: 15px;
+}
+
+.overviewButton:hover{
+    -fx-background-color: rgba(255, 255, 255, 0.39);
+    -fx-background-radius: 15px;
+}
+
+.overviewButton:focused{
+    -fx-background-color: rgba(51, 51, 51, 0.37);
+    -fx-background-radius: 15px;
+}
+
 .playButton{
     -fx-background-color: rgba(0, 0, 0, 0.32);
     -fx-background-radius: 50px;
@@ -302,7 +343,7 @@
     -fx-text-fill: #ffffff;
 }
 
-.seeButtonSelected{
+.seeButton:focused{
     -fx-background-color: rgb(255, 255, 255);
     -fx-background-radius: 35px;
     -fx-text-fill: #0e0e0e;
@@ -324,7 +365,7 @@
     -fx-text-fill: #ffffff;
 }
 
-.optionsButtonSelected{
+.optionsButton:focused{
     -fx-background-color: rgb(255, 255, 255);
     -fx-background-radius: 50px;
     -fx-text-fill: #0e0e0e;
@@ -371,18 +412,14 @@
 
 .seriesCoverButton{
     -fx-background-color: transparent;
-    -fx-border-width: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 4;
 }
 
 .seriesCoverButton:focused {
     -fx-background-color: transparent;
-    -fx-border-color:
-            linear-gradient(#686868 0%, #a9a9a9 25%, #5e5e5e 75%, #3d3d3d 100%),
-            linear-gradient(#9d9e9d 0%, #6b6a6b 20%, #343534 80%, #242424 100%),
-            linear-gradient(#8a8a8a 0%, #6b6a6b 20%, #343534 80%, #262626 100%),
-            linear-gradient(#777777 0%, #606060 50%, #505250 51%, #2a2b2a 100%);
-    -fx-border-width: 3 3 3 3;
-    -fx-border-radius: 4, 3, 2;
+    -fx-border-color: white;
+    -fx-border-width: 4;
 }
 
 .folderContainer{

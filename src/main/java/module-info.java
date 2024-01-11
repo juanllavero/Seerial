@@ -21,6 +21,8 @@ module com.example.executablelauncher {
     requires okhttp3;
     requires com.fasterxml.jackson.databind;
     requires imgscalr.lib;
+    requires TarsosDSP.core;
+    requires TarsosDSP.jvm;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

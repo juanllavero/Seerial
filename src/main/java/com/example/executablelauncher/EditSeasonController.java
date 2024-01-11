@@ -451,15 +451,15 @@ public class EditSeasonController {
     void loadVideo(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(App.textBundle.getString("selectVideo"));
-        if (lastVideoDirectory != null && Files.exists(Path.of(lastVideoDirectory)))
+        if (App.lastVideoDirectory != null && Files.exists(Path.of(App.lastVideoDirectory)))
             fileChooser.setInitialDirectory(new File(lastVideoDirectory));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allVideos"), "*.mp4"));
-        selectedVideo = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
+        selectedVideo = fileChooser.showOpenDialog(((Button) event.getSource()).getScene().getWindow());
         if (selectedVideo != null){
             videoField.setText(selectedVideo.getPath());
-            lastVideoDirectory = selectedVideo.getPath();
+            lastVideoDirectory = selectedVideo.getPath().substring(0, (selectedVideo.getPath().length() - selectedVideo.getName().length()));
         }
     }
     @FXML
@@ -471,10 +471,10 @@ public class EditSeasonController {
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allAudios"), "*.mp3", "*.wav", "*.flac", "*.aac"));
-        selectedMusic = fileChooser.showOpenDialog((Stage)((Button) event.getSource()).getScene().getWindow());
+        selectedMusic = fileChooser.showOpenDialog(((Button) event.getSource()).getScene().getWindow());
         if (selectedMusic != null){
             musicField.setText(selectedMusic.getPath());
-            lastMusicDirectory = selectedMusic.getPath();
+            lastMusicDirectory = selectedMusic.getPath().substring(0, (selectedMusic.getPath().length() - selectedMusic.getName().length()));
         }
     }
     //endregion

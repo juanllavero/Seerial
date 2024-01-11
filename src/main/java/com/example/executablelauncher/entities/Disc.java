@@ -8,7 +8,9 @@ public class Disc implements Serializable {
     public final String id;
     public String name = "";
     public String resume = "";
+    public float score = 0;
     public int order = 0;
+    public int runtime = 0;
     public String episodeNumber = "";
     public String executableSrc = "";
     public String seasonID = "";

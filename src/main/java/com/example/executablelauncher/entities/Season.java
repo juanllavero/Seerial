@@ -10,7 +10,13 @@ import java.util.UUID;
 public class Season implements Serializable {
     public final String id;
     public String name = "";
+    public String overview = "";
     public String year = "";
+    public float score = 0;
+    public String tagline = "";
+    public int runtime = 0;
+    public int seasonNumber = 0;
+    public List<String> genres = new ArrayList<>();
     public String logoSrc = "";
     public String backgroundSrc = "";
     public String videoSrc = "";
@@ -18,7 +24,6 @@ public class Season implements Serializable {
     public String seriesID = "";
     public int order = 0;
     public int themdbID = -1;
-    public String resume = "";
     public boolean showName = true;
     public final List<String> discs = new ArrayList<>();
 
@@ -107,5 +112,22 @@ public class Season implements Serializable {
 
     public void removeDisc(String id){
         discs.remove(id);
+    }
+
+    public String getGenres(){
+        StringBuilder genresString = new StringBuilder();
+
+        if (genres.size() == 1){
+            genresString = new StringBuilder(genres.get(0));
+        }else{
+            for (int i = 0; i < genres.size(); i++){
+                if (i != 0)
+                    genresString.append(", ");
+
+                genresString.append(genres.get(i));
+            }
+        }
+
+        return genresString.toString();
     }
 }

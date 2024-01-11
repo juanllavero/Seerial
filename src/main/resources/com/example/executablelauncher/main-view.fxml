@@ -91,29 +91,24 @@
             </HBox>
          </top>
          <center>
-            <StackPane styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
-               <children>
-                  <HBox fx:id="hBox" styleClass="transparent" stylesheets="@styles.css">
-                     <children>
-                        <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" prefHeight="655.0" prefWidth="1281.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS">
-                           <opaqueInsets>
-                              <Insets />
-                           </opaqueInsets>
-                           <padding>
-                              <Insets right="5.0" top="5.0" />
-                           </padding>
-                           <content>
-                              <FlowPane fx:id="cardContainer" hgap="20.0" prefHeight="640.0" prefWidth="1169.0" styleClass="transparent" stylesheets="@styles.css" vgap="20.0">
-                                 <padding>
-                                    <Insets bottom="10.0" left="50.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </FlowPane>
-                           </content>
-                        </ScrollPane>
-                     </children>
-                  </HBox>
-               </children>
-            </StackPane>
+            <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <content>
+                  <FlowPane fx:id="cardContainer" hgap="30.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="50.0">
+                     <padding>
+                        <Insets bottom="50.0" left="100.0" right="100.0" top="30.0" />
+                     </padding>
+                  </FlowPane>
+               </content>
+               <BorderPane.margin>
+                  <Insets top="20.0" />
+               </BorderPane.margin>
+               <padding>
+                  <Insets top="20.0" />
+               </padding>
+            </ScrollPane>
          </center>
       </BorderPane>
       <StackPane fx:id="sideMenuParent" styleClass="blurredBackground" stylesheets="@styles.css" StackPane.alignment="CENTER">
