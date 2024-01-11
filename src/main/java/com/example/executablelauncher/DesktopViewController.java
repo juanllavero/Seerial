@@ -1627,20 +1627,8 @@ public class DesktopViewController {
             newSeries.themdbID = tvSeries.getId();
             newSeries.score = tvSeries.getVoteAverage();
 
-
             TvSeries show = seriesMetadata.getSeries(tvSeries.getId(), currentCategory.language);
             newSeries.seasonsNumber = show.getNumberOfSeasons();
-
-            List<Genre> genres = show.getGenres();
-
-            if (genres != null){
-                List<String> genresText = new ArrayList<>();
-                for (Genre genre : genres){
-                    genresText.add(genre.getName());
-                }
-
-                newSeries.genres = genresText;
-            }
 
             downloadImages(newSeries, tvSeries.getId());
 
@@ -1711,8 +1699,6 @@ public class DesktopViewController {
                 newSeason.seriesID = newSeries.id;
                 newSeason.year = newSeries.year;
                 newSeason.score = newSeries.score;
-                newSeason.runtime = newSeries.runtime;
-                newSeason.tagline = newSeries.tagline;
 
                 downloadImages(newSeries, newSeries.themdbID);
                 downloadLogos(newSeries, newSeason, newSeries.themdbID);
@@ -1766,8 +1752,6 @@ public class DesktopViewController {
                         newSeason.themdbID = movie.getId();
                         newSeason.year = movie.getReleaseDate();
                         newSeason.score = movie.getVoteAverage();
-                        newSeason.runtime = movie.getRuntime();
-                        newSeason.tagline = movie.getTagline();
                         newSeason.seriesID = newSeries.id;
 
                         downloadImages(newSeries, newSeason.themdbID);
@@ -1820,8 +1804,6 @@ public class DesktopViewController {
                     newSeason.seriesID = newSeries.id;
                     newSeason.year = newSeries.year;
                     newSeason.score = newSeries.score;
-                    newSeason.runtime = newSeries.runtime;
-                    newSeason.tagline = newSeries.tagline;
 
                     downloadImages(newSeries, newSeason.themdbID);
                     downloadLogos(newSeries, newSeason, newSeason.themdbID);
@@ -1857,7 +1839,6 @@ public class DesktopViewController {
         newDisc.episodeNumber = String.valueOf(season.getDiscs().size());
         newDisc.seasonID = season.id;
         newDisc.score = season.score;
-        newDisc.runtime = season.runtime;
         newDisc.executableSrc = file.getAbsolutePath();
 
         setMovieThumbnail(newDisc, season.themdbID);
@@ -1956,26 +1937,12 @@ public class DesktopViewController {
         MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(seriesName, 1, currentCategory.language, true, 1);
 
         if (movieResults.getTotalResults() > 0) {
-            MovieDb movie = moviesMetadata.getMovie(movieResults.getResults().get(0).getId(), currentCategory.language, TmdbMovies.MovieMethod.values());
+            MovieDb movie = moviesMetadata.getMovie(movieResults.getResults().get(0).getId(), currentCategory.language);
             newSeries.name = movie.getTitle();
             newSeries.overview = movie.getOverview();
             newSeries.themdbID = movie.getId();
             newSeries.year = movie.getReleaseDate();
             newSeries.score = movie.getVoteAverage();
-
-            newSeries.runtime = movie.getRuntime();
-            newSeries.tagline = movie.getTagline();
-
-            List<Genre> genres = movie.getGenres();
-
-            if (genres != null){
-                List<String> genresText = new ArrayList<>();
-                for (Genre genre : genres){
-                    genresText.add(genre.getName());
-                }
-
-                newSeries.genres = genresText;
-            }
 
             return newSeries;
         }

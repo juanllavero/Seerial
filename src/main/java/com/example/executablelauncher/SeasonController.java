@@ -74,12 +74,6 @@ public class SeasonController {
     private Label detailsTitle;
 
     @FXML
-    private Label directedByField;
-
-    @FXML
-    private Label directedByText;
-
-    @FXML
     private Label durationField;
 
     @FXML
@@ -96,12 +90,6 @@ public class SeasonController {
 
     @FXML
     private Label fileNameText;
-
-    @FXML
-    private Label genderField;
-
-    @FXML
-    private Label genderText;
 
     @FXML
     private VBox infoBox;
@@ -138,9 +126,6 @@ public class SeasonController {
 
     @FXML
     private Label seasonEpisodeNumber;
-
-    @FXML
-    private Label tagline;
 
     @FXML
     private Label title;
@@ -669,11 +654,9 @@ public class SeasonController {
         if (isShow){
             detailsTitle.setText(episodeName.getText());
             detailsImage.setImage(new Image("file:" + selectedDisc.imgSrc));
-            tagline.setText(series.tagline);
         }else{
             detailsTitle.setText(seasons.get(currentSeason).name);
             detailsImage.setImage(new Image("file:" + series.coverSrc));
-            tagline.setText(seasons.get(currentSeason).tagline);
         }
         detailsOverview.setText(overviewField.getText());
 

@@ -86,17 +86,6 @@
          <center>
             <VBox alignment="BOTTOM_LEFT" BorderPane.alignment="CENTER">
                <children>
-                  <Label fx:id="tagline" text="Quote from the movie/series" textFill="#d7d7d7">
-                     <VBox.margin>
-                        <Insets left="130.0" />
-                     </VBox.margin>
-                     <font>
-                        <Font name="System Bold Italic" size="13.0" />
-                     </font>
-                     <effect>
-                        <DropShadow />
-                     </effect>
-                  </Label>
                   <VBox fx:id="infoBox" alignment="BOTTOM_LEFT" prefHeight="310.0" prefWidth="1108.0" spacing="5.0" stylesheets="@styles.css">
                      <children>
                         <ImageView fx:id="logo" fitHeight="138.0" fitWidth="344.0" pickOnBounds="true" preserveRatio="true">

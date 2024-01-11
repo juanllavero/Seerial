@@ -13,11 +13,8 @@ public class Series implements Serializable {
     public String name = "";
     public String overview = "";
     public float score = 0;
-    public int runtime = 0;
-    public String tagline = "";
     public String year = "";
     public String category = "";
-    public List<String> genres = new ArrayList<>();
     public int order = 0;
     public String coverSrc = "";
     public String logoSrc = "";
@@ -78,22 +75,5 @@ public class Series implements Serializable {
 
     public void setOrder(int order) {
         this.order = order;
-    }
-
-    public String getGenres(){
-        StringBuilder genresString = new StringBuilder();
-
-        if (genres.size() == 1){
-            genresString = new StringBuilder(genres.get(0));
-        }else{
-            for (int i = 0; i < genres.size(); i++){
-                if (i != 0)
-                    genresString.append(", ");
-
-                genresString.append(genres.get(i));
-            }
-        }
-
-        return genresString.toString();
     }
 }
