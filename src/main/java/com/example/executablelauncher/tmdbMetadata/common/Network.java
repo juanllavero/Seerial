@@ -1,4 +1,4 @@
-package com.example.executablelauncher.tmdbMetadata;
+package com.example.executablelauncher.tmdbMetadata.common;
 
 public class Network {
     public int id;

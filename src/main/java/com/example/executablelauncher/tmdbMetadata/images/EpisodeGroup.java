@@ -1,4 +1,4 @@
-package com.example.executablelauncher.tmdbMetadata;
+package com.example.executablelauncher.tmdbMetadata.images;
 
 import java.util.ArrayList;
 

@@ -4,7 +4,11 @@ import com.example.executablelauncher.entities.Disc;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.Locale;
 
 public class Utils {
     private static int CompareMedia(int order, int order2, String name, String name2) {
@@ -38,6 +42,19 @@ public class Utils {
         @Override
         public int compare(Disc a, Disc b) {
             return Integer.compare(Integer.parseInt(b.getEpisodeNumber()), Integer.parseInt(a.getEpisodeNumber()));
+        }
+    }
+
+    public static String episodeDateFormat(String originalDate, String language) {
+        SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat newFormat = new SimpleDateFormat("dd MMM yyyy", Locale.forLanguageTag(language));
+
+        try {
+            Date date = originalFormat.parse(originalDate);
+            return newFormat.format(date);
+        } catch (ParseException e) {
+            System.err.println("episodeDateFormat: Error applying date format");
+            return originalDate;
         }
     }
 

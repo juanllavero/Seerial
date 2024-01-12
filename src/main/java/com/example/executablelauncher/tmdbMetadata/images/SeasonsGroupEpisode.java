@@ -1,4 +1,4 @@
-package com.example.executablelauncher.tmdbMetadata;
+package com.example.executablelauncher.tmdbMetadata.images;
 
 public class SeasonsGroupEpisode {
     public String air_date;

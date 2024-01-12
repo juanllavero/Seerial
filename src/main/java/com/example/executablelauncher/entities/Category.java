@@ -12,7 +12,8 @@ public class Category {
     public List<String> folders = new ArrayList<>();
     public boolean showOnFullscreen = false;
     public List<String> series = new ArrayList<>();
-    public Map<String, Boolean> analyzedFiles = new HashMap<>();
+    public Map<String, String> analyzedFiles = new HashMap<>();                 //<File, DiscID>
+    public Map<String, String> analyzedFolders = new HashMap<>();               //<Folder, SeriesID>
 
     public Category(String n, String lang, String t, List<String> f, boolean s){
         name = n;

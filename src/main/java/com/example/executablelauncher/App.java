@@ -1,6 +1,9 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.*;
+import com.example.executablelauncher.entities.Category;
+import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.entities.Season;
+import com.example.executablelauncher.entities.Series;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -327,7 +330,7 @@ public class App extends Application {
         }
 
         series.removeSeason(season.id);
-        series.seasonsNumber--;
+        series.numberOfSeasons--;
 
         try{
             FileUtils.deleteDirectory(new File("src/main/resources/img/backgrounds/" + season.id));

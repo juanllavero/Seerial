@@ -1,6 +1,6 @@
-package com.example.executablelauncher.tmdbMetadata;
+package com.example.executablelauncher.tmdbMetadata.images;
 
-public class Logo {
+public class Backdrop {
     public double aspect_ratio;
     public int height;
     public String iso_639_1;

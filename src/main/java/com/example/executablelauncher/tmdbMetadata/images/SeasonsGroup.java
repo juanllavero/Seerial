@@ -1,4 +1,6 @@
-package com.example.executablelauncher.tmdbMetadata;
+package com.example.executablelauncher.tmdbMetadata.images;
+
+import com.example.executablelauncher.tmdbMetadata.common.Network;
 
 public class SeasonsGroup {
     public String description;

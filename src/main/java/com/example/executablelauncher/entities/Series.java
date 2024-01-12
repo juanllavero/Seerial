@@ -15,12 +15,15 @@ public class Series implements Serializable {
     public float score = 0;
     public String year = "";
     public String category = "";
+    public String tagline = "";
+    public int numberOfSeasons = 0;
+    public int numberOfEpisodes = 0;
     public int order = 0;
     public String coverSrc = "";
     public String logoSrc = "";
-    public boolean playSameMusic = false;
     public List<String> seasons = new ArrayList<>();
-    public int seasonsNumber = 0;
+    public List<String> genres = new ArrayList<>();
+    public boolean playSameMusic = false;
 
     public Series() {
         String uuid = UUID.randomUUID().toString();
