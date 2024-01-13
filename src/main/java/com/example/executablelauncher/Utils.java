@@ -41,7 +41,7 @@ public class Utils {
     public static class DiscComparator implements Comparator<Disc> {
         @Override
         public int compare(Disc a, Disc b) {
-            return Integer.compare(Integer.parseInt(b.getEpisodeNumber()), Integer.parseInt(a.getEpisodeNumber()));
+            return Integer.compare(b.getEpisodeNumber(), a.getEpisodeNumber());
         }
     }
 

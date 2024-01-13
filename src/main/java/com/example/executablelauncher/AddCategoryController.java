@@ -1,5 +1,6 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Category;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -80,11 +81,11 @@ public class AddCategoryController {
     //endregion
 
     private DesktopViewController parentController;
-    private boolean toEdit = false;
     private String catName = "";
     private String type = "";
     private List<String> folders = new ArrayList<>();
     private boolean inGeneralView = true;
+    private Category categoryToEdit = null;
 
     //region INITIALIZATION
     @FXML
@@ -99,7 +100,6 @@ public class AddCategoryController {
         generalBox.setVisible(true);
         folderBox.setVisible(false);
         showOnFullscreen.setSelected(true);
-        toEdit = false;
         saveButton.setText(App.buttonsBundle.getString("next"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
@@ -115,23 +115,23 @@ public class AddCategoryController {
         showGeneralView();
     }
 
-    public void setValues(String catName, String lang, String type, List<String> folders, boolean showFS){
+    public void setValues(Category toEdit){
+        categoryToEdit = toEdit;
         title.setText(App.textBundle.getString("categoryWindowTitleEdit"));
-        nameField.setText(catName);
-        showOnFullscreen.setSelected(showFS);
+        nameField.setText(categoryToEdit.name);
+        showOnFullscreen.setSelected(categoryToEdit.showOnFullscreen);
         generalBox.setVisible(true);
         folderBox.setVisible(false);
-        toEdit = true;
-        this.type = type;
-        this.catName = catName;
-        this.folders = folders;
+        this.type = categoryToEdit.type;
+        this.catName = categoryToEdit.name;
+        this.folders = categoryToEdit.folders;
 
         List<Locale> languages = App.tmdbLanguages;
         for (Locale locale : languages){
             languageChoice.getItems().add(locale.getDisplayName());
         }
 
-        Locale locale = Locale.forLanguageTag(lang);
+        Locale locale = Locale.forLanguageTag(categoryToEdit.language);
         languageChoice.setValue(locale.getDisplayName());
 
         saveButton.setText(App.buttonsBundle.getString("next"));
@@ -169,7 +169,7 @@ public class AddCategoryController {
                 return;
             }
 
-            if ((!catName.equals(nameField.getText()) && App.categoryExist(nameField.getText())) || App.categoryExist(nameField.getText())){
+            if ((!catName.equals(nameField.getText()) && App.categoryExist(nameField.getText()))){
                 App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("categoryExists"));
                 return;
             }
@@ -182,12 +182,19 @@ public class AddCategoryController {
                 }
             }
 
-            if (toEdit)
-                App.editCategory(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
-            else
-                App.addCategory(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
+            if (categoryToEdit != null){
+                categoryToEdit.name = nameField.getText();
+                categoryToEdit.language = language;
+                categoryToEdit.type = type;
+                categoryToEdit.folders = folders;
+                categoryToEdit.showOnFullscreen = showOnFullscreen.isSelected();
 
-            parentController.loadCategory(nameField.getText());
+                parentController.searchFiles();
+            }else{
+                App.addCategory(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
+                parentController.loadCategory(nameField.getText());
+            }
+
             parentController.hideBackgroundShadow();
             cancelButton(event);
         }

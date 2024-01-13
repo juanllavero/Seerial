@@ -12,6 +12,7 @@ public class Season implements Serializable {
     public String name = "";
     public String overview = "";
     public String year = "";
+    public String tagline = "";
     public float score = 0;
     public int seasonNumber = 0;
     public String logoSrc = "";
@@ -22,7 +23,9 @@ public class Season implements Serializable {
     public int order = 0;
     public int themdbID = -1;
     public boolean showName = true;
+    public String folder = "";
     public final List<String> discs = new ArrayList<>();
+    public List<String> genres = new ArrayList<>();
 
     public Season() {
         String uuid = UUID.randomUUID().toString();
@@ -109,5 +112,25 @@ public class Season implements Serializable {
 
     public void removeDisc(String id){
         discs.remove(id);
+    }
+
+    public String getGenres(){
+        return getString(genres);
+    }
+
+    public static String getString(List<String> genres) {
+        StringBuilder genresText = new StringBuilder();
+
+        if (genres.size() == 1){
+            return genres.get(0);
+        }
+
+        for (String genre : genres){
+            if (genres.indexOf(genre) > 0)
+                genresText.append(", ");
+            genresText.append(genre);
+        }
+
+        return genresText.toString();
     }
 }

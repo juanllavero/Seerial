@@ -59,6 +59,9 @@ public class SeasonController {
     private HBox cardContainer;
 
     @FXML
+    private VBox detailsText;
+
+    @FXML
     private BorderPane detailsBox;
 
     @FXML
@@ -128,13 +131,16 @@ public class SeasonController {
     private Label seasonEpisodeNumber;
 
     @FXML
-    private Label title;
-
-    @FXML
     private Label writtenByField;
 
     @FXML
     private Label writtenByText;
+
+    @FXML
+    private Label genresText;
+
+    @FXML
+    private Label genresField;
 
     @FXML
     private Label yearField;
@@ -175,22 +181,10 @@ public class SeasonController {
 
         if (season.getDiscs().size() > 1){
             cardContainer.setPrefHeight((Screen.getPrimary().getBounds().getHeight() / 5) + 20);
+            cardContainer.setVisible(true);
         }else{
             cardContainer.setPrefHeight(0);
-        }
-
-        if (!season.showName && infoBox.getChildren().size() == 4){
-            infoBox.getChildren().remove(1);
-        }else if (season.showName && infoBox.getChildren().size() == 3){
-            infoBox.getChildren().add(1, nameFiledSaved);
-            title.setText(season.getName());
-        }
-
-        overviewField.setText(season.overview);
-        yearField.setText(season.getYear());
-
-        if (!isShow){
-           detailsInfo.getChildren().remove(seasonEpisodeNumber);
+            cardContainer.setVisible(false);
         }
 
         //Set Background Image
@@ -233,25 +227,40 @@ public class SeasonController {
         // Crear el nuevo ImageView con la imagen recortada
         backgroundImage.setImage(croppedImage);
 
-        if (season.getLogoSrc().isEmpty()){
-            infoBox.getChildren().remove(0);
-            Label seriesTitle = new Label(App.findSeries(season.getSeriesID()).name);
-            seriesTitle.setFont(new Font("Arial", 58));
-            seriesTitle.setStyle("-fx-font-weight: bold");
-            seriesTitle.setTextFill(Color.color(1, 1, 1));
-            seriesTitle.setEffect(new DropShadow());
-            infoBox.getChildren().add(0, seriesTitle);
-        }else {
-            Image img;
-            if (isShow){
-                img = new Image("file:" + season.logoSrc, screenWidth * 0.25, screenHeight * 0.25, true, true);
-            }else{
+        if (isShow){
+            if (series.logoSrc.isEmpty()){
+                infoBox.getChildren().remove(0);
+                Label seriesTitle = new Label(series.name);
+                seriesTitle.setFont(new Font("Arial", 58));
+                seriesTitle.setStyle("-fx-font-weight: bold");
+                seriesTitle.setTextFill(Color.color(1, 1, 1));
+                seriesTitle.setEffect(new DropShadow());
+                infoBox.getChildren().add(0, seriesTitle);
+            }else {
+                Image img;
                 img = new Image("file:" + series.logoSrc, screenWidth * 0.25, screenHeight * 0.25, true, true);
-            }
 
-            logo.setImage(img);
-            logo.setFitWidth(screenWidth * 0.15);
-            logo.setFitHeight(screenHeight * 0.15);
+                logo.setImage(img);
+                logo.setFitWidth(screenWidth * 0.15);
+                logo.setFitHeight(screenHeight * 0.15);
+            }
+        }else{
+            if (season.getLogoSrc().isEmpty()){
+                infoBox.getChildren().remove(0);
+                Label seriesTitle = new Label(series.name);
+                seriesTitle.setFont(new Font("Arial", 58));
+                seriesTitle.setStyle("-fx-font-weight: bold");
+                seriesTitle.setTextFill(Color.color(1, 1, 1));
+                seriesTitle.setEffect(new DropShadow());
+                infoBox.getChildren().add(0, seriesTitle);
+            }else {
+                Image img;
+                img = new Image("file:" + season.logoSrc, screenWidth * 0.25, screenHeight * 0.25, true, true);
+
+                logo.setImage(img);
+                logo.setFitWidth(screenWidth * 0.15);
+                logo.setFitHeight(screenHeight * 0.15);
+            }
         }
 
         if (!season.getVideoSrc().isEmpty()){
@@ -287,12 +296,36 @@ public class SeasonController {
             addEpisodeCard(d);
         }
 
-        if (!discsButtons.isEmpty())
+        mainPane.requestFocus();
+
+        if (discsButtons.size() > 1)
             discsButtons.get(0).requestFocus();
         else
             playButton.requestFocus();
 
+        selectedDisc = App.findDisc(discs.get(0));
+
+        overviewField.setText(season.overview);
+        yearField.setText(season.getYear());
+        scoreField.setText(String.valueOf(selectedDisc.score));
+        durationField.setText(setRuntime(selectedDisc.runtime));
+        episodeName.setText(season.name);
+
+        if (!isShow){
+            detailsInfo.getChildren().remove(seasonEpisodeNumber);
+        }
+
         fadeInEffect(backgroundImage);
+    }
+
+    private String setRuntime(int runtime){
+        int h = runtime / 60;
+        int m = runtime % 60;
+
+        if (h == 0)
+            return (m + "m");
+
+        return (h + "h " + m + "m");
     }
 
     private void setMediaPlayer(){
@@ -323,8 +356,6 @@ public class SeasonController {
                 seasons.add(App.findSeason(id));
             }
         }
-
-        nameFiledSaved = title;
 
         menuShadow.setFitWidth(Screen.getPrimary().getBounds().getWidth());
         menuShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
@@ -357,6 +388,9 @@ public class SeasonController {
         backgroundShadow2.setFitWidth(screenWidth);
         backgroundShadow2.setFitHeight(screenHeight);
         episodeScroll.setPrefWidth(screenWidth);
+
+        detailsText.setPrefWidth(screenWidth / 2);
+        detailsBox.setVisible(false);
 
         /*episodeScroll.setOnScroll(event -> {
 
@@ -521,14 +555,16 @@ public class SeasonController {
     private void updateDiscInfo(Disc disc) {
         selectedDisc = disc;
         episodeName.setText(disc.name);
-        overviewField.setText(disc.resume);
+        overviewField.setText(disc.overview);
         seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).seasonNumber + App.textBundle.getString("episodeLetter") + disc.episodeNumber);
-        //yearField.setText(disc.releaseDate);
-        //durationField.setText(disc.duration);
+        yearField.setText(disc.year);
+        durationField.setText(setRuntime(disc.runtime));
+        scoreField.setText(String.valueOf(disc.score));
     }
 
     public void playEpisode(Disc disc){
-        mp.stop();
+        if (mp != null)
+            mp.stop();
 
         //Run file in vlc
         String command = null;
@@ -549,7 +585,8 @@ public class SeasonController {
             final Process process = pBuilder.start();
 
             process.waitFor();
-            mp.play();
+            if (mp != null)
+                mp.play();
         } catch (IOException | InterruptedException e) {
             System.err.println("Error playing episode in DesktopViewController");
         }
@@ -654,9 +691,11 @@ public class SeasonController {
         if (isShow){
             detailsTitle.setText(episodeName.getText());
             detailsImage.setImage(new Image("file:" + selectedDisc.imgSrc));
+            genresField.setText(series.getGenres());
         }else{
             detailsTitle.setText(seasons.get(currentSeason).name);
             detailsImage.setImage(new Image("file:" + series.coverSrc));
+            genresField.setText(seasons.get(currentSeason).getGenres());
         }
         detailsOverview.setText(overviewField.getText());
 
@@ -665,6 +704,8 @@ public class SeasonController {
 
         fadeInEffect(menuShadow);
         fadeInEffect(detailsBox);
+
+        detailsBox.requestFocus();
     }
 
     private void closeDetails(){

@@ -21,6 +21,7 @@ public class Series implements Serializable {
     public int order = 0;
     public String coverSrc = "";
     public String logoSrc = "";
+    public String folder = "";
     public List<String> seasons = new ArrayList<>();
     public List<String> genres = new ArrayList<>();
     public boolean playSameMusic = false;
@@ -78,5 +79,9 @@ public class Series implements Serializable {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public String getGenres(){
+        return Season.getString(genres);
     }
 }

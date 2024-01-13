@@ -1,6 +1,8 @@
 package com.example.executablelauncher.tmdbMetadata.series;
 
 import com.example.executablelauncher.tmdbMetadata.common.Crew;
+import com.example.executablelauncher.tmdbMetadata.common.GuestStar;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 
@@ -18,6 +20,8 @@ public class EpisodeMetadata {
     public String still_path;
     public double vote_average;
     public int vote_count;
+    @JsonIgnore
     public ArrayList<Crew> crew;
-    public ArrayList<Object> guest_stars;
+    @JsonIgnore
+    public ArrayList<GuestStar> guest_stars;
 }

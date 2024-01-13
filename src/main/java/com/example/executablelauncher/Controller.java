@@ -93,6 +93,9 @@ public class Controller implements Initializable {
     @FXML
     private Label clock;
 
+    @FXML
+    private ImageView globalShadow;
+
     private Series seriesToEdit;
     private List<Series> collectionList = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
@@ -122,15 +125,19 @@ public class Controller implements Initializable {
         sideMenu.setVisible(false);
         menuButton.setOnMouseClicked(mouseEvent -> {
             playInteractionSound();
+            globalShadow.setVisible(true);
             sideMenuParent.setVisible(true);
             sideMenu.setVisible(true);
+            switchToDesktopButton.requestFocus();
         });
 
         menuButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (KeyCode.ENTER == event.getCode()) {
                 playInteractionSound();
+                globalShadow.setVisible(true);
                 sideMenuParent.setVisible(true);
                 sideMenu.setVisible(true);
+                switchToDesktopButton.requestFocus();
             }
         });
 
@@ -166,6 +173,10 @@ public class Controller implements Initializable {
         menuShadow.setFitWidth(screenWidth);
         menuShadow.setFitHeight(screenHeight);
         menuShadow.setVisible(false);
+
+        globalShadow.setFitWidth(screenWidth);
+        globalShadow.setFitHeight(screenHeight);
+        globalShadow.setVisible(false);
 
         List<String> categories = App.getFullscreenCategories();
 
@@ -361,7 +372,11 @@ public class Controller implements Initializable {
     }
 
     private void addCard(Series s){
-        Image img = new Image("file:" + s.getCoverSrc(), 260, 350, false, true);
+        String coverSrc = "src/main/resources/img/DefaultPoster.png";
+
+        if (!s.coverSrc.isEmpty())
+            coverSrc = s.getCoverSrc();
+        Image img = new Image("file:" + coverSrc, 260, 350, false, true);
         ImageView image = new ImageView(img);
 
         Button btn = new Button();
@@ -454,6 +469,7 @@ public class Controller implements Initializable {
         seriesToEdit = null;
         sideMenuParent.setVisible(false);
         sideMenu.setVisible(false);
+        globalShadow.setVisible(false);
     }
 
     public void showSeason(Series s){

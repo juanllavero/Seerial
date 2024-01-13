@@ -167,14 +167,14 @@ public class OldDesignController {
     private final ImageViewPane seasonBackground = new ImageViewPane();
 
     private List<Series> seriesList = new ArrayList<>();
-    private List<Season> seasonList = new ArrayList<>();
+    private List<SeasonMetadataBasic> seasonList = new ArrayList<>();
     private List<Disc> discList = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
     private List<Button> seasonsButtons = new ArrayList<>();
     private List<Button> discButtons = new ArrayList<>();
 
     private Series selectedSeries = null;
-    private Season selectedSeason = null;
+    private SeasonMetadataBasic selectedSeason = null;
     private List<Disc> selectedDiscs = new ArrayList<>();
     private Disc discToEdit = null;
     private String currentCategory = "";
@@ -398,7 +398,7 @@ public class OldDesignController {
             if (!s.getSeasons().isEmpty()){
                 seasonList.clear();
                 for (int i : s.getSeasons()){
-                    Season season = App.findSeason(i);
+                    SeasonMetadataBasic season = App.findSeason(i);
                     if (season != null)
                         seasonList.add(season);
                 }
@@ -483,7 +483,7 @@ public class OldDesignController {
         seasonContainer.getChildren().clear();
         seasonsButtons.clear();
 
-        for (Season s : seasonList){
+        for (SeasonMetadataBasic s : seasonList){
             Button seasonButton = new Button();
             seasonButton.setText(s.getName());
             seasonButton.setBackground(null);
@@ -516,9 +516,9 @@ public class OldDesignController {
         btn.getStyleClass().clear();
         btn.getStyleClass().add("desktopButtonActive");
         String seasonName = btn.getText();
-        Season season = null;
+        SeasonMetadataBasic season = null;
 
-        for (Season s : seasonList){
+        for (SeasonMetadataBasic s : seasonList){
             if (s.getName().equals(seasonName)){
                 season = s;
             }
@@ -529,7 +529,7 @@ public class OldDesignController {
         }
     }
 
-    private void selectSeason(Season s) {
+    private void selectSeason(SeasonMetadataBasic s) {
         if (selectedSeason != s){
             selectedSeason = s;
 
@@ -543,7 +543,7 @@ public class OldDesignController {
         }
     }
 
-    private void showDiscs(Season s) {
+    private void showDiscs(SeasonMetadataBasic s) {
         discList.clear();
         discContainer.getChildren().clear();
         discButtons.clear();
@@ -993,7 +993,7 @@ public class OldDesignController {
         hideMenu();
     }
 
-    public Season getCurrentSeason(){
+    public SeasonMetadataBasic getCurrentSeason(){
         return selectedSeason;
     }
 
@@ -1091,7 +1091,7 @@ public class OldDesignController {
         backgroundShadow.setVisible(false);
     }
 
-    public void refreshSeason(Season s){
+    public void refreshSeason(SeasonMetadataBasic s){
         selectedSeason = null;
         selectSeason(s);
     }

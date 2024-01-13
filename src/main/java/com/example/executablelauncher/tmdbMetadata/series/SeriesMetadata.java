@@ -34,7 +34,7 @@ public class SeriesMetadata {
     public String poster_path;
     public ArrayList<ProductionCompany> production_companies;
     public ArrayList<ProductionCountry> production_countries;
-    public ArrayList<Season> seasons;
+    public ArrayList<SeasonMetadataBasic> seasons;
     public ArrayList<SpokenLanguage> spoken_languages;
     public String status;
     public String tagline;

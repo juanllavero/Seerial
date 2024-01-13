@@ -56,7 +56,7 @@ public class DiscController {
 
     public void setData(Disc d) {
         name.setText(d.getName());
-        if (d.getEpisodeNumber().isEmpty()){
+        if (d.getEpisodeNumber() == 0){
             number.setText("");
         }else{
             number.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber());

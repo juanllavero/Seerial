@@ -7,11 +7,13 @@ import com.example.executablelauncher.App;
 public class Disc implements Serializable {
     public final String id;
     public String name = "";
-    public String resume = "";
+    public String overview = "";
+    public String year = "";
     public float score = 0;
     public int order = 0;
     public int runtime = 0;
-    public String episodeNumber = "";
+    public int episodeNumber = 0;
+    public int seasonNumber = 0;
     public String executableSrc = "";
     public String seasonID = "";
     public String imgSrc = "";
@@ -59,11 +61,11 @@ public class Disc implements Serializable {
         this.executableSrc = executableSrc;
     }
 
-    public String getEpisodeNumber() {
+    public int getEpisodeNumber() {
         return episodeNumber;
     }
 
-    public void setEpisodeNumber(String episodeNumber) {
+    public void setEpisodeNumber(int episodeNumber) {
         this.episodeNumber = episodeNumber;
     }
 }

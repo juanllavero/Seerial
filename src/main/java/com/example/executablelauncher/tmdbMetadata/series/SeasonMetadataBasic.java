@@ -1,6 +1,6 @@
 package com.example.executablelauncher.tmdbMetadata.series;
 
-public class Season {
+public class SeasonMetadataBasic {
     public String air_date;
     public int episode_count;
     public int id;

@@ -15,7 +15,7 @@
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
+<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="2569.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="1080.0" fitWidth="1920.0" pickOnBounds="true" preserveRatio="true" smooth="false" StackPane.alignment="TOP_LEFT">
          <image>
@@ -93,20 +93,9 @@
                               <Image url="@../../../img/logos/d0b8365f-f76c-485d-a46a-f720abf65b71_sl.png" />
                            </image>
                            <VBox.margin>
-                              <Insets />
+                              <Insets bottom="10.0" />
                            </VBox.margin>
                         </ImageView>
-                        <Label fx:id="title" text="Season 1" textFill="WHITE">
-                           <VBox.margin>
-                              <Insets bottom="5.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="System Bold" size="24.0" />
-                           </font>
-                           <effect>
-                              <DropShadow offsetY="2.5" spread="0.45" />
-                           </effect>
-                        </Label>
                         <Label fx:id="episodeName" text="Episode Name" textFill="WHITE">
                            <font>
                               <Font name="System Bold" size="24.0" />
@@ -162,7 +151,7 @@
                               <Font size="20.0" />
                            </font>
                            <graphic>
-                              <Label fx:id="overviewField" alignment="TOP_LEFT" prefWidth="1620.0" text="Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, " textFill="WHITE" wrapText="true">
+                              <Label fx:id="overviewField" alignment="TOP_LEFT" prefHeight="89.0" prefWidth="839.0" text="Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, " textFill="WHITE" wrapText="true">
                                  <font>
                                     <Font name="System Bold" size="16.0" />
                                  </font>
@@ -174,10 +163,13 @@
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
                         </Button>
                      </children>
                      <padding>
-                        <Insets bottom="20.0" left="130.0" />
+                        <Insets left="130.0" />
                      </padding>
                   </VBox>
                   <ScrollPane fx:id="episodeScroll" fitToWidth="true" hbarPolicy="NEVER" pannable="true" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
@@ -242,54 +234,75 @@
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
-      <BorderPane fx:id="detailsBox" visible="false" StackPane.alignment="CENTER">
-         <left>
-            <ImageView fx:id="detailsImage" fitHeight="772.0" fitWidth="603.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_CENTER">
-               <image>
-                  <Image url="@../../../img/TEST_NoBlur.png" />
-               </image>
-               <BorderPane.margin>
-                  <Insets right="50.0" />
-               </BorderPane.margin>
-            </ImageView>
-         </left>
-         <center>
-            <VBox prefHeight="200.0" prefWidth="100.0" spacing="5.0" BorderPane.alignment="TOP_CENTER">
+      <BorderPane fx:id="detailsBox" StackPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="150.0" left="150.0" right="150.0" top="150.0" />
+         </padding>
+         <right>
+            <VBox fx:id="detailsText" spacing="5.0" BorderPane.alignment="TOP_LEFT">
                <children>
                   <Label fx:id="detailsTitle" alignment="TOP_LEFT" text="Title of the movie/show" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="20.0" />
+                        <Font name="System Bold" size="32.0" />
                      </font>
                   </Label>
                   <Label fx:id="detailsOverview" alignment="TOP_LEFT" prefWidth="845.0" text="Overview of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show," textFill="WHITE" wrapText="true">
                      <font>
-                        <Font name="System Bold" size="15.0" />
+                        <Font name="System Bold" size="21.0" />
                      </font>
                      <VBox.margin>
                         <Insets bottom="10.0" />
                      </VBox.margin>
                   </Label>
-                  <Label fx:id="fileDetailsText" text="Detalles del archivo" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="16.0" />
-                     </font>
-                  </Label>
-                  <HBox prefHeight="100.0" prefWidth="200.0">
+                  <HBox>
                      <children>
-                        <VBox prefHeight="100.0" prefWidth="150.0">
+                        <VBox prefWidth="250.0">
                            <children>
-                              <Label fx:id="fileNameText" text="Nombre del archivo" textFill="WHITE">
+                              <Label fx:id="genresText" text="Géneros" textFill="WHITE">
                                  <font>
-                                    <Font name="System Bold" size="13.0" />
+                                    <Font name="System Bold" size="18.0" />
                                  </font>
                               </Label>
                            </children>
                         </VBox>
-                        <VBox prefHeight="100.0" prefWidth="679.0">
+                        <VBox>
                            <children>
-                              <Label fx:id="fileNameField" text="Nombre del archivo.mkv" textFill="WHITE">
+                              <Label fx:id="genresField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
                                  <font>
-                                    <Font name="System Bold" size="13.0" />
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <Label fx:id="fileDetailsText" text="Detalles del archivo" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="20.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="20.0" />
+                     </VBox.margin>
+                  </Label>
+                  <HBox>
+                     <children>
+                        <VBox prefWidth="250.0">
+                           <children>
+                              <Label fx:id="fileNameText" text="Nombre del archivo" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <VBox>
+                           <children>
+                              <Label fx:id="fileNameField" text="Nombre del archivo.mkv" textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font name="System Bold" size="18.0" />
                                  </font>
                               </Label>
                            </children>
@@ -298,10 +311,17 @@
                   </HBox>
                </children>
             </VBox>
+         </right>
+         <center>
+            <ImageView fx:id="detailsImage" fitHeight="772.0" fitWidth="603.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_RIGHT">
+               <image>
+                  <Image url="@../../../img/TEST_NoBlur.png" />
+               </image>
+               <BorderPane.margin>
+                  <Insets right="50.0" />
+               </BorderPane.margin>
+            </ImageView>
          </center>
-         <padding>
-            <Insets bottom="150.0" left="150.0" right="150.0" top="150.0" />
-         </padding>
       </BorderPane>
    </children>
 </StackPane>

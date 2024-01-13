@@ -14,6 +14,7 @@ public class Category {
     public List<String> series = new ArrayList<>();
     public Map<String, String> analyzedFiles = new HashMap<>();                 //<File, DiscID>
     public Map<String, String> analyzedFolders = new HashMap<>();               //<Folder, SeriesID>
+    public Map<String, String> seasonFolders = new HashMap<>();               //<Folder, SeasonID>
 
     public Category(String n, String lang, String t, List<String> f, boolean s){
         name = n;

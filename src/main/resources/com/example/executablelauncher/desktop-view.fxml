@@ -233,7 +233,7 @@
                                                             <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
-                                                      <Label prefHeight="35.0" prefWidth="144.0" text="Season name" textFill="WHITE">
+                                                      <Label fx:id="seasonNumberText" prefHeight="35.0" prefWidth="144.0" text="Season number" textFill="WHITE">
                                                          <font>
                                                             <Font size="18.0" />
                                                          </font>
@@ -281,7 +281,7 @@
                                                             <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
-                                                      <Label fx:id="seasonName" prefHeight="27.0" prefWidth="239.0" text="Name of the season" textFill="#aeaeae" wrapText="true">
+                                                      <Label fx:id="seasonNumberField" prefHeight="27.0" prefWidth="239.0" text="Number" textFill="#aeaeae" wrapText="true">
                                                          <font>
                                                             <Font size="18.0" />
                                                          </font>
@@ -475,7 +475,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button fx:id="identificationShow" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#correctIdentificationShow" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Correct Identification" textFill="WHITE">
+                  <Button fx:id="identificationShow" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#correctIdentificationShow" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Correct identification" textFill="WHITE">
                      <font>
                         <Font size="14.0" />
                      </font>
@@ -503,7 +503,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button fx:id="identificationMovie" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#correctIdentificationMovie" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Correct Identification" textFill="WHITE">
+                  <Button fx:id="identificationMovie" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#correctIdentificationMovie" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Correct identification" textFill="WHITE">
                      <font>
                         <Font size="14.0" />
                      </font>

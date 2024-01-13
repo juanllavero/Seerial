@@ -7,7 +7,9 @@ import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.tmdbMetadata.common.Genre;
 import com.example.executablelauncher.tmdbMetadata.images.*;
 import com.example.executablelauncher.tmdbMetadata.movies.MovieMetadata;
+import com.example.executablelauncher.tmdbMetadata.series.EpisodeMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadata;
+import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadataBasic;
 import com.example.executablelauncher.tmdbMetadata.series.SeriesMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.movito.themoviedbapi.*;
@@ -15,8 +17,6 @@ import info.movito.themoviedbapi.model.Artwork;
 import info.movito.themoviedbapi.model.MovieDb;
 import info.movito.themoviedbapi.model.MovieImages;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
-import info.movito.themoviedbapi.model.tv.TvEpisode;
-import info.movito.themoviedbapi.model.tv.TvSeason;
 import info.movito.themoviedbapi.model.tv.TvSeries;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
@@ -70,7 +70,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -180,7 +179,10 @@ public class DesktopViewController {
     private VBox seasonMenu;
 
     @FXML
-    private Label seasonName;
+    private Label seasonNumberText;
+
+    @FXML
+    private Label seasonNumberField;
 
     @FXML
     private ScrollPane seasonScroll;
@@ -277,8 +279,6 @@ public class DesktopViewController {
 
     //region THEMOVIEDB ATTRIBUTES
     TmdbApi tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
-    TmdbTV seriesMetadata;                                                              //Saves all series from TheMovieDB
-    TmdbMovies moviesMetadata;                                                          //Saves all movies from TheMovieDB
     SeasonsGroupMetadata episodesGroup = null;                                          //Create metadata holders for episode groups
     MovieDb movieMetadataToCorrect = null;                                              //Metadata of the movie that is going to be correctly identified
     TvSeries seriesMetadataToCorrect = null;                                            //Metadata of the show that is going to be correctly identified
@@ -504,6 +504,8 @@ public class DesktopViewController {
         yearField.setText(selectedSeason.getYear());
         orderField.setText(Integer.toString(selectedSeason.getOrder()));
         episodesField.setText(Integer.toString(selectedSeason.getDiscs().size()));
+        seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
+        seasonNumberField.setText(String.valueOf(selectedSeason.seasonNumber));
 
         if (currentCategory.type.equals("Shows")){
             if (selectedSeries.logoSrc.isEmpty()){
@@ -526,29 +528,31 @@ public class DesktopViewController {
         }
 
         try{
+            File file;
             if (!selectedSeries.getCoverSrc().isEmpty()){
-                File file = new File(selectedSeries.getCoverSrc());
-                Image image = new Image(file.toURI().toURL().toExternalForm(), 200, 251, true, true);
-                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
-
-                //Compress image
-                BufferedImage resizedImage = Thumbnails.of(bufferedImage)
-                        .size(200, 251)
-                        .outputFormat("jpg")
-                        .asBufferedImage();
-
-                Image compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
-                bufferedImage.flush();
-                resizedImage.flush();
-                seriesCover.setImage(compressedImage);
+                file = new File(selectedSeries.getCoverSrc());
+            }else{
+                file = new File("src/main/resources/img/DefaultPoster.png");
             }
+
+            Image image = new Image(file.toURI().toURL().toExternalForm(), 200, 251, true, true);
+            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
+
+            //Compress image
+            BufferedImage resizedImage = Thumbnails.of(bufferedImage)
+                    .size(200, 251)
+                    .outputFormat("jpg")
+                    .asBufferedImage();
+
+            Image compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
+            bufferedImage.flush();
+            resizedImage.flush();
+            seriesCover.setImage(compressedImage);
         } catch (MalformedURLException e) {
             System.err.println("Series cover not found");
         } catch (IOException e) {
             System.err.println("DesktopView: Series Cover not properly compressed");
         }
-
-        seasonName.setText(selectedSeason.getName());
     }
 
     private void setLogoNoText(File file) {
@@ -1025,7 +1029,7 @@ public class DesktopViewController {
         }
     }
     public void correctIdentificationShow(){
-        showBackgroundShadow();
+        /*showBackgroundShadow();
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
         Task<Void> correctIdentificationTask = new Task<>() {
@@ -1049,7 +1053,7 @@ public class DesktopViewController {
                 }
 
                 for (String seasonID : selectedSeries.getSeasons()){
-                    Season season = App.findSeason(seasonID);
+                    SeasonMetadataBasic season = App.findSeason(seasonID);
 
                     if (season == null)
                         continue;
@@ -1076,7 +1080,7 @@ public class DesktopViewController {
 
                         if (disc != null){
                             disc.name = selectedSeason.name;
-                            disc.resume = selectedSeason.overview;
+                            disc.overview = selectedSeason.overview;
                         }
                     }
 
@@ -1113,10 +1117,10 @@ public class DesktopViewController {
             showDiscs(selectedSeason);
         });
 
-        new Thread(correctIdentificationTask).start();
+        new Thread(correctIdentificationTask).start();*/
     }
     public void correctIdentificationMovie(){
-        showBackgroundShadow();
+        /*showBackgroundShadow();
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
         Task<Void> correctIdentificationTask = new Task<>() {
@@ -1149,7 +1153,7 @@ public class DesktopViewController {
 
                     if (disc != null){
                         disc.name = selectedSeason.name;
-                        disc.resume = selectedSeason.overview;
+                        disc.overview = selectedSeason.overview;
                     }
                 }
 
@@ -1185,7 +1189,7 @@ public class DesktopViewController {
             showDiscs(selectedSeason);
         });
 
-        new Thread(correctIdentificationTask).start();
+        new Thread(correctIdentificationTask).start();*/
     }
     public void setCorrectIdentificationShow(TvSeries tvSeries){
         seriesMetadataToCorrect = tvSeries;
@@ -1196,23 +1200,9 @@ public class DesktopViewController {
     //endregion
 
     //region AUTOMATED FILE SEARCH
-    public void loadCategory(String name){
-        backgroundShadow.setVisible(false);
+    public void searchFiles(){
         downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindow.setVisible(true);
-
-        categorySelector.getItems().add(name);
-        categorySelector.setValue(name);
-
-        currentCategory = App.findCategory(name);
-
-        if (currentCategory == null)
-            return;
-
-        if (currentCategory.type.equals("Shows"))
-            seriesMetadata = tmdbApi.getTvSeries();
-        else
-            moviesMetadata = tmdbApi.getMovies();
 
         List<String> folders = currentCategory.folders;
 
@@ -1242,7 +1232,17 @@ public class DesktopViewController {
             }
         }
     }
+    public void loadCategory(String name){
+        categorySelector.getItems().add(name);
+        categorySelector.setValue(name);
 
+        currentCategory = App.findCategory(name);
+
+        if (currentCategory == null)
+            return;
+
+        searchFiles();
+    }
     private void loadHalfTask(List<File> files, int start, int end){
         Task<Void> loadHalfTask = new Task<>() {
             @Override
@@ -1258,9 +1258,9 @@ public class DesktopViewController {
                         if (filesInDir == null)
                             continue;
 
-                        scanTVShow(file, filesInDir, false, true);
+                        scanTVShow(file, filesInDir);
                     }else {
-                        addMovie(file);
+                        scanMovie(file);
                     }
                 }
                 return null;
@@ -1273,10 +1273,21 @@ public class DesktopViewController {
                 downloadingContentWindow.setVisible(false);
         });
 
+        loadHalfTask.setOnCancelled(e -> {
+            numFilesToCheck--;
+            if (numFilesToCheck == 0)
+                downloadingContentWindow.setVisible(false);
+        });
+
+        loadHalfTask.setOnFailed(e -> {
+            numFilesToCheck--;
+            if (numFilesToCheck == 0)
+                downloadingContentWindow.setVisible(false);
+        });
+
         new Thread(loadHalfTask).start();
     }
-
-    private void scanTVShow(File directory, File[] filesInDir, boolean updateMetadata, boolean downloadImages){
+    private void scanTVShow(File directory, File[] filesInDir){
         //All video files in directory (not taking into account two subdirectories ahead, like Series/Folder1/Folder2/File)
         List<File> videoFiles = new ArrayList<>();
 
@@ -1289,7 +1300,7 @@ public class DesktopViewController {
                     continue;
 
                 for (File f : filesInDirectory){
-                    if (validVideoFile(f))
+                    if (f.isFile() && validVideoFile(f))
                         videoFiles.add(f);
                 }
             }else{
@@ -1304,18 +1315,13 @@ public class DesktopViewController {
         //region CREATE/EDIT SERIES
         Series series;
 
+        boolean updateMetadata = false;
+
         if (currentCategory.analyzedFolders.get(directory.getAbsolutePath()) != null){
             series = App.findSeries(currentCategory.analyzedFiles.get(directory.getAbsolutePath()));
-
-            //Clear seasons and episodes in order to update the metadata from the show
-            if (updateMetadata){
-                List<String> seasonsIDs = List.copyOf(series.seasons);
-                for (String seasonID : seasonsIDs){
-                    App.removeSeason(App.findSeason(seasonID), series);
-                }
-            }
         }else{
             series = new Series();
+            series.folder = directory.getAbsolutePath();
             currentCategory.analyzedFolders.put(directory.getAbsolutePath(), series.id);
             currentCategory.series.add(series.id);
             App.addCollection(series);
@@ -1333,69 +1339,28 @@ public class DesktopViewController {
 
             //Set themdbID as the id of the first result
             themdbID = tvResults.getResults().get(0).getId();
+            series.themdbID = themdbID;
 
-            //Fake the updateMetadata in order to set the attributes from the search result in the new series
+            //Set values in order to set the attributes from the search result in the new series and download images
             updateMetadata = true;
         }
-
         SeriesMetadata seriesMetadata = downloadSeriesMetadata(themdbID);
 
         if (seriesMetadata == null)
             return;
 
-        if (updateMetadata){
-            series.name = seriesMetadata.name;
-            series.overview = seriesMetadata.overview;
-            series.score = (float) ((int) (seriesMetadata.vote_average * 10.0)) / 10.0f;
-
-            String year = seriesMetadata.first_air_date.substring(0, seriesMetadata.first_air_date.indexOf("-")) + "-";
-            if (!seriesMetadata.in_production)
-                year += seriesMetadata.last_air_date.substring(0, seriesMetadata.first_air_date.indexOf("-"));
-            series.year = year;
-
-            series.tagline = seriesMetadata.tagline;
-            series.numberOfSeasons = seriesMetadata.number_of_seasons;
-            series.numberOfEpisodes = seriesMetadata.number_of_episodes;
-            series.category = currentCategory.name;
-
-            List<Genre> genres = seriesMetadata.genres;
-
-            if (genres != null){
-                List<String> genreList = new ArrayList<>();
-                for (Genre genre : genres){
-                    genreList.add(genre.name);
-                }
-
-                series.genres = genreList;
-            }
-        }
+        if (updateMetadata)
+            setSeriesMetadataAndImages(series, seriesMetadata, updateMetadata);
         //endregion
-
-        //Download posters and logos for the show
-        if (downloadImages) {
-            Images images = downloadImages(series.themdbID);
-
-            if (images != null)
-                loadImages(series, images);
-        }
-
         //Download metadata for each season of the show
         List<SeasonMetadata> seasonsMetadata = new ArrayList<>();
-        for (com.example.executablelauncher.tmdbMetadata.series.Season seasonBasic : seriesMetadata.seasons){
-            SeasonMetadata seasonMetadata = downloadSeasonMetadata(series.themdbID, seasonBasic.season_number);
+        for (SeasonMetadataBasic seasonMetadataBasicBasic : seriesMetadata.seasons){
+            SeasonMetadata seasonMetadata = downloadSeasonMetadata(series.themdbID, seasonMetadataBasicBasic.season_number);
 
-            if (seasonMetadata != null)
+            if (seasonMetadata != null) {
                 seasonsMetadata.add(seasonMetadata);
+            }
         }
-
-        //Process background images
-        int i = 0;
-        for (String seasonID : newSeries.getSeasons()) {
-            Season season = App.findSeason(seasonID);
-            saveBackground(season, "src/main/resources/img/DownloadCache/" + season.seasonNumber + ".png");
-            i++;
-        }
-
         //Process each episode
         for (File video : videoFiles){
             if (currentCategory.analyzedFiles.get(video.getAbsolutePath()) != null)
@@ -1406,6 +1371,101 @@ public class DesktopViewController {
 
         episodesGroup = null;
         addSeries(series);
+    }
+    private void setSeriesMetadataAndImages(Series series, SeriesMetadata seriesMetadata, boolean downloadImages){
+        //Set metadata
+        series.name = seriesMetadata.name;
+        series.overview = seriesMetadata.overview;
+        series.score = (float) ((int) (seriesMetadata.vote_average * 10.0)) / 10.0f;
+
+        String year = seriesMetadata.first_air_date.substring(0, seriesMetadata.first_air_date.indexOf("-")) + "-";
+        if (!seriesMetadata.in_production)
+            year += seriesMetadata.last_air_date.substring(0, seriesMetadata.first_air_date.indexOf("-"));
+        series.year = year;
+
+        series.tagline = seriesMetadata.tagline;
+        series.numberOfSeasons = seriesMetadata.number_of_seasons;
+        series.numberOfEpisodes = seriesMetadata.number_of_episodes;
+        series.category = currentCategory.name;
+
+        List<Genre> genres = seriesMetadata.genres;
+
+        if (genres != null){
+            List<String> genreList = new ArrayList<>();
+            for (Genre genre : genres){
+                genreList.add(genre.name);
+            }
+
+            series.genres = genreList;
+        }
+
+        //Download posters and logos for the show
+        if (downloadImages) {
+            Images images = downloadImages(series.themdbID);
+
+            if (images != null)
+                loadImages(series, images, series.themdbID);
+        }
+    }
+    private void loadImages(Series series, Images images, int tmdbID){
+        String imageBaseURL = "https://image.tmdb.org/t/p/original";
+
+        //region Process Posters
+        List<Poster> posterList = images.posters;
+        if (!posterList.isEmpty()){
+            Image originalImage = new Image(imageBaseURL + posterList.get(0).file_path);
+            saveCover(series, 0, originalImage);
+
+            Task<Void> posterTask = new Task<>() {
+                @Override
+                protected Void call() {
+                    int processedFiles = 1;
+                    for (int i = processedFiles; i < posterList.size(); i++){
+                        if (processedFiles == 19)
+                            break;
+
+                        Image originalImage = new Image(imageBaseURL + posterList.get(i).file_path);
+                        saveCover(series, processedFiles, originalImage);
+
+                        processedFiles++;
+                    }
+                    return null;
+                }
+            };
+
+            new Thread(posterTask).start();
+        }
+
+        File posterDir = new File("src/main/resources/img/seriesCovers/" + series.id + "/0.png");
+        if (posterDir.exists()){
+            series.coverSrc = "src/main/resources/img/seriesCovers/" + series.id + "/0.png";
+        }
+        //endregion
+
+        //region Process Background
+        List<Backdrop> backdropList = images.backdrops;
+        if (!backdropList.isEmpty()){
+            String path;
+            if (currentCategory.type.equals("Shows"))
+                path = backdropList.get(0).file_path;
+            else
+                path = backdropList.get(backdropList.size() - 1).file_path;
+
+            Image originalImage = new Image(imageBaseURL + path);
+
+            if (!originalImage.isError()){
+                File file;
+                file = new File("src/main/resources/img/DownloadCache/" + tmdbID + ".png");
+
+                try{
+                    RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
+                    ImageIO.write(renderedImage,"png", file);
+                } catch (IOException e) {
+                    System.err.println("DesktopViewController: Downloaded background not saved");
+                }
+            }
+        }
+        //endregion
     }
     private SeasonsGroupMetadata getEpisodesGroup(int tmdbID){
         try{
@@ -1433,7 +1493,7 @@ public class DesktopViewController {
                     }
                 }
             } else {
-                System.out.println("Response not successful: " + response.code());
+                System.out.println("getEpisodeGroup: Response not successful: " + response.code());
             }
             //endregion
 
@@ -1454,7 +1514,7 @@ public class DesktopViewController {
                     assert response.body() != null;
                     return objectMapper.readValue(response.body().string(), SeasonsGroupMetadata.class);
                 } else {
-                    System.out.println("Response not successful: " + response.code());
+                    System.out.println("getEpisodeGroup: Response not successful: " + response.code());
                 }
             }
             //endregion
@@ -1465,15 +1525,13 @@ public class DesktopViewController {
         return null;
     }
     private boolean validVideoFile(File file){
-        String videoExtension = file.getName().substring(file.getName().length() - 4);
+        String videoExtension = file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf("."));
         videoExtension = videoExtension.toLowerCase();
 
         return videoExtension.equals(".mkv") || videoExtension.equals(".mp4") || videoExtension.equals(".avi") || videoExtension.equals(".mov")
-                || videoExtension.equals(".wmv") || videoExtension.equals("mpeg") || videoExtension.equals("m2ts") || videoExtension.equals(".iso");
+                || videoExtension.equals(".wmv") || videoExtension.equals(".mpeg") || videoExtension.equals(".m2ts") || videoExtension.equals(".iso");
     }
     private void processEpisode(Series series, File file, List<SeasonMetadata> seasonsMetadata, SeasonsGroupMetadata episodesGroup){
-        Disc newDisc = new Disc();
-
         //Name of the file without the extension
         String fullName = file.getName().substring(0, file.getName().lastIndexOf("."));
 
@@ -1484,6 +1542,10 @@ public class DesktopViewController {
         final Pattern pattern = Pattern.compile(regexSeasonEpisode, Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(fullName);
 
+        //SeasonMetadataBasic and episode metadata to find for the current file
+        SeasonMetadata seasonMetadata = null;
+        EpisodeMetadata episodeMetadata = null;
+
         if (!matcher.find()){
             Pattern newPattern = Pattern.compile(regexOnlyEpisode, Pattern.MULTILINE);
             Matcher newMatch = newPattern.matcher(fullName);
@@ -1493,7 +1555,6 @@ public class DesktopViewController {
                 return;
 
             int absoluteNumber = Integer.parseInt(newMatch.group("episode"));
-            int seasonNumber = 0;
             int episodeNumber = 1;
             boolean episodeFound = false;
 
@@ -1507,8 +1568,8 @@ public class DesktopViewController {
 
                     for (int i = 0; i < season.episodes.size(); i++){
                         if (episodeNumber == absoluteNumber) {
-                            seasonNumber = season.season_number;
-                            episodeNumber = season.episodes.get(i).episode_number;
+                            episodeMetadata = season.episodes.get(i);
+                            seasonMetadata = season;
                             episodeFound = true;
                             break;
                         }
@@ -1518,27 +1579,20 @@ public class DesktopViewController {
 
                 if (episodeFound)
                     break;
-
-                seasonNumber++;
             }
 
             if (!episodeFound)
                 return;
-
-            sdfasdgasdfsdgsadfdsgf
-            TvEpisode episode = seasonsMetadata.get(seasonNumber).getEpisodes().get(episodeNumber);
-
-            newDisc.setEpisodeNumber(String.valueOf(episode.getEpisodeNumber()));
-            newDisc.seasonID = series.getSeasons().get(seasonNumber);
-            setEpisodeData(newDisc, episode, series);
         }else{
             int seasonNumber = Integer.parseInt(matcher.group("season").substring(1));
             int episodeNumber = Integer.parseInt(matcher.group("episode").substring(1));
 
             boolean toFindMetadata = true;
-            for (TvSeason season : seasonsMetadata){
-                if (season.getSeasonNumber() == seasonNumber)
+            for (SeasonMetadata season : seasonsMetadata){
+                if (season.season_number == seasonNumber) {
                     toFindMetadata = false;
+                    break;
+                }
             }
 
             if (toFindMetadata){
@@ -1562,55 +1616,98 @@ public class DesktopViewController {
                             break;
                     }
 
-                    processMetadata(newDisc, series, seasonNumber, episodeNumber, seasonsMetadata);
+                    for (SeasonMetadata seasonMeta : seasonsMetadata){
+                        if (seasonMeta.season_number == seasonNumber){
+                            seasonMetadata = seasonMeta;
+
+                            for (EpisodeMetadata episodeMeta : seasonMeta.episodes){
+                                if (episodeMeta.episode_number == episodeNumber){
+                                    episodeMetadata = episodeMeta;
+                                    break;
+                                }
+                            }
+
+                            break;
+                        }
+                    }
                 }else{
                     return;
                 }
             }else{
-                processMetadata(newDisc, series, seasonNumber, episodeNumber, seasonsMetadata);
-            }
-        }
+                for (SeasonMetadata seasonMeta : seasonsMetadata){
+                    if (seasonMeta.season_number == seasonNumber){
+                        seasonMetadata = seasonMeta;
 
-        newDisc.setExecutableSrc(file.getAbsolutePath());
-        currentCategory.analyzedFiles.put(file.getAbsolutePath(), newDisc.id);
-        App.addDisc(newDisc);
-    }
-    private void processMetadata(Disc newDisc, Series series, int seasonNumber, int episodeNumber, List<TvSeason> seasonsMetadata){
-        TvEpisode episode = null;
+                        for (EpisodeMetadata episodeMeta : seasonMeta.episodes){
+                            if (episodeMeta.episode_number == episodeNumber){
+                                episodeMetadata = episodeMeta;
+                                break;
+                            }
+                        }
 
-        for (TvSeason tvSeason : seasonsMetadata){
-            if (tvSeason.getSeasonNumber() == seasonNumber){
-                for (TvEpisode tvEpisode : tvSeason.getEpisodes()){
-                    if (tvEpisode.getEpisodeNumber() == episodeNumber){
-                        episode = tvEpisode;
                         break;
                     }
                 }
-                break;
             }
         }
 
-        if (episode == null)
+        if (seasonMetadata == null || episodeMetadata == null)
             return;
 
-        newDisc.setEpisodeNumber(String.valueOf(episode.getEpisodeNumber()));
+        Season season = App.findSeason(series, seasonMetadata.season_number);
+        if (season == null){
+            season = new Season();
 
-        for (String seasonID : series.getSeasons()){
-            Season season = App.findSeason(seasonID);
-            if (season.order == seasonNumber){
-                seasonNumber = series.getSeasons().indexOf(seasonID);
-                break;
+            season.name = seasonMetadata.name;
+            season.overview = seasonMetadata.overview;
+            season.year = seasonMetadata.air_date.substring(0, seasonMetadata.air_date.indexOf("-"));
+            season.seasonNumber = seasonMetadata.season_number;
+            season.score = (float) ((int) (seasonMetadata.vote_average * 10.0)) / 10.0f;
+            season.seriesID = series.id;
+
+            App.addSeason(season, series.id);
+
+            if (season.backgroundSrc.isEmpty() || season.backgroundSrc.equals("src/main/resources/img/DefaultBackground.png")) {
+                File f = new File("src/main/resources/img/DownloadCache/" + series.themdbID + ".png");
+                if (!f.exists() && series.seasons.size() > 1){
+                    Season s = App.findSeason(series.seasons.get(0));
+
+                    if (s != null){
+                        saveBackground(season, s.backgroundSrc);
+                    }
+                }else if (f.exists()){
+                    saveBackground(season, "src/main/resources/img/DownloadCache/" + series.themdbID + ".png");
+                }
             }
+
+            if (series.seasons.size() == 1)
+                downloadLogos(series, season, series.themdbID);
         }
 
-        newDisc.seasonID = series.getSeasons().get(seasonNumber);
-        setEpisodeData(newDisc, episode, series);
-    }
-    private void setEpisodeData(Disc disc, TvEpisode episodeMetadata, Series show){
-        disc.name = episodeMetadata.getName();
-        disc.resume = episodeMetadata.getOverview();
-        disc.score = episodeMetadata.getVoteAverage();
+        Disc disc = App.findDisc(season, episodeMetadata.episode_number);
+        if (disc != null) {
+            disc.executableSrc = file.getAbsolutePath();
+            return;
+        }
 
+        disc = new Disc();
+
+        //Set the metadata for the new episode
+        disc.seasonID = season.id;
+        disc.executableSrc = file.getAbsolutePath();
+        setEpisodeData(disc, episodeMetadata, series);
+
+        currentCategory.analyzedFiles.put(file.getAbsolutePath(), disc.id);
+        App.addDisc(disc);
+
+    }
+    private void setEpisodeData(Disc disc, EpisodeMetadata episodeMetadata, Series show){
+        disc.name = episodeMetadata.name;
+        disc.overview = episodeMetadata.overview;
+        disc.episodeNumber =episodeMetadata.episode_number;
+        disc.year = Utils.episodeDateFormat(episodeMetadata.air_date, currentCategory.language);
+        disc.score = (float) ((int) (episodeMetadata.vote_average * 10.0)) / 10.0f;
+        disc.runtime = episodeMetadata.runtime;
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
         try{
@@ -1619,7 +1716,7 @@ public class DesktopViewController {
             System.err.println("setEpisodeData: Directory could not be created");
         }
 
-        MovieImages images = tmdbApi.getTvEpisodes().getEpisode(show.themdbID, episodeMetadata.getSeasonNumber(), episodeMetadata.getEpisodeNumber(), null, TmdbTvEpisodes.EpisodeMethod.images).getImages();
+        MovieImages images = tmdbApi.getTvEpisodes().getEpisode(show.themdbID, episodeMetadata.season_number, episodeMetadata.episode_number, null, TmdbTvEpisodes.EpisodeMethod.images).getImages();
         List<Artwork> thumbnails = images.getStills();
 
         List<String> thumbnailsUrls = new ArrayList<>();
@@ -1688,47 +1785,98 @@ public class DesktopViewController {
             }
         }
     }
-    private void addMovie(File f){
+    private void scanMovie(File f){
+        //Regular expression to catch name and/or year of the movie
+        Pattern regex = Pattern.compile("([^(]*)\\s*(?:\\((\\d{4})\\))?");
+
+        //If the movie exists, do not add a new Card in the main view
+        boolean exists = false;
+
         if (!f.isDirectory()){
             //region MOVIE FILE ONLY
             if (!validVideoFile(f)){
                 return;
             }
 
-            //Create Series
-            Series newSeries = searchFirstMovie(f.getName().substring(0, f.getName().lastIndexOf(".")));
-            Season newSeason = new Season();
-            if (newSeries.themdbID == -1){
-                newSeason.name = f.getName().substring(0, f.getName().lastIndexOf("."));
-                newSeason.seriesID = newSeries.id;
+            if (currentCategory.analyzedFiles.get(f.getAbsolutePath()) != null)
+                return;
 
-                App.addCollection(newSeries);
-                App.addSeason(newSeason, newSeries.id);
-                currentCategory.series.add(newSeries.id);
+            //region CREATE/EDIT SERIES
+            Series series = new Series();
+            series.folder = f.getAbsolutePath();
+            currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.id);
+            currentCategory.series.add(series.id);
+            App.addCollection(series);
 
-                if (!f.isDirectory() && validVideoFile(f))
-                    saveDiscWithoutMetadata(f, newSeason);
-            }else{
-                newSeason.name = newSeries.name;
-                newSeason.overview = newSeries.overview;
-                newSeason.themdbID = newSeries.themdbID;
-                newSeason.seriesID = newSeries.id;
-                newSeason.year = newSeries.year;
-                newSeason.score = newSeries.score;
+            Matcher matcher = regex.matcher(f.getName());
+            if (!matcher.find())
+                return;
 
-                downloadImages(newSeries, newSeries.themdbID);
-                downloadLogos(newSeries, newSeason, newSeries.themdbID);
-                saveBackground(newSeason, "src/main/resources/img/DownloadCache/" + newSeries.themdbID + ".png");
+            String movieName = matcher.group(1).trim();
+            String year = matcher.group(2);
 
-                App.addCollection(newSeries);
-                App.addSeason(newSeason, newSeries.id);
-                currentCategory.series.add(newSeries.id);
+            if (year == null)
+                year = "1";
 
-                if (!f.isDirectory())
-                    processMovie(f, newSeason);
+            //Search show by name of the folder
+            int themdbID = searchFirstMovie(movieName, Integer.parseInt(year));
+
+            if (themdbID == -1) {
+                series.name = movieName;
+                Season newSeason = new Season();
+                newSeason.name = movieName;
+                newSeason.year = year;
+                newSeason.seriesID = series.id;
+                newSeason.seasonNumber = series.seasons.size();
+
+                App.addSeason(newSeason, series.id);
+                currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.id);
+
+                saveDiscWithoutMetadata(f, newSeason);
+                addSeries(series);
+                return;
             }
 
-            addSeries(newSeries);
+            MovieMetadata movieMetadata = downloadMovieMetadata(themdbID);
+
+            series.name = movieMetadata.title;
+            Season season = new Season();
+            season.folder = f.getAbsolutePath();
+            season.seriesID = series.id;
+            season.themdbID = themdbID;
+
+            season.name = movieMetadata.title;
+            season.overview = movieMetadata.overview;
+            season.year = movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-"));
+            season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
+            season.tagline = movieMetadata.tagline;
+            season.seasonNumber = series.seasons.size();
+
+            List<Genre> genres = movieMetadata.genres;
+
+            if (genres != null){
+                List<String> genreList = new ArrayList<>();
+                for (Genre genre : genres){
+                    genreList.add(genre.name);
+                }
+
+                season.genres = genreList;
+            }
+
+            currentCategory.seasonFolders.put(f.getAbsolutePath(), season.id);
+            App.addSeason(season, series.id);
+
+            Images images = downloadImages(season.themdbID);
+
+            if (images != null)
+                loadImages(series, images, season.themdbID);
+
+            downloadLogos(series, season, season.themdbID);
+            saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
+
+            processMovie(f, season, movieMetadata.runtime);
+
+            addSeries(series);
             //endregion
         }else {
             File[] filesInDir = f.listFiles();
@@ -1744,121 +1892,258 @@ public class DesktopViewController {
                     filesInRoot.add(file);
             }
 
+            Series series;
+
+            if (currentCategory.analyzedFolders.get(f.getAbsolutePath()) != null) {
+                series = App.findSeries(currentCategory.analyzedFolders.get(f.getAbsolutePath()));
+                exists = true;
+
+                if (series == null)
+                    return;
+            }else{
+                series = new Series();
+                series.name = f.getName();
+                series.folder = f.getAbsolutePath();
+                currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.id);
+                currentCategory.series.add(series.id);
+                App.addCollection(series);
+            }
+
             if (!folders.isEmpty()){
                 //region FOLDERS CORRESPONDING DIFFERENT MOVIES FROM A COLLECTION
-                //Create new collection for the movies inside
-                Series newSeries = new Series();
-                newSeries.name = f.getName();
-                currentCategory.series.add(newSeries.id);
-                App.addCollection(newSeries);
-
                 for (File folder : folders){
                     File[] filesInFolder = folder.listFiles();
                     if (filesInFolder == null)
                         continue;
 
-                    MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(folder.getName(), 1, currentCategory.language, true, 1);
+                    Matcher matcher = regex.matcher(folder.getName());
+                    if (!matcher.find())
+                        return;
 
-                    if (movieResults.getTotalResults() > 0) {
-                        //Load Movie metadata as Season data
-                        MovieDb movie = movieResults.getResults().get(0);
-                        Season newSeason = new Season();
-                        newSeason.name = movie.getTitle();
-                        newSeason.overview = movie.getOverview();
-                        newSeason.themdbID = movie.getId();
-                        newSeason.year = movie.getReleaseDate();
-                        newSeason.score = movie.getVoteAverage();
-                        newSeason.seriesID = newSeries.id;
+                    String movieName = matcher.group(1).trim();
+                    String year = matcher.group(2);
 
-                        downloadImages(newSeries, newSeason.themdbID);
-                        downloadLogos(newSeries, newSeason, newSeason.themdbID);
-                        saveBackground(newSeason, "src/main/resources/img/DownloadCache/" + newSeason.themdbID + ".png");
+                    if (year == null)
+                        year = "1";
 
-                        App.addSeason(newSeason, newSeries.id);
+                    boolean updateMetadata = false;
+
+                    Season season;
+                    if (currentCategory.seasonFolders.get(folder.getAbsolutePath()) != null){
+                        season = App.findSeason(currentCategory.seasonFolders.get(folder.getAbsolutePath()));
+                    }else {
+                        season = new Season();
+                        currentCategory.seasonFolders.put(folder.getAbsolutePath(), season.id);
+                        season.seasonNumber = series.seasons.size();
+                        App.addSeason(season, series.id);
+
+                        updateMetadata = true;
+                    }
+
+                    int themdbID = season.themdbID;
+                    MovieMetadata movieMetadata = null;
+
+                    if (themdbID == -1){
+                        themdbID = searchFirstMovie(movieName, Integer.parseInt(year));
+                    }
+
+                    if (themdbID != -1)
+                        movieMetadata = downloadMovieMetadata(themdbID);
+
+                    season.themdbID = themdbID;
+
+                    if (movieMetadata == null){
+                        season.name = movieName;
 
                         for (File file : filesInFolder){
-                            if (!file.isDirectory() && validVideoFile(file))
-                                processMovie(file, newSeason);
+                            if (file.isFile() && validVideoFile(file))
+                                saveDiscWithoutMetadata(file, season);
                         }
-                    }else{
-                        Season newSeason = new Season();
-                        newSeason.name = folder.getName();
-                        newSeason.seriesID = newSeries.id;
 
-                        App.addSeason(newSeason, newSeries.id);
+                        continue;
+                    }
 
-                        for (File file : filesInFolder){
-                            if (!file.isDirectory() && validVideoFile(file))
-                                saveDiscWithoutMetadata(file, newSeason);
+                    if (updateMetadata){
+                        season.folder = f.getAbsolutePath();
+                        season.seriesID = series.id;
+
+                        season.name = movieMetadata.title;
+                        season.overview = movieMetadata.overview;
+                        season.year = movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-"));
+                        season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
+                        season.tagline = movieMetadata.tagline;
+
+                        List<Genre> genres = movieMetadata.genres;
+
+                        if (genres != null){
+                            List<String> genreList = new ArrayList<>();
+                            for (Genre genre : genres){
+                                genreList.add(genre.name);
+                            }
+
+                            season.genres = genreList;
                         }
+
+                        Images images = downloadImages(season.themdbID);
+
+                        if (images != null)
+                            loadImages(series, images, season.themdbID);
+
+                        downloadLogos(series, season, season.themdbID);
+                        saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
+                    }
+
+                    for (File file : filesInFolder){
+                        if (file.isFile() && validVideoFile(file))
+                            processMovie(file, season, movieMetadata.runtime);
                     }
                 }
 
-                addSeries(newSeries);
+                if (!exists)
+                    addSeries(series);
                 //endregion
             }else if (!filesInRoot.isEmpty()){
                 //region MOVIE FILE/CONCERT FILES INSIDE FOLDER
-                //Create Series
-                Series newSeries = searchFirstMovie(f.getName());
-                Season newSeason = new Season();
-                if (newSeries.themdbID == -1){
-                    newSeason.name = f.getName();
-                    newSeason.seriesID = newSeries.id;
+                Matcher matcher = regex.matcher(f.getName());
+                if (!matcher.find())
+                    return;
 
-                    App.addCollection(newSeries);
-                    App.addSeason(newSeason, newSeries.id);
-                    currentCategory.series.add(newSeries.id);
+                String movieName = matcher.group(1).trim();
+                String year = matcher.group(2);
 
-                    for (File file : filesInRoot){
-                        if (file.isFile() && validVideoFile(file))
-                            saveDiscWithoutMetadata(file, newSeason);
-                    }
-                }else{
-                    newSeason.name = newSeries.name;
-                    newSeason.overview = newSeries.overview;
-                    newSeason.themdbID = newSeries.themdbID;
-                    newSeason.seriesID = newSeries.id;
-                    newSeason.year = newSeries.year;
-                    newSeason.score = newSeries.score;
+                if (year == null)
+                    year = "1";
 
-                    downloadImages(newSeries, newSeason.themdbID);
-                    downloadLogos(newSeries, newSeason, newSeason.themdbID);
-                    saveBackground(newSeason, "src/main/resources/img/DownloadCache/" + newSeason.themdbID + ".png");
+                boolean updateMetadata = false;
 
-                    App.addCollection(newSeries);
-                    App.addSeason(newSeason, newSeries.id);
-                    currentCategory.series.add(newSeries.id);
+                Season season;
+                if (currentCategory.seasonFolders.get(f.getAbsolutePath()) != null){
+                    season = App.findSeason(currentCategory.seasonFolders.get(f.getAbsolutePath()));
+                }else {
+                    season = new Season();
+                    currentCategory.seasonFolders.put(f.getAbsolutePath(), season.id);
+                    season.seasonNumber = series.seasons.size();
+                    App.addSeason(season, series.id);
 
-                    for (File file : filesInRoot){
-                        if (file.isFile() && validVideoFile(file))
-                            processMovie(file, newSeason);
-                    }
+                    updateMetadata = true;
                 }
 
-                addSeries(newSeries);
+                int themdbID = season.themdbID;
+
+                if (themdbID == -1){
+                    themdbID = searchFirstMovie(movieName, Integer.parseInt(year));
+                }
+
+                MovieMetadata movieMetadata = null;
+
+                if (themdbID != -1)
+                    movieMetadata = downloadMovieMetadata(themdbID);
+
+                season.themdbID = themdbID;
+
+                if (movieMetadata == null){
+                    season.name = movieName;
+
+                    for (File file : filesInRoot){
+                        if (file.isFile() && validVideoFile(file))
+                            saveDiscWithoutMetadata(file, season);
+                    }
+
+                    if (!exists)
+                        addSeries(series);
+                    return;
+                }
+
+                if (updateMetadata){
+                    season.folder = f.getAbsolutePath();
+                    season.seriesID = series.id;
+
+                    season.name = movieMetadata.title;
+                    season.overview = movieMetadata.overview;
+                    season.year = movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-"));
+                    season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
+                    season.tagline = movieMetadata.tagline;
+
+                    List<Genre> genres = movieMetadata.genres;
+
+                    if (genres != null){
+                        List<String> genreList = new ArrayList<>();
+                        for (Genre genre : genres){
+                            genreList.add(genre.name);
+                        }
+
+                        season.genres = genreList;
+                    }
+
+                    currentCategory.seasonFolders.put(f.getAbsolutePath(), season.id);
+
+                    Images images = downloadImages(season.themdbID);
+
+                    if (images != null)
+                        loadImages(series, images, season.themdbID);
+
+                    downloadLogos(series, season, season.themdbID);
+                    saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
+                }
+
+                for (File file : filesInRoot){
+                    if (file.isFile() && validVideoFile(file))
+                        processMovie(file, season, movieMetadata.runtime);
+                }
+
+                if (!exists)
+                    addSeries(series);
                 //endregion
             }
         }
     }
-    private void saveDiscWithoutMetadata(File f, Season newSeason) {
-        Disc newDisc = new Disc();
-        newDisc.name = f.getName().substring(0, f.getName().lastIndexOf("."));
-        newDisc.executableSrc = f.getAbsolutePath();
-        newDisc.seasonID = newSeason.id;
-        newDisc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
-        App.addDisc(newDisc);
+    private int searchFirstMovie(String name, int year){
+        MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(name, year, currentCategory.language, true, 1);
+
+        if (movieResults.getTotalResults() > 0)
+            return movieResults.getResults().get(0).getId();
+
+        return -1;
     }
-    private void processMovie(File file, Season season){
-        Disc newDisc = new Disc();
+    private void saveDiscWithoutMetadata(File f, Season season) {
+        Disc disc;
 
-        newDisc.name = file.getName().substring(0, file.getName().lastIndexOf("."));
-        newDisc.episodeNumber = String.valueOf(season.getDiscs().size());
-        newDisc.seasonID = season.id;
-        newDisc.score = season.score;
-        newDisc.executableSrc = file.getAbsolutePath();
+        if (currentCategory.analyzedFiles.get(f.getAbsolutePath()) != null){
+            disc = App.findDisc(currentCategory.analyzedFiles.get(f.getAbsolutePath()));
+        }else{
+            disc = new Disc();
+            disc.seasonID = season.id;
+            currentCategory.analyzedFiles.put(f.getAbsolutePath(), disc.id);
+            App.addDisc(disc);
+        }
 
-        setMovieThumbnail(newDisc, season.themdbID);
-        App.addDisc(newDisc);
+        disc.name = f.getName().substring(0, f.getName().lastIndexOf("."));
+        disc.executableSrc = f.getAbsolutePath();
+        disc.seasonNumber = season.seasonNumber;
+        disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+    }
+    private void processMovie(File file, Season season, int runtime){
+        Disc disc;
+
+        if (currentCategory.analyzedFiles.get(file.getAbsolutePath()) != null){
+            disc = App.findDisc(currentCategory.analyzedFiles.get(file.getAbsolutePath()));
+        }else{
+            disc = new Disc();
+            disc.seasonID = season.id;
+            currentCategory.analyzedFiles.put(file.getAbsolutePath(), disc.id);
+            App.addDisc(disc);
+        }
+
+        disc.name = file.getName().substring(0, file.getName().lastIndexOf("."));
+        disc.episodeNumber = season.getDiscs().size();
+        disc.score = season.score;
+        disc.overview = season.overview;
+        disc.year = season.year;
+        disc.runtime = runtime;
+        disc.seasonNumber = season.seasonNumber;
+        disc.executableSrc = file.getAbsolutePath();
+
+        setMovieThumbnail(disc, season.themdbID);
     }
     private void setMovieThumbnail(Disc disc, int themdbID){
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
@@ -1942,31 +2227,89 @@ public class DesktopViewController {
             System.err.println("DesktopViewController: Error compressing image");
         }
     }
-    private Series searchFirstMovie(String seriesName){
-        Series newSeries = new Series();
+    public MovieMetadata downloadMovieMetadata(int tmdbID){
+        try{
+            OkHttpClient client = new OkHttpClient();
 
-        int index = seriesName.lastIndexOf("(");
-        if (index != -1){
-            seriesName = seriesName.substring(0, index - 1);
+            Request request = new Request.Builder()
+                    .url("https://api.themoviedb.org/3/movie/" + tmdbID + "?language=" + currentCategory.language)
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                    .build();
+
+            Response response = client.newCall(request).execute();
+
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                if (response.body() != null)
+                    return objectMapper.readValue(response.body().string(), MovieMetadata.class);
+            } else {
+                System.out.println("Response not successful: " + response.code());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
-        MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(seriesName, 1, currentCategory.language, true, 1);
-
-        if (movieResults.getTotalResults() > 0) {
-            MovieDb movie = moviesMetadata.getMovie(movieResults.getResults().get(0).getId(), currentCategory.language);
-            newSeries.name = movie.getTitle();
-            newSeries.overview = movie.getOverview();
-            newSeries.themdbID = movie.getId();
-            newSeries.year = movie.getReleaseDate();
-            newSeries.score = movie.getVoteAverage();
-
-            return newSeries;
-        }
-
-        newSeries.name = seriesName;
-        return newSeries;
+        return null;
     }
-    private void downloadImages(Series series, int tmdbID){
+    public SeriesMetadata downloadSeriesMetadata(int tmdbID){
+        try{
+            OkHttpClient client = new OkHttpClient();
+
+            Request request = new Request.Builder()
+                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "?language=" + currentCategory.language)
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                    .build();
+
+            Response response = client.newCall(request).execute();
+
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                if (response.body() != null)
+                    return objectMapper.readValue(response.body().string(), SeriesMetadata.class);
+            } else {
+                System.out.println("downloadSeriesMetadata: Response not successful: " + response.code());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
+    }
+
+    public SeasonMetadata downloadSeasonMetadata(int tmdbID, int season){
+        try{
+            OkHttpClient client = new OkHttpClient();
+
+            Request request = new Request.Builder()
+                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "/season/" + season + "?language=" + currentCategory.language)
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                    .build();
+
+            Response response = client.newCall(request).execute();
+
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                if (response.body() != null)
+                    return objectMapper.readValue(response.body().string(), SeasonMetadata.class);
+            } else {
+                System.out.println("downloadSeasonMetadata: Response not successful for " + tmdbID + " season: " + season);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
+    }
+    private Images downloadImages(int tmdbID){
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
         String type = "tv";
         String languages = "null%2C" + currentCategory.language;
@@ -1978,7 +2321,6 @@ public class DesktopViewController {
         if (!currentCategory.language.equals("en"))
             languages += "%2Cen";
 
-        //region GET IMAGES
         try{
             OkHttpClient client = new OkHttpClient();
 
@@ -1993,78 +2335,19 @@ public class DesktopViewController {
 
             if (response.isSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                assert response.body() != null;
-                Images images = objectMapper.readValue(response.body().string(), Images.class);
 
-                if (images == null)
-                    return;
-
-                //region Process Posters
-                List<Poster> posterList = images.posters;
-                if (!posterList.isEmpty()){
-                    Image originalImage = new Image(imageBaseURL + posterList.get(0).file_path);
-                    saveCover(series, 0, originalImage);
-
-                    Task<Void> posterTask = new Task<>() {
-                        @Override
-                        protected Void call() {
-                            int processedFiles = 1;
-                            for (int i = processedFiles; i < posterList.size(); i++){
-                                if (processedFiles == 19)
-                                    break;
-
-                                Image originalImage = new Image(imageBaseURL + posterList.get(i).file_path);
-                                saveCover(series, processedFiles, originalImage);
-
-                                processedFiles++;
-                            }
-                            return null;
-                        }
-                    };
-
-                    new Thread(posterTask).start();
-                }
-
-                File posterDir = new File("src/main/resources/img/seriesCovers/" + series.id + "/0.png");
-                if (posterDir.exists()){
-                    series.coverSrc = "src/main/resources/img/seriesCovers/" + series.id + "/0.png";
-                }
-                //endregion
-
-                //region Process Background
-                List<Backdrop> backdropList = images.backdrops;
-                if (!backdropList.isEmpty()){
-                    String path;
-                    if (currentCategory.type.equals("Shows"))
-                        path = backdropList.get(0).file_path;
-                    else
-                        path = backdropList.get(backdropList.size() - 1).file_path;
-
-                    Image originalImage = new Image(imageBaseURL + path);
-
-                    if (!originalImage.isError()){
-                        File file;
-                        if (currentCategory.type.equals("Shows"))
-                            file = new File("src/main/resources/img/DownloadCache/" + series.id + ".png");
-                        else
-                            file = new File("src/main/resources/img/DownloadCache/" + tmdbID + ".png");
-                        try{
-                            RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
-                            ImageIO.write(renderedImage,"png", file);
-                        } catch (IOException e) {
-                            System.err.println("DesktopViewController: Downloaded background not saved");
-                        }
-                    }
-                }
-                //endregion
+                if (response.body() != null)
+                    return objectMapper.readValue(response.body().string(), Images.class);
             } else {
-                System.out.println("Response not successful: " + response.code());
+                System.out.println("downloadImages: Response not successful: " + response.code());
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        //endregion
+
+        return null;
     }
+
     private void downloadLogos(Series series, Season season, int tmdbID){
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
         String type = "tv";
@@ -2141,133 +2424,12 @@ public class DesktopViewController {
                 }
                 //endregion
             } else {
-                System.out.println("Response not successful: " + response.code());
+                System.out.println("downloadLogos: Response not successful: " + response.code());
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         //endregion
-    }
-    public MovieMetadata downloadMovieMetadata(int tmdbID){
-        try{
-            OkHttpClient client = new OkHttpClient();
-
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/movie/" + tmdbID + "?language=" + currentCategory.language)
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
-            if (response.isSuccessful()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-
-                if (response.body() != null)
-                    return objectMapper.readValue(response.body().string(), MovieMetadata.class);
-            } else {
-                System.out.println("Response not successful: " + response.code());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return null;
-    }
-
-    public SeriesMetadata downloadSeriesMetadata(int tmdbID){
-        try{
-            OkHttpClient client = new OkHttpClient();
-
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "?language=" + currentCategory.language)
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
-            if (response.isSuccessful()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-
-                if (response.body() != null)
-                    return objectMapper.readValue(response.body().string(), SeriesMetadata.class);
-            } else {
-                System.out.println("Response not successful: " + response.code());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return null;
-    }
-    public SeasonMetadata downloadSeasonMetadata(int tmdbID, int season){
-        try{
-            OkHttpClient client = new OkHttpClient();
-
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "/season/" + season + "?language=" + currentCategory.language)
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
-            if (response.isSuccessful()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-
-                if (response.body() != null)
-                    return objectMapper.readValue(response.body().string(), SeasonMetadata.class);
-            } else {
-                System.out.println("Response not successful: " + response.code());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return null;
-    }
-
-    private Images downloadImages(int tmdbID){
-        String imageBaseURL = "https://image.tmdb.org/t/p/original";
-        String type = "tv";
-        String languages = "null%2C" + currentCategory.language;
-
-        if (!currentCategory.type.equals("Shows")){
-            type = "movie";
-        }
-
-        if (!currentCategory.language.equals("en"))
-            languages += "%2Cen";
-
-        try{
-            OkHttpClient client = new OkHttpClient();
-
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/"+ type +"/" + tmdbID + "/images?include_image_language=" + languages)
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
-            if (response.isSuccessful()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-
-                if (response.body() != null)
-                    return objectMapper.readValue(response.body().string(), Images.class);
-            } else {
-                System.out.println("Response not successful: " + response.code());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return null;
     }
     public void clearImageCache(){
         try{
@@ -2363,7 +2525,7 @@ public class DesktopViewController {
                 Parent root1 = fxmlLoader.load();
                 AddCategoryController addCategoryController = fxmlLoader.getController();
                 addCategoryController.setParent(this);
-                addCategoryController.setValues(currentCategory.name, currentCategory.language, currentCategory.type, currentCategory.folders, currentCategory.showOnFullscreen);
+                addCategoryController.setValues(currentCategory);
                 Stage stage = new Stage();
                 stage.setTitle("Edit Category");
                 stage.initStyle(StageStyle.UNDECORATED);
@@ -2489,13 +2651,14 @@ public class DesktopViewController {
 
             if (acceptRemove){
                 acceptRemove = false;
+                int index = seriesList.indexOf(selectedSeries);
                 seriesList.remove(selectedSeries);
+                seriesButtons.remove(index);
+                seriesContainer.getChildren().remove(index);
                 App.removeCollection(selectedSeries, currentCategory);
                 selectedSeries = null;
-
-                if (!App.getCategories().isEmpty()){
-                    seriesList = App.getSeriesFromCategory(App.getCategories().get(0));
-                    showSeries();
+                if (!seriesList.isEmpty()){
+                    selectSeriesButton(seriesButtons.get(0));
                 }
             }
         }
@@ -2510,7 +2673,7 @@ public class DesktopViewController {
         if (acceptRemove){
             acceptRemove = false;
             seasonList.remove(selectedSeason);
-            App.removeSeason(selectedSeason, selectedSeries);
+            App.removeSeason(selectedSeason, selectedSeries, currentCategory);
 
             selectedSeason = null;
             selectSeries(selectedSeries);
@@ -2542,7 +2705,7 @@ public class DesktopViewController {
         }
 
         discList.remove(d);
-        App.removeDisc(d, selectedSeason);
+        App.removeDisc(d, selectedSeason, currentCategory);
         selectedSeason.removeDisc(d.id);
 
         selectSeason(selectedSeason);

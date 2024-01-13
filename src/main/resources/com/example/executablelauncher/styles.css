@@ -514,17 +514,27 @@
 
 .buttonGradient {
     -fx-background-color: transparent;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-width: 3 3 3 3;
+    -fx-border-color: transparent;
     -fx-text-fill: #b6b6b6;
 }
 
 .buttonGradient:hover {
     -fx-background-color: transparent;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-width: 3 3 3 3;
+    -fx-border-color: transparent;
     -fx-text-fill: #ffffff;
 }
 
 .buttonGradient:focused {
     -fx-background-color: transparent;
-    -fx-border-width: 2 2 2 2;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-width: 3 3 3 3;
     -fx-border-color: linear-gradient(to top, rgba(176,176,176,1) 0%, rgba(186,186,186,1) 31%, rgba(65,65,65,1) 63%, rgba(65,65,65,1) 100%);
 }
 

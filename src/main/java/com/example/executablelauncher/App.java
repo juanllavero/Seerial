@@ -220,18 +220,6 @@ public class App extends Application {
         categories.add(new Category(n, lang, t, f, s));
     }
 
-    public static void editCategory(String c, String lang, String type, List<String> folders, boolean showOnFullscreen){
-        for (Category cat : categories){
-            if (cat.name.equals(c)){
-                cat.name = c;
-                cat.language = lang;
-                cat.type = type;
-                cat.folders = folders;
-                cat.showOnFullscreen = showOnFullscreen;
-            }
-        }
-    }
-
     public static Category findCategory(String name){
         for (Category c : categories){
             if (c.name.equals(name))
@@ -274,8 +262,37 @@ public class App extends Application {
         return seasons.get(id);
     }
 
+    //Find season within series with the same seasonNumber
+    public static Season findSeason(Series series, int seasonNumber){
+        for (String seasonID : series.seasons){
+            Season season = App.findSeason(seasonID);
+
+            if (season == null)
+                continue;
+
+            if (season.seasonNumber == seasonNumber)
+                return season;
+        }
+
+        return null;
+    }
+
     public static Disc findDisc(String id){
         return discs.get(id);
+    }
+
+    public static Disc findDisc(Season season, int episodeNumber){
+        for (String discID : season.discs){
+            Disc disc = App.findDisc(discID);
+
+            if (disc == null)
+                continue;
+
+            if (disc.episodeNumber == episodeNumber)
+                return disc;
+        }
+
+        return null;
     }
 
     //region REMOVE
@@ -308,7 +325,7 @@ public class App extends Application {
             Season season = seasons.get(seasonID);
 
             if (season != null)
-                removeSeason(season, s);
+                removeSeason(season, s, category);
         }
 
         try{
@@ -316,17 +333,19 @@ public class App extends Application {
         } catch (IOException e) {
             System.err.println("App.removeCollection: Error deleting cover images directory");
         }
+
         category.series.remove(s.id);
+        category.analyzedFolders.remove(s.folder);
         series.remove(s.id);
     }
 
-    public static void removeSeason(Season season, Series series){
+    public static void removeSeason(Season season, Series series, Category category){
         List<String> discsIDs = new ArrayList<>(season.discs);
         for (String discID : discsIDs){
             Disc disc = discs.get(discID);
 
             if (disc != null)
-                removeDisc(disc, season);
+                removeDisc(disc, season, category);
         }
 
         series.removeSeason(season.id);
@@ -343,10 +362,12 @@ public class App extends Application {
             System.err.println("App.removeSeason: Error deleting images files and directories");
         }
 
+        category.seasonFolders.remove(season.folder);
+        category.analyzedFolders.remove(season.folder);
         seasons.remove(season.id);
     }
 
-    public static void removeDisc(Disc disc, Season season){
+    public static void removeDisc(Disc disc, Season season, Category category){
         season.removeDisc(disc.id);
 
         try{
@@ -355,6 +376,7 @@ public class App extends Application {
             System.err.println("App.removeDisc: Error deleting directory: src/main/resources/img/discCovers/" + disc.id);
         }
 
+        category.analyzedFiles.remove(disc.executableSrc);
         discs.remove(disc.id);
     }
     //endregion
