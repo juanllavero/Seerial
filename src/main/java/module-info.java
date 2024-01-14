@@ -25,6 +25,7 @@ module com.example.executablelauncher {
     requires TarsosDSP.jvm;
     requires uk.co.caprica.vlcj;
     requires uk.co.caprica.vlcj.javafx;
+    requires com.jfoenix;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

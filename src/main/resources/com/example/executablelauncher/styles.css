@@ -176,6 +176,42 @@
     -fx-background-color: rgba(0, 0, 0, 0.47);
 }
 
+.volumeSliderBox{
+    -fx-background-color: rgba(0, 0, 0, 0.62);
+    -fx-background-radius: 10px;
+}
+
+/* Styling the slider track */
+.jfx-slider>.track {
+    -fx-background-color: rgba(0, 0, 0, 0.62);
+    -fx-pref-height: 10;
+}
+
+/* Styling the slider thumb */
+.jfx-slider>.thumb {
+    -fx-background-color: transparent;
+    -fx-pref-height: 20;
+    -fx-pref-width: 20;
+}
+
+.jfx-slider>.thumb:hover {
+    -fx-background-color: white;
+}
+
+.jfx-slider:focused>.thumb {
+    -fx-background-color: white;
+}
+
+/* Styling the filled track */
+.jfx-slider>.colored-track {
+    -fx-background-color: #8EDCE6;
+}
+
+/* Styling the animated thumb */
+.jfx-slider>.animated-thumb {
+    -fx-background-color: transparent;
+}
+
 .choice-box .context-menu { -fx-background-color: black; }
 .choice-box .menu-item { -fx-background-color: transparent; }
 .choice-box .menu-item:focused { -fx-background-color: grey; }

@@ -26,6 +26,11 @@
 
   <dependencies>
       <dependency>
+          <groupId>com.jfoenix</groupId>
+          <artifactId>jfoenix</artifactId>
+          <version>9.0.10</version>
+      </dependency>
+      <dependency>
           <groupId>uk.co.caprica</groupId>
           <artifactId>vlcj</artifactId>
           <version>4.8.2</version>

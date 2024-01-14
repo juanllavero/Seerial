@@ -417,7 +417,7 @@ public class SeasonController {
             if (newVal){
                 playButton.setText("Reproducir");
                 ImageView img = (ImageView) playButton.getGraphic();
-                img.setImage(new Image("file:src/main/resources/img/icons/playHover.png", 30, 30, true, true));
+                img.setImage(new Image("file:src/main/resources/img/icons/playSelected.png", 30, 30, true, true));
             }else{
                 playButton.setText("");
                 ImageView img = (ImageView) playButton.getGraphic();
@@ -599,7 +599,7 @@ public class SeasonController {
             playerController.setVideo(this, disc, name, scene);
 
             stage.setMaximized(true);
-            stage.showAndWait();
+            stage.show();
 
             //videoPlayerPane.setVisible(true);
             //fadeInEffect(videoPlayerPane);
@@ -758,7 +758,7 @@ public class SeasonController {
         fadeInEffect(mainPane);
     }
 
-    private void fadeOutEffect(Pane pane){
+    public void fadeOutEffect(Pane pane){
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), pane);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0);
@@ -766,7 +766,7 @@ public class SeasonController {
         pane.setVisible(false);
     }
 
-    private void fadeOutEffect(ImageView img){
+    public void fadeOutEffect(ImageView img){
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), img);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0);
@@ -774,7 +774,7 @@ public class SeasonController {
         img.setVisible(false);
     }
 
-    private void fadeInEffect(Pane pane){
+    public void fadeInEffect(Pane pane){
         pane.setVisible(true);
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), pane);
         fadeIn.setFromValue(0);
@@ -782,7 +782,7 @@ public class SeasonController {
         fadeIn.play();
     }
 
-    private void fadeInEffect(ImageView img){
+    public void fadeInEffect(ImageView img){
         img.setVisible(true);
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), img);
         fadeIn.setFromValue(0);

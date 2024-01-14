@@ -132,7 +132,7 @@ public class DiscController {
         });
 
         playButton.setOnMouseEntered(e -> {
-            playImage.setImage(new Image("file:src/main/resources/img/icons/playHover.png"));
+            playImage.setImage(new Image("file:src/main/resources/img/icons/playSelected.png"));
         });
 
         playButton.setOnMouseExited(e -> {
