@@ -324,6 +324,6 @@
             </ImageView>
          </center>
       </BorderPane>
-      <Pane fx:id="videoPlayerPane" />
+      <Pane fx:id="videoPlayerPane" style="-fx-background-color: black;" visible="false" />
    </children>
 </StackPane>

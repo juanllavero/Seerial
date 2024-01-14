@@ -171,6 +171,7 @@ public class SeasonController {
     private boolean isShow = false;
     private Series series = null;
     private boolean episodesFocussed = true;
+    private boolean playingVideo = false;
 
     public void setParent(Controller c){
         controllerParent = c;
@@ -368,10 +369,12 @@ public class SeasonController {
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()){
-                if (detailsBox.isVisible())
-                    closeDetails();
-                else
-                    goBack(event);
+                if (!playingVideo){
+                    if (detailsBox.isVisible())
+                        closeDetails();
+                    else
+                        goBack(event);
+                }
             }
         });
 
@@ -571,15 +574,25 @@ public class SeasonController {
         if (mp != null)
             mp.stop();
 
+        playingVideo = true;
+
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
-            videoPlayerPane = fxmlLoader.load();
+            Parent root1 = fxmlLoader.load();
 
             VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setVideo(disc.executableSrc);
+            playerController.setVideo(this, disc.executableSrc);
 
-            videoPlayerPane.setVisible(true);
-            fadeInEffect(videoPlayerPane);
+            Stage stage = new Stage();
+            stage.setTitle("VideoPlayer");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(new Scene(root1));
+            stage.setMaximized(true);
+            App.setPopUpProperties(stage);
+            stage.showAndWait();
+
+            //videoPlayerPane.setVisible(true);
+            //fadeInEffect(videoPlayerPane);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -769,5 +782,9 @@ public class SeasonController {
 
     public void hideMenuShadow(){
         menuShadow.setVisible(false);
+    }
+
+    public void stopVideo(){
+        playingVideo = false;
     }
 }

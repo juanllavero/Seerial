@@ -80,9 +80,12 @@ public class VideoPlayerController {
     public EmbeddedMediaPlayer embeddedMediaPlayer;
 
     boolean isPaused = false;
+    SeasonController parentController = null;
 
-    public void setVideo(String videoSrc){
+    public void setVideo(SeasonController parent, String videoSrc){
         onLoad();
+
+        parentController = parent;
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -182,6 +185,8 @@ public class VideoPlayerController {
         embeddedMediaPlayer.controls().stop();
         embeddedMediaPlayer.release();
         mediaPlayerFactory.release();
+
+        parentController.stopVideo();
 
         Stage stage = (Stage) mainPane.getScene().getWindow();
         stage.close();
