@@ -68,6 +68,9 @@ public class SeasonController {
     private ImageView detailsImage;
 
     @FXML
+    private Pane videoPlayerPane;
+
+    @FXML
     private HBox detailsInfo;
 
     @FXML
@@ -361,6 +364,8 @@ public class SeasonController {
         menuShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
         menuShadow.setVisible(false);
 
+        videoPlayerPane.setVisible(false);
+
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()){
                 if (detailsBox.isVisible())
@@ -566,6 +571,22 @@ public class SeasonController {
         if (mp != null)
             mp.stop();
 
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
+            videoPlayerPane = fxmlLoader.load();
+
+            VideoPlayerController playerController = fxmlLoader.getController();
+            playerController.setVideo(disc.executableSrc);
+
+            videoPlayerPane.setVisible(true);
+            fadeInEffect(videoPlayerPane);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+
+        /*
         //Run file in vlc
         String command = null;
         String extension = disc.getExecutableSrc().substring(disc.getExecutableSrc().length() - 3);
@@ -589,7 +610,7 @@ public class SeasonController {
                 mp.play();
         } catch (IOException | InterruptedException e) {
             System.err.println("Error playing episode in DesktopViewController");
-        }
+        }*/
     }
 
     private void setEpisodesOutOfFocusButton(Button btn){

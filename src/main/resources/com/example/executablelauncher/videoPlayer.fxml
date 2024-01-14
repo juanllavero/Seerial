@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+
+<StackPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="718.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.VideoPlayerController">
+   <children>
+      <ImageView fx:id="videoImage" fitHeight="404.0" fitWidth="862.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../img/TEST2.png" />
+         </image>
+      </ImageView>
+      <ImageView fx:id="shadowImage" fitHeight="406.0" fitWidth="916.0" opacity="0.6" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../img/desktopBackgroundShadow.png" />
+         </image>
+      </ImageView>
+      <VBox alignment="BOTTOM_LEFT">
+         <children>
+            <Label fx:id="seriesTitle" text="Juego de tronos" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+               <VBox.margin>
+                  <Insets bottom="5.0" />
+               </VBox.margin>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <HBox spacing="2.0">
+               <children>
+                  <Label fx:id="episodeTitle" text="Se acerca el invierno" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <effect>
+                        <DropShadow />
+                     </effect>
+                  </Label>
+                  <Label fx:id="seasonEpisode" text="- S1 E1" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <effect>
+                        <DropShadow />
+                     </effect>
+                  </Label>
+                  <Label fx:id="episodeDate" text="- Apr 16, 2011" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <effect>
+                        <DropShadow />
+                     </effect>
+                  </Label>
+                  <Label fx:id="runtime" text="- 1h 1m" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <effect>
+                        <DropShadow />
+                     </effect>
+                  </Label>
+               </children>
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </HBox>
+            <Slider fx:id="runtimeSlider" styleClass="playerSlider" stylesheets="@styles.css">
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </Slider>
+            <BorderPane>
+               <left>
+                  <VBox BorderPane.alignment="CENTER">
+                     <children>
+                        <Label fx:id="currentTime" text="18:31" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                           <effect>
+                              <DropShadow />
+                           </effect>
+                        </Label>
+                        <HBox>
+                           <children>
+                              <Button fx:id="subtitlesButton" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/subtitulos-de-peliculas.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                              <Button fx:id="audiosButton" mnemonicParsing="false" prefHeight="36.0" prefWidth="35.0" styleClass="playerButton" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/audio.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </Button>
+                           </children>
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </left>
+               <right>
+                  <VBox alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
+                     <children>
+                        <Label fx:id="toFinishTime" alignment="TOP_RIGHT" text="43:10" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                           <effect>
+                              <DropShadow />
+                           </effect>
+                        </Label>
+                        <HBox>
+                           <children>
+                              <Button fx:id="menuButton" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/dvdMenu.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                              <Button fx:id="optionsButton" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/discOptions.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                           </children>
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </right>
+               <center>
+                  <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+                     <children>
+                        <HBox alignment="TOP_CENTER">
+                           <children>
+                              <Button fx:id="prevButton" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/prevTrack.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                              <Button fx:id="playButton" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/play.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                              <Button fx:id="nextButton" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/nextTrack.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                           </children>
+                           <VBox.margin>
+                              <Insets top="20.0" />
+                           </VBox.margin>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </center>
+            </BorderPane>
+         </children>
+         <StackPane.margin>
+            <Insets bottom="20.0" left="50.0" right="50.0" />
+         </StackPane.margin>
+      </VBox>
+   </children>
+</StackPane>

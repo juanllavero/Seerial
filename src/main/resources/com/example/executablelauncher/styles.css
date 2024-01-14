@@ -93,6 +93,24 @@
     -fx-text-fill: #8EDCE6;
 }
 
+.playerButton{
+    -fx-background-color: transparent;
+    -fx-background-radius: 50px;
+    -fx-effect: dropShadow(gaussian, black, 10, 0.0, 0, 0);
+}
+
+.playerButton:hover{
+    -fx-background-color: transparent;
+    -fx-background-radius: 50px;
+    -fx-effect: dropShadow(gaussian, black, 10, 0.0, 0, 0);
+}
+
+.playerButton:focused{
+    -fx-background-color: white;
+    -fx-background-radius: 50px;
+    -fx-effect: none;
+}
+
 .fullscreenButton{
     -fx-background-color: rgba(255, 255, 255, 0.21);
     -fx-background-radius: 50px;

@@ -23,6 +23,8 @@ module com.example.executablelauncher {
     requires imgscalr.lib;
     requires TarsosDSP.core;
     requires TarsosDSP.jvm;
+    requires uk.co.caprica.vlcj;
+    requires uk.co.caprica.vlcj.javafx;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;
