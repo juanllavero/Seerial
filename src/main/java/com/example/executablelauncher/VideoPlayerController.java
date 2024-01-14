@@ -1,14 +1,20 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Disc;
+import javafx.animation.Timeline;
+import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
@@ -73,6 +79,9 @@ public class VideoPlayerController {
 
     @FXML
     private ImageView videoImage;
+
+    @FXML
+    private VBox controlsBox;
     //endregion
 
     public MediaPlayerFactory mediaPlayerFactory;
@@ -81,11 +90,15 @@ public class VideoPlayerController {
 
     boolean isPaused = false;
     SeasonController parentController = null;
+    Timeline timeline = null;
 
-    public void setVideo(SeasonController parent, String videoSrc){
+    public void setVideo(SeasonController parent, Disc disc, String seriesName, Scene scene){
+        parentController = parent;
         onLoad();
 
-        parentController = parent;
+        seriesTitle.setText(seriesName);
+        setDiscValues(disc);
+
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -97,17 +110,45 @@ public class VideoPlayerController {
         shadowImage.setFitHeight(screenHeight);
         shadowImage.setPreserveRatio(false);
 
-        mainPane.setOnKeyReleased(e -> {
-            if (e.getCode().equals(KeyCode.ESCAPE))
+        shadowImage.setVisible(false);
+        controlsBox.setVisible(false);
+
+        timeline = new javafx.animation.Timeline(
+            new javafx.animation.KeyFrame(Duration.seconds(5), event -> {
+                hideControls();
+            })
+        );
+        timeline.play();
+
+        scene.setOnKeyReleased(e -> {
+            if (e.getCode().equals(KeyCode.ESCAPE) || e.getCode().equals(KeyCode.BACK_SPACE))
                 stop();
-            else if (e.getCode().equals(KeyCode.SPACE)){
-                if (!isPaused)
+        });
+
+        scene.setOnKeyPressed(e -> {
+            if (!controlsBox.isVisible()){
+                if (e.getCode().equals(KeyCode.RIGHT))
+                    goAhead();
+                else if (e.getCode().equals(KeyCode.LEFT))
+                    goBack();
+                else if (e.getCode().equals(KeyCode.PLUS))
+                    volumeUp();
+                else if (e.getCode().equals(KeyCode.MINUS))
+                    volumeDown();
+                else if (e.getCode().equals(KeyCode.SPACE)){
+                    showControls();
                     pause();
+                }
                 else
-                    resume();
-            }else if (e.getCode().equals(KeyCode.F11))
-                embeddedMediaPlayer.video().setAdjustVideo(true);
-            else if (e.getCode().equals(KeyCode.DIGIT1)) {
+                    showControls();
+            }else{
+                timeline.playFromStart();
+
+                if (e.getCode().equals(KeyCode.M))
+                    embeddedMediaPlayer.menu().activate();
+            }
+
+            /*else if (e.getCode().equals(KeyCode.DIGIT1)) {
                 switchSubtitleTrack(1);
 
                 List<TrackDescription> tracks = embeddedMediaPlayer.subpictures().trackDescriptions();
@@ -121,21 +162,28 @@ public class VideoPlayerController {
                 for (TrackDescription trackDescription : audioTracks){
                     System.out.println(trackDescription.description());
                 }
-            }else if (e.getCode().equals(KeyCode.RIGHT))
-                goAhead();
-            else if (e.getCode().equals(KeyCode.LEFT))
-                goBack();
-            else if (e.getCode().equals(KeyCode.M))
-                embeddedMediaPlayer.menu().activate();
-            else if (e.getCode().equals(KeyCode.UP))
-                volumeUp();
-            else if (e.getCode().equals(KeyCode.DOWN))
-                volumeDown();
+            }*/
+
         });
 
-        embeddedMediaPlayer.media().play(videoSrc);
+        embeddedMediaPlayer.media().play(disc.executableSrc);
 
         embeddedMediaPlayer.controls().setPosition(0);
+
+        /*InvalidationListener sliderChangeListener = o-> {
+            Duration seekTo = Duration.seconds(runtimeSlider.getValue());
+            embeddedMediaPlayer.controls().setTime((long) seekTo.toMinutes());
+        });
+        runtimeSlider.valueProperty().addListener(sliderChangeListener);
+
+        embeddedMediaPlayer.media().events().addMediaEventListener(l-> {
+            runtimeSlider.valueProperty().removeListener(sliderChangeListener);
+
+            long currentTime = embeddedMediaPlayer.status().time();
+            runtimeSlider.setValue(currentTime);
+
+            runtimeSlider.valueProperty().addListener(sliderChangeListener);
+        });*/
     }
 
     private void onLoad(){
@@ -143,7 +191,7 @@ public class VideoPlayerController {
         embeddedMediaPlayer = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
 
         embeddedMediaPlayer.videoSurface().set(new ImageViewVideoSurface(videoImage));
-        this.embeddedMediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
+        embeddedMediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
             @Override
             public void playing(MediaPlayer mediaPlayer) {
             }
@@ -177,8 +225,30 @@ public class VideoPlayerController {
         });
     }
 
+    private void setDiscValues(Disc disc){
+        episodeTitle.setText(disc.name);
+        episodeDate.setText(disc.year);
+        seasonEpisode.setText(App.textBundle.getString("seasonLetter") + disc.seasonNumber + " " + App.textBundle.getString("episodeLetter") + disc.episodeNumber);
+        runtime.setText(parentController.setRuntime(disc.runtime));
+
+        currentTime.setText("00:00");
+        //toFinishTime.setText(formatTime(disc.runtime));
+    }
+
     private void switchSubtitleTrack(int trackNumber) {
         embeddedMediaPlayer.subpictures().setTrack(trackNumber);
+    }
+
+    private void showControls(){
+        timeline.playFromStart();
+        controlsBox.setVisible(true);
+        shadowImage.setVisible(true);
+    }
+
+    private void hideControls(){
+        timeline.stop();
+        controlsBox.setVisible(false);
+        shadowImage.setVisible(false);
     }
 
     public void stop() {
@@ -193,10 +263,13 @@ public class VideoPlayerController {
     }
 
     public void resume(){
+        hideControls();
+        isPaused = false;
         embeddedMediaPlayer.controls().play();
     }
 
     public void pause(){
+        isPaused = true;
         embeddedMediaPlayer.controls().pause();
     }
 

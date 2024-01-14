@@ -26,6 +26,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.media.Media;
@@ -322,7 +323,7 @@ public class SeasonController {
         fadeInEffect(backgroundImage);
     }
 
-    private String setRuntime(int runtime){
+    public String setRuntime(int runtime){
         int h = runtime / 60;
         int m = runtime % 60;
 
@@ -339,9 +340,9 @@ public class SeasonController {
         });
 
         javafx.animation.Timeline timeline = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
-                    playVideo();
-                })
+            new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
+                playVideo();
+            })
         );
         timeline.play();
     }
@@ -564,7 +565,7 @@ public class SeasonController {
         selectedDisc = disc;
         episodeName.setText(disc.name);
         overviewField.setText(disc.overview);
-        seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).seasonNumber + App.textBundle.getString("episodeLetter") + disc.episodeNumber);
+        seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).seasonNumber + " " + App.textBundle.getString("episodeLetter") + disc.episodeNumber);
         yearField.setText(disc.year);
         durationField.setText(setRuntime(disc.runtime));
         scoreField.setText(String.valueOf(disc.score));
@@ -580,15 +581,24 @@ public class SeasonController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
             Parent root1 = fxmlLoader.load();
 
-            VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setVideo(this, disc.executableSrc);
+            Stage thisStage = (Stage) mainBox.getScene().getWindow();
 
             Stage stage = new Stage();
             stage.setTitle("VideoPlayer");
             stage.initStyle(StageStyle.UNDECORATED);
-            stage.setScene(new Scene(root1));
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(thisStage);
+            Scene scene = new Scene(root1);
+            stage.setScene(scene);
+
+            String name = series.name;
+            if (!isShow)
+                name = seasons.get(currentSeason).name;
+
+            VideoPlayerController playerController = fxmlLoader.getController();
+            playerController.setVideo(this, disc, name, scene);
+
             stage.setMaximized(true);
-            App.setPopUpProperties(stage);
             stage.showAndWait();
 
             //videoPlayerPane.setVisible(true);
