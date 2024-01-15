@@ -254,12 +254,27 @@
             <Insets bottom="50.0" left="50.0" right="50.0" />
          </StackPane.margin>
       </VBox>
-      <HBox fx:id="volumeBox" fillHeight="false" styleClass="volumeSliderBox" stylesheets="@styles.css">
+      <HBox fx:id="volumeBox" alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="volumeSliderBox" stylesheets="@styles.css" StackPane.alignment="CENTER">
          <children>
-            <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-            <JFXSlider />
-            <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../img/icons/minVolume.png" />
+               </image></ImageView>
+            <JFXSlider>
+               <HBox.margin>
+                  <Insets top="5.0" />
+               </HBox.margin></JFXSlider>
+            <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../img/icons/maxVolume.png" />
+               </image></ImageView>
          </children>
+         <StackPane.margin>
+            <Insets bottom="500.0" top="100.0" />
+         </StackPane.margin>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
       </HBox>
    </children>
 </StackPane>

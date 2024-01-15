@@ -376,14 +376,6 @@ public class VideoPlayerController {
         fadeOut.setOnFinished(e -> controlsShown = false);
     }
 
-    public void fadeOutEffect(Pane pane){
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), pane);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0);
-        fadeOut.play();
-        pane.setVisible(false);
-    }
-
     public void fadeOutEffect(ImageView img){
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), img);
         fadeOut.setFromValue(1.0);
