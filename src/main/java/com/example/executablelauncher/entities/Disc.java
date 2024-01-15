@@ -1,6 +1,7 @@
 package com.example.executablelauncher.entities;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import com.example.executablelauncher.App;
 
@@ -17,6 +18,12 @@ public class Disc implements Serializable {
     public String executableSrc = "";
     public String seasonID = "";
     public String imgSrc = "";
+
+    //region WATCH HISTORY
+    public boolean watched = false;
+    public long lastMilisecond = 0;
+    //public LocalDateTime lastWatched = null;
+    //endregion
 
     public Disc() {
         String uuid = UUID.randomUUID().toString();
@@ -68,4 +75,26 @@ public class Disc implements Serializable {
     public void setEpisodeNumber(int episodeNumber) {
         this.episodeNumber = episodeNumber;
     }
+
+    public void setWatched(){
+        lastMilisecond = 0;
+        watched = true;
+    }
+
+    public void setUnWatched(){
+        lastMilisecond = 0;
+        watched = false;
+    }
+
+    public boolean isWatched(){ return watched; }
+
+    public void setTime(long miliseconds){
+        lastMilisecond = miliseconds;
+
+        //If we have watched more than 90% of the video, it is marked as watched
+        if (((runtime * 60L) - ((double) lastMilisecond / 100)) < (runtime * 60L * 0.1))
+            setWatched();
+    }
+
+    public long getTimeWatched(){ return lastMilisecond; }
 }

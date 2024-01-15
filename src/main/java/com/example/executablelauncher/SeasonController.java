@@ -596,7 +596,7 @@ public class SeasonController {
                 name = seasons.get(currentSeason).name;
 
             VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setVideo(this, disc, name, scene);
+            playerController.setVideo(this, discs, disc, name, scene);
 
             stage.setMaximized(true);
             stage.show();

@@ -24,6 +24,8 @@ import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -102,13 +104,15 @@ public class VideoPlayerController {
     private Timer clockTimer;
     double percentageStep = 0;
 
-    public void setVideo(SeasonController parent, Disc disc, String seriesName, Scene scene){
+    List<Disc> discList = new ArrayList<>();
+    int currentDisc = 0;
+
+    public void setVideo(SeasonController parent, List<Disc> discList, Disc disc, String seriesName, Scene scene){
         parentController = parent;
+        this.discList = discList;
         onLoad();
 
-        seriesTitle.setText(seriesName);
-        setDiscValues(disc);
-
+        currentDisc = discList.indexOf(disc);
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -176,9 +180,10 @@ public class VideoPlayerController {
 
         });
 
-        embeddedMediaPlayer.media().play(disc.executableSrc);
+        seriesTitle.setText(seriesName);
+        setDiscValues(disc);
 
-        embeddedMediaPlayer.controls().setPosition(0);
+
 
         //Set dvd menu button visible if file extension equals .iso
         //menuButton.setVisible(false);
@@ -252,12 +257,12 @@ public class VideoPlayerController {
 
         nextButton.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER))
-                goAhead();
+                nextEpisode();
         });
 
         prevButton.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER))
-                goBack();
+                prevEpisode();
         });
 
         //region BUTTON ICONS
@@ -330,6 +335,21 @@ public class VideoPlayerController {
         percentageStep = (fiveSecondsPercentage / 100.0) * 100;
 
         runtimeSlider.setBlockIncrement(percentageStep);
+
+        nextButton.setDisable(discList.indexOf(disc) == (discList.size() - 1));
+
+        if (disc.isWatched())
+            disc.setUnWatched();
+
+        float position = 0;
+
+        if (disc.getTimeWatched() > 0){
+            position = (float) ((disc.runtime * 60L * 1000) - disc.getTimeWatched()) / 100;
+        }
+
+        //Set video and start
+        embeddedMediaPlayer.media().play(disc.executableSrc);
+        embeddedMediaPlayer.controls().setPosition(position);
     }
 
     private void switchSubtitleTrack(int trackNumber) {
@@ -389,6 +409,10 @@ public class VideoPlayerController {
     }
 
     public void stop() {
+        Disc disc = discList.get(currentDisc);
+        disc.setTime(embeddedMediaPlayer.status().time() / 1000);
+
+
         stopTimer();
         embeddedMediaPlayer.controls().stop();
         embeddedMediaPlayer.release();
@@ -430,6 +454,27 @@ public class VideoPlayerController {
     public void goBack(){
         showControls();
         runtimeSlider.requestFocus();
+    }
+
+    public void nextEpisode(){
+        Disc disc = discList.get(currentDisc);
+        disc.setTime(embeddedMediaPlayer.status().time() / 1000);
+
+        setDiscValues(discList.get(++currentDisc));
+    }
+
+    public void prevEpisode(){
+        if ((embeddedMediaPlayer.status().time() / 1000) > 2000){
+            runtimeSlider.setValue(0);
+        }else{
+            if (currentDisc > 0) {
+                Disc disc = discList.get(currentDisc);
+                disc.setTime(embeddedMediaPlayer.status().time() / 1000);
+
+                setDiscValues(discList.get(--currentDisc));
+            }else
+                runtimeSlider.setValue(0);
+        }
     }
 
     public void showAudioTracks(){
