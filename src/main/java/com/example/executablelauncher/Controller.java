@@ -4,6 +4,8 @@ import com.example.executablelauncher.entities.Category;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import javafx.animation.*;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -37,6 +39,7 @@ import java.nio.file.Files;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import javafx.scene.image.ImageView;
 import javafx.stage.Screen;
@@ -59,6 +62,9 @@ public class Controller implements Initializable {
 
     @FXML
     private ImageView backgroundImage;
+
+    @FXML
+    private ImageView backgroundShadow;
 
     @FXML
     private ScrollPane scrollPane;
@@ -101,8 +107,9 @@ public class Controller implements Initializable {
     private List<Button> seriesButtons = new ArrayList<>();
 
     private MediaPlayer backgroundMusicPlayer;
-    private List<Timeline> coverBorderTimelines = new ArrayList<>();
     private String categoryType = null;
+    private FadeTransition fadeIn = null;
+    private PauseTransition delay = null;
 
     @FXML
     private void close(ActionEvent event) throws IOException {
@@ -161,6 +168,10 @@ public class Controller implements Initializable {
         backgroundImage.setFitHeight(screenHeight);
         backgroundImage.setFitWidth(screenWidth);
         backgroundImage.setPreserveRatio(false);
+
+        backgroundShadow.setFitHeight(screenHeight);
+        backgroundShadow.setFitWidth(screenWidth);
+        backgroundShadow.setPreserveRatio(false);
         
         sideMenuBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight());
         sideMenuBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth() / 6);
@@ -260,16 +271,13 @@ public class Controller implements Initializable {
         Background bi = mainBox.getBackground();
         Background black = new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY));
 
-        mainBox.setBackground(null);
-        mainBox.setBackground(black);
+        mainBox.setBackground(bi);
 
         //Fade in effect
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
-        fadeIn.setFromValue(0.2);
+        fadeIn.setFromValue(0);
         fadeIn.setToValue(1);
         fadeIn.play();
-
-        fadeIn.setOnFinished(event -> mainBox.setBackground(bi));
     }
 
     public void defaultSelection(){
@@ -280,65 +288,53 @@ public class Controller implements Initializable {
     }
 
     public void selectSeries(Series s){
-        playInteractionSound();
-
         if (seriesToEdit != s){
             seriesToEdit = s;
-            int i = collectionList.indexOf(seriesToEdit);
-            seriesButtons.get(i).requestFocus();
 
-            for (Timeline t : coverBorderTimelines){
-                t.stop();
-            }
+            delay = new PauseTransition(Duration.millis(500));
+            delay.setOnFinished(event -> Platform.runLater(() -> {
+                if (!s.getSeasons().isEmpty()) {
+                    Season season = App.findSeason(s.getSeasons().get(0));
+                    if (season != null) {
+                        String imagePath = "src/main/resources/img/backgrounds/" + season.id;
+                        File fullBlur = new File(imagePath + "/fullBlur.png");
+                        String backgroundPath = fullBlur.exists() ? "fullBlur.png" : "background.png";
 
+                        ImageView background = new ImageView(new Image("file:" + imagePath + "/" + backgroundPath,
+                                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
 
-            if (!s.getSeasons().isEmpty()){
-                Season season = App.findSeason(s.getSeasons().get(0));
-                if (season != null){
-                    /*Image image = new Image("file:src/main/resources/img/backgrounds/" + season.id + "/fullBlur.png");
-                    backgroundImage.setImage(image);
-                    //backgroundImage.setPreserveRatio(true);
-                    backgroundImage.setSmooth(true);
-                    backgroundImage.setCache(true);*/
+                        BackgroundImage myBI = new BackgroundImage(
+                                Objects.requireNonNull(getCroppedImage(background)),
+                                BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                                BackgroundSize.DEFAULT);
 
-                    File fullBlur = new File("src/main/resources/img/backgrounds/" + season.id + "/fullBlur.png");
+                        Platform.runLater(() -> {
+                            mainBox.setBackground(new Background(myBI));
+                            backgroundImage.setImage(getCroppedImage(background));
+                        });
 
-                    ImageView background;
-                    if (!fullBlur.exists()){
-                        background = new ImageView(new Image("file:src/main/resources/img/backgrounds/" + season.id + "/background.png",
-                                Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true));
-                    }else{
-                        background = new ImageView(new Image("file:src/main/resources/img/backgrounds/" + season.id + "/fullBlur.png",
-                                Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true));
+                        Background bi = mainBox.getBackground();
+                        Background black = new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY));
+
+                        if (!bi.equals(black)) {
+                            mainBox.setBackground(black);
+                        }
+
+                        if (fadeIn == null) {
+                            fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
+                        } else {
+                            fadeIn.stop();
+                            fadeIn.setNode(backgroundImage);
+                        }
+
+                        fadeIn.setFromValue(0.2);
+                        fadeIn.setToValue(1);
+                        fadeIn.play();
                     }
-
-                    BackgroundImage myBI= new BackgroundImage(Objects.requireNonNull(getCroppedImage(background)),
-                            BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                            BackgroundSize.DEFAULT);
-                    mainBox.setBackground(new Background(myBI));
-
-                    backgroundImage.setImage(getCroppedImage(background));
                 }
+            }));
 
-                //Node node = cardContainer.getChildren().get(collectionList.indexOf(s));
-                //node.getStyleClass().clear();
-                //node.getStyleClass().add("coverSelected");
-                //coverBorderTimelines.get(collectionList.indexOf(s)).play();
-
-                Background bi = mainBox.getBackground();
-                Background black = new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY));
-
-                mainBox.setBackground(null);
-                mainBox.setBackground(black);
-
-                //Fade in effect
-                FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
-                fadeIn.setFromValue(0.2);
-                fadeIn.setToValue(1);
-                fadeIn.play();
-
-                fadeIn.setOnFinished(event -> mainBox.setBackground(bi));
-            }
+            delay.play();
         }
     }
 
@@ -392,8 +388,11 @@ public class Controller implements Initializable {
             if (newVal) {
                 btn.setScaleX(1.1);
                 btn.setScaleY(1.1);
-                selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
                 playInteractionSound();
+
+                CompletableFuture.runAsync(() -> {
+                    selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
+                });
             }else{
                 btn.setScaleX(1);
                 btn.setScaleY(1);

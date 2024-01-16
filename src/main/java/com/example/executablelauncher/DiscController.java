@@ -169,14 +169,6 @@ public class DiscController {
         desktopParent.openDiscMenu(event, disc);
     }
 
-    public void selectDiscFullScreen(){
-        discSelected = true;
-        thumbnailShadow.setVisible(true);
-        playButton.setVisible(true);
-        selectDiscButton.setVisible(false);
-        discMenu.setVisible(false);
-    }
-
     public void selectDiscDesktop(){
         desktopParent.selectDisc(disc);
         if (discSelected){

@@ -260,7 +260,7 @@
                <image>
                   <Image url="@../../../img/icons/minVolume.png" />
                </image></ImageView>
-            <JFXSlider>
+            <JFXSlider fx:id="volumeSlider" blockIncrement="5.0" styleClass="jfx-slider" stylesheets="@styles.css" value="100.0">
                <HBox.margin>
                   <Insets top="5.0" />
                </HBox.margin></JFXSlider>

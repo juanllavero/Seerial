@@ -19,6 +19,8 @@ import info.movito.themoviedbapi.model.MovieImages;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import info.movito.themoviedbapi.model.tv.TvSeries;
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -487,6 +489,7 @@ public class DesktopViewController {
     private void fillSeasonInfo() {
         selectedDiscs.clear();
         selectionOptions.setVisible(false);
+
         Image i = new Image("file:" + "src/main/resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.png");
         ASPECT_RATIO = i.getWidth() / i.getHeight();
         globalBackground.setImage(i);
@@ -615,11 +618,26 @@ public class DesktopViewController {
             }
         }
 
-        if (!discList.isEmpty()){
+
+        if (!discList.isEmpty()) {
             discList.sort(new Utils.DiscComparator().reversed());
-            for (Disc d : discList){
-                addEpisodeCard(d);
-            }
+            addEpisodeCardWithDelay(0);
+        }
+    }
+
+    private void addEpisodeCardWithDelay(int index) {
+        if (index < discList.size()) {
+            Disc disc = discList.get(index);
+            addEpisodeCard(disc);
+
+            index++;
+
+            Duration delay = Duration.millis(10);
+
+            int finalIndex = index;
+            KeyFrame keyFrame = new KeyFrame(delay, event -> addEpisodeCardWithDelay(finalIndex));
+            Timeline timeline = new Timeline(keyFrame);
+            timeline.play();
         }
     }
 

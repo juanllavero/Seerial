@@ -2,6 +2,7 @@ package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Disc;
 import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -11,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -69,6 +71,9 @@ public class VideoPlayerController {
     private JFXSlider runtimeSlider;
 
     @FXML
+    private JFXSlider volumeSlider;
+
+    @FXML
     private Label seasonEpisode;
 
     @FXML
@@ -88,6 +93,9 @@ public class VideoPlayerController {
 
     @FXML
     private VBox controlsBox;
+
+    @FXML
+    private HBox volumeBox;
     //endregion
 
     public MediaPlayerFactory mediaPlayerFactory;
@@ -98,6 +106,7 @@ public class VideoPlayerController {
     boolean controlsShown = false;
     SeasonController parentController = null;
     Timeline timeline = null;
+    Timeline volumeCount = null;
 
     private final AtomicBoolean tracking = new AtomicBoolean();
 
@@ -127,12 +136,20 @@ public class VideoPlayerController {
         shadowImage.setVisible(false);
         controlsBox.setVisible(false);
 
+        volumeBox.setVisible(false);
+
         timeline = new javafx.animation.Timeline(
             new javafx.animation.KeyFrame(Duration.seconds(5), event -> {
                 hideControls();
             })
         );
         timeline.play();
+
+        volumeCount = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(Duration.seconds(2), event -> {
+                    volumeBox.setVisible(false);
+                })
+        );
 
         scene.setOnKeyReleased(e -> {
             if (e.getCode().equals(KeyCode.ESCAPE) || e.getCode().equals(KeyCode.BACK_SPACE))
@@ -431,11 +448,20 @@ public class VideoPlayerController {
     }
 
     public void volumeUp(){
-        embeddedMediaPlayer.audio().setVolume(embeddedMediaPlayer.audio().volume() + 10);
+        volumeCount.playFromStart();
+        volumeBox.setVisible(true);
+
+        if (embeddedMediaPlayer.audio().volume() < 100){
+            embeddedMediaPlayer.audio().setVolume(embeddedMediaPlayer.audio().volume() + 5);
+            volumeSlider.setValue(embeddedMediaPlayer.audio().volume());
+        }
     }
 
     public void volumeDown(){
-        embeddedMediaPlayer.audio().setVolume(embeddedMediaPlayer.audio().volume() - 10);
+        volumeCount.playFromStart();
+        volumeBox.setVisible(true);
+        embeddedMediaPlayer.audio().setVolume(embeddedMediaPlayer.audio().volume() - 5);
+        volumeSlider.setValue(embeddedMediaPlayer.audio().volume());
     }
 
     public void goAhead(){
