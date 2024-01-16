@@ -60,6 +60,7 @@ public class App extends Application {
                 Locale.forLanguageTag("fr-FR")
         });
 
+        /*
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
         stage.setTitle(textBundle.getString("desktopMode"));
@@ -74,7 +75,7 @@ public class App extends Application {
         desktopViewController.initValues();
         primaryStage = stage;
         FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
-        stage.show();
+        stage.show();*/
     }
 
     public static boolean isRepeatedID(String uuid){
