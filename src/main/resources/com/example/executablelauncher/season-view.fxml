@@ -235,7 +235,7 @@
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
-      <BorderPane fx:id="detailsBox" visible="false" StackPane.alignment="CENTER">
+      <BorderPane fx:id="detailsBox" StackPane.alignment="CENTER">
          <padding>
             <Insets bottom="150.0" left="150.0" right="150.0" top="150.0" />
          </padding>
@@ -314,7 +314,7 @@
             </VBox>
          </right>
          <center>
-            <ImageView fx:id="detailsImage" fitHeight="772.0" fitWidth="603.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_RIGHT">
+            <ImageView fx:id="detailsImage" fitHeight="387.0" fitWidth="776.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_RIGHT">
                <image>
                   <Image url="@../../../img/TEST_NoBlur.png" />
                </image>

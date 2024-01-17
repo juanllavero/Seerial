@@ -5,11 +5,9 @@ import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
@@ -34,8 +32,6 @@ import javafx.scene.layout.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -108,7 +104,7 @@ public class Controller implements Initializable {
 
     private MediaPlayer backgroundMusicPlayer;
     private String categoryType = null;
-    private FadeTransition fadeIn = null;
+    private FadeTransition fadeTransition = null;
     private PauseTransition delay = null;
 
     @FXML
@@ -283,7 +279,9 @@ public class Controller implements Initializable {
     public void defaultSelection(){
         if (!collectionList.isEmpty()) {
             seriesToEdit = null;
-            selectSeries(collectionList.get(0));
+            mainPane.requestFocus();
+            cardContainer.requestFocus();
+            seriesButtons.get(0).requestFocus();
         }
     }
 
@@ -291,7 +289,7 @@ public class Controller implements Initializable {
         if (seriesToEdit != s){
             seriesToEdit = s;
 
-            delay = new PauseTransition(Duration.millis(500));
+            delay = new PauseTransition(Duration.millis(400));
             delay.setOnFinished(event -> Platform.runLater(() -> {
                 if (!s.getSeasons().isEmpty()) {
                     Season season = App.findSeason(s.getSeasons().get(0));
@@ -299,6 +297,8 @@ public class Controller implements Initializable {
                         String imagePath = "src/main/resources/img/backgrounds/" + season.id;
                         File fullBlur = new File(imagePath + "/fullBlur.png");
                         String backgroundPath = fullBlur.exists() ? "fullBlur.png" : "background.png";
+
+                        Image currentImage = backgroundImage.getImage();
 
                         ImageView background = new ImageView(new Image("file:" + imagePath + "/" + backgroundPath,
                                 Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
@@ -310,32 +310,30 @@ public class Controller implements Initializable {
 
                         Platform.runLater(() -> {
                             mainBox.setBackground(new Background(myBI));
-                            backgroundImage.setImage(getCroppedImage(background));
+                            fadeEffectComplete(currentImage, getCroppedImage(background));
                         });
-
-                        Background bi = mainBox.getBackground();
-                        Background black = new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY));
-
-                        if (!bi.equals(black)) {
-                            mainBox.setBackground(black);
-                        }
-
-                        if (fadeIn == null) {
-                            fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
-                        } else {
-                            fadeIn.stop();
-                            fadeIn.setNode(backgroundImage);
-                        }
-
-                        fadeIn.setFromValue(0.2);
-                        fadeIn.setToValue(1);
-                        fadeIn.play();
                     }
                 }
             }));
 
             delay.play();
         }
+    }
+
+    public void fadeEffectComplete(Image first, Image second){
+        backgroundImage.setImage(first);
+        fadeTransition = new FadeTransition(Duration.seconds(0.5), backgroundImage);
+        fadeTransition.setFromValue(1);
+        fadeTransition.setToValue(0.1);
+        fadeTransition.play();
+
+        fadeTransition.setOnFinished(e -> {
+            backgroundImage.setImage(second);
+            fadeTransition = new FadeTransition(Duration.seconds(0.5), backgroundImage);
+            fadeTransition.setFromValue(0.1);
+            fadeTransition.setToValue(1);
+            fadeTransition.play();
+        });
     }
 
     private WritableImage getCroppedImage(ImageView img){
@@ -390,9 +388,7 @@ public class Controller implements Initializable {
                 btn.setScaleY(1.1);
                 playInteractionSound();
 
-                CompletableFuture.runAsync(() -> {
-                    selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
-                });
+                CompletableFuture.runAsync(() -> selectSeries(collectionList.get(seriesButtons.indexOf(btn))));
             }else{
                 btn.setScaleX(1);
                 btn.setScaleY(1);

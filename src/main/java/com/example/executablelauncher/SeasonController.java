@@ -1,5 +1,6 @@
 package com.example.executablelauncher;
 
+import be.tarsos.dsp.FadeIn;
 import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import com.example.executablelauncher.entities.Disc;
@@ -231,6 +232,10 @@ public class SeasonController {
 
         // Crear el nuevo ImageView con la imagen recortada
         backgroundImage.setImage(croppedImage);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+        fadeIn.play();
 
         if (isShow){
             if (series.logoSrc.isEmpty()){
@@ -296,9 +301,15 @@ public class SeasonController {
         discsButtons.clear();
         discs.clear();
         List<String> discs = season.getDiscs();
+        List<Disc> discList = new ArrayList<>();
         for (String i : discs){
             Disc d = App.findDisc(i);
-            addEpisodeCard(d);
+            discList.add(d);
+        }
+
+        discList.sort(new Utils.DiscComparator().reversed());
+        for (Disc disc : discList){
+            addEpisodeCard(disc);
         }
 
         mainPane.requestFocus();
@@ -434,6 +445,18 @@ public class SeasonController {
                 optionsButton.setText("");
                 ImageView img = (ImageView) optionsButton.getGraphic();
                 img.setImage(new Image("file:src/main/resources/img/icons/options.png", 30, 30, true, true));
+            }
+        });
+
+        lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal){
+                lastSeason();
+            }
+        });
+
+        nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal){
+                nextSeason();
             }
         });
 

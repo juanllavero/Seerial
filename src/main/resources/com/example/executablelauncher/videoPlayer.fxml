@@ -21,11 +21,11 @@
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
-      <VBox fx:id="controlsBox" alignment="BOTTOM_LEFT">
+      <VBox fx:id="controlsBox" alignment="BOTTOM_LEFT" maxWidth="2560.0">
          <children>
             <Label fx:id="seriesTitle" text="Juego de tronos" textFill="WHITE">
                <font>
-                  <Font name="System Bold" size="26.0" />
+                  <Font name="System Bold" size="46.0" />
                </font>
                <VBox.margin>
                   <Insets bottom="10.0" />
@@ -38,7 +38,7 @@
                <children>
                   <Label fx:id="episodeTitle" text="Se acerca el invierno" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="18.0" />
+                        <Font name="System Bold" size="30.0" />
                      </font>
                      <effect>
                         <DropShadow />
@@ -46,7 +46,7 @@
                   </Label>
                   <Label text=" - " textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="18.0" />
+                        <Font name="System Bold" size="30.0" />
                      </font>
                      <effect>
                         <DropShadow />
@@ -54,7 +54,7 @@
                   </Label>
                   <Label fx:id="seasonEpisode" text="S1 E1" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="18.0" />
+                        <Font name="System Bold" size="30.0" />
                      </font>
                      <effect>
                         <DropShadow />
@@ -62,7 +62,7 @@
                   </Label>
                   <Label text=" - " textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="18.0" />
+                        <Font name="System Bold" size="30.0" />
                      </font>
                      <effect>
                         <DropShadow />
@@ -70,7 +70,7 @@
                   </Label>
                   <Label fx:id="episodeDate" text="Apr 16, 2011" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="18.0" />
+                        <Font name="System Bold" size="30.0" />
                      </font>
                      <effect>
                         <DropShadow />
@@ -78,7 +78,7 @@
                   </Label>
                   <Label text=" - " textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="18.0" />
+                        <Font name="System Bold" size="30.0" />
                      </font>
                      <effect>
                         <DropShadow />
@@ -86,7 +86,7 @@
                   </Label>
                   <Label fx:id="runtime" text="1h 1m" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="18.0" />
+                        <Font name="System Bold" size="30.0" />
                      </font>
                      <effect>
                         <DropShadow />
@@ -253,6 +253,9 @@
          <StackPane.margin>
             <Insets bottom="50.0" left="50.0" right="50.0" />
          </StackPane.margin>
+         <padding>
+            <Insets bottom="20.0" />
+         </padding>
       </VBox>
       <HBox fx:id="volumeBox" alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="volumeSliderBox" stylesheets="@styles.css" StackPane.alignment="CENTER">
          <children>
@@ -270,7 +273,7 @@
                </image></ImageView>
          </children>
          <StackPane.margin>
-            <Insets bottom="500.0" top="100.0" />
+            <Insets bottom="500.0" top="50.0" />
          </StackPane.margin>
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
