@@ -144,9 +144,9 @@ public class SearchSeriesController {
                     else
                         System.out.println("Selected series with name: " + resultMovies.get(resultsCards.indexOf(cardBox)).getTitle());*/
                     if (isShow)
-                        parentController.setCorrectIdentificationShow(resultShows.get(resultsCards.indexOf(cardBox)));
+                        parentController.setCorrectIdentificationShow(resultShows.get(resultsCards.indexOf(cardBox)).getId());
                     else
-                        parentController.setCorrectIdentificationMovie(resultMovies.get(resultsCards.indexOf(cardBox)));
+                        parentController.setCorrectIdentificationMovie(resultMovies.get(resultsCards.indexOf(cardBox)).getId());
                     cancelButton();
                 });
 

@@ -358,15 +358,25 @@ public class VideoPlayerController {
         if (disc.isWatched())
             disc.setUnWatched();
 
-        float position = 0;
+        float position;
 
         if (disc.getTimeWatched() > 0){
             position = (float) ((disc.runtime * 60L * 1000) - disc.getTimeWatched()) / 100;
+        } else {
+            position = 0;
         }
 
-        //Set video and start
-        embeddedMediaPlayer.media().play(disc.executableSrc);
-        embeddedMediaPlayer.controls().setPosition(position);
+        FadeTransition fade = new FadeTransition(Duration.seconds(0.8), videoImage);
+        fade.setFromValue(0);
+        fade.setToValue(1.0);
+
+        fade.setOnFinished(event -> {
+            //Set video and start
+            embeddedMediaPlayer.media().play(disc.executableSrc);
+            embeddedMediaPlayer.controls().setPosition(position);
+        });
+
+        fade.play();
     }
 
     private void switchSubtitleTrack(int trackNumber) {
@@ -421,16 +431,23 @@ public class VideoPlayerController {
         Disc disc = discList.get(currentDisc);
         disc.setTime(embeddedMediaPlayer.status().time() / 1000);
 
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.7), videoImage);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0);
 
-        stopTimer();
-        embeddedMediaPlayer.controls().stop();
-        embeddedMediaPlayer.release();
-        mediaPlayerFactory.release();
+        fadeOut.setOnFinished(e -> {
+            stopTimer();
+            embeddedMediaPlayer.controls().stop();
+            embeddedMediaPlayer.release();
+            mediaPlayerFactory.release();
 
-        parentController.stopVideo();
+            parentController.stopVideo();
 
-        Stage stage = (Stage) mainPane.getScene().getWindow();
-        stage.close();
+            Stage stage = (Stage) mainPane.getScene().getWindow();
+            stage.close();
+        });
+
+        fadeOut.play();
     }
 
     public void resume(){

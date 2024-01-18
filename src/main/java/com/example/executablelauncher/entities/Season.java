@@ -19,7 +19,10 @@ public class Season implements Serializable {
     public String backgroundSrc = "";
     public String videoSrc = "";
     public String musicSrc = "";
+
+    public String coverSrc = "";
     public String seriesID = "";
+
     public int order = 0;
     public int themdbID = -1;
     public boolean showName = true;

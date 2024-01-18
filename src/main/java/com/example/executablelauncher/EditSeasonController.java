@@ -53,10 +53,34 @@ public class EditSeasonController {
     private Button downloadImagesButton;
 
     @FXML
+    private Button downloadPostersButton;
+
+    @FXML
+    private Button fromURLButton;
+
+    @FXML
+    private ScrollPane postersBox;
+
+    @FXML
+    private Button fromURLPosterButton;
+
+    @FXML
+    private FlowPane postersContainer;
+
+    @FXML
+    private Button postersViewButton;
+
+    @FXML
+    private Button selectImageButton;
+
+    @FXML
     private VBox generalBox;
 
     @FXML
     private Button generalViewButton;
+
+    @FXML
+    private FlowPane imagesContainer;
 
     @FXML
     private ScrollPane logosBox;
@@ -83,13 +107,10 @@ public class EditSeasonController {
     private TextField orderField;
 
     @FXML
-    private FlowPane imagesContainer;
-
-    @FXML
     private Button saveButton;
 
     @FXML
-    private Button selectImageButton;
+    private Button selectPosterButton;
 
     @FXML
     private CheckBox showName;
@@ -121,6 +142,9 @@ public class EditSeasonController {
     public String seriesName = "";
     private List<File> logoFiles = new ArrayList<>();
     private File selectedLogo = null;
+
+    private List<File> posterFiles = new ArrayList<>();
+    private File selectedPoster = null;
     private File selectedBackground = null;
     private File selectedVideo = null;
     private File selectedMusic = null;
@@ -144,9 +168,13 @@ public class EditSeasonController {
 
         if (isShow){
             logosViewButton.setVisible(false);
+            postersViewButton.setVisible(false);
         }else{
             selectedLogo = new File(s.logoSrc);
             logosViewButton.setVisible(true);
+
+            selectedPoster = new File(s.coverSrc);
+            postersViewButton.setVisible(true);
         }
 
         oldBackgroundPath = s.getBackgroundSrc();
@@ -232,6 +260,31 @@ public class EditSeasonController {
             addImage(file);
         }
     }
+    public void loadPoster(String src){
+        File file = new File(src);
+        if (file.exists()) {
+            selectedPoster = file;
+
+            int number = 0;
+
+            for (File f : posterFiles){
+                if (Integer.parseInt(f.getName().substring(0, f.getName().lastIndexOf("."))) > number){
+                    number = Integer.parseInt(f.getName().substring(0, f.getName().lastIndexOf(".")));
+                }
+            }
+
+            File newFile = new File("src/main/resources/img/seriesCovers/" + seasonToEdit.id + "/" + (number + 1) + ".png");
+
+            try{
+                Files.copy(selectedPoster.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }catch (IOException e){
+                System.err.println("Thumbnail not copied");
+            }
+
+            posterFiles.add(file);
+            addPoster(file);
+        }
+    }
     public void loadBackground(String src){
         File file = new File(src);
         if (file.exists()) {
@@ -274,6 +327,14 @@ public class EditSeasonController {
         }
     }
     @FXML
+    void loadPosterFile(ActionEvent event) {
+        selectedPoster = getImageFile();
+        if (selectedPoster != null){
+            loadPoster(selectedPoster.getPath());
+            App.lastDirectory = selectedPoster.getPath().substring(0, (selectedPoster.getPath().length() - selectedPoster.getName().length()));
+        }
+    }
+    @FXML
     void cropBackground(ActionEvent event){
         if (selectedBackground != null){
             try{
@@ -306,6 +367,10 @@ public class EditSeasonController {
     void downloadLogo(ActionEvent event) {
         openImagesDownloader(seriesName + " logo", Integer.toString(353), Integer.toString(122), false, true, true);
     }
+    @FXML
+    void downloadPoster(ActionEvent event) {
+        openImagesDownloader(seriesName + " poster", Integer.toString(353), Integer.toString(122), true, false, false);
+    }
     private void openImagesDownloader(String searchText, String width, String height, boolean isCover, boolean isLogo, boolean transparent){
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ImageDownloader-view.fxml"));
@@ -331,6 +396,10 @@ public class EditSeasonController {
     @FXML
     void loadLogoURL(ActionEvent event) {
         openURLImageLoader(true);
+    }
+    @FXML
+    void loadPosterURL(ActionEvent event) {
+        openURLImageLoader(false);
     }
     private void openURLImageLoader(boolean isLogo){
         try{
@@ -362,6 +431,64 @@ public class EditSeasonController {
     //endregion
 
     //region SECTIONS
+    private void showPosters() {
+        if (posterFiles.isEmpty())
+            loadPosters();
+    }
+    private void loadPosters(){
+        //Add images to view
+        File dir = new File("src/main/resources/img/seriesCovers/" + seasonToEdit.id);
+        if (dir.exists()){
+            File[] files = dir.listFiles();
+            assert files != null;
+            posterFiles.addAll(Arrays.asList(files));
+
+            for (File f : posterFiles){
+                addPoster(f);
+
+                if (selectedPoster != null && selectedPoster.getAbsolutePath().equals(f.getAbsolutePath())){
+                    selectPosterButton((Button) postersContainer.getChildren().get(posterFiles.indexOf(f)));
+                }
+            }
+        }
+    }
+    private void addPoster(File file){
+        try{
+            Image img = new Image(file.toURI().toURL().toExternalForm(), 150, 225, true, true);
+            ImageView image = new ImageView(img);
+
+            Button btn = new Button();
+            btn.setGraphic(image);
+            btn.setText("");
+            btn.getStyleClass().add("downloadedImageButton");
+            btn.setPadding(new Insets(2));
+
+            btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                selectPosterButton(btn);
+            });
+
+            postersContainer.getChildren().add(btn);
+        } catch (MalformedURLException e) {
+            System.err.println("EditDiscController: Error loading image thumbnail");
+        }
+    }
+    private void selectPosterButton(Button btn){
+        int index = 0;
+        int i = 0;
+        for (Node n : postersContainer.getChildren()){
+            Button b = (Button)n;
+            b.getStyleClass().clear();
+            b.getStyleClass().add("downloadedImageButton");
+            if (b == btn)
+                index = i;
+            i++;
+        }
+
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("downloadedImageButtonSelected");
+
+        selectedPoster = posterFiles.get(index);
+    }
     private void showImages() {
         if (logoFiles.isEmpty())
             loadImages();
@@ -423,6 +550,7 @@ public class EditSeasonController {
     @FXML
     void showGeneralView() {
         logosBox.setVisible(false);
+        postersBox.setVisible(false);
         generalBox.setVisible(true);
 
         generalViewButton.getStyleClass().clear();
@@ -430,10 +558,14 @@ public class EditSeasonController {
 
         logosViewButton.getStyleClass().clear();
         logosViewButton.getStyleClass().add("editButton");
+
+        postersViewButton.getStyleClass().clear();
+        postersViewButton.getStyleClass().add("editButton");
     }
     @FXML
     void showLogosView() {
         logosBox.setVisible(true);
+        postersBox.setVisible(false);
         generalBox.setVisible(false);
 
         logosViewButton.getStyleClass().clear();
@@ -442,7 +574,27 @@ public class EditSeasonController {
         generalViewButton.getStyleClass().clear();
         generalViewButton.getStyleClass().add("editButton");
 
+        postersViewButton.getStyleClass().clear();
+        postersViewButton.getStyleClass().add("editButton");
+
         showImages();
+    }
+    @FXML
+    void showPostersView() {
+        logosBox.setVisible(false);
+        postersBox.setVisible(true);
+        generalBox.setVisible(false);
+
+        logosViewButton.getStyleClass().clear();
+        logosViewButton.getStyleClass().add("editButton");
+
+        generalViewButton.getStyleClass().clear();
+        generalViewButton.getStyleClass().add("editButton");
+
+        postersViewButton.getStyleClass().clear();
+        postersViewButton.getStyleClass().add("buttonSelected");
+
+        showPosters();
     }
     //endregion
 
@@ -588,6 +740,10 @@ public class EditSeasonController {
         //Save Logo
         if (selectedLogo != null)
             seasonToEdit.logoSrc = "src/main/resources/img/logos/" + seasonToEdit.id + "/" + selectedLogo.getName();
+
+        //Save Poster
+        if (selectedPoster != null)
+            seasonToEdit.coverSrc = "src/main/resources/img/seriesCovers/" + seasonToEdit.id + "/" + selectedPoster.getName();
 
         parentController.hideBackgroundShadow();
         parentController.refreshSeason(seasonToEdit);

@@ -495,7 +495,7 @@ public class Controller implements Initializable {
         File file = new File("src/main/resources/audio/interaction.wav");
         Media media = new Media(file.toURI().toString());
         MediaPlayer player = new MediaPlayer(media);
-        player.setVolume(0.15);
+        player.setVolume(1);
         player.seek(player.getStartTime());
         player.play();
     }
@@ -504,7 +504,7 @@ public class Controller implements Initializable {
         File file = new File("src/main/resources/audio/categories.wav");
         Media media = new Media(file.toURI().toString());
         MediaPlayer player = new MediaPlayer(media);
-        player.setVolume(0.15);
+        player.setVolume(1);
         player.seek(player.getStartTime());
         player.play();
     }
@@ -513,7 +513,7 @@ public class Controller implements Initializable {
         File file = new File("src/main/resources/audio/background.mp3");
         Media media = new Media(file.toURI().toString());
         backgroundMusicPlayer = new MediaPlayer(media);
-        backgroundMusicPlayer.setVolume(0.15);
+        backgroundMusicPlayer.setVolume(0.05);
         backgroundMusicPlayer.seek(backgroundMusicPlayer.getStartTime());
         backgroundMusicPlayer.play();
     }

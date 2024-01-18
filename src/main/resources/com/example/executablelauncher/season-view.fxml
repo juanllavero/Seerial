@@ -314,7 +314,7 @@
             </VBox>
          </right>
          <center>
-            <ImageView fx:id="detailsImage" fitHeight="387.0" fitWidth="776.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_RIGHT">
+            <ImageView fx:id="detailsImage" fitHeight="363.0" fitWidth="652.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_RIGHT">
                <image>
                   <Image url="@../../../img/TEST_NoBlur.png" />
                </image>

@@ -26,6 +26,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -608,10 +609,11 @@ public class SeasonController {
 
             Stage stage = new Stage();
             stage.setTitle("VideoPlayer");
-            stage.initStyle(StageStyle.UNDECORATED);
+            stage.initStyle(StageStyle.TRANSPARENT);
             stage.initModality(Modality.WINDOW_MODAL);
             stage.initOwner(thisStage);
             Scene scene = new Scene(root1);
+            scene.setFill(Color.TRANSPARENT);
             stage.setScene(scene);
 
             String name = series.name;
@@ -624,8 +626,7 @@ public class SeasonController {
             stage.setMaximized(true);
             stage.show();
 
-            //videoPlayerPane.setVisible(true);
-            //fadeInEffect(videoPlayerPane);
+            fadeInEffect((Pane) root1);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -761,7 +762,8 @@ public class SeasonController {
             genresField.setText(series.getGenres());
         }else{
             detailsTitle.setText(seasons.get(currentSeason).name);
-            detailsImage.setImage(new Image("file:" + series.coverSrc));
+            detailsImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
+            detailsImage.setImage(new Image("file:" + seasons.get(currentSeason).coverSrc));
             genresField.setText(seasons.get(currentSeason).getGenres());
         }
         detailsOverview.setText(overviewField.getText());
