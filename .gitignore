@@ -50,5 +50,6 @@ build/
 /src/main/resources/img/seriesCovers/
 /src/main/resources/music/
 /src/main/resources/videos/
+src/main/resources/downloadedMediaCache/
 
 *.mp4

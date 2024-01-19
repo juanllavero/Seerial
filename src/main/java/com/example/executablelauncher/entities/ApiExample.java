@@ -7,47 +7,29 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
+import com.google.api.services.youtube.model.SearchResult;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.List;
 
 public class ApiExample {
-    // You need to set this value for your code to compile.
-    // For example: ... DEVELOPER_KEY = "YOUR ACTUAL KEY";
-    private static final String DEVELOPER_KEY = "AIzaSyA4gu0k2eDOYSXZ6Li2KD_cAJ6WUrkN4Zk";
 
-    private static final String APPLICATION_NAME = "VideoLauncher";
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    public static void main(String[] args){
+       try {
+        ProcessBuilder pb;
+        pb = new ProcessBuilder("python", "pytube"
+                    , "url"
+                    , "-t", "src/main/resources/downloadedMediaCache/");
 
-    /**
-     * Build and return an authorized API client service.
-     *
-     * @return an authorized API client service
-     * @throws GeneralSecurityException, IOException
-     */
-    public static YouTube getService() throws GeneralSecurityException, IOException {
-        final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        return new YouTube.Builder(httpTransport, JSON_FACTORY, null)
-                .setApplicationName(APPLICATION_NAME)
-                .build();
+        //Hacer búsqueda de vídeos en python
+
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+        process.waitFor();
+    } catch (IOException | InterruptedException e) {
+        System.err.println("Error downloading images");
     }
-
-    /**
-     * Call function to create API service object. Define and
-     * execute API request. Print API response.
-     *
-     * @throws GeneralSecurityException, IOException, GoogleJsonResponseException
-     */
-    public static void main(String[] args)
-            throws GeneralSecurityException, IOException {
-        YouTube youtubeService = getService();
-        // Define and execute the API request
-        YouTube.Search.List request = youtubeService.search()
-                .list(Collections.singletonList("snippet"));
-        SearchListResponse response = request.setKey(DEVELOPER_KEY)
-                .setQ("One Piece opening")
-                .execute();
-        System.out.println(response);
     }
 }

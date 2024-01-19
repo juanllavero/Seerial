@@ -1406,7 +1406,7 @@ public class DesktopViewController {
                 protected Void call() {
                     int processedFiles = 1;
                     for (int i = processedFiles; i < posterList.size(); i++){
-                        if (processedFiles == 19)
+                        if (processedFiles == 31)
                             break;
 
                         Image originalImage = new Image(imageBaseURL + posterList.get(i).file_path);
@@ -2419,7 +2419,7 @@ public class DesktopViewController {
                         protected Void call() {
                             int processedFiles = 1;
                             for (int i = processedFiles; i < logosList.size(); i++){
-                                if (processedFiles == 19)
+                                if (processedFiles == 16)
                                     break;
 
                                 Image originalImage = new Image(imageBaseURL + logosList.get(i).file_path);
@@ -2456,6 +2456,48 @@ public class DesktopViewController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    //endregion
+
+    //region DOWNLOAD MEDIA
+    public void searchYoutube(String videoName, boolean isVideo){
+
+
+        //downloadMedia(url, isVideo);
+    }
+
+    private void downloadMedia(String url, boolean isVideo){
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() {
+                try {
+                    ProcessBuilder pb;
+                    if (isVideo){
+                        pb = new ProcessBuilder("python", "pytube"
+                                , "url"
+                                , "-t", "src/main/resources/downloadedMediaCache/");
+                    }else{
+                        pb = new ProcessBuilder("python", "pytube"
+                                , "url"
+                                , "-a", "-t", "src/main/resources/downloadedMediaCache/");
+                    }
+
+                    pb.redirectErrorStream(true);
+                    Process process = pb.start();
+                    process.waitFor();
+                } catch (IOException | InterruptedException e) {
+                    System.err.println("Error downloading images");
+                }
+
+                return null;
+            }
+        };
+
+        //Run when the process ends
+        //task.setOnSucceeded(e -> postDownload());
+
+        //Start the process in a new thread
+        new Thread(task).start();
     }
     //endregion
 
