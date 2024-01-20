@@ -15,10 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import javafx.stage.*;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -72,6 +69,9 @@ public class EditSeasonController {
 
     @FXML
     private Button selectImageButton;
+
+    @FXML
+    private Button musicDownloadButton;
 
     @FXML
     private VBox generalBox;
@@ -146,8 +146,8 @@ public class EditSeasonController {
     private List<File> posterFiles = new ArrayList<>();
     private File selectedPoster = null;
     private File selectedBackground = null;
-    private File selectedVideo = null;
-    private File selectedMusic = null;
+    public File selectedVideo = null;
+    public File selectedMusic = null;
     private DesktopViewController parentController = null;
     private FileChooser fileChooser = new FileChooser();
 
@@ -216,6 +216,7 @@ public class EditSeasonController {
         title.setText(App.textBundle.getString("seasonWindowTitleEdit"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         backgroundText.setText(App.textBundle.getString("backgroundImage"));
+        musicDownloadButton.setText(buttonsBundle.getString("downloadButton"));
     }
     @FXML
     void cancelButton(ActionEvent event) {
@@ -614,6 +615,20 @@ public class EditSeasonController {
             lastVideoDirectory = selectedVideo.getPath().substring(0, (selectedVideo.getPath().length() - selectedVideo.getName().length()));
         }
     }
+
+    private void newWindow(Parent root) {
+        Stage thisStage = (Stage) title.getScene().getWindow();
+
+        Scene scene = new Scene(root);
+        Stage stage = new Stage();
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(thisStage);
+        stage.setScene(scene);
+
+        stage.showAndWait();
+    }
+
     @FXML
     void loadMusic(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
@@ -627,6 +642,19 @@ public class EditSeasonController {
         if (selectedMusic != null){
             musicField.setText(selectedMusic.getPath());
             lastMusicDirectory = selectedMusic.getPath().substring(0, (selectedMusic.getPath().length() - selectedMusic.getName().length()));
+        }
+    }
+    @FXML
+    void downloadMusic(){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("youtubeSearch.fxml"));
+            Parent root = loader.load();
+            YoutubeSearchController controller = loader.getController();
+            controller.initValues(parentController, this, seriesName + seasonToEdit.name);
+
+            newWindow(root);
+        } catch (IOException e) {
+            System.err.println("EditSeasonController: downloadMusic error");
         }
     }
     //endregion
@@ -668,7 +696,7 @@ public class EditSeasonController {
                 String audioExtension = musicField.getText().substring(musicField.getText().length() - 4);
                 audioExtension = audioExtension.toLowerCase();
 
-                if (!audioExtension.equals(".mp3") && !audioExtension.equals(".wav") && !audioExtension.equals("flac") && !audioExtension.equals(".aac")){
+                if (!audioExtension.equals(".mp4") && !audioExtension.equals(".mp3") && !audioExtension.equals(".wav") && !audioExtension.equals("flac") && !audioExtension.equals(".aac")){
                     App.showErrorMessage("Invalid data", "", App.textBundle.getString("audioErrorFormat"));
                     return;
                 }

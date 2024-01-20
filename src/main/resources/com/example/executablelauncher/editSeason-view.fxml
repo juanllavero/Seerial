@@ -312,8 +312,13 @@
                         </TextField>
                         <Button fx:id="musicButton" mnemonicParsing="false" onAction="#loadMusic" styleClass="desktopButton" stylesheets="@styles.css" text="Load" textFill="WHITE">
                            <HBox.margin>
-                              <Insets />
+                              <Insets right="10.0" />
                            </HBox.margin>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="musicDownloadButton" mnemonicParsing="false" onAction="#downloadMusic" styleClass="desktopButton" stylesheets="@styles.css" text="Download" textFill="WHITE">
                            <font>
                               <Font size="14.0" />
                            </font>

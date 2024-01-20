@@ -10,40 +10,36 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
+import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ApiExample {
 
     public static void main(String[] args){
-        String searchText = "Jujutsu Kaisen opening";
-
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "src/main/resources/python/YoutubeSearch.py", searchText);
-            processBuilder.redirectErrorStream(true);
-            Process process = processBuilder.start();
+            File directory = new File("src/main/resources/downloadedMediaCache/");
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            StringBuilder output = new StringBuilder();
+            ProcessBuilder pb;
+            pb = new ProcessBuilder("pytube"
+                , "https://www.youtube.com/watch?v=-jGBp5HBLFs"
+                , "-t", directory.getAbsolutePath());
 
-            while ((line = reader.readLine()) != null) {
-               output.append(line).append("\n");
-            }
-
-            System.out.println(output);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
             process.waitFor();
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            YoutubeVideo[] searchResults = objectMapper.readValue(output.toString(), YoutubeVideo[].class);
-            System.out.println(searchResults.length);
         } catch (IOException | InterruptedException e) {
-        System.err.println("Error downloading images");
+            System.err.println("downloadMedia: Error downloading media");
         }
     }
 }

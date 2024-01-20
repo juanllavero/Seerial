@@ -39,6 +39,9 @@ import javafx.util.Duration;
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.AudioProcessor;
+import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
+import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 import javax.sound.sampled.AudioInputStream;
 import java.io.*;
@@ -46,6 +49,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SeasonController {
+    //region FXML ATTRIBUTES
+    @FXML
+    private ImageView videoImage;
+
     @FXML
     private ImageView backgroundImage;
 
@@ -54,9 +61,6 @@ public class SeasonController {
 
     @FXML
     private ImageView backgroundShadow2;
-
-    @FXML
-    private MediaView backgroundVideo;
 
     @FXML
     private HBox cardContainer;
@@ -150,41 +154,146 @@ public class SeasonController {
 
     @FXML
     private Label yearField;
+    //endregion
 
+    //region ATTRIBUTES
     private Controller controllerParent;
-    private Label nameFiledSaved = null;
 
     private List<Season> seasons = new ArrayList<>();
     private List<Disc> discs = new ArrayList<>();
     private List<Button> discsButtons = new ArrayList<>();
     private int currentSeason = 0;
-    public String currentEpisoceID = "";
     private Disc selectedDisc = null;
-    private boolean showEpisodes = false;
-    private boolean optionsSelected = false;
-    private boolean playSelected = false;
-
     private MediaPlayer mp = null;
+    public MediaPlayerFactory mediaPlayerFactory;
 
-    int pos = 0;
-    final int minPos = 0;
-    final int maxPos = 100;
+    public EmbeddedMediaPlayer embeddedMediaPlayer;
     private boolean isVideo = false;
     private boolean playSameMusic = false;
     private boolean isShow = false;
     private Series series = null;
     private boolean episodesFocussed = true;
     private boolean playingVideo = false;
+    //endregion
 
+    //region INITIALIZATION
     public void setParent(Controller c){
         controllerParent = c;
     }
+    public void setSeasons(Series series, List<String> seasonList, boolean playSameMusic, boolean isShow){
+        this.isShow = isShow;
+        this.series = series;
+        this.playSameMusic = playSameMusic;
+        if (seasons != null){
+            for (String id : seasonList){
+                seasons.add(App.findSeason(id));
+            }
+        }
 
+        videoImage.setFitWidth(Screen.getPrimary().getBounds().getWidth());
+        videoImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
+        videoImage.setVisible(false);
+        initVideoPlayer();
+
+        menuShadow.setFitWidth(Screen.getPrimary().getBounds().getWidth());
+        menuShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
+        menuShadow.setVisible(false);
+
+        videoPlayerPane.setVisible(false);
+
+        mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()){
+                if (!playingVideo){
+                    if (detailsBox.isVisible())
+                        closeDetails();
+                    else
+                        goBack(event);
+                }
+            }
+        });
+
+        //Set buttons for next and last season
+        updateButtons();
+
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+
+        //Fit all elements to screen size
+        mainBox.setPrefWidth(screenWidth);
+        mainBox.setPrefHeight(screenHeight);
+        backgroundImage.setFitWidth(screenWidth);
+        backgroundImage.setFitHeight(screenHeight);
+        backgroundShadow.setFitWidth(screenWidth);
+        backgroundShadow.setFitHeight(screenHeight);
+        backgroundShadow2.setFitWidth(screenWidth);
+        backgroundShadow2.setFitHeight(screenHeight);
+        episodeScroll.setPrefWidth(screenWidth);
+
+        detailsText.setPrefWidth(screenWidth / 2);
+        detailsBox.setVisible(false);
+
+        /*episodeScroll.setOnScroll(event -> {
+
+            if (event.getDeltaY() > 0)
+                episodeScroll.setHvalue(pos == minPos ? minPos : pos--);
+            else
+                episodeScroll.setHvalue(pos == maxPos ? maxPos : pos++);
+        });*/
+
+        //Remove horizontal and vertical scroll
+        episodeScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        episodeScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal){
+                playButton.setText("Reproducir");
+                ImageView img = (ImageView) playButton.getGraphic();
+                img.setImage(new Image("file:src/main/resources/img/icons/playSelected.png", 30, 30, true, true));
+            }else{
+                playButton.setText("");
+                ImageView img = (ImageView) playButton.getGraphic();
+                img.setImage(new Image("file:src/main/resources/img/icons/play.png", 30, 30, true, true));
+            }
+        });
+
+        optionsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal){
+                optionsButton.setText("Más");
+                ImageView img = (ImageView) optionsButton.getGraphic();
+                img.setImage(new Image("file:src/main/resources/img/icons/optionsSelected.png", 30, 30, true, true));
+            }else{
+                optionsButton.setText("");
+                ImageView img = (ImageView) optionsButton.getGraphic();
+                img.setImage(new Image("file:src/main/resources/img/icons/options.png", 30, 30, true, true));
+            }
+        });
+
+        lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal){
+                lastSeason();
+            }
+        });
+
+        nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal){
+                nextSeason();
+            }
+        });
+
+        setEpisodesOutOfFocusButton(playButton);
+        setEpisodesOutOfFocusButton(optionsButton);
+
+        assert seasons != null;
+        updateInfo(seasons.get(currentSeason));
+    }
     private void updateInfo(Season season){
         if (mp != null){
-            if (isVideo && !playSameMusic)
+            if (isVideo && !playSameMusic) {
                 mp.stop();
+            }
         }
+
+        stopBackgroundVideo();
 
         if (season.getDiscs().size() > 1){
             cardContainer.setPrefHeight((Screen.getPrimary().getBounds().getHeight() / 5) + 20);
@@ -276,15 +385,15 @@ public class SeasonController {
 
         if (!season.getVideoSrc().isEmpty()){
             File file = new File(season.getVideoSrc());
-            Media media = new Media(file.toURI().toString());
-            mp = new MediaPlayer(media);
-            backgroundVideo.setMediaPlayer(mp);
-            backgroundVideo.setVisible(false);
+            //Media media = new Media(file.toURI().toString());
+            //mp = new MediaPlayer(media);
+            //backgroundVideo.setMediaPlayer(mp);
+            //backgroundVideo.setVisible(false);
             isVideo = true;
 
-            normalizeVolume(file);
+            //normalizeVolume(file);
 
-            setMediaPlayer();
+            setVideoPlayer();
         }else if (!season.getMusicSrc().isEmpty()){
             if (!playSameMusic || (currentSeason == 0 && mp == null)){
                 File file = new File(season.getMusicSrc());
@@ -334,199 +443,22 @@ public class SeasonController {
 
         fadeInEffect(backgroundImage);
     }
+    //endregion
 
-    public String setRuntime(int runtime){
-        int h = runtime / 60;
-        int m = runtime % 60;
-
-        if (h == 0)
-            return (m + "m");
-
-        return (h + "h " + m + "m");
-    }
-
-    private void setMediaPlayer(){
-        mp.setOnEndOfMedia(() -> {
-            mp.seek(Duration.ZERO);
-            mp.play();
-        });
-
-        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
-            new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
-                playVideo();
-            })
-        );
-        timeline.play();
-    }
-
+    //region UTILS
     private void updateButtons(){
         lastSeasonButton.setVisible(currentSeason != 0);
         nextSeasonButton.setVisible(currentSeason != seasons.size() - 1);
     }
-
-    public void setSeasons(Series series, List<String> seasonList, boolean playSameMusic, boolean isShow){
-        this.isShow = isShow;
-        this.series = series;
-        this.playSameMusic = playSameMusic;
-        if (seasons != null){
-            for (String id : seasonList){
-                seasons.add(App.findSeason(id));
-            }
-        }
-
-        menuShadow.setFitWidth(Screen.getPrimary().getBounds().getWidth());
-        menuShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
+    public void hideMenuShadow(){
         menuShadow.setVisible(false);
-
-        videoPlayerPane.setVisible(false);
-
-        mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()){
-                if (!playingVideo){
-                    if (detailsBox.isVisible())
-                        closeDetails();
-                    else
-                        goBack(event);
-                }
-            }
-        });
-
-        //Set buttons for next and last season
-        updateButtons();
-
-        double screenHeight = Screen.getPrimary().getBounds().getHeight();
-        double screenWidth = Screen.getPrimary().getBounds().getWidth();
-
-        //Fit all elements to screen size
-        mainBox.setPrefWidth(screenWidth);
-        mainBox.setPrefHeight(screenHeight);
-        backgroundImage.setFitWidth(screenWidth);
-        backgroundImage.setFitHeight(screenHeight);
-        backgroundVideo.setFitHeight(screenHeight);
-        backgroundVideo.setFitWidth(screenWidth);
-        backgroundShadow.setFitWidth(screenWidth);
-        backgroundShadow.setFitHeight(screenHeight);
-        backgroundShadow2.setFitWidth(screenWidth);
-        backgroundShadow2.setFitHeight(screenHeight);
-        episodeScroll.setPrefWidth(screenWidth);
-
-        detailsText.setPrefWidth(screenWidth / 2);
-        detailsBox.setVisible(false);
-
-        /*episodeScroll.setOnScroll(event -> {
-
-            if (event.getDeltaY() > 0)
-                episodeScroll.setHvalue(pos == minPos ? minPos : pos--);
-            else
-                episodeScroll.setHvalue(pos == maxPos ? maxPos : pos++);
-        });*/
-
-        //Remove horizontal and vertical scroll
-        episodeScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        episodeScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-
-        playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal){
-                playButton.setText("Reproducir");
-                ImageView img = (ImageView) playButton.getGraphic();
-                img.setImage(new Image("file:src/main/resources/img/icons/playSelected.png", 30, 30, true, true));
-            }else{
-                playButton.setText("");
-                ImageView img = (ImageView) playButton.getGraphic();
-                img.setImage(new Image("file:src/main/resources/img/icons/play.png", 30, 30, true, true));
-            }
-        });
-
-        optionsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal){
-                optionsButton.setText("Más");
-                ImageView img = (ImageView) optionsButton.getGraphic();
-                img.setImage(new Image("file:src/main/resources/img/icons/optionsSelected.png", 30, 30, true, true));
-            }else{
-                optionsButton.setText("");
-                ImageView img = (ImageView) optionsButton.getGraphic();
-                img.setImage(new Image("file:src/main/resources/img/icons/options.png", 30, 30, true, true));
-            }
-        });
-
-        lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal){
-                lastSeason();
-            }
-        });
-
-        nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal){
-                nextSeason();
-            }
-        });
-
-        setEpisodesOutOfFocusButton(playButton);
-        setEpisodesOutOfFocusButton(optionsButton);
-
-        assert seasons != null;
-        updateInfo(seasons.get(currentSeason));
     }
-
-    private void playVideo(){
-        Platform.runLater(() ->{
-            if (mp != null) {
-                if (isVideo){
-                    double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
-                    double mediaRatio = (double) backgroundVideo.getMediaPlayer().getMedia().getWidth() / backgroundVideo.getMediaPlayer().getMedia().getHeight();
-
-                    backgroundVideo.setPreserveRatio(true);
-
-                    if (screenRatio > 1.8f && mediaRatio > 1.8f){
-                        backgroundVideo.setPreserveRatio(false);
-                    }
-
-                    backgroundVideo.setVisible(true);
-
-                    //Fade In Transition
-                    FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
-                    fadeIn.setFromValue(0);
-                    fadeIn.setToValue(1.0);
-                    fadeIn.play();
-                    mp.stop();
-                    mp.seek(mp.getStartTime());
-                    mp.play();
-                }else{
-                    mp.stop();
-                    mp.seek(mp.getStartTime());
-                    mp.play();
-                }
-            }
-        });
+    public void stopVideo(){
+        playingVideo = false;
     }
+    //endregion
 
-    private void normalizeVolume(File audioFile) {
-        try {
-            AudioInputStream audioInputStream = javax.sound.sampled.AudioSystem.getAudioInputStream(audioFile);
-            TarsosDSPAudioInputStream tarsosDSPAudioInputStream = new JVMAudioInputStream(audioInputStream);
-            AudioDispatcher dispatcher = new AudioDispatcher(tarsosDSPAudioInputStream, 1024, 0);
-
-            dispatcher.addAudioProcessor(new AudioProcessor() {
-                @Override
-                public boolean process(AudioEvent audioEvent) {
-                    double rms = audioEvent.getRMS();
-                    double normalizedVolume = 0.5 / rms;
-
-                    mp.setVolume(normalizedVolume);
-                    return true;
-                }
-
-                @Override
-                public void processingFinished() {}
-            });
-
-            // Iniciar el procesamiento del archivo de audio
-            dispatcher.run();
-        } catch (IOException | javax.sound.sampled.UnsupportedAudioFileException e) {
-            System.err.println("normalizeVolume: Error normalizing media volume");
-        }
-    }
-
+    //region EPISODES
     public void addEpisodeCard(Disc disc){
         if (disc != null){
             discs.add(disc);
@@ -585,19 +517,11 @@ public class SeasonController {
         }
     }
 
-    private void updateDiscInfo(Disc disc) {
-        selectedDisc = disc;
-        episodeName.setText(disc.name);
-        overviewField.setText(disc.overview);
-        seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).seasonNumber + " " + App.textBundle.getString("episodeLetter") + disc.episodeNumber);
-        yearField.setText(disc.year);
-        durationField.setText(setRuntime(disc.runtime));
-        scoreField.setText(String.valueOf(disc.score));
-    }
-
     public void playEpisode(Disc disc){
         if (mp != null)
             mp.stop();
+
+        embeddedMediaPlayer.controls().stop();
 
         playingVideo = true;
 
@@ -683,12 +607,16 @@ public class SeasonController {
             btn.setDisable(false);
         }
     }
+    //endregion
 
+    //region MOVEMENT
     @FXML
     void goBack(KeyEvent event){
         if (mp != null)
             mp.stop();
-        //alertTimer.stop();
+
+        stopBackgroundVideo();
+
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
@@ -703,19 +631,16 @@ public class SeasonController {
             throw new RuntimeException(e);
         }
     }
-
     @FXML
     void lastSeason(){
         updateInfo(seasons.get(--currentSeason));
         updateButtons();
     }
-
     @FXML
     void nextSeason(){
         updateInfo(seasons.get(++currentSeason));
         updateButtons();
     }
-
     @FXML
     void openMenu(ActionEvent event){
         menuShadow.setVisible(true);
@@ -735,54 +660,22 @@ public class SeasonController {
             System.err.println("Cannot load menu");
         }
     }
-
     @FXML
     void removeSeason(){
 
     }
-
     @FXML
     void play(){
         if (selectedDisc != null)
             playEpisode(selectedDisc);
     }
-
     @FXML
     void editSeason(){
         //Edit "sorting order"
     }
+    //endregion
 
-    @FXML
-    void openDetails(){
-        fadeOutEffect(mainPane);
-
-        if (isShow){
-            detailsTitle.setText(episodeName.getText());
-            detailsImage.setImage(new Image("file:" + selectedDisc.imgSrc));
-            genresField.setText(series.getGenres());
-        }else{
-            detailsTitle.setText(seasons.get(currentSeason).name);
-            detailsImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
-            detailsImage.setImage(new Image("file:" + seasons.get(currentSeason).coverSrc));
-            genresField.setText(seasons.get(currentSeason).getGenres());
-        }
-        detailsOverview.setText(overviewField.getText());
-
-        File file = new File(selectedDisc.executableSrc);
-        fileNameField.setText(file.getName());
-
-        fadeInEffect(menuShadow);
-        fadeInEffect(detailsBox);
-
-        detailsBox.requestFocus();
-    }
-
-    private void closeDetails(){
-        fadeOutEffect(menuShadow);
-        fadeOutEffect(detailsBox);
-        fadeInEffect(mainPane);
-    }
-
+    //region EFFECTS
     public void fadeOutEffect(Pane pane){
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), pane);
         fadeOut.setFromValue(1.0);
@@ -814,12 +707,160 @@ public class SeasonController {
         fadeIn.setToValue(1.0);
         fadeIn.play();
     }
+    //endregion
 
-    public void hideMenuShadow(){
-        menuShadow.setVisible(false);
+    //region DETAILS
+    @FXML
+    void openDetails(){
+        fadeOutEffect(mainPane);
+
+        if (isShow){
+            detailsTitle.setText(episodeName.getText());
+            detailsImage.setImage(new Image("file:" + selectedDisc.imgSrc));
+            genresField.setText(series.getGenres());
+        }else{
+            detailsTitle.setText(seasons.get(currentSeason).name);
+            detailsImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
+            detailsImage.setImage(new Image("file:" + seasons.get(currentSeason).coverSrc));
+            genresField.setText(seasons.get(currentSeason).getGenres());
+        }
+        detailsOverview.setText(overviewField.getText());
+
+        File file = new File(selectedDisc.executableSrc);
+        fileNameField.setText(file.getName());
+
+        fadeInEffect(menuShadow);
+        fadeInEffect(detailsBox);
+
+        detailsBox.requestFocus();
     }
 
-    public void stopVideo(){
-        playingVideo = false;
+    private void closeDetails(){
+        fadeOutEffect(menuShadow);
+        fadeOutEffect(detailsBox);
+        fadeInEffect(mainPane);
     }
+    public String setRuntime(int runtime){
+        int h = runtime / 60;
+        int m = runtime % 60;
+
+        if (h == 0)
+            return (m + "m");
+
+        return (h + "h " + m + "m");
+    }
+    private void updateDiscInfo(Disc disc) {
+        selectedDisc = disc;
+        episodeName.setText(disc.name);
+        overviewField.setText(disc.overview);
+        seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).seasonNumber + " " + App.textBundle.getString("episodeLetter") + disc.episodeNumber);
+        yearField.setText(disc.year);
+        durationField.setText(setRuntime(disc.runtime));
+        scoreField.setText(String.valueOf(disc.score));
+    }
+
+    //endregion
+
+    //region BACKGROUND MUSIC
+    private void setMediaPlayer(){
+        mp.setOnEndOfMedia(() -> {
+            mp.seek(Duration.ZERO);
+            mp.play();
+        });
+
+        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
+                    playVideo();
+                })
+        );
+        timeline.play();
+    }
+    private void playVideo(){
+        Platform.runLater(() ->{
+            if (isVideo){
+                playBackgroundVideo();
+            }else{
+                if (mp != null) {
+                    mp.stop();
+                    mp.seek(mp.getStartTime());
+                    mp.play();
+                }
+            }
+        });
+    }
+    private void normalizeVolume(File audioFile) {
+        try {
+            AudioInputStream audioInputStream = javax.sound.sampled.AudioSystem.getAudioInputStream(audioFile);
+            TarsosDSPAudioInputStream tarsosDSPAudioInputStream = new JVMAudioInputStream(audioInputStream);
+            AudioDispatcher dispatcher = new AudioDispatcher(tarsosDSPAudioInputStream, 1024, 0);
+
+            dispatcher.addAudioProcessor(new AudioProcessor() {
+                @Override
+                public boolean process(AudioEvent audioEvent) {
+                    double rms = audioEvent.getRMS();
+                    double normalizedVolume = 0.9 / rms;
+
+                    mp.setVolume(normalizedVolume);
+                    return true;
+                }
+
+                @Override
+                public void processingFinished() {}
+            });
+
+            // Iniciar el procesamiento del archivo de audio
+            dispatcher.run();
+        } catch (IOException | javax.sound.sampled.UnsupportedAudioFileException e) {
+            System.err.println("normalizeVolume: Error normalizing media volume");
+        }
+    }
+    //endregion
+
+    //region BACKGROUND VIDEO
+    private void initVideoPlayer(){
+        mediaPlayerFactory = new MediaPlayerFactory();
+        embeddedMediaPlayer = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
+
+        embeddedMediaPlayer.videoSurface().set(new ImageViewVideoSurface(videoImage));
+    }
+    private void setVideoPlayer(){
+        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
+                    playVideo();
+                })
+        );
+        timeline.play();
+    }
+    public void playBackgroundVideo(){
+        embeddedMediaPlayer.media().play(seasons.get(currentSeason).videoSrc);
+        embeddedMediaPlayer.controls().setPosition(0);
+        embeddedMediaPlayer.controls().pause();
+
+        //Get video ratio
+        //double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+        //double mediaRatio = Double.parseDouble(embeddedMediaPlayer.video().aspectRatio());
+
+        /*if (screenRatio > 1.8f && mediaRatio > 1.8f){
+            backgroundVideo.setPreserveRatio(false);
+        }
+
+        backgroundVideo.setVisible(true);
+
+        //Fade In Transition
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+        mp.stop();
+        mp.seek(mp.getStartTime());
+        mp.play();*/
+
+        embeddedMediaPlayer.controls().play();
+        fadeInEffect(videoImage);
+    }
+    public void stopBackgroundVideo(){
+        embeddedMediaPlayer.controls().stop();
+        fadeOutEffect(videoImage);
+    }
+    //endregion
 }

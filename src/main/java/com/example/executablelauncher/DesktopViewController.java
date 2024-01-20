@@ -1,9 +1,6 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Category;
-import com.example.executablelauncher.entities.Disc;
-import com.example.executablelauncher.entities.Season;
-import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.entities.*;
 import com.example.executablelauncher.tmdbMetadata.common.Genre;
 import com.example.executablelauncher.tmdbMetadata.images.*;
 import com.example.executablelauncher.tmdbMetadata.movies.MovieMetadata;
@@ -65,13 +62,12 @@ import org.apache.commons.io.FileUtils;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1162,6 +1158,30 @@ public class DesktopViewController {
         downloadLogos(selectedSeries, selectedSeason, selectedSeason.themdbID);
         saveBackground(selectedSeason, "src/main/resources/img/DownloadCache/" + selectedSeason.themdbID + ".png");
 
+        //Process background music
+        List<YoutubeVideo> results = searchYoutube(selectedSeason.name + " main theme");
+
+        if (results != null){
+            downloadMedia(selectedSeason.id, results.get(0).watch_url);
+
+            File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.id + "/");
+            File[] filesInMediaCache = mediaCahceDir.listFiles();
+
+            if (filesInMediaCache != null){
+                File audioFile = filesInMediaCache[0];
+
+                try{
+                    Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + selectedSeason.id + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                    selectedSeason.musicSrc = "src/main/resources/music/" + selectedSeason.id + ".mp3";
+
+                    File directory = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.id + "/");
+                    FileUtils.deleteDirectory(directory);
+                } catch (IOException e) {
+                    System.err.println("processEpisode: Could not copy downloaded audio file");
+                }
+            }
+        }
+
         for (String discID : selectedSeason.getDiscs()){
             Disc disc = App.findDisc(discID);
 
@@ -1171,6 +1191,7 @@ public class DesktopViewController {
             setMovieThumbnail(disc, selectedSeason.themdbID);
         }
 
+        refreshSeason(selectedSeason);
     }
     public void setCorrectIdentificationShow(int newID){
 
@@ -1357,6 +1378,7 @@ public class DesktopViewController {
         series.name = seriesMetadata.name;
         series.overview = seriesMetadata.overview;
         series.score = (float) ((int) (seriesMetadata.vote_average * 10.0)) / 10.0f;
+        series.playSameMusic = true;
 
         String year = seriesMetadata.first_air_date.substring(0, seriesMetadata.first_air_date.indexOf("-")) + "-";
         if (!seriesMetadata.in_production)
@@ -1665,6 +1687,34 @@ public class DesktopViewController {
 
             if (series.seasons.size() == 1)
                 downloadLogos(series, season, series.themdbID);
+
+            if (season.seasonNumber == 0)
+                season.order = 100;
+
+            if (series.getSeasons().size() == 1){
+                List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
+
+                if (results != null){
+                    downloadMedia(season.id, results.get(0).watch_url);
+
+                    File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                    File[] filesInMediaCache = mediaCahceDir.listFiles();
+
+                    if (filesInMediaCache != null){
+                        File audioFile = filesInMediaCache[0];
+
+                        try{
+                            Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
+                            season.musicSrc = "src/main/resources/music/" + season.id + ".mp4";
+
+                            File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                            FileUtils.deleteDirectory(directory);
+                        } catch (IOException e) {
+                            System.err.println("processEpisode: Could not copy downloaded audio file");
+                        }
+                    }
+                }
+            }
         }
 
         Disc disc = App.findDisc(season, episodeMetadata.episode_number);
@@ -1682,7 +1732,6 @@ public class DesktopViewController {
 
         currentCategory.analyzedFiles.put(file.getAbsolutePath(), disc.id);
         App.addDisc(disc);
-
     }
     private void setEpisodeData(Disc disc, EpisodeMetadata episodeMetadata, Series show){
         disc.name = episodeMetadata.name;
@@ -1833,7 +1882,7 @@ public class DesktopViewController {
             season.year = movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-"));
             season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
             season.tagline = movieMetadata.tagline;
-            season.seasonNumber = series.seasons.size();
+            season.seasonNumber = series.seasons.size() + 1;
 
             List<Genre> genres = movieMetadata.genres;
 
@@ -1868,6 +1917,30 @@ public class DesktopViewController {
 
             downloadLogos(series, season, season.themdbID);
             saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
+
+            //Process background music
+            List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
+
+            if (results != null){
+                downloadMedia(season.id, results.get(0).watch_url);
+
+                File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                File[] filesInMediaCache = mediaCahceDir.listFiles();
+
+                if (filesInMediaCache != null){
+                    File audioFile = filesInMediaCache[0];
+
+                    try{
+                        Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                        season.musicSrc = "src/main/resources/music/" + season.id + ".mp3";
+
+                        File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                        FileUtils.deleteDirectory(directory);
+                    } catch (IOException e) {
+                        System.err.println("processEpisode: Could not copy downloaded audio file");
+                    }
+                }
+            }
 
             processMovie(f, season, movieMetadata.runtime);
 
@@ -1929,7 +2002,9 @@ public class DesktopViewController {
                     }else {
                         season = new Season();
                         currentCategory.seasonFolders.put(folder.getAbsolutePath(), season.id);
-                        season.seasonNumber = series.seasons.size();
+                        season.seasonNumber = series.seasons.size() + 1;
+                        season.seriesID = series.id;
+                        season.folder = folder.getAbsolutePath();
                         App.addSeason(season, series.id);
 
                         updateMetadata = true;
@@ -1998,6 +2073,30 @@ public class DesktopViewController {
 
                         downloadLogos(series, season, season.themdbID);
                         saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
+
+                        //Process background music
+                        List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
+
+                        if (results != null){
+                            downloadMedia(season.id, results.get(0).watch_url);
+
+                            File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                            File[] filesInMediaCache = mediaCahceDir.listFiles();
+
+                            if (filesInMediaCache != null){
+                                File audioFile = filesInMediaCache[0];
+
+                                try{
+                                    Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                                    season.musicSrc = "src/main/resources/music/" + season.id + ".mp3";
+
+                                    File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                                    FileUtils.deleteDirectory(directory);
+                                } catch (IOException e) {
+                                    System.err.println("processEpisode: Could not copy downloaded audio file");
+                                }
+                            }
+                        }
                     }
 
                     for (File file : filesInFolder){
@@ -2029,7 +2128,9 @@ public class DesktopViewController {
                 }else {
                     season = new Season();
                     currentCategory.seasonFolders.put(f.getAbsolutePath(), season.id);
-                    season.seasonNumber = series.seasons.size();
+                    season.seasonNumber = series.seasons.size() + 1;
+                    season.seriesID = series.id;
+                    season.folder = f.getAbsolutePath();
                     App.addSeason(season, series.id);
 
                     updateMetadata = true;
@@ -2103,6 +2204,30 @@ public class DesktopViewController {
 
                     downloadLogos(series, season, season.themdbID);
                     saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
+
+                    //Process background music
+                    List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
+
+                    if (results != null){
+                        downloadMedia(season.id, results.get(0).watch_url);
+
+                        File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                        File[] filesInMediaCache = mediaCahceDir.listFiles();
+
+                        if (filesInMediaCache != null){
+                            File audioFile = filesInMediaCache[0];
+
+                            try{
+                                Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                                season.musicSrc = "src/main/resources/music/" + season.id + ".mp3";
+
+                                File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                                FileUtils.deleteDirectory(directory);
+                            } catch (IOException e) {
+                                System.err.println("processEpisode: Could not copy downloaded audio file");
+                            }
+                        }
+                    }
                 }
 
                 for (File file : filesInRoot){
@@ -2460,44 +2585,57 @@ public class DesktopViewController {
     //endregion
 
     //region DOWNLOAD MEDIA
-    public void searchYoutube(String videoName, boolean isVideo){
+    public List<YoutubeVideo> searchYoutube(String videoName){
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "src/main/resources/python/YoutubeSearch.py", videoName);
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
 
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            StringBuilder output = new StringBuilder();
 
-        //downloadMedia(url, isVideo);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+
+            String regex = "\\[\\{\".*?\"\\}\\]";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(output);
+
+            YoutubeVideo[] searchResults = null;
+            if (matcher.find()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                searchResults = objectMapper.readValue(matcher.group(0), YoutubeVideo[].class);
+            }
+
+            process.waitFor();
+
+            if (searchResults != null)
+                return List.of(searchResults);
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error searching in youtube");
+        }
+
+        return null;
     }
 
-    private void downloadMedia(String url, boolean isVideo){
-        Task<Void> task = new Task<>() {
-            @Override
-            protected Void call() {
-                try {
-                    ProcessBuilder pb;
-                    if (isVideo){
-                        pb = new ProcessBuilder("python", "pytube"
-                                , "url"
-                                , "-t", "src/main/resources/downloadedMediaCache/");
-                    }else{
-                        pb = new ProcessBuilder("python", "pytube"
-                                , "url"
-                                , "-a", "-t", "src/main/resources/downloadedMediaCache/");
-                    }
+    public void downloadMedia(String seasonID, String url){
+        try {
+            Files.createDirectories(Paths.get("src/main/resources/downloadedMediaCache/" + seasonID + "/"));
+            File directory = new File("src/main/resources/downloadedMediaCache/" + seasonID + "/");
 
-                    pb.redirectErrorStream(true);
-                    Process process = pb.start();
-                    process.waitFor();
-                } catch (IOException | InterruptedException e) {
-                    System.err.println("Error downloading images");
-                }
+            ProcessBuilder pb;
+            pb = new ProcessBuilder("pytube"
+                , url
+                , "-a", "-t", directory.getAbsolutePath());
 
-                return null;
-            }
-        };
-
-        //Run when the process ends
-        //task.setOnSucceeded(e -> postDownload());
-
-        //Start the process in a new thread
-        new Thread(task).start();
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            System.err.println("downloadMedia: Error downloading media");
+        }
     }
     //endregion
 

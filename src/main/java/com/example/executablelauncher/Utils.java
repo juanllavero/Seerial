@@ -13,10 +13,10 @@ import java.util.Locale;
 public class Utils {
     private static int CompareMedia(int order, int order2, String name, String name2) {
         if (order != 0 && order2 == 0)
-            return -1;
+            return 1;
 
         if (order == 0 && order2 != 0)
-            return 1;
+            return -1;
 
         if (order != 0){
             return Integer.compare(order, order2);

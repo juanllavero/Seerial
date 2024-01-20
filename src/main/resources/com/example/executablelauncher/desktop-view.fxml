@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.effect.GaussianBlur?>
@@ -396,6 +397,7 @@
       </ImageView>
       <HBox fx:id="downloadingContentWindow" alignment="CENTER_RIGHT" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 5;" styleClass="midSectionLightColor" stylesheets="@styles.css" StackPane.alignment="BOTTOM_RIGHT">
          <children>
+            <ProgressIndicator />
             <Label fx:id="downloadingContentText" text="Downloading metadata" textFill="WHITE">
                <HBox.margin>
                   <Insets right="20.0" />
