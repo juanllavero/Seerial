@@ -1,10 +1,13 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -25,6 +28,7 @@ import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
 import uk.co.caprica.vlcj.player.base.MediaPlayer;
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
+import uk.co.caprica.vlcj.player.embedded.fullscreen.FullScreenStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,18 +93,13 @@ public class VideoPlayerController {
     private Label toFinishTime;
 
     @FXML
-    private ImageView videoImage;
-
-    @FXML
     private VBox controlsBox;
 
     @FXML
     private HBox volumeBox;
     //endregion
 
-    public MediaPlayerFactory mediaPlayerFactory;
-
-    public EmbeddedMediaPlayer embeddedMediaPlayer;
+    private VideoPlayer videoPlayer;
 
     boolean isPaused = false;
     boolean controlsShown = false;
@@ -126,8 +125,8 @@ public class VideoPlayerController {
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
 
-        videoImage.setFitWidth(screenWidth);
-        videoImage.setFitHeight(screenHeight);
+        videoPlayer = new VideoPlayer();
+        mainPane.getChildren().add(0, videoPlayer);
 
         shadowImage.setFitWidth(screenWidth);
         shadowImage.setFitHeight(screenHeight);
@@ -174,9 +173,6 @@ public class VideoPlayerController {
                     showControls();
             }else{
                 timeline.playFromStart();
-
-                if (e.getCode().equals(KeyCode.M))
-                    embeddedMediaPlayer.menu().activate();
             }
 
             /*else if (e.getCode().equals(KeyCode.DIGIT1)) {
@@ -207,46 +203,7 @@ public class VideoPlayerController {
     }
 
     private void onLoad(){
-        mediaPlayerFactory = new MediaPlayerFactory("--tone-mapping=3", "--tone-mapping-param=0.5");
-        embeddedMediaPlayer = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
-
-        embeddedMediaPlayer.videoSurface().set(new ImageViewVideoSurface(videoImage));
-        embeddedMediaPlayer.events().addMediaPlayerEventListener(new MediaPlayerEventAdapter() {
-            @Override
-            public void playing(MediaPlayer mediaPlayer) {
-                startTimer();
-            }
-
-            @Override
-            public void paused(MediaPlayer mediaPlayer) {
-                stopTimer();
-            }
-
-            @Override
-            public void stopped(MediaPlayer mediaPlayer) {
-                stopTimer();
-            }
-
-            @Override
-            public void finished(MediaPlayer mediaPlayer) {
-                stopTimer();
-            }
-
-            @Override
-            public void error(MediaPlayer mediaPlayer) {
-                stopTimer();
-            }
-
-            @Override
-            public void positionChanged(MediaPlayer mediaPlayer, float newPosition) {
-                Platform.runLater(() -> updateSliderPosition(newPosition));
-            }
-        });
-
-        runtimeSlider.setOnMousePressed(mouseEvent -> beginTracking());
-        runtimeSlider.setOnMouseReleased(mouseEvent -> endTracking());
-
-        runtimeSlider.focusedProperty().addListener((obs, oldVal, newVal) -> {
+        /*runtimeSlider.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
                 timeline.stop();
                 beginTracking();
@@ -254,6 +211,10 @@ public class VideoPlayerController {
                 timeline.playFromStart();
                 tracking.set(false);
             }
+        });*/
+
+        runtimeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            videoPlayer.seekToTime((long) (newValue.doubleValue() * 1000));
         });
 
         runtimeSlider.setOnKeyPressed(e -> {
@@ -351,8 +312,6 @@ public class VideoPlayerController {
         double fiveSecondsPercentage = (5.0 / durationInSeconds) * 100.0;
         percentageStep = (fiveSecondsPercentage / 100.0) * 100;
 
-        runtimeSlider.setBlockIncrement(percentageStep);
-
         nextButton.setDisable(discList.indexOf(disc) == (discList.size() - 1));
 
         if (disc.isWatched())
@@ -366,21 +325,21 @@ public class VideoPlayerController {
             position = 0;
         }
 
-        FadeTransition fade = new FadeTransition(Duration.seconds(0.8), videoImage);
+        FadeTransition fade = new FadeTransition(Duration.seconds(0.8), videoPlayer);
         fade.setFromValue(0);
         fade.setToValue(1.0);
 
         fade.setOnFinished(event -> {
             //Set video and start
-            embeddedMediaPlayer.media().play(disc.executableSrc);
-            embeddedMediaPlayer.controls().setPosition(position);
+            videoPlayer.playVideo(disc.executableSrc);
+            videoPlayer.seekToTime(0);
+            runtimeSlider.setMin(0);
+            runtimeSlider.setMax(videoPlayer.getDuration() / 1000.0);
+            runtimeSlider.setValue(0);
+            runtimeSlider.setBlockIncrement(percentageStep);
         });
 
         fade.play();
-    }
-
-    private void switchSubtitleTrack(int trackNumber) {
-        embeddedMediaPlayer.subpictures().setTrack(trackNumber);
     }
 
     private void showControls(){
@@ -429,17 +388,14 @@ public class VideoPlayerController {
 
     public void stop() {
         Disc disc = discList.get(currentDisc);
-        disc.setTime(embeddedMediaPlayer.status().time() / 1000);
+        disc.setTime(videoPlayer.getCurrentTime());
 
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.7), videoImage);
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.7), videoPlayer);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0);
 
         fadeOut.setOnFinished(e -> {
-            stopTimer();
-            embeddedMediaPlayer.controls().stop();
-            embeddedMediaPlayer.release();
-            mediaPlayerFactory.release();
+            videoPlayer.stop();
 
             parentController.stopVideo();
 
@@ -453,12 +409,12 @@ public class VideoPlayerController {
     public void resume(){
         hideControls();
         isPaused = false;
-        embeddedMediaPlayer.controls().play();
+        videoPlayer.togglePause();
     }
 
     public void pause(){
         isPaused = true;
-        embeddedMediaPlayer.controls().pause();
+        videoPlayer.togglePause();
 
         if (controlsShown)
             playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/playSelected.png", 35, 35, true, true)));
@@ -468,17 +424,15 @@ public class VideoPlayerController {
         volumeCount.playFromStart();
         volumeBox.setVisible(true);
 
-        if (embeddedMediaPlayer.audio().volume() < 100){
-            embeddedMediaPlayer.audio().setVolume(embeddedMediaPlayer.audio().volume() + 5);
-            volumeSlider.setValue(embeddedMediaPlayer.audio().volume());
-        }
+        videoPlayer.adjustVolume(true);
+        volumeSlider.setValue(videoPlayer.getVolume());
     }
 
     public void volumeDown(){
         volumeCount.playFromStart();
         volumeBox.setVisible(true);
-        embeddedMediaPlayer.audio().setVolume(embeddedMediaPlayer.audio().volume() - 5);
-        volumeSlider.setValue(embeddedMediaPlayer.audio().volume());
+        videoPlayer.adjustVolume(false);
+        volumeSlider.setValue(videoPlayer.getVolume());
     }
 
     public void goAhead(){
@@ -493,19 +447,17 @@ public class VideoPlayerController {
 
     public void nextEpisode(){
         Disc disc = discList.get(currentDisc);
-        disc.setTime(embeddedMediaPlayer.status().time() / 1000);
-
+        disc.setTime(videoPlayer.getCurrentTime());
         setDiscValues(discList.get(++currentDisc));
     }
 
     public void prevEpisode(){
-        if ((embeddedMediaPlayer.status().time() / 1000) > 2000){
+        if (videoPlayer.getCurrentTime() > 2000){
             runtimeSlider.setValue(0);
         }else{
             if (currentDisc > 0) {
                 Disc disc = discList.get(currentDisc);
-                disc.setTime(embeddedMediaPlayer.status().time() / 1000);
-
+                disc.setTime(videoPlayer.getCurrentTime());
                 setDiscValues(discList.get(--currentDisc));
             }else
                 runtimeSlider.setValue(0);
@@ -518,23 +470,6 @@ public class VideoPlayerController {
 
     public void showSubtitleTracks(){
         pause();
-    }
-
-    private void startTimer() {
-        clockTimer = new Timer();
-        clockTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    currentTime.setText(formatTime(embeddedMediaPlayer.status().time()));
-                    toFinishTime.setText(formatTime(embeddedMediaPlayer.status().length() - embeddedMediaPlayer.status().time()));
-                });
-            }
-        }, 0, 1000);
-    }
-
-    private void stopTimer() {
-        clockTimer.cancel();
     }
 
     private String formatTime(long time){
@@ -551,23 +486,14 @@ public class VideoPlayerController {
 
     private synchronized void updateMediaPlayerPosition(float newValue) {
         if (tracking.get()) {
-            embeddedMediaPlayer.controls().setPosition(newValue);
+            videoPlayer.seekToTime((long) (newValue * videoPlayer.getDuration()));
         }
     }
 
-    private synchronized void beginTracking() {
-        tracking.set(true);
-    }
+    public void notifyChanges(long timeMillis){
+        currentTime.setText(formatTime(timeMillis));
+        toFinishTime.setText(formatTime(videoPlayer.getDuration() - timeMillis));
 
-    private synchronized void endTracking() {
-        tracking.set(false);
-        // This deals with the case where there was an absolute click in the timeline rather than a drag
-        embeddedMediaPlayer.controls().setPosition((float) runtimeSlider.getValue() / 100);
-    }
-
-    private synchronized void updateSliderPosition(float newValue) {
-        if (!tracking.get()) {
-            runtimeSlider.setValue(newValue * 100);
-        }
+        runtimeSlider.setValue((double) 100 / ((double) videoPlayer.getDuration() / timeMillis));
     }
 }

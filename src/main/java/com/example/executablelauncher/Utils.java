@@ -1,5 +1,6 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Category;
 import com.example.executablelauncher.entities.Disc;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
@@ -42,6 +43,13 @@ public class Utils {
         @Override
         public int compare(Disc a, Disc b) {
             return Integer.compare(b.getEpisodeNumber(), a.getEpisodeNumber());
+        }
+    }
+
+    public static class CategoryComparator implements Comparator<Category> {
+        @Override
+        public int compare(Category a, Category b) {
+            return a.name.compareTo(b.name);
         }
     }
 

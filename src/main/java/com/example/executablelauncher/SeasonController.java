@@ -44,6 +44,8 @@ import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.FloatControl;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -400,8 +402,6 @@ public class SeasonController {
                 Media media = new Media(file.toURI().toString());
                 mp = new MediaPlayer(media);
                 isVideo = false;
-
-                normalizeVolume(file);
 
                 setMediaPlayer();
             }
@@ -763,6 +763,7 @@ public class SeasonController {
 
     //region BACKGROUND MUSIC
     private void setMediaPlayer(){
+        mp.setVolume(0.2);
         mp.setOnEndOfMedia(() -> {
             mp.seek(Duration.ZERO);
             mp.play();
@@ -787,32 +788,6 @@ public class SeasonController {
                 }
             }
         });
-    }
-    private void normalizeVolume(File audioFile) {
-        try {
-            AudioInputStream audioInputStream = javax.sound.sampled.AudioSystem.getAudioInputStream(audioFile);
-            TarsosDSPAudioInputStream tarsosDSPAudioInputStream = new JVMAudioInputStream(audioInputStream);
-            AudioDispatcher dispatcher = new AudioDispatcher(tarsosDSPAudioInputStream, 1024, 0);
-
-            dispatcher.addAudioProcessor(new AudioProcessor() {
-                @Override
-                public boolean process(AudioEvent audioEvent) {
-                    double rms = audioEvent.getRMS();
-                    double normalizedVolume = 0.9 / rms;
-
-                    mp.setVolume(normalizedVolume);
-                    return true;
-                }
-
-                @Override
-                public void processingFinished() {}
-            });
-
-            // Iniciar el procesamiento del archivo de audio
-            dispatcher.run();
-        } catch (IOException | javax.sound.sampled.UnsupportedAudioFileException e) {
-            System.err.println("normalizeVolume: Error normalizing media volume");
-        }
     }
     //endregion
 
@@ -855,6 +830,7 @@ public class SeasonController {
         mp.seek(mp.getStartTime());
         mp.play();*/
 
+        //embeddedMediaPlayer.audio().setVolume(20);
         embeddedMediaPlayer.controls().play();
         fadeInEffect(videoImage);
     }

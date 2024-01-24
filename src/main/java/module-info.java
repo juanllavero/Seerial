@@ -44,4 +44,6 @@ module com.example.executablelauncher {
     opens com.example.executablelauncher.tmdbMetadata.images to javafx.fxml;
     exports com.example.executablelauncher.tmdbMetadata.common;
     opens com.example.executablelauncher.tmdbMetadata.common to javafx.fxml;
+    exports com.example.executablelauncher.videoPlayer;
+    opens com.example.executablelauncher.videoPlayer to javafx.fxml;
 }
