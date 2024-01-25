@@ -118,7 +118,7 @@ public class vlcPlayerOLD {
 
     List<Disc> discList = new ArrayList<>();
     int currentDisc = 0;
-
+    /*
     public void setVideo(SeasonController parent, List<Disc> discList, Disc disc, String seriesName, Scene scene){
         parentController = parent;
         this.discList = discList;
@@ -182,32 +182,14 @@ public class vlcPlayerOLD {
                     embeddedMediaPlayer.menu().activate();
             }
 
-            /*else if (e.getCode().equals(KeyCode.DIGIT1)) {
-                switchSubtitleTrack(1);
-
-                List<TrackDescription> tracks = embeddedMediaPlayer.subpictures().trackDescriptions();
-
-                for (TrackDescription trackDescription : tracks){
-                    System.out.println(trackDescription.description());
-                }
-
-                List<TrackDescription> audioTracks = embeddedMediaPlayer.audio().trackDescriptions();
-
-                for (TrackDescription trackDescription : audioTracks){
-                    System.out.println(trackDescription.description());
-                }
-            }*/
-
         });
 
         seriesTitle.setText(seriesName);
         setDiscValues(disc);
 
+    }*/
 
-
-        //Set dvd menu button visible if file extension equals .iso
-        //menuButton.setVisible(false);
-    }
+    /*
 
     private void onLoad(){
         mediaPlayerFactory = new MediaPlayerFactory(
@@ -584,4 +566,5 @@ public class vlcPlayerOLD {
             runtimeSlider.setValue(newValue * 100);
         }
     }
+    */
 }

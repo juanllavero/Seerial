@@ -1,13 +1,10 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.videoPlayer.Track;
 import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -23,18 +20,12 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import com.jfoenix.controls.JFXSlider;
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
-import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
-import uk.co.caprica.vlcj.player.base.MediaPlayer;
-import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
-import uk.co.caprica.vlcj.player.embedded.fullscreen.FullScreenStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class VideoPlayerController {
     //region FXML ATTRIBUTES
@@ -54,7 +45,7 @@ public class VideoPlayerController {
     private Label episodeTitle;
 
     @FXML
-    private Button menuButton;
+    private Button videoButton;
 
     @FXML
     private Button nextButton;
@@ -96,25 +87,46 @@ public class VideoPlayerController {
     private VBox controlsBox;
 
     @FXML
+    private VBox optionsBox;
+
+    @FXML
+    private VBox optionsContainer;
+
+    @FXML
+    private Button button1;
+
+    @FXML
+    private Button button2;
+
+    @FXML
+    private Button button3;
+
+    @FXML
+    private Button button4;
+
+    @FXML
+    private Label optionsTitle;
+
+    @FXML
     private HBox volumeBox;
     //endregion
 
     private VideoPlayer videoPlayer;
-
-    boolean isPaused = false;
     boolean controlsShown = false;
     SeasonController parentController = null;
     Timeline timeline = null;
     Timeline volumeCount = null;
-
-    private final AtomicBoolean tracking = new AtomicBoolean();
-
-    private Timer clockTimer;
     double percentageStep = 0;
-
     List<Disc> discList = new ArrayList<>();
+    private List<Track> videoTracks = new ArrayList<>();
+    private List<Track> audioTracks = new ArrayList<>();
+    private List<Track> subtitleTracks = new ArrayList<>();
+    private int videoTrackID = -1;
+    private int audioTrackID = -1;
+    private int subtitleTrackID = -1;
     int currentDisc = 0;
 
+    //region INITIALIZATION
     public void setVideo(SeasonController parent, List<Disc> discList, Disc disc, String seriesName, Scene scene){
         parentController = parent;
         this.discList = discList;
@@ -126,6 +138,7 @@ public class VideoPlayerController {
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
 
         videoPlayer = new VideoPlayer();
+        videoPlayer.setParent(this);
         mainPane.getChildren().add(0, videoPlayer);
 
         shadowImage.setFitWidth(screenWidth);
@@ -174,59 +187,28 @@ public class VideoPlayerController {
             }else{
                 timeline.playFromStart();
             }
-
-            /*else if (e.getCode().equals(KeyCode.DIGIT1)) {
-                switchSubtitleTrack(1);
-
-                List<TrackDescription> tracks = embeddedMediaPlayer.subpictures().trackDescriptions();
-
-                for (TrackDescription trackDescription : tracks){
-                    System.out.println(trackDescription.description());
-                }
-
-                List<TrackDescription> audioTracks = embeddedMediaPlayer.audio().trackDescriptions();
-
-                for (TrackDescription trackDescription : audioTracks){
-                    System.out.println(trackDescription.description());
-                }
-            }*/
-
         });
 
         seriesTitle.setText(seriesName);
         setDiscValues(disc);
-
-
-
-        //Set dvd menu button visible if file extension equals .iso
-        //menuButton.setVisible(false);
     }
-
     private void onLoad(){
-        /*runtimeSlider.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                timeline.stop();
-                beginTracking();
-            }else {
-                timeline.playFromStart();
-                tracking.set(false);
-            }
-        });*/
-
-        runtimeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            videoPlayer.seekToTime((long) (newValue.doubleValue() * 1000));
-        });
-
         runtimeSlider.setOnKeyPressed(e -> {
             if (runtimeSlider.isFocused() && e.getCode().equals(KeyCode.UP))
                 hideControls();
-        });
+            else{
+                timeline.playFromStart();
+            }
 
-        runtimeSlider.valueProperty().addListener((obs, oldValue, newValue) -> updateMediaPlayerPosition(newValue.floatValue() / 100));
+            if (e.getCode().equals(KeyCode.LEFT))
+                videoPlayer.seekBackward();
+            else if (e.getCode().equals(KeyCode.RIGHT))
+                videoPlayer.seekForward();
+        });
 
         playButton.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)){
-                if (!isPaused)
+                if (!videoPlayer.isPaused())
                     pause();
                 else
                     resume();
@@ -246,12 +228,12 @@ public class VideoPlayerController {
         //region BUTTON ICONS
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
-                if (isPaused)
+                if (videoPlayer.isPaused())
                     playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/playSelected.png", 35, 35, true, true)));
                 else
                     playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/pauseSelected.png", 35, 35, true, true)));
             }else{
-                if (isPaused)
+                if (videoPlayer.isPaused())
                     playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/play.png", 35, 35, true, true)));
                 else
                     playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/pause.png", 35, 35, true, true)));
@@ -279,6 +261,7 @@ public class VideoPlayerController {
                 optionsButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/playerOptions.png", 35, 35, true, true)));
         });
 
+        audiosButton.setDisable(true);
         audiosButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
                 audiosButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/audioSelected.png", 35, 35, true, true)));
@@ -286,6 +269,7 @@ public class VideoPlayerController {
                 audiosButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/audio.png", 35, 35, true, true)));
         });
 
+        subtitlesButton.setDisable(true);
         subtitlesButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
                 subtitlesButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/subsSelected.png", 35, 35, true, true)));
@@ -293,15 +277,15 @@ public class VideoPlayerController {
                 subtitlesButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/subs.png", 35, 35, true, true)));
         });
 
-        menuButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+        videoButton.setDisable(true);
+        videoButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                menuButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/dvdMenuSelected.png", 35, 35, true, true)));
+                videoButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/dvdMenuSelected.png", 35, 35, true, true)));
             else
-                menuButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/dvdMenu.png", 35, 35, true, true)));
+                videoButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/dvdMenu.png", 35, 35, true, true)));
         });
         //endregion
     }
-
     private void setDiscValues(Disc disc){
         episodeTitle.setText(disc.name);
         episodeDate.setText(disc.year);
@@ -333,15 +317,35 @@ public class VideoPlayerController {
             //Set video and start
             videoPlayer.playVideo(disc.executableSrc);
             videoPlayer.seekToTime(0);
-            runtimeSlider.setMin(0);
-            runtimeSlider.setMax(videoPlayer.getDuration() / 1000.0);
             runtimeSlider.setValue(0);
             runtimeSlider.setBlockIncrement(percentageStep);
+
+            loadTracks();
         });
 
         fade.play();
     }
+    private void loadTracks(){
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
+        scheduler.schedule(() -> {
+            videoPlayer.loadTracks();
+
+            videoTracks = videoPlayer.getVideoTracks();
+            audioTracks = videoPlayer.getAudioTracks();
+            subtitleTracks = videoPlayer.getSubtitleTracks();
+
+            //Initialize Buttons
+            videoButton.setDisable(videoTracks == null || videoTracks.size() <= 1);
+            audiosButton.setDisable(audioTracks == null || audioTracks.size() <= 1);
+            subtitlesButton.setDisable(subtitleTracks == null || subtitleTracks.size() <= 1);
+
+            scheduler.shutdown();
+        }, 100, TimeUnit.MILLISECONDS);
+    }
+    //endregion
+
+    //region BEHAVIOR AND EFFECTS
     private void showControls(){
         controlsShown = true;
         timeline.playFromStart();
@@ -349,7 +353,6 @@ public class VideoPlayerController {
         fadeInEffect(shadowImage);
         playButton.requestFocus();
     }
-
     private void hideControls(){
         timeline.stop();
         fadeOutEffect(shadowImage);
@@ -361,7 +364,6 @@ public class VideoPlayerController {
         controlsBox.setVisible(false);
         fadeOut.setOnFinished(e -> controlsShown = false);
     }
-
     public void fadeOutEffect(ImageView img){
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), img);
         fadeOut.setFromValue(1.0);
@@ -369,7 +371,6 @@ public class VideoPlayerController {
         fadeOut.play();
         img.setVisible(false);
     }
-
     public void fadeInEffect(Pane pane){
         pane.setVisible(true);
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), pane);
@@ -377,7 +378,6 @@ public class VideoPlayerController {
         fadeIn.setToValue(1.0);
         fadeIn.play();
     }
-
     public void fadeInEffect(ImageView img){
         img.setVisible(true);
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), img);
@@ -385,7 +385,9 @@ public class VideoPlayerController {
         fadeIn.setToValue(1.0);
         fadeIn.play();
     }
+    //endregion
 
+    //region CONTROLS
     public void stop() {
         Disc disc = discList.get(currentDisc);
         disc.setTime(videoPlayer.getCurrentTime());
@@ -405,21 +407,16 @@ public class VideoPlayerController {
 
         fadeOut.play();
     }
-
     public void resume(){
         hideControls();
-        isPaused = false;
         videoPlayer.togglePause();
     }
-
     public void pause(){
-        isPaused = true;
         videoPlayer.togglePause();
 
         if (controlsShown)
             playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/playSelected.png", 35, 35, true, true)));
     }
-
     public void volumeUp(){
         volumeCount.playFromStart();
         volumeBox.setVisible(true);
@@ -427,30 +424,25 @@ public class VideoPlayerController {
         videoPlayer.adjustVolume(true);
         volumeSlider.setValue(videoPlayer.getVolume());
     }
-
     public void volumeDown(){
         volumeCount.playFromStart();
         volumeBox.setVisible(true);
         videoPlayer.adjustVolume(false);
         volumeSlider.setValue(videoPlayer.getVolume());
     }
-
     public void goAhead(){
         showControls();
         runtimeSlider.requestFocus();
     }
-
     public void goBack(){
         showControls();
         runtimeSlider.requestFocus();
     }
-
     public void nextEpisode(){
         Disc disc = discList.get(currentDisc);
         disc.setTime(videoPlayer.getCurrentTime());
         setDiscValues(discList.get(++currentDisc));
     }
-
     public void prevEpisode(){
         if (videoPlayer.getCurrentTime() > 2000){
             runtimeSlider.setValue(0);
@@ -463,14 +455,40 @@ public class VideoPlayerController {
                 runtimeSlider.setValue(0);
         }
     }
-
-    public void showAudioTracks(){
+    public void showVideoOptions(){
         pause();
-    }
+        optionsBox.setVisible(true);
+        optionsTitle.setText(App.textBundle.getString("video"));
 
-    public void showSubtitleTracks(){
-        pause();
+        button1.setText(App.textBundle.getString("video"));
+        button2.setText(App.textBundle.getString("zoom"));
+        button3.setVisible(false);
+        button4.setVisible(false);
     }
+    public void showAudioOptions(){
+        pause();
+        optionsBox.setVisible(true);
+        optionsTitle.setText(App.textBundle.getString("audio"));
+
+        button1.setText(App.textBundle.getString("audio"));
+        button2.setText(App.textBundle.getString("audioDevice"));
+        button3.setVisible(false);
+        button4.setVisible(false);
+    }
+    public void showSubtitleOptions(){
+        pause();
+        optionsBox.setVisible(true);
+        optionsTitle.setText(App.textBundle.getString("subs"));
+
+        button1.setText(App.textBundle.getString("language"));
+        button2.setText(App.textBundle.getString("color"));
+        button3.setVisible(true);
+        button3.setText(App.textBundle.getString("size"));
+        button3.setVisible(true);
+        button4.setText(App.textBundle.getString("position"));
+
+    }
+    //endregion
 
     private String formatTime(long time){
         long totalSec = time / 1000;
@@ -482,12 +500,6 @@ public class VideoPlayerController {
             return String.format("%d:%2d:%02d", h, m, s);
 
         return String.format("%2d:%02d", m, s);
-    }
-
-    private synchronized void updateMediaPlayerPosition(float newValue) {
-        if (tracking.get()) {
-            videoPlayer.seekToTime((long) (newValue * videoPlayer.getDuration()));
-        }
     }
 
     public void notifyChanges(long timeMillis){
