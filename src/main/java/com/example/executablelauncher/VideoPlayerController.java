@@ -12,10 +12,9 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -23,6 +22,7 @@ import com.jfoenix.controls.JFXSlider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -87,7 +87,7 @@ public class VideoPlayerController {
     private VBox controlsBox;
 
     @FXML
-    private VBox optionsBox;
+    private BorderPane optionsBox;
 
     @FXML
     private VBox optionsContainer;
@@ -149,6 +149,7 @@ public class VideoPlayerController {
         controlsBox.setVisible(false);
 
         volumeBox.setVisible(false);
+        optionsBox.setVisible(false);
 
         timeline = new javafx.animation.Timeline(
             new javafx.animation.KeyFrame(Duration.seconds(5), event -> {
@@ -164,8 +165,12 @@ public class VideoPlayerController {
         );
 
         scene.setOnKeyReleased(e -> {
-            if (e.getCode().equals(KeyCode.ESCAPE) || e.getCode().equals(KeyCode.BACK_SPACE))
-                stop();
+            if (e.getCode().equals(KeyCode.ESCAPE) || e.getCode().equals(KeyCode.BACK_SPACE)){
+                if (optionsBox.isVisible())
+                    hideOptions();
+                else
+                    stop();
+            }
         });
 
         scene.setOnKeyPressed(e -> {
@@ -184,7 +189,7 @@ public class VideoPlayerController {
                 }
                 else
                     showControls();
-            }else{
+            }else if (!optionsBox.isVisible()){
                 timeline.playFromStart();
             }
         });
@@ -336,12 +341,12 @@ public class VideoPlayerController {
             subtitleTracks = videoPlayer.getSubtitleTracks();
 
             //Initialize Buttons
-            videoButton.setDisable(videoTracks == null || videoTracks.size() <= 1);
-            audiosButton.setDisable(audioTracks == null || audioTracks.size() <= 1);
-            subtitlesButton.setDisable(subtitleTracks == null || subtitleTracks.size() <= 1);
+            videoButton.setDisable(videoTracks == null || videoTracks.isEmpty());
+            audiosButton.setDisable(audioTracks == null || audioTracks.isEmpty());
+            subtitlesButton.setDisable(subtitleTracks == null || subtitleTracks.isEmpty());
 
             scheduler.shutdown();
-        }, 100, TimeUnit.MILLISECONDS);
+        }, 1, TimeUnit.SECONDS);
     }
     //endregion
 
@@ -456,37 +461,151 @@ public class VideoPlayerController {
         }
     }
     public void showVideoOptions(){
-        pause();
+        if (!videoPlayer.isPaused())
+            pause();
         optionsBox.setVisible(true);
+        timeline.stop();
+        shadowImage.setVisible(true);
+        controlsBox.setVisible(false);
         optionsTitle.setText(App.textBundle.getString("video"));
 
         button1.setText(App.textBundle.getString("video"));
+        button2.setVisible(true);
         button2.setText(App.textBundle.getString("zoom"));
         button3.setVisible(false);
         button4.setVisible(false);
+
+        optionsBox.requestFocus();
+        button1.requestFocus();
+
+        button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                showVideoTracks();
+        });
+        button2.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                showZoomOptions();
+        });
+    }
+    private void showVideoTracks(){
+        optionsContainer.getChildren().clear();
+        for (Track track : videoTracks){
+            addOptionCard(track.demux_h + " (" + track.codec.toUpperCase() + ")");
+        }
+    }
+    private void showZoomOptions(){
+        optionsContainer.getChildren().clear();
+        addOptionCard("Normal");
+        addOptionCard("Zoom");
+        addOptionCard("Fixed 4:3");
+        addOptionCard("Fixed 16:9");
+        addOptionCard("Expanded");
     }
     public void showAudioOptions(){
-        pause();
+        if (!videoPlayer.isPaused())
+            pause();
         optionsBox.setVisible(true);
+        timeline.stop();
+        shadowImage.setVisible(true);
+        controlsBox.setVisible(false);
         optionsTitle.setText(App.textBundle.getString("audio"));
 
         button1.setText(App.textBundle.getString("audio"));
-        button2.setText(App.textBundle.getString("audioDevice"));
+        button2.setVisible(false);
         button3.setVisible(false);
         button4.setVisible(false);
+
+        optionsBox.requestFocus();
+        button1.requestFocus();
+
+        button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                showAudioTracks();
+        });
+        button2.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            /*if (newVal)
+                showAudioDevices();*/
+        });
+    }
+    private void showAudioTracks(){
+        optionsContainer.getChildren().clear();
+        for (Track track : audioTracks){
+            String channels = switch (track.audio_channels) {
+                case 1 -> "1.0";
+                case 2 -> "2.0";
+                case 3 -> "2.1";
+                case 6 -> "5.1";
+                case 8 -> "7.1";
+                default -> track.audio_channels + " ch";
+            };
+
+            String title = track.title;
+            Locale lang = Locale.forLanguageTag(track.lang);
+            if (lang != null){
+                title = lang.getDisplayLanguage();
+            }
+
+            addOptionCard( title + " (" + track.lang.toUpperCase() + ") " + track.codec.toUpperCase() + " " + channels);
+        }
     }
     public void showSubtitleOptions(){
-        pause();
+        if (!videoPlayer.isPaused())
+            pause();
         optionsBox.setVisible(true);
+        timeline.stop();
+        shadowImage.setVisible(true);
+        controlsBox.setVisible(false);
         optionsTitle.setText(App.textBundle.getString("subs"));
 
-        button1.setText(App.textBundle.getString("language"));
+        button1.setText(App.textBundle.getString("languageText"));
+        button2.setVisible(true);
         button2.setText(App.textBundle.getString("color"));
         button3.setVisible(true);
         button3.setText(App.textBundle.getString("size"));
         button3.setVisible(true);
         button4.setText(App.textBundle.getString("position"));
 
+        optionsBox.requestFocus();
+        button1.requestFocus();
+
+        button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                showSubtitleTracks();
+        });
+    }
+    private void showSubtitleTracks(){
+        optionsContainer.getChildren().clear();
+        for (Track track : subtitleTracks){
+
+            String forced = "";
+
+            if (track.forced)
+                forced = " - Forced";
+
+            String title = track.title;
+            Locale lang = Locale.forLanguageTag(track.lang);
+            if (lang != null){
+                title = lang.getDisplayLanguage();
+            }
+
+            addOptionCard( title + " (" + track.lang.toUpperCase() + ") " + forced);
+        }
+    }
+    private void addOptionCard(String title){
+        Button btn = new Button();
+        btn.setText(title);
+        btn.setFont(new Font("Arial", 24));
+        btn.setTextFill(Color.WHITE);
+        btn.setMaxWidth(Integer.MAX_VALUE);
+
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("playerOptionsButton");
+
+        optionsContainer.getChildren().add(btn);
+    }
+    public void hideOptions(){
+        optionsBox.setVisible(false);
+        showControls();
     }
     //endregion
 

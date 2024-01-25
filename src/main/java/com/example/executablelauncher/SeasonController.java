@@ -1,12 +1,10 @@
 package com.example.executablelauncher;
 
-import be.tarsos.dsp.FadeIn;
-import be.tarsos.dsp.io.TarsosDSPAudioInputStream;
-import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
 import com.example.executablelauncher.entities.Disc;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import javafx.animation.FadeTransition;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -26,26 +24,18 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-import be.tarsos.dsp.AudioDispatcher;
-import be.tarsos.dsp.AudioEvent;
-import be.tarsos.dsp.AudioProcessor;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
 import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.FloatControl;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -166,6 +156,7 @@ public class SeasonController {
     private List<Button> discsButtons = new ArrayList<>();
     private int currentSeason = 0;
     private Disc selectedDisc = null;
+    private Timeline timeline = null;
     private MediaPlayer mp = null;
     public MediaPlayerFactory mediaPlayerFactory;
 
@@ -209,7 +200,7 @@ public class SeasonController {
                     if (detailsBox.isVisible())
                         closeDetails();
                     else
-                        goBack(event);
+                        goBack();
                 }
             }
         });
@@ -294,6 +285,9 @@ public class SeasonController {
                 mp.stop();
             }
         }
+
+        if (timeline != null)
+            timeline.stop();
 
         stopBackgroundVideo();
 
@@ -521,7 +515,10 @@ public class SeasonController {
         if (mp != null)
             mp.stop();
 
-        embeddedMediaPlayer.controls().stop();
+        if (timeline != null)
+            timeline.stop();
+
+        stopBackgroundVideo();
 
         playingVideo = true;
 
@@ -611,11 +608,16 @@ public class SeasonController {
 
     //region MOVEMENT
     @FXML
-    void goBack(KeyEvent event){
+    void goBack(){
         if (mp != null)
             mp.stop();
 
+        if (timeline != null)
+            timeline.stop();
+
         stopBackgroundVideo();
+        embeddedMediaPlayer.release();
+        mediaPlayerFactory.release();
 
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
@@ -799,7 +801,7 @@ public class SeasonController {
         embeddedMediaPlayer.videoSurface().set(new ImageViewVideoSurface(videoImage));
     }
     private void setVideoPlayer(){
-        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+        timeline = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
                     playVideo();
                 })
