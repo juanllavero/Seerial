@@ -6,6 +6,8 @@ import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,6 +17,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -179,10 +182,6 @@ public class VideoPlayerController {
                     goAhead();
                 else if (e.getCode().equals(KeyCode.LEFT))
                     goBack();
-                else if (e.getCode().equals(KeyCode.PLUS))
-                    volumeUp();
-                else if (e.getCode().equals(KeyCode.MINUS))
-                    volumeDown();
                 else if (e.getCode().equals(KeyCode.SPACE)){
                     showControls();
                     pause();
@@ -190,6 +189,11 @@ public class VideoPlayerController {
                 else
                     showControls();
             }else if (!optionsBox.isVisible()){
+                if (e.getCode().equals(KeyCode.PLUS))
+                    volumeUp();
+                else if (e.getCode().equals(KeyCode.MINUS))
+                    volumeDown();
+
                 timeline.playFromStart();
             }
         });
@@ -432,6 +436,7 @@ public class VideoPlayerController {
     public void volumeDown(){
         volumeCount.playFromStart();
         volumeBox.setVisible(true);
+
         videoPlayer.adjustVolume(false);
         volumeSlider.setValue(videoPlayer.getVolume());
     }
@@ -475,9 +480,6 @@ public class VideoPlayerController {
         button3.setVisible(false);
         button4.setVisible(false);
 
-        optionsBox.requestFocus();
-        button1.requestFocus();
-
         button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
                 showVideoTracks();
@@ -486,16 +488,30 @@ public class VideoPlayerController {
             if (newVal)
                 showZoomOptions();
         });
+
+        optionsBox.requestFocus();
+        button1.requestFocus();
     }
     private void showVideoTracks(){
         optionsContainer.getChildren().clear();
         for (Track track : videoTracks){
             addOptionCard(track.demux_h + " (" + track.codec.toUpperCase() + ")");
+
+            if (track.selected) {
+                Button btn = (Button) optionsContainer.getChildren().get(videoTracks.indexOf(track));
+                btn.getStyleClass().clear();
+                btn.getStyleClass().add("playerOptionsSelected");
+            }
         }
     }
     private void showZoomOptions(){
         optionsContainer.getChildren().clear();
         addOptionCard("Normal");
+
+        Button btn = (Button) optionsContainer.getChildren().get(0);
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("playerOptionsSelected");
+
         addOptionCard("Zoom");
         addOptionCard("Fixed 4:3");
         addOptionCard("Fixed 16:9");
@@ -515,9 +531,6 @@ public class VideoPlayerController {
         button3.setVisible(false);
         button4.setVisible(false);
 
-        optionsBox.requestFocus();
-        button1.requestFocus();
-
         button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
                 showAudioTracks();
@@ -526,6 +539,9 @@ public class VideoPlayerController {
             /*if (newVal)
                 showAudioDevices();*/
         });
+
+        optionsBox.requestFocus();
+        button1.requestFocus();
     }
     private void showAudioTracks(){
         optionsContainer.getChildren().clear();
@@ -546,6 +562,12 @@ public class VideoPlayerController {
             }
 
             addOptionCard( title + " (" + track.lang.toUpperCase() + ") " + track.codec.toUpperCase() + " " + channels);
+
+            if (track.selected) {
+                Button btn = (Button) optionsContainer.getChildren().get(audioTracks.indexOf(track));
+                btn.getStyleClass().clear();
+                btn.getStyleClass().add("playerOptionsSelected");
+            }
         }
     }
     public void showSubtitleOptions(){
@@ -565,13 +587,13 @@ public class VideoPlayerController {
         button3.setVisible(true);
         button4.setText(App.textBundle.getString("position"));
 
-        optionsBox.requestFocus();
-        button1.requestFocus();
-
         button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
                 showSubtitleTracks();
         });
+
+        optionsBox.requestFocus();
+        button1.requestFocus();
     }
     private void showSubtitleTracks(){
         optionsContainer.getChildren().clear();
@@ -589,6 +611,12 @@ public class VideoPlayerController {
             }
 
             addOptionCard( title + " (" + track.lang.toUpperCase() + ") " + forced);
+
+            if (track.selected) {
+                Button btn = (Button) optionsContainer.getChildren().get(subtitleTracks.indexOf(track));
+                btn.getStyleClass().clear();
+                btn.getStyleClass().add("playerOptionsSelected");
+            }
         }
     }
     private void addOptionCard(String title){
@@ -597,8 +625,9 @@ public class VideoPlayerController {
         btn.setFont(new Font("Arial", 24));
         btn.setTextFill(Color.WHITE);
         btn.setMaxWidth(Integer.MAX_VALUE);
+        btn.setPrefWidth(Integer.MAX_VALUE);
+        btn.setAlignment(Pos.BOTTOM_LEFT);
 
-        btn.getStyleClass().clear();
         btn.getStyleClass().add("playerOptionsButton");
 
         optionsContainer.getChildren().add(btn);

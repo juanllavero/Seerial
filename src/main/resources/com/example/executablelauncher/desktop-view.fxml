@@ -308,6 +308,9 @@
                                              </VBox.margin>
                                           </ImageView>
                                        </children>
+                                       <HBox.margin>
+                                          <Insets left="10.0" />
+                                       </HBox.margin>
                                     </VBox>
                                  </children>
                               </HBox>

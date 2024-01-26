@@ -267,7 +267,7 @@ public class DesktopViewController {
     private Season selectedSeason = null;
     private List<Disc> selectedDiscs = new ArrayList<>();
     private List<DiscController> discControllers = new ArrayList<>();
-    private Category currentCategory;
+    public Category currentCategory;
     private double xOffset = 0;
     private double yOffset = 0;
     private double ASPECT_RATIO = 16.0 / 9.0;

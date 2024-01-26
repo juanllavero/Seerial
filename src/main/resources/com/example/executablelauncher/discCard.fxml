@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="TOP_CENTER" fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="323.0" prefWidth="335.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DiscController">
+<VBox fx:id="mainBox" alignment="TOP_CENTER" fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="323.0" prefWidth="335.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DiscController">
    <children>
       <StackPane fx:id="thumbnailStackPane" prefHeight="186.0" prefWidth="335.0">
          <children>
@@ -53,6 +53,9 @@
                </StackPane.margin>
             </ImageView>
          </children>
+         <VBox.margin>
+            <Insets bottom="5.0" />
+         </VBox.margin>
       </StackPane>
       <Label fx:id="number" alignment="TOP_LEFT" contentDisplay="CENTER" prefHeight="27.0" prefWidth="321.0" text="Episode 15" textFill="#e8e8e8" wrapText="true">
          <font>
@@ -62,7 +65,7 @@
             <DropShadow blurType="GAUSSIAN" height="23.94" radius="20.995" spread="0.55" width="62.04" />
          </effect>
          <VBox.margin>
-            <Insets top="10.0" />
+            <Insets top="5.0" />
          </VBox.margin>
       </Label>
       <Label fx:id="name" alignment="TOP_LEFT" contentDisplay="CENTER" prefHeight="86.0" prefWidth="331.0" text="¡Siéntate en la bañera caliente hasta que te sientas mal!" textFill="#e8e8e8" wrapText="true">

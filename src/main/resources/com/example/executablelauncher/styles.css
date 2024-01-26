@@ -193,6 +193,18 @@
     -fx-text-fill: black;
 }
 
+.playerOptionsSelected{
+    -fx-background-color: #9d9d9d;
+    -fx-background-radius: 5px;
+    -fx-text-fill: black;
+}
+
+.playerOptionsSelected:focused{
+    -fx-background-color: #EDF2F4;
+    -fx-background-radius: 5px;
+    -fx-text-fill: black;
+}
+
 /* Styling the slider track */
 .jfx-slider>.track {
     -fx-background-color: rgba(0, 0, 0, 0.62);

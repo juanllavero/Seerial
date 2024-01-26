@@ -118,7 +118,10 @@ public class VideoPlayer extends MediaView {
         mpvCommand("cycle", "pause");
     }
     public void adjustVolume(boolean increase) {
-        mpvCommand("add", "volume", increase ? "5%" : "-5%");
+        double currentVolume = getVolume();
+        double newVolume = increase ? Math.min(currentVolume + 5, 100) : Math.max(currentVolume - 5, 0.0);
+
+        mpvSetProperty("volume", String.valueOf(newVolume));
     }
     public double getVolume() {
         String volumeString = mpvGetProperty("volume");

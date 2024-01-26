@@ -3,6 +3,7 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Disc;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.*;
@@ -10,6 +11,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -23,6 +25,9 @@ import java.io.IOException;
 public class DiscController {
     @FXML
     private ImageView discMenu;
+
+    @FXML
+    private VBox mainBox;
 
     @FXML
     private Label name;
@@ -56,11 +61,13 @@ public class DiscController {
 
     public void setData(Disc d) {
         name.setText(d.getName());
-        if (d.getEpisodeNumber() == 0){
-            number.setText("");
+
+        if (d.getEpisodeNumber() == 0 || !desktopParent.currentCategory.type.equals("Shows")){
+            mainBox.getChildren().remove(number);
         }else{
             number.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber());
         }
+
         disc = d;
 
         clearSelection();

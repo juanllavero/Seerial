@@ -4,6 +4,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -289,13 +290,6 @@
                </effect>
             </Label>
          </top>
-         <right>
-            <VBox fx:id="optionsContainer" fillWidth="false" minWidth="600.0" prefHeight="657.0" prefWidth="834.0" BorderPane.alignment="CENTER">
-               <padding>
-                  <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-               </padding>
-            </VBox>
-         </right>
          <center>
             <VBox stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <children>
@@ -325,6 +319,20 @@
                </padding>
             </VBox>
          </center>
+         <right>
+            <ScrollPane hbarPolicy="NEVER" hmax="0.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
+               <content>
+                  <VBox fx:id="optionsContainer" fillWidth="false" minWidth="600.0" prefHeight="657.0" prefWidth="834.0" styleClass="transparent" stylesheets="@styles.css">
+                     <padding>
+                        <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+                     </padding>
+                  </VBox>
+               </content>
+               <BorderPane.margin>
+                  <Insets bottom="20.0" right="20.0" />
+               </BorderPane.margin>
+            </ScrollPane>
+         </right>
       </BorderPane>
    </children>
 </StackPane>
