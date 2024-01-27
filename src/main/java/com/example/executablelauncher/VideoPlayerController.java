@@ -324,9 +324,7 @@ public class VideoPlayerController {
 
         fade.setOnFinished(event -> {
             //Set video and start
-            videoPlayer.playVideo(disc.executableSrc);
-            videoPlayer.seekToTime(0);
-            runtimeSlider.setValue(0);
+            videoPlayer.playVideo(disc.executableSrc, disc.getTimeWatched());
             runtimeSlider.setBlockIncrement(percentageStep);
 
             loadTracks();
@@ -451,6 +449,9 @@ public class VideoPlayerController {
     public void nextEpisode(){
         Disc disc = discList.get(currentDisc);
         disc.setTime(videoPlayer.getCurrentTime());
+
+        videoPlayer.stop();
+
         setDiscValues(discList.get(++currentDisc));
     }
     public void prevEpisode(){
@@ -460,6 +461,9 @@ public class VideoPlayerController {
             if (currentDisc > 0) {
                 Disc disc = discList.get(currentDisc);
                 disc.setTime(videoPlayer.getCurrentTime());
+
+                videoPlayer.stop();
+
                 setDiscValues(discList.get(--currentDisc));
             }else
                 runtimeSlider.setValue(0);

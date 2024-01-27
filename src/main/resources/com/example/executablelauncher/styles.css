@@ -205,6 +205,12 @@
     -fx-text-fill: black;
 }
 
+.episodeCardInfo{
+    -fx-background-color: rgba(0, 0, 0, 0.56);
+    -fx-background-radius: 5px;
+    -fx-font-weight: bold;
+}
+
 /* Styling the slider track */
 .jfx-slider>.track {
     -fx-background-color: rgba(0, 0, 0, 0.62);

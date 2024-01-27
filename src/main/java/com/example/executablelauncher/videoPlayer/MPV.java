@@ -27,10 +27,13 @@ public interface MPV extends StdCallLibrary {
     int mpv_set_property_string(long handle, String name, String data);
     int mpv_set_option_string(long handle, String name, String data);
     void mpv_free(Pointer data);
-    int mpv_set_option(long handle, String name, int format, Pointer data);
+    void mpv_set_option(long handle, String name, int format, Pointer data);
+
+    void mpv_request_event(long handle, int event_id, int enable);
 
     mpv_event mpv_wait_event(long handle, double timeOut);
-    int mpv_request_event(long handle, int event_id, int enable);
+
+    // ... (resto de la interfaz)
 
     class mpv_event extends Structure {
         public int event_id;

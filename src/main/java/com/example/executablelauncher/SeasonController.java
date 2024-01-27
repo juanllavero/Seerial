@@ -3,13 +3,19 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Disc;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import com.jfoenix.controls.JFXSlider;
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -167,6 +173,9 @@ public class SeasonController {
     private Series series = null;
     private boolean episodesFocussed = true;
     private boolean playingVideo = false;
+    private int middleEpisode = 0;
+    private static int BUTTON_COUNT = 0;
+    private static int VISIBLE_BUTTONS = 0;
     //endregion
 
     //region INITIALIZATION
@@ -236,6 +245,8 @@ public class SeasonController {
         //Remove horizontal and vertical scroll
         episodeScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         episodeScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        episodeScroll.addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyPress);
 
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
@@ -416,6 +427,9 @@ public class SeasonController {
             addEpisodeCard(disc);
         }
 
+        BUTTON_COUNT = discList.size();
+        VISIBLE_BUTTONS = getVisibleButtonsCount();
+
         mainPane.requestFocus();
 
         if (discsButtons.size() > 1)
@@ -438,6 +452,47 @@ public class SeasonController {
         fadeInEffect(backgroundImage);
     }
     //endregion
+
+    private void handleKeyPress(KeyEvent event) {
+        Node focusedNode = (Node) event.getTarget();
+        int currentIndex = cardContainer.getChildren().indexOf(focusedNode);
+
+        if (currentIndex >= 0) {
+            double buttonWidth = discsButtons.get(0).getWidth();
+            double spacing = 50.0;
+
+            double centerOffset = (currentIndex + 0.5) * (buttonWidth + spacing) - cardContainer.getWidth() / 2.0;
+
+            animateScrollTransition(episodeScroll.getHvalue() + centerOffset / (cardContainer.getWidth() * cardContainer.getChildren().size()));
+        }
+    }
+
+    private void animateScrollTransition(double endValue) {
+        double clampedEndValue = Math.max(0, Math.min(1, endValue)); // Clamping to [0, 1]
+
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0.5), new KeyValue(episodeScroll.hvalueProperty(), clampedEndValue))
+        );
+        timeline.play();
+    }
+
+    private int getVisibleButtonsCount() {
+        double scrollPaneWidth = episodeScroll.getWidth();
+        double scrollPaneX = episodeScroll.getLayoutX();
+
+        int visibleButtons = 0;
+
+        for (Node button : cardContainer.getChildren()) {
+            Bounds buttonBounds = button.localToScene(button.getBoundsInLocal());
+            double buttonX = buttonBounds.getMinX();
+
+            if (buttonX >= scrollPaneX && buttonX + buttonBounds.getWidth() <= scrollPaneX + scrollPaneWidth) {
+                visibleButtons++;
+            }
+        }
+
+        return visibleButtons;
+    }
 
     //region UTILS
     private void updateButtons(){
@@ -504,7 +559,42 @@ public class SeasonController {
             thumbnail.setSmooth(true);
 
             btn.getStyleClass().add("seriesCoverButton");
-            btn.setGraphic(thumbnail);
+            //btn.setGraphic(thumbnail);
+
+            StackPane main = new StackPane(thumbnail);
+            BorderPane details = new BorderPane();
+
+            if (disc.getTimeWatched() > 5000){
+                JFXSlider slider = new JFXSlider(0, 100, (double) 100 / ((double) (disc.runtime * 1000) / disc.getTimeWatched()));
+                details.setBottom(slider);
+            }
+
+            HBox videoInfo = new HBox();
+            videoInfo.setAlignment(Pos.TOP_RIGHT);
+            videoInfo.setPrefWidth(Region.USE_COMPUTED_SIZE);
+            videoInfo.setMaxWidth(Region.USE_PREF_SIZE);
+            videoInfo.setPadding(new Insets(5));
+            videoInfo.getStyleClass().add("episodeCardInfo");
+            videoInfo.setSpacing(5);
+
+            if (isShow){
+                Label info = new Label("S" + disc.seasonNumber + "E" + disc.episodeNumber);
+                info.setFont(new Font(24));
+                info.setTextFill(Color.WHITE);
+                videoInfo.getChildren().add(info);
+            }
+
+            if (disc.isWatched()){
+                ImageView watched = new ImageView(
+                        new Image("file:src/main/resources/img/icons/tick.png", 25, 25, true, true));
+                videoInfo.getChildren().add(0, watched);
+            }
+
+            if (!videoInfo.getChildren().isEmpty())
+                details.setTop(videoInfo);
+
+            main.getChildren().add(details);
+            btn.setGraphic(main);
 
             cardContainer.getChildren().add(btn);
             discsButtons.add(btn);
@@ -771,7 +861,7 @@ public class SeasonController {
             mp.play();
         });
 
-        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+        timeline = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
                     playVideo();
                 })

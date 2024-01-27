@@ -17,6 +17,7 @@ import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import info.movito.themoviedbapi.model.tv.TvSeries;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -356,7 +357,6 @@ public class DesktopViewController {
 
         seriesScrollPane.setPrefHeight(screenHeight);
         seriesContainer.setPrefHeight(screenHeight);
-
 
         //seasonScroll.prefHeightProperty().bind(seasonInfoPane.heightProperty());
         //seasonScroll.setMinHeight(screenHeight);

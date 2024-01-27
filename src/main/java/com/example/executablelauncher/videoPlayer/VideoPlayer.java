@@ -17,6 +17,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.executablelauncher.videoPlayer.MPV.MPV_EVENT_FILE_LOADED;
+
 public class VideoPlayer extends MediaView {
     long handle;
     private boolean paused = false;
@@ -32,7 +34,7 @@ public class VideoPlayer extends MediaView {
         parentController = parent;
     }
 
-    public void playVideo(String src) {
+    public void playVideo(String src, long seekTimeMillis) {
         //Get interface to MPV DLL
         MPV mpv = MPV.INSTANCE;
 
@@ -57,6 +59,21 @@ public class VideoPlayer extends MediaView {
         //Load and play a video:
         if((error = mpv.mpv_command(handle, new String[] {"loadfile", src})) != 0) {
             throw new IllegalStateException("Playback failed with error: " + error);
+        }
+
+        if (seekTimeMillis > 5000){
+            //Detect when the video id loaded
+            boolean[] videoLoaded = {false};
+            mpv.mpv_request_event(handle, MPV_EVENT_FILE_LOADED, 1);
+
+            while (!videoLoaded[0]) {
+                MPV.mpv_event event = mpv.mpv_wait_event(handle, -1);
+                if (event.event_id == MPV_EVENT_FILE_LOADED) {
+                    videoLoaded[0] = true;
+                }
+            }
+
+            seekToTime(seekTimeMillis - 5000);
         }
 
         startClock();

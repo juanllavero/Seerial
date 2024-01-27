@@ -92,8 +92,8 @@ public class Disc implements Serializable {
         lastMilisecond = miliseconds;
 
         //If we have watched more than 90% of the video, it is marked as watched
-        if (((runtime * 60L) - ((double) lastMilisecond / 100)) < (runtime * 60L * 0.1))
-            setWatched();
+        /*if (((runtime * 60L) - ((double) lastMilisecond / 100)) < (runtime * 60L * 0.1))
+            setWatched();*/
     }
 
     public long getTimeWatched(){ return lastMilisecond; }
