@@ -46,6 +46,7 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SeasonController {
     //region FXML ATTRIBUTES
@@ -69,6 +70,12 @@ public class SeasonController {
 
     @FXML
     private VBox detailsText;
+
+    @FXML
+    private HBox timeLeftBox;
+
+    @FXML
+    private Label timeLeftField;
 
     @FXML
     private BorderPane detailsBox;
@@ -298,16 +305,14 @@ public class SeasonController {
             }
         });
 
-        lastSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (event.getCode().equals(KeyCode.SPACE) || event.getCode().equals(KeyCode.LEFT)){
+        lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
                 lastSeason();
-            }
         });
 
-        nextSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (event.getCode().equals(KeyCode.SPACE) || event.getCode().equals(KeyCode.RIGHT)){
+        nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
                 nextSeason();
-            }
         });
 
         detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
@@ -316,23 +321,52 @@ public class SeasonController {
                     playButton.requestFocus();
                 else
                     discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
-            }else if (event.getCode().equals(KeyCode.LEFT)
-                    && discs.indexOf(selectedDisc) == 0 && lastSeasonButton.isVisible())
+            }else if (event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
                 lastSeasonButton.requestFocus();
-            else if (event.getCode().equals(KeyCode.RIGHT)
-                    && discs.indexOf(selectedDisc) == (discs.size() - 1) && lastSeasonButton.isVisible())
-                lastSeasonButton.requestFocus();
+            else if (event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
+                nextSeasonButton.requestFocus();
         });
 
         playButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (event.getCode().equals(KeyCode.UP)){
-                if (cardContainer.getChildren().size() <= 1)
+                if (discsButtons.size() <= 1)
                     detailsButton.requestFocus();
-            }
+                else
+                    discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+            }else if (event.getCode().equals(KeyCode.RIGHT))
+                watchedButton.requestFocus();
+            else if (event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
+                lastSeasonButton.requestFocus();
+        });
+
+        watchedButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+            if (event.getCode().equals(KeyCode.UP)){
+                if (discsButtons.size() <= 1)
+                    detailsButton.requestFocus();
+                else
+                    discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+            }else if (event.getCode().equals(KeyCode.RIGHT))
+                optionsButton.requestFocus();
+            else if (event.getCode().equals(KeyCode.LEFT))
+                playButton.requestFocus();
+        });
+
+        optionsButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+            if (event.getCode().equals(KeyCode.UP)){
+                if (discsButtons.size() <= 1)
+                    detailsButton.requestFocus();
+                else
+                    discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+            }else if (event.getCode().equals(KeyCode.LEFT))
+                watchedButton.requestFocus();
+            else if (event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
+                nextSeasonButton.requestFocus();
         });
 
         detailsButton.setFocusTraversable(false);
         playButton.setFocusTraversable(false);
+        watchedButton.setFocusTraversable(false);
+        optionsButton.setFocusTraversable(false);
         lastSeasonButton.setFocusTraversable(false);
         nextSeasonButton.setFocusTraversable(false);
 
@@ -472,6 +506,10 @@ public class SeasonController {
             addEpisodeCard(disc);
         }
 
+        if (discsButtons.size() <= 1){
+            setTimeLeft(discList.get(0));
+        }
+
         Platform.runLater(() -> {
             if (discsButtons.size() > 1)
                 discsButtons.get(season.lastDisc).requestFocus();
@@ -512,6 +550,13 @@ public class SeasonController {
     }
     public void stopVideo(){
         playingVideo = false;
+
+        if (discsButtons.size() > 1)
+            discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+        else
+            playButton.requestFocus();
+
+        setTimeLeft(selectedDisc);
         reloadEpisodeCard();
         updateWatchedButton();
     }
@@ -523,6 +568,8 @@ public class SeasonController {
             discs.add(disc);
             Button btn = new Button();
             btn.setPadding(new Insets(0));
+
+            btn.setFocusTraversable(false);
 
             btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal) {
@@ -567,6 +614,19 @@ public class SeasonController {
                 if (discsButtons.indexOf(btn) == (discsButtons.size() - 1)
                         && event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
                     nextSeasonButton.requestFocus();
+
+                int index = discsButtons.indexOf(btn);
+                if (event.getCode().equals(KeyCode.LEFT)){
+                    if (index > 0)
+                        discsButtons.get(index - 1).requestFocus();
+                    else if (lastSeasonButton.isVisible())
+                        lastSeasonButton.requestFocus();
+                }else if (event.getCode().equals(KeyCode.RIGHT)){
+                    if (index < discsButtons.size() - 1)
+                        discsButtons.get(index + 1).requestFocus();
+                    else if (nextSeasonButton.isVisible())
+                        nextSeasonButton.requestFocus();
+                }
             });
 
             setEpisodeCardValues(btn, disc);
@@ -765,6 +825,7 @@ public class SeasonController {
         if (selectedDisc.getTimeWatched() > 5000){
             JFXSlider slider = new JFXSlider(0, selectedDisc.runtime * 60 * 1000
                     , selectedDisc.getTimeWatched());
+            slider.setFocusTraversable(false);
             details.setBottom(slider);
         }
 
@@ -782,7 +843,7 @@ public class SeasonController {
         videoInfoParent.getChildren().add(videoInfo);
 
         if (isShow){
-            Label info = new Label("S" + selectedDisc.seasonNumber + "E" + selectedDisc.episodeNumber);
+            Label info = new Label("S" + seasons.get(currentSeason).seasonNumber + "E" + selectedDisc.episodeNumber);
             info.setFont(new Font(24));
             info.setTextFill(Color.WHITE);
             videoInfo.getChildren().add(info);
@@ -938,6 +999,8 @@ public class SeasonController {
         fadeOutEffect(menuShadow);
         fadeOutEffect(detailsBox);
         fadeInEffect(mainPane);
+
+        detailsButton.requestFocus();
     }
     public String setRuntime(int runtime){
         int h = runtime / 60;
@@ -957,9 +1020,38 @@ public class SeasonController {
         durationField.setText(setRuntime(disc.runtime));
         scoreField.setText(String.valueOf(disc.score));
 
+        setTimeLeft(disc);
+
         updateWatchedButton();
     }
+    private void setTimeLeft(Disc disc){
+        if (disc.getTimeWatched() > 5000){
+            timeLeftBox.setVisible(true);
+            long leftTime = ((long) disc.runtime * 60 * 1000) - disc.getTimeWatched();
 
+            long hours = leftTime / 3600000;
+            long minutes = (leftTime % 3600000) / 60000;
+
+            String timeLeft;
+            if (App.globalLanguage != Locale.forLanguageTag("es-ES")) {
+                if (hours > 0) {
+                    timeLeft = hours + " h " + minutes + " min left";
+                } else {
+                    timeLeft = minutes + " min left";
+                }
+            } else {
+                if (hours > 0) {
+                    timeLeft = "Quedan " + hours + " horas " + minutes + " minutos";
+                } else {
+                    timeLeft = "Quedan " + minutes + " minutos";
+                }
+            }
+
+            timeLeftField.setText(timeLeft);
+        }else{
+            timeLeftBox.setVisible(false);
+        }
+    }
     //endregion
 
     //region BACKGROUND MUSIC

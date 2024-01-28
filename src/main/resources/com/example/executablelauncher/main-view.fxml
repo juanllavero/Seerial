@@ -124,6 +124,9 @@
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
+                     <padding>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                     </padding>
                   </Button>
                   <Button fx:id="exitButton" alignment="CENTER" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#close" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Exit" textFill="WHITE">
                      <font>
@@ -132,13 +135,16 @@
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
+                     <padding>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                     </padding>
                   </Button>
                </children>
                <effect>
                   <DropShadow />
                </effect>
                <StackPane.margin>
-                  <Insets bottom="300.0" left="300.0" right="300.0" top="200.0" />
+                  <Insets bottom="500.0" left="500.0" right="500.0" top="250.0" />
                </StackPane.margin>
             </VBox>
          </children>

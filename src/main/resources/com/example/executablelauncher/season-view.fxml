@@ -105,7 +105,7 @@
                               <DropShadow offsetY="2.5" spread="0.45" />
                            </effect>
                         </Label>
-                        <HBox fx:id="detailsInfo" spacing="10.0">
+                        <HBox fx:id="detailsInfo" alignment="CENTER_LEFT" spacing="10.0">
                            <children>
                               <Label fx:id="seasonEpisodeNumber" text="S1E1" textFill="WHITE">
                                  <font>
@@ -131,6 +131,21 @@
                                     <DropShadow offsetY="2.5" spread="0.45" />
                                  </effect>
                               </Label>
+                              <HBox fx:id="timeLeftBox" alignment="CENTER_LEFT" fillHeight="false" styleClass="playerOptionsButton" stylesheets="@styles.css">
+                                 <children>
+                                    <Label fx:id="timeLeftField" text="24m left" textFill="WHITE">
+                                       <font>
+                                          <Font name="System Bold" size="18.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                                 </padding>
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin>
+                              </HBox>
                            </children>
                         </HBox>
                         <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
