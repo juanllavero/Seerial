@@ -57,9 +57,6 @@ public class Controller implements Initializable {
     private ImageView backgroundImage;
 
     @FXML
-    private ImageView backgroundShadow;
-
-    @FXML
     private ScrollPane scrollPane;
 
     @FXML
@@ -151,10 +148,6 @@ public class Controller implements Initializable {
         backgroundImage.setFitHeight(screenHeight);
         backgroundImage.setFitWidth(screenWidth);
         backgroundImage.setPreserveRatio(false);
-
-        backgroundShadow.setFitHeight(screenHeight);
-        backgroundShadow.setFitWidth(screenWidth);
-        backgroundShadow.setPreserveRatio(false);
 
         //Remove horizontal and vertical scroll
         DesktopViewController.scrollModification(scrollPane);
@@ -289,9 +282,9 @@ public class Controller implements Initializable {
             App.setSelectedSeries(seriesToEdit);
             App.setSelectedSeries(seriesToEdit);
 
-            delay = new PauseTransition(Duration.millis(400));
+            delay = new PauseTransition(Duration.millis(300));
             delay.setOnFinished(event -> Platform.runLater(() -> {
-                if (!s.getSeasons().isEmpty()) {
+                if (!s.getSeasons().isEmpty() && seriesButtons.get(collectionList.indexOf(s)).isFocused()) {
                     Season season = App.findSeason(s.getSeasons().get(0));
                     if (season != null) {
                         String imagePath = "src/main/resources/img/backgrounds/" + season.id;
@@ -309,8 +302,8 @@ public class Controller implements Initializable {
                                 BackgroundSize.DEFAULT);
 
                         Platform.runLater(() -> {
-                            mainBox.setBackground(new Background(myBI));
                             fadeEffectComplete(currentImage, getCroppedImage(background));
+                            mainBox.setBackground(new Background(myBI));
                         });
                     }
                 }
@@ -322,14 +315,14 @@ public class Controller implements Initializable {
 
     public void fadeEffectComplete(Image first, Image second){
         backgroundImage.setImage(first);
-        fadeTransition = new FadeTransition(Duration.seconds(0.5), backgroundImage);
+        fadeTransition = new FadeTransition(Duration.seconds(0.2), backgroundImage);
         fadeTransition.setFromValue(1);
         fadeTransition.setToValue(0.1);
         fadeTransition.play();
 
         fadeTransition.setOnFinished(e -> {
             backgroundImage.setImage(second);
-            fadeTransition = new FadeTransition(Duration.seconds(0.5), backgroundImage);
+            fadeTransition = new FadeTransition(Duration.seconds(0.2), backgroundImage);
             fadeTransition.setFromValue(0.1);
             fadeTransition.setToValue(1);
             fadeTransition.play();

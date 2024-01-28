@@ -62,6 +62,9 @@ public class SeasonController {
     private ImageView backgroundShadow2;
 
     @FXML
+    private ImageView scoreProviderImg;
+
+    @FXML
     private HBox cardContainer;
 
     @FXML
@@ -125,6 +128,9 @@ public class SeasonController {
     private Button nextSeasonButton;
 
     @FXML
+    private Button watchedButton;
+
+    @FXML
     private Button optionsButton;
 
     @FXML
@@ -132,6 +138,9 @@ public class SeasonController {
 
     @FXML
     private Button playButton;
+
+    @FXML
+    private Button detailsButton;
 
     @FXML
     private Label scoreField;
@@ -241,7 +250,7 @@ public class SeasonController {
 
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
-                playButton.setText("Reproducir");
+                playButton.setText(App.buttonsBundle.getString("playButton"));
                 ImageView img = (ImageView) playButton.getGraphic();
                 img.setImage(new Image("file:src/main/resources/img/icons/playSelected.png", 30, 30, true, true));
             }else{
@@ -251,9 +260,29 @@ public class SeasonController {
             }
         });
 
+        watchedButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            ImageView img = (ImageView) watchedButton.getGraphic();
+            if (newVal){
+                if (selectedDisc.isWatched()){
+                    watchedButton.setText(App.buttonsBundle.getString("markUnwatched"));
+                    img.setImage(new Image("file:src/main/resources/img/icons/watchedSelected.png", 30, 30, true, true));
+                }else{
+                    watchedButton.setText(App.buttonsBundle.getString("markWatched"));
+                    img.setImage(new Image("file:src/main/resources/img/icons/toWatchSelected.png", 30, 30, true, true));
+                }
+            }else{
+                watchedButton.setText("");
+                if (selectedDisc.isWatched()){
+                    img.setImage(new Image("file:src/main/resources/img/icons/watched.png", 30, 30, true, true));
+                }else{
+                    img.setImage(new Image("file:src/main/resources/img/icons/toWatch.png", 30, 30, true, true));
+                }
+            }
+        });
+
         optionsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
-                optionsButton.setText("Más");
+                optionsButton.setText(App.buttonsBundle.getString("moreButton"));
                 ImageView img = (ImageView) optionsButton.getGraphic();
                 img.setImage(new Image("file:src/main/resources/img/icons/optionsSelected.png", 30, 30, true, true));
             }else{
@@ -263,19 +292,53 @@ public class SeasonController {
             }
         });
 
-        lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal){
+        watchedButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (event.getCode().equals(KeyCode.ENTER)){
+                toggleWatched();
+            }
+        });
+
+        lastSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (event.getCode().equals(KeyCode.SPACE) || event.getCode().equals(KeyCode.LEFT)){
                 lastSeason();
             }
         });
 
-        nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal){
+        nextSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (event.getCode().equals(KeyCode.SPACE) || event.getCode().equals(KeyCode.RIGHT)){
                 nextSeason();
             }
         });
 
+        detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (event.getCode().equals(KeyCode.DOWN)){
+                if (discsButtons.size() <= 1)
+                    playButton.requestFocus();
+                else
+                    discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+            }else if (event.getCode().equals(KeyCode.LEFT)
+                    && discs.indexOf(selectedDisc) == 0 && lastSeasonButton.isVisible())
+                lastSeasonButton.requestFocus();
+            else if (event.getCode().equals(KeyCode.RIGHT)
+                    && discs.indexOf(selectedDisc) == (discs.size() - 1) && lastSeasonButton.isVisible())
+                lastSeasonButton.requestFocus();
+        });
+
+        playButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+            if (event.getCode().equals(KeyCode.UP)){
+                if (cardContainer.getChildren().size() <= 1)
+                    detailsButton.requestFocus();
+            }
+        });
+
+        detailsButton.setFocusTraversable(false);
+        playButton.setFocusTraversable(false);
+        lastSeasonButton.setFocusTraversable(false);
+        nextSeasonButton.setFocusTraversable(false);
+
+        setEpisodesOutOfFocusButton(detailsButton);
         setEpisodesOutOfFocusButton(playButton);
+        setEpisodesOutOfFocusButton(watchedButton);
         setEpisodesOutOfFocusButton(optionsButton);
 
         currentSeason = 0;
@@ -341,12 +404,12 @@ public class SeasonController {
 
         // Crear el nuevo ImageView con la imagen recortada
         backgroundImage.setImage(croppedImage);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.8), backgroundImage);
         fadeIn.setFromValue(0);
         fadeIn.setToValue(1);
         fadeIn.play();
 
-        String logoSrc = "";
+        String logoSrc;
         if (isShow)
             logoSrc = series.logoSrc;
         else
@@ -365,12 +428,12 @@ public class SeasonController {
             img = new Image("file:" + logoSrc, screenWidth * 0.25, screenHeight * 0.25, true, true);
 
             logo.setImage(img);
-            logo.setFitWidth(screenWidth * 0.15);
-            logo.setFitHeight(screenHeight * 0.15);
+            logo.setFitWidth(screenWidth * 0.25);
+            logo.setFitHeight(screenHeight * 0.25);
         }
 
-        if (!isShow)
-            infoBox.getChildren().remove(episodeName);
+        /*if (!isShow)
+            infoBox.getChildren().remove(episodeName);*/
 
         if (!season.getVideoSrc().isEmpty()){
             File file = new File(season.getVideoSrc());
@@ -409,11 +472,9 @@ public class SeasonController {
             addEpisodeCard(disc);
         }
 
-        mainPane.requestFocus();
-
         Platform.runLater(() -> {
             if (discsButtons.size() > 1)
-                discsButtons.get(0).requestFocus();
+                discsButtons.get(season.lastDisc).requestFocus();
             else
                 playButton.requestFocus();
         });
@@ -422,9 +483,16 @@ public class SeasonController {
 
         overviewField.setText(season.overview);
         yearField.setText(season.getYear());
-        scoreField.setText(String.valueOf(selectedDisc.score));
         durationField.setText(setRuntime(selectedDisc.runtime));
         episodeName.setText(season.name);
+
+        if (selectedDisc.imdbScore != 0){
+            scoreProviderImg.setImage(new Image("file:src/main/resources/img/icons/imdb.png", 30, 30, true, true));
+            scoreField.setText(String.valueOf(selectedDisc.imdbScore));
+        }else{
+            scoreProviderImg.setImage(new Image("file:src/main/resources/img/icons/tmdb.png", 30, 30, true, true));
+            scoreField.setText(String.valueOf(selectedDisc.score));
+        }
 
         if (!isShow){
             detailsInfo.getChildren().remove(seasonEpisodeNumber);
@@ -433,24 +501,6 @@ public class SeasonController {
         fadeInEffect(backgroundImage);
     }
     //endregion
-
-    private int getVisibleButtonsCount() {
-        double scrollPaneWidth = episodeScroll.getWidth();
-        double scrollPaneX = episodeScroll.getLayoutX();
-
-        int visibleButtons = 0;
-
-        for (Node button : cardContainer.getChildren()) {
-            Bounds buttonBounds = button.localToScene(button.getBoundsInLocal());
-            double buttonX = buttonBounds.getMinX();
-
-            if (buttonX >= scrollPaneX && buttonX + buttonBounds.getWidth() <= scrollPaneX + scrollPaneWidth) {
-                visibleButtons++;
-            }
-        }
-
-        return visibleButtons;
-    }
 
     //region UTILS
     private void updateButtons(){
@@ -462,6 +512,8 @@ public class SeasonController {
     }
     public void stopVideo(){
         playingVideo = false;
+        reloadEpisodeCard();
+        updateWatchedButton();
     }
     //endregion
 
@@ -479,18 +531,13 @@ public class SeasonController {
                         enableAllEpisodes();
                     }
 
-                    //////////
+                    seasons.get(currentSeason).lastDisc = discsButtons.indexOf(btn);
 
-                    double rightBorderPos = 0;
-                    double centerOfScreen = Screen.getPrimary().getBounds().getWidth() / 2;
-
+                    //Move ScrollPane
                     handleButtonFocus(btn);
-
-                    /////////
 
                     btn.setScaleX(1.1);
                     btn.setScaleY(1.1);
-                    //selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
                     controllerParent.playInteractionSound();
 
                     updateDiscInfo(discs.get(discsButtons.indexOf(btn)));
@@ -506,67 +553,23 @@ public class SeasonController {
                 }
             });
 
-            ImageView thumbnail = new ImageView();
+            btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
+                if (event.getCode().equals(KeyCode.DOWN))
+                    playButton.requestFocus();
 
-            double targetHeight = Screen.getPrimary().getBounds().getHeight() / 5.5;
-            double targetWidth = ((double) 16 /9) * targetHeight;
+                if (event.getCode().equals(KeyCode.UP))
+                    detailsButton.requestFocus();
 
-            thumbnail.setFitWidth(targetWidth);
-            thumbnail.setFitHeight(targetHeight);
+                if (discsButtons.indexOf(btn) == 0
+                        && event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
+                    lastSeasonButton.requestFocus();
 
-            File newFile = new File(disc.imgSrc);
-            if (!newFile.exists())
-                disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+                if (discsButtons.indexOf(btn) == (discsButtons.size() - 1)
+                        && event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
+                    nextSeasonButton.requestFocus();
+            });
 
-            Image originalImage = new Image("file:" + disc.imgSrc, targetWidth, targetHeight, true, true);
-
-            thumbnail.setImage(originalImage);
-            thumbnail.setPreserveRatio(false);
-            thumbnail.setSmooth(true);
-
-            btn.getStyleClass().add("seriesCoverButton");
-            //btn.setGraphic(thumbnail);
-
-            StackPane main = new StackPane(thumbnail);
-            BorderPane details = new BorderPane();
-
-            if (disc.getTimeWatched() > 5000){
-                JFXSlider slider = new JFXSlider(0, 100, (double) 100 / ((double) (disc.runtime * 1000) / disc.getTimeWatched()));
-                details.setBottom(slider);
-            }
-
-            HBox videoInfoParent = new HBox();
-            videoInfoParent.setPadding(new Insets(6, 0, 0, 6));
-
-            HBox videoInfo = new HBox();
-            videoInfo.setAlignment(Pos.TOP_RIGHT);
-            videoInfo.setPrefWidth(Region.USE_COMPUTED_SIZE);
-            videoInfo.setMaxWidth(Region.USE_PREF_SIZE);
-            videoInfo.setPadding(new Insets(8));
-            videoInfo.getStyleClass().add("episodeCardInfo");
-            videoInfo.setSpacing(5);
-
-            videoInfoParent.getChildren().add(videoInfo);
-
-            if (isShow){
-                Label info = new Label("S" + disc.seasonNumber + "E" + disc.episodeNumber);
-                info.setFont(new Font(24));
-                info.setTextFill(Color.WHITE);
-                videoInfo.getChildren().add(info);
-            }
-
-            if (disc.isWatched()){
-                ImageView watched = new ImageView(
-                        new Image("file:src/main/resources/img/icons/tick.png", 25, 25, true, true));
-                videoInfo.getChildren().add(watched);
-                watched.setTranslateY(5);
-            }
-
-            if (!videoInfo.getChildren().isEmpty())
-                details.setTop(videoInfoParent);
-
-            main.getChildren().add(details);
-            btn.setGraphic(main);
+            setEpisodeCardValues(btn, disc);
 
             cardContainer.getChildren().add(btn);
             discsButtons.add(btn);
@@ -700,6 +703,103 @@ public class SeasonController {
         for (Button btn : discsButtons){
             btn.setDisable(false);
         }
+    }
+
+    private void toggleWatched(){
+        if (selectedDisc.isWatched())
+            selectedDisc.setUnWatched();
+        else
+            selectedDisc.setWatched();
+
+        reloadEpisodeCard();
+
+        updateWatchedButton();
+    }
+    private void updateWatchedButton(){
+        ImageView img = (ImageView) watchedButton.getGraphic();
+
+        if (watchedButton.isFocused()){
+            if (selectedDisc.isWatched()){
+                img.setImage(new Image("file:src/main/resources/img/icons/watchedSelected.png", 30, 30, true, true));
+            }else{
+                img.setImage(new Image("file:src/main/resources/img/icons/toWatchSelected.png", 30, 30, true, true));
+            }
+        }else{
+            if (selectedDisc.isWatched()){
+                img.setImage(new Image("file:src/main/resources/img/icons/watched.png", 30, 30, true, true));
+            }else{
+                img.setImage(new Image("file:src/main/resources/img/icons/toWatch.png", 30, 30, true, true));
+            }
+        }
+    }
+    private void reloadEpisodeCard(){
+        Button btn = discsButtons.get(discs.indexOf(selectedDisc));
+        btn.setGraphic(null);
+
+        setEpisodeCardValues(btn, selectedDisc);
+    }
+    private void setEpisodeCardValues(Button btn, Disc selectedDisc) {
+        ImageView thumbnail = new ImageView();
+
+        double targetHeight = Screen.getPrimary().getBounds().getHeight() / 5.5;
+        double targetWidth = ((double) 16 /9) * targetHeight;
+
+        thumbnail.setFitWidth(targetWidth);
+        thumbnail.setFitHeight(targetHeight);
+
+        File newFile = new File(selectedDisc.imgSrc);
+        if (!newFile.exists())
+            selectedDisc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+
+        Image originalImage = new Image("file:" + selectedDisc.imgSrc, targetWidth, targetHeight, true, true);
+
+        thumbnail.setImage(originalImage);
+        thumbnail.setPreserveRatio(false);
+        thumbnail.setSmooth(true);
+
+        btn.getStyleClass().add("seriesCoverButton");
+
+        StackPane main = new StackPane(thumbnail);
+        BorderPane details = new BorderPane();
+
+        if (selectedDisc.getTimeWatched() > 5000){
+            JFXSlider slider = new JFXSlider(0, selectedDisc.runtime * 60 * 1000
+                    , selectedDisc.getTimeWatched());
+            details.setBottom(slider);
+        }
+
+        HBox videoInfoParent = new HBox();
+        videoInfoParent.setPadding(new Insets(6, 0, 0, 6));
+
+        HBox videoInfo = new HBox();
+        videoInfo.setAlignment(Pos.TOP_RIGHT);
+        videoInfo.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        videoInfo.setMaxWidth(Region.USE_PREF_SIZE);
+        videoInfo.setPadding(new Insets(8));
+        videoInfo.getStyleClass().add("episodeCardInfo");
+        videoInfo.setSpacing(5);
+
+        videoInfoParent.getChildren().add(videoInfo);
+
+        if (isShow){
+            Label info = new Label("S" + selectedDisc.seasonNumber + "E" + selectedDisc.episodeNumber);
+            info.setFont(new Font(24));
+            info.setTextFill(Color.WHITE);
+            videoInfo.getChildren().add(info);
+        }
+
+        if (selectedDisc.isWatched()){
+            ImageView watched = new ImageView(
+                    new Image("file:src/main/resources/img/icons/tick.png", 25, 25, true, true));
+            videoInfo.getChildren().add(watched);
+            watched.setTranslateY(5);
+        }
+
+        if (!videoInfo.getChildren().isEmpty())
+            details.setTop(videoInfoParent);
+
+        main.getChildren().add(details);
+        btn.setGraphic(main);
     }
     //endregion
 
@@ -856,6 +956,8 @@ public class SeasonController {
         yearField.setText(disc.year);
         durationField.setText(setRuntime(disc.runtime));
         scoreField.setText(String.valueOf(disc.score));
+
+        updateWatchedButton();
     }
 
     //endregion

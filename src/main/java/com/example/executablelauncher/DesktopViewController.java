@@ -59,6 +59,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.FileUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -1144,6 +1148,7 @@ public class DesktopViewController {
         selectedSeason.year = metadata.release_date.substring(0, metadata.release_date.indexOf("-"));
         selectedSeason.score = (float) ((int) (metadata.vote_average * 10.0)) / 10.0f;
         selectedSeason.tagline = metadata.tagline;
+        selectedSeason.imdbID = metadata.imdb_id;
 
         Images images = downloadImages(selectedSeason.themdbID);
 
@@ -1187,6 +1192,9 @@ public class DesktopViewController {
 
             if (disc == null)
                 continue;
+
+            if (!selectedSeason.imdbID.isEmpty())
+                setIMDBScore(selectedSeason.imdbID, disc);
 
             setMovieThumbnail(disc, selectedSeason.themdbID);
         }
@@ -1876,6 +1884,7 @@ public class DesktopViewController {
             season.folder = f.getAbsolutePath();
             season.seriesID = series.id;
             season.themdbID = themdbID;
+            season.imdbID = movieMetadata.imdb_id;
 
             season.name = movieMetadata.title;
             season.overview = movieMetadata.overview;
@@ -2042,6 +2051,7 @@ public class DesktopViewController {
                         season.year = movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-"));
                         season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
                         season.tagline = movieMetadata.tagline;
+                        season.imdbID = movieMetadata.imdb_id;
 
                         List<Genre> genres = movieMetadata.genres;
 
@@ -2171,6 +2181,7 @@ public class DesktopViewController {
                     season.year = movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-"));
                     season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
                     season.tagline = movieMetadata.tagline;
+                    season.imdbID = movieMetadata.imdb_id;
 
                     List<Genre> genres = movieMetadata.genres;
 
@@ -2287,7 +2298,24 @@ public class DesktopViewController {
         disc.seasonNumber = season.seasonNumber;
         disc.executableSrc = file.getAbsolutePath();
 
+        if (!season.imdbID.isEmpty())
+            setIMDBScore(season.imdbID, disc);
+
         setMovieThumbnail(disc, season.themdbID);
+    }
+    private void setIMDBScore(String imdbID, Disc disc){
+        try{
+            Document doc= Jsoup.connect("https://www.imdb.com/title/" + imdbID).timeout(6000).get();
+            Elements body = doc.select("div.sc-bde20123-2");
+            for (Element e : body.select("span.sc-bde20123-1"))
+            {
+                String score = e.text();
+                disc.imdbScore = Float.parseFloat(score);
+                break;
+            }
+        } catch (IOException e) {
+            System.err.println("setIMDBScore: IMDB connection lost");
+        }
     }
     private void setMovieThumbnail(Disc disc, int themdbID){
         String imageBaseURL = "https://image.tmdb.org/t/p/original";

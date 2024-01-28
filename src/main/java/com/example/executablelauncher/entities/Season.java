@@ -14,6 +14,7 @@ public class Season implements Serializable {
     public String year = "";
     public String tagline = "";
     public float score = 0;
+    public float imdbScore = 0;
     public int seasonNumber = 0;
     public String logoSrc = "";
     public String backgroundSrc = "";
@@ -25,6 +26,7 @@ public class Season implements Serializable {
 
     public int order = 0;
     public int themdbID = -1;
+    public String imdbID = "";
     public boolean showName = true;
     public String folder = "";
     public int lastDisc = 0;

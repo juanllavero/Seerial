@@ -135,7 +135,7 @@
                         </HBox>
                         <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
                            <children>
-                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="scoreProviderImg" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/tmdb.png" />
                                  </image>
@@ -147,7 +147,7 @@
                               </Label>
                            </children>
                         </HBox>
-                        <Button alignment="TOP_LEFT" graphicTextGap="0.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" prefWidth="649.0" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
+                        <Button fx:id="detailsButton" alignment="TOP_LEFT" graphicTextGap="0.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" prefWidth="649.0" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
                            <font>
                               <Font size="20.0" />
                            </font>
@@ -157,7 +157,7 @@
                                     <Font name="System Bold" size="16.0" />
                                  </font>
                                  <padding>
-                                    <Insets bottom="5.0" top="5.0" />
+                                    <Insets bottom="5.0" left="2.0" top="5.0" />
                                  </padding>
                               </Label>
                            </graphic>
@@ -185,7 +185,7 @@
                         <Insets bottom="10.0" top="10.0" />
                      </VBox.margin>
                   </ScrollPane>
-                  <HBox fillHeight="false">
+                  <HBox fillHeight="false" spacing="20.0">
                      <children>
                         <Button fx:id="playButton" accessibleRole="IMAGE_VIEW" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onAction="#play" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
                            <font>
@@ -201,6 +201,27 @@
                            <padding>
                               <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                            </padding>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="watchedButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
+                           <graphic>
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
+                                 <image>
+                                    <Image url="@../../../img/icons/toWatch.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <padding>
+                              <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                           </padding>
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
                         </Button>
                         <Button fx:id="optionsButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
                            <graphic>
@@ -211,7 +232,7 @@
                               </ImageView>
                            </graphic>
                            <HBox.margin>
-                              <Insets left="20.0" />
+                              <Insets />
                            </HBox.margin>
                            <padding>
                               <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
@@ -220,7 +241,6 @@
                               <Font size="18.0" />
                            </font>
                         </Button>
-                        <ImageView fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
                      </children>
                      <VBox.margin>
                         <Insets left="130.0" />

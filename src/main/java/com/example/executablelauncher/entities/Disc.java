@@ -11,6 +11,7 @@ public class Disc implements Serializable {
     public String overview = "";
     public String year = "";
     public float score = 0;
+    public float imdbScore = 0;
     public int order = 0;
     public int runtime = 0;
     public int episodeNumber = 0;
