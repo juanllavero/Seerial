@@ -206,7 +206,7 @@
 }
 
 .episodeCardInfo{
-    -fx-background-color: rgba(0, 0, 0, 0.56);
+    -fx-background-color: rgba(0, 0, 0, 0.69);
     -fx-background-radius: 5px;
     -fx-font-weight: bold;
 }

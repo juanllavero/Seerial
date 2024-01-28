@@ -51,9 +51,6 @@ public class Controller implements Initializable {
     private BorderPane mainPane;
 
     @FXML
-    private Button menuButton;
-
-    @FXML
     private ImageView menuShadow;
 
     @FXML
@@ -66,13 +63,7 @@ public class Controller implements Initializable {
     private ScrollPane scrollPane;
 
     @FXML
-    private VBox sideMenu;
-
-    @FXML
-    private AnchorPane sideMenuBox;
-
-    @FXML
-    private StackPane sideMenuParent;
+    private StackPane mainMenu;
 
     @FXML
     private HBox topBar;
@@ -98,6 +89,8 @@ public class Controller implements Initializable {
     @FXML
     private ImageView globalShadow;
 
+    private List<Category> categories = null;
+    private Category currentCategory = null;
     private Series seriesToEdit;
     private List<Series> collectionList = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
@@ -117,36 +110,34 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        sideMenuParent.setVisible(false);
+        mainMenu.setVisible(false);
 
         exitButton.setText(App.buttonsBundle.getString("exitFullscreen"));
         switchToDesktopButton.setText(App.buttonsBundle.getString("switchToDesktop"));
 
         playBackgroundSound();
 
-        //Open/Close Side Menu
-        sideMenu.setVisible(false);
-        menuButton.setOnMouseClicked(mouseEvent -> {
-            playInteractionSound();
-            globalShadow.setVisible(true);
-            sideMenuParent.setVisible(true);
-            sideMenu.setVisible(true);
-            switchToDesktopButton.requestFocus();
-        });
-
-        menuButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (KeyCode.ENTER == event.getCode()) {
-                playInteractionSound();
-                globalShadow.setVisible(true);
-                sideMenuParent.setVisible(true);
-                sideMenu.setVisible(true);
-                switchToDesktopButton.requestFocus();
-            }
-        });
+        //Open/Close Menu
+        mainMenu.setVisible(false);
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()) {
-                hideContextMenu();
+                if (mainMenu.isVisible()){
+                    hideContextMenu();
+                }else{
+                    playInteractionSound();
+                    globalShadow.setVisible(true);
+                    mainMenu.setVisible(true);
+                    mainPane.setDisable(true);
+                    switchToDesktopButton.requestFocus();
+                }
+            }
+        });
+
+        categoriesBox.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                int index = categories.indexOf(currentCategory);
+                categoriesBox.getChildren().get(index).requestFocus();
             }
         });
 
@@ -156,10 +147,6 @@ public class Controller implements Initializable {
         //Fit width and height of components to window size
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
-        //mainBox.prefWidth(screenWidth);
-        //mainBox.prefHeight(screenHeight);
-        //mainPane.prefWidthProperty().bind(mainBox.prefWidthProperty());
-        //mainPane.prefHeightProperty().bind(mainBox.prefHeightProperty());
         topBorderPane.prefWidthProperty().bind(topBar.widthProperty());
         backgroundImage.setFitHeight(screenHeight);
         backgroundImage.setFitWidth(screenWidth);
@@ -168,11 +155,6 @@ public class Controller implements Initializable {
         backgroundShadow.setFitHeight(screenHeight);
         backgroundShadow.setFitWidth(screenWidth);
         backgroundShadow.setPreserveRatio(false);
-        
-        sideMenuBox.setPrefHeight(Screen.getPrimary().getBounds().getHeight());
-        sideMenuBox.setPrefWidth(Screen.getPrimary().getBounds().getWidth() / 6);
-        sideMenu.prefHeightProperty().bind(sideMenuBox.prefHeightProperty());
-        sideMenu.prefWidthProperty().bind(sideMenuBox.prefWidthProperty());
 
         //Remove horizontal and vertical scroll
         DesktopViewController.scrollModification(scrollPane);
@@ -185,23 +167,23 @@ public class Controller implements Initializable {
         globalShadow.setFitHeight(screenHeight);
         globalShadow.setVisible(false);
 
-        List<String> categories = App.getFullscreenCategories();
+        categories = App.getFullscreenCategories();
 
-        for (String cat : categories){
+        for (Category cat : categories){
             Button btn = new Button();
-            btn.setText(cat);
+            btn.setText(cat.name);
             btn.getStyleClass().add("CatButton");
             HBox.setMargin(btn, new Insets(0, 5, 0, 0));
 
             btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
                 playCategoriesSound();
-                showSeriesFrom(btn.getText());
+                showSeriesFrom(categories.get(categoriesBox.getChildren().indexOf(btn)));
             });
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
                 if (KeyCode.ENTER == event.getCode()) {
                     playCategoriesSound();
-                    showSeriesFrom(btn.getText());
+                    showSeriesFrom(categories.get(categoriesBox.getChildren().indexOf(btn)));
                 }
             });
 
@@ -222,8 +204,12 @@ public class Controller implements Initializable {
         timeline.play();
         //endregion
 
-        showSeriesFrom(categories.get(0));
-        defaultSelection();
+        currentCategory = App.getCurrentCategory();
+
+        if (currentCategory == null)
+            currentCategory = categories.get(0);
+
+        showSeriesFrom(currentCategory);
     }
 
     private void updateHour() {
@@ -236,12 +222,17 @@ public class Controller implements Initializable {
         clock.setText(time);
     }
 
-    public void showSeriesFrom(String cat){
-        Category category = App.findCategory(cat);
-        categoryType = category.type;
+    public void showSeriesFrom(Category cat){
+        if (cat != currentCategory)
+            App.setCurrentCategory(cat);
+
+        currentCategory = cat;
+
+        categoryType = currentCategory.type;
         cardContainer.getChildren().clear();
         seriesButtons.clear();
-        collectionList = App.getSeriesFromCategory(cat);
+        collectionList = App.getSeriesFromCategory(cat.name);
+        assert collectionList != null;
         for (Series col : collectionList) {
             addCard(col);
         }
@@ -262,32 +253,41 @@ public class Controller implements Initializable {
                 Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true),
                 BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
                 BackgroundSize.DEFAULT);
-        mainBox.setBackground(new Background(myBI));
 
-        Background bi = mainBox.getBackground();
-        Background black = new Background(new BackgroundFill(Color.BLACK, CornerRadii.EMPTY, Insets.EMPTY));
+        Platform.runLater(() -> {
+            restoreSelection();
 
-        mainBox.setBackground(bi);
+            mainBox.setBackground(new Background(myBI));
+            //Fade in effect
+            FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), backgroundImage);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
 
-        //Fade in effect
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1);
-        fadeIn.play();
+            fadeIn.play();
+        });
     }
 
-    public void defaultSelection(){
-        if (!collectionList.isEmpty()) {
-            seriesToEdit = null;
-            mainPane.requestFocus();
-            cardContainer.requestFocus();
-            seriesButtons.get(0).requestFocus();
-        }
+    private void restoreSelection(){
+        Series seriesToSelect = App.getSelectedSeries();
+
+        if (seriesToSelect == null)
+            seriesToSelect = collectionList.get(0);
+
+        int index = collectionList.indexOf(seriesToSelect);
+        if (index == -1)
+            index = 0;
+
+        App.setSelectedSeries(collectionList.get(0));
+
+        cardContainer.getChildren().get(index).requestFocus();
     }
 
     public void selectSeries(Series s){
         if (seriesToEdit != s){
             seriesToEdit = s;
+
+            App.setSelectedSeries(seriesToEdit);
+            App.setSelectedSeries(seriesToEdit);
 
             delay = new PauseTransition(Duration.millis(400));
             delay.setOnFinished(event -> Platform.runLater(() -> {
@@ -435,7 +435,7 @@ public class Controller implements Initializable {
     public void showContextMenu(Series s){
         playInteractionSound();
         seriesToEdit = s;
-        sideMenuParent.setVisible(true);
+        mainMenu.setVisible(true);
     }
 
     public void showSeriesMenu(){
@@ -462,9 +462,10 @@ public class Controller implements Initializable {
     void hideContextMenu(){
         playInteractionSound();
         seriesToEdit = null;
-        sideMenuParent.setVisible(false);
-        sideMenu.setVisible(false);
+        mainMenu.setVisible(false);
         globalShadow.setVisible(false);
+        mainPane.setDisable(false);
+        restoreSelection();
     }
 
     public void showSeason(Series s){

@@ -147,7 +147,7 @@
                               </Label>
                            </children>
                         </HBox>
-                        <Button alignment="TOP_LEFT" graphicTextGap="0.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" prefWidth="849.0" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
+                        <Button alignment="TOP_LEFT" graphicTextGap="0.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" prefWidth="649.0" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
                            <font>
                               <Font size="20.0" />
                            </font>

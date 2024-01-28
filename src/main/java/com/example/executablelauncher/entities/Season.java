@@ -27,6 +27,7 @@ public class Season implements Serializable {
     public int themdbID = -1;
     public boolean showName = true;
     public String folder = "";
+    public int lastDisc = 0;
     public final List<String> discs = new ArrayList<>();
     public List<String> genres = new ArrayList<>();
 

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -10,7 +9,6 @@
 <?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
@@ -41,51 +39,30 @@
                      <HBox.margin>
                         <Insets top="10.0" />
                      </HBox.margin>
-                     <left>
-                        <HBox fx:id="categoriesBox" alignment="BOTTOM_LEFT" prefHeight="50.0" BorderPane.alignment="CENTER">
-                           <padding>
-                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
-                           <BorderPane.margin>
-                              <Insets />
-                           </BorderPane.margin>
-                        </HBox>
-                     </left>
                      <right>
-                        <HBox alignment="CENTER" BorderPane.alignment="CENTER">
-                           <children>
-                              <Label fx:id="clock" alignment="CENTER" prefHeight="35.0" prefWidth="98.0" text="22:30" textFill="WHITE">
-                                 <font>
-                                    <Font size="24.0" />
-                                 </font>
-                                 <HBox.margin>
-                                    <Insets right="20.0" />
-                                 </HBox.margin>
-                                 <effect>
-                                    <DropShadow />
-                                 </effect>
-                              </Label>
-                              <Button fx:id="menuButton" mnemonicParsing="false" prefHeight="0.0" prefWidth="0.0" styleClass="menuButton" stylesheets="@styles.css">
-                                 <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true" smooth="false">
-                                       <image>
-                                          <Image url="@../../../img/icons/menu.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </Button>
-                           </children>
+                        <Label fx:id="clock" alignment="CENTER" prefHeight="35.0" prefWidth="98.0" text="22:30" textFill="WHITE" BorderPane.alignment="CENTER">
+                           <font>
+                              <Font size="24.0" />
+                           </font>
+                           <effect>
+                              <DropShadow />
+                           </effect>
                            <BorderPane.margin>
-                              <Insets />
+                              <Insets right="20.0" />
                            </BorderPane.margin>
-                           <padding>
-                              <Insets right="50.0" />
-                           </padding>
-                        </HBox>
+                        </Label>
                      </right>
+                     <left>
+                        <ScrollPane hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
+                           <content>
+                              <HBox fx:id="categoriesBox" alignment="BOTTOM_LEFT" prefHeight="50.0">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding>
+                              </HBox>
+                           </content>
+                        </ScrollPane>
+                     </left>
                   </BorderPane>
                </children>
                <BorderPane.margin>
@@ -127,78 +104,48 @@
       </ImageView>
       <ImageView fx:id="globalShadow" fitHeight="720.0" fitWidth="1280.0" nodeOrientation="RIGHT_TO_LEFT" pickOnBounds="true">
          <image>
-            <Image url="@../../../img/backgroundShadow.png" />
+            <Image url="@../../../img/aaa.png" />
          </image>
          <effect>
             <ColorAdjust contrast="1.0" />
          </effect>
       </ImageView>
-      <StackPane fx:id="sideMenuParent" styleClass="blurredBackground" stylesheets="@styles.css" StackPane.alignment="CENTER">
+      <StackPane fx:id="mainMenu" styleClass="blurredBackground" stylesheets="@styles.css" StackPane.alignment="CENTER">
          <children>
-            <AnchorPane StackPane.alignment="CENTER">
+            <VBox alignment="TOP_CENTER" spacing="20.0" stylesheets="@styles.css">
                <children>
-                  <AnchorPane fx:id="sideMenuBox" layoutX="975.0" maxHeight="-Infinity" prefHeight="720.0" prefWidth="387.0" AnchorPane.rightAnchor="0.0">
-                     <children>
-                        <VBox fx:id="sideMenu" layoutX="-64.0" prefHeight="720.0" prefWidth="348.0" stylesheets="@styles.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <Label prefHeight="34.0" prefWidth="247.0" text="VideoLauncher" textFill="WHITE">
-                                 <font>
-                                    <Font size="28.0" />
-                                 </font>
-                                 <VBox.margin>
-                                    <Insets bottom="10.0" left="15.0" />
-                                 </VBox.margin>
-                              </Label>
-                              <Button fx:id="switchToDesktopButton" alignment="BASELINE_LEFT" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#switchToDesktop" stylesheets="@styles.css" text="Switch to Desktop Mode" textFill="WHITE">
-                                 <font>
-                                    <Font size="24.0" />
-                                 </font>
-                                 <styleClass>
-                                    <String fx:value="transparent" />
-                                    <String fx:value="buttonGradient" />
-                                 </styleClass>
-                                 <graphic>
-                                    <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/icons/back.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <VBox.margin>
-                                    <Insets />
-                                 </VBox.margin>
-                              </Button>
-                              <Button fx:id="exitButton" alignment="BASELINE_LEFT" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#close" stylesheets="@styles.css" text="Exit VideoLauncher" textFill="WHITE">
-                                 <font>
-                                    <Font size="24.0" />
-                                 </font>
-                                 <styleClass>
-                                    <String fx:value="transparent" />
-                                    <String fx:value="buttonGradient" />
-                                 </styleClass>
-                                 <VBox.margin>
-                                    <Insets />
-                                 </VBox.margin>
-                                 <graphic>
-                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/icons/close.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                              </Button>
-                           </children>
-                           <padding>
-                              <Insets top="20.0" />
-                           </padding>
-                           <effect>
-                              <DropShadow />
-                           </effect>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
+                  <Label alignment="CENTER" text="VideoLauncher" textFill="WHITE">
+                     <font>
+                        <Font size="34.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets bottom="20.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Button fx:id="switchToDesktopButton" alignment="CENTER" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#switchToDesktop" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Switch to Desktop Mode" textFill="WHITE">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </Button>
+                  <Button fx:id="exitButton" alignment="CENTER" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#close" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Exit" textFill="WHITE">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </Button>
                </children>
-            </AnchorPane>
+               <effect>
+                  <DropShadow />
+               </effect>
+               <StackPane.margin>
+                  <Insets bottom="300.0" left="300.0" right="300.0" top="200.0" />
+               </StackPane.margin>
+            </VBox>
          </children>
       </StackPane>
    </children>

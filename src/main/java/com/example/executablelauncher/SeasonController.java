@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -173,9 +174,6 @@ public class SeasonController {
     private Series series = null;
     private boolean episodesFocussed = true;
     private boolean playingVideo = false;
-    private int middleEpisode = 0;
-    private static int BUTTON_COUNT = 0;
-    private static int VISIBLE_BUTTONS = 0;
     //endregion
 
     //region INITIALIZATION
@@ -191,6 +189,9 @@ public class SeasonController {
                 seasons.add(App.findSeason(id));
             }
         }
+
+        assert seasons != null;
+        seasons.sort(new Utils.SeasonComparator());
 
         videoImage.setFitWidth(Screen.getPrimary().getBounds().getWidth());
         videoImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
@@ -234,19 +235,9 @@ public class SeasonController {
         detailsText.setPrefWidth(screenWidth / 2);
         detailsBox.setVisible(false);
 
-        /*episodeScroll.setOnScroll(event -> {
-
-            if (event.getDeltaY() > 0)
-                episodeScroll.setHvalue(pos == minPos ? minPos : pos--);
-            else
-                episodeScroll.setHvalue(pos == maxPos ? maxPos : pos++);
-        });*/
-
         //Remove horizontal and vertical scroll
         episodeScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         episodeScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-
-        episodeScroll.addEventFilter(KeyEvent.KEY_PRESSED, this::handleKeyPress);
 
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
@@ -287,8 +278,9 @@ public class SeasonController {
         setEpisodesOutOfFocusButton(playButton);
         setEpisodesOutOfFocusButton(optionsButton);
 
+        currentSeason = 0;
         assert seasons != null;
-        updateInfo(seasons.get(currentSeason));
+        updateInfo(seasons.get(0));
     }
     private void updateInfo(Season season){
         if (mp != null){
@@ -354,41 +346,31 @@ public class SeasonController {
         fadeIn.setToValue(1);
         fadeIn.play();
 
-        if (isShow){
-            if (series.logoSrc.isEmpty()){
-                infoBox.getChildren().remove(0);
-                Label seriesTitle = new Label(series.name);
-                seriesTitle.setFont(new Font("Arial", 58));
-                seriesTitle.setStyle("-fx-font-weight: bold");
-                seriesTitle.setTextFill(Color.color(1, 1, 1));
-                seriesTitle.setEffect(new DropShadow());
-                infoBox.getChildren().add(0, seriesTitle);
-            }else {
-                Image img;
-                img = new Image("file:" + series.logoSrc, screenWidth * 0.25, screenHeight * 0.25, true, true);
+        String logoSrc = "";
+        if (isShow)
+            logoSrc = series.logoSrc;
+        else
+            logoSrc = season.logoSrc;
 
-                logo.setImage(img);
-                logo.setFitWidth(screenWidth * 0.15);
-                logo.setFitHeight(screenHeight * 0.15);
-            }
-        }else{
-            if (season.getLogoSrc().isEmpty()){
-                infoBox.getChildren().remove(0);
-                Label seriesTitle = new Label(series.name);
-                seriesTitle.setFont(new Font("Arial", 58));
-                seriesTitle.setStyle("-fx-font-weight: bold");
-                seriesTitle.setTextFill(Color.color(1, 1, 1));
-                seriesTitle.setEffect(new DropShadow());
-                infoBox.getChildren().add(0, seriesTitle);
-            }else {
-                Image img;
-                img = new Image("file:" + season.logoSrc, screenWidth * 0.25, screenHeight * 0.25, true, true);
+        if (logoSrc.isEmpty()){
+            infoBox.getChildren().remove(0);
+            Label seriesTitle = new Label(series.name);
+            seriesTitle.setFont(new Font("Arial", 58));
+            seriesTitle.setStyle("-fx-font-weight: bold");
+            seriesTitle.setTextFill(Color.color(1, 1, 1));
+            seriesTitle.setEffect(new DropShadow());
+            infoBox.getChildren().add(0, seriesTitle);
+        }else {
+            Image img;
+            img = new Image("file:" + logoSrc, screenWidth * 0.25, screenHeight * 0.25, true, true);
 
-                logo.setImage(img);
-                logo.setFitWidth(screenWidth * 0.15);
-                logo.setFitHeight(screenHeight * 0.15);
-            }
+            logo.setImage(img);
+            logo.setFitWidth(screenWidth * 0.15);
+            logo.setFitHeight(screenHeight * 0.15);
         }
+
+        if (!isShow)
+            infoBox.getChildren().remove(episodeName);
 
         if (!season.getVideoSrc().isEmpty()){
             File file = new File(season.getVideoSrc());
@@ -427,15 +409,14 @@ public class SeasonController {
             addEpisodeCard(disc);
         }
 
-        BUTTON_COUNT = discList.size();
-        VISIBLE_BUTTONS = getVisibleButtonsCount();
-
         mainPane.requestFocus();
 
-        if (discsButtons.size() > 1)
-            discsButtons.get(0).requestFocus();
-        else
-            playButton.requestFocus();
+        Platform.runLater(() -> {
+            if (discsButtons.size() > 1)
+                discsButtons.get(0).requestFocus();
+            else
+                playButton.requestFocus();
+        });
 
         selectedDisc = App.findDisc(discs.get(0));
 
@@ -452,29 +433,6 @@ public class SeasonController {
         fadeInEffect(backgroundImage);
     }
     //endregion
-
-    private void handleKeyPress(KeyEvent event) {
-        Node focusedNode = (Node) event.getTarget();
-        int currentIndex = cardContainer.getChildren().indexOf(focusedNode);
-
-        if (currentIndex >= 0) {
-            double buttonWidth = discsButtons.get(0).getWidth();
-            double spacing = 50.0;
-
-            double centerOffset = (currentIndex + 0.5) * (buttonWidth + spacing) - cardContainer.getWidth() / 2.0;
-
-            animateScrollTransition(episodeScroll.getHvalue() + centerOffset / (cardContainer.getWidth() * cardContainer.getChildren().size()));
-        }
-    }
-
-    private void animateScrollTransition(double endValue) {
-        double clampedEndValue = Math.max(0, Math.min(1, endValue)); // Clamping to [0, 1]
-
-        Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.5), new KeyValue(episodeScroll.hvalueProperty(), clampedEndValue))
-        );
-        timeline.play();
-    }
 
     private int getVisibleButtonsCount() {
         double scrollPaneWidth = episodeScroll.getWidth();
@@ -521,6 +479,15 @@ public class SeasonController {
                         enableAllEpisodes();
                     }
 
+                    //////////
+
+                    double rightBorderPos = 0;
+                    double centerOfScreen = Screen.getPrimary().getBounds().getWidth() / 2;
+
+                    handleButtonFocus(btn);
+
+                    /////////
+
                     btn.setScaleX(1.1);
                     btn.setScaleY(1.1);
                     //selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
@@ -538,7 +505,6 @@ public class SeasonController {
                     playEpisode(discs.get(discsButtons.indexOf(btn)));
                 }
             });
-
 
             ImageView thumbnail = new ImageView();
 
@@ -569,13 +535,18 @@ public class SeasonController {
                 details.setBottom(slider);
             }
 
+            HBox videoInfoParent = new HBox();
+            videoInfoParent.setPadding(new Insets(6, 0, 0, 6));
+
             HBox videoInfo = new HBox();
             videoInfo.setAlignment(Pos.TOP_RIGHT);
             videoInfo.setPrefWidth(Region.USE_COMPUTED_SIZE);
             videoInfo.setMaxWidth(Region.USE_PREF_SIZE);
-            videoInfo.setPadding(new Insets(5));
+            videoInfo.setPadding(new Insets(8));
             videoInfo.getStyleClass().add("episodeCardInfo");
             videoInfo.setSpacing(5);
+
+            videoInfoParent.getChildren().add(videoInfo);
 
             if (isShow){
                 Label info = new Label("S" + disc.seasonNumber + "E" + disc.episodeNumber);
@@ -587,11 +558,12 @@ public class SeasonController {
             if (disc.isWatched()){
                 ImageView watched = new ImageView(
                         new Image("file:src/main/resources/img/icons/tick.png", 25, 25, true, true));
-                videoInfo.getChildren().add(0, watched);
+                videoInfo.getChildren().add(watched);
+                watched.setTranslateY(5);
             }
 
             if (!videoInfo.getChildren().isEmpty())
-                details.setTop(videoInfo);
+                details.setTop(videoInfoParent);
 
             main.getChildren().add(details);
             btn.setGraphic(main);
@@ -599,6 +571,41 @@ public class SeasonController {
             cardContainer.getChildren().add(btn);
             discsButtons.add(btn);
         }
+    }
+
+    private void handleButtonFocus(Button focusedButton) {
+        double screenCenter = Screen.getPrimary().getBounds().getWidth() / 2;
+
+        double localButtonCenterX = focusedButton.getBoundsInLocal().getCenterX();
+        double globalButtonCenterX = focusedButton.localToScene(localButtonCenterX, focusedButton.getBoundsInLocal().getMaxY()).getX();
+
+        double newHvalue = getNewHvalue(globalButtonCenterX, screenCenter);
+
+        animateScrollTransition(newHvalue);
+    }
+
+    private double getNewHvalue(double globalButtonCenterX, double screenCenter) {
+        double currentHvalue = episodeScroll.getHvalue();
+        double contentWidth = discsButtons.size() * (discsButtons.get(0).getWidth() + 50);
+
+        double newHvalue;
+        if (globalButtonCenterX > screenCenter) {
+            //Movement to right
+            double offset = globalButtonCenterX - screenCenter;
+            newHvalue = Math.min(1.0, currentHvalue + (offset / contentWidth));
+        } else {
+            //Movement to left
+            double offset = screenCenter - globalButtonCenterX;
+            newHvalue = Math.max(0.0, currentHvalue - (offset / contentWidth) - 0.004);
+        }
+        return newHvalue;
+    }
+
+    private void animateScrollTransition(double endValue) {
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0.25), new KeyValue(episodeScroll.hvalueProperty(), endValue))
+        );
+        timeline.play();
     }
 
     public void playEpisode(Disc disc){

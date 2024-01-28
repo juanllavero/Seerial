@@ -37,6 +37,8 @@ public class App extends Application {
     public static Locale globalLanguage;
     public static ResourceBundle buttonsBundle;
     public static ResourceBundle textBundle;
+    public static Category currentCategory = null;
+    public static Series selectedSeries = null;
     public static Stage primaryStage;
     public static String lastDirectory = null;
     public static String lastVideoDirectory = null;
@@ -207,11 +209,11 @@ public class App extends Application {
         return catList;
     }
 
-    public static List<String> getFullscreenCategories(){
-        List<String> catList = new ArrayList<>();
+    public static List<Category> getFullscreenCategories(){
+        List<Category> catList = new ArrayList<>();
         for (Category cat : categories){
             if (!cat.name.equals("NO CATEGORY") && cat.showOnFullscreen)
-                catList.add(cat.name);
+                catList.add(cat);
         }
         return catList;
     }
@@ -380,6 +382,18 @@ public class App extends Application {
         discs.remove(disc.id);
     }
     //endregion
+
+    public static void setCurrentCategory(Category cat){ currentCategory = cat; }
+
+    public static Category getCurrentCategory(){
+        return currentCategory;
+    }
+
+    public static void setSelectedSeries(Series series){ selectedSeries = series; }
+
+    public static Series getSelectedSeries(){
+        return selectedSeries;
+    }
 
     public static void showErrorMessage(String title, String header, String content){
         Alert alert = new Alert(Alert.AlertType.ERROR);
