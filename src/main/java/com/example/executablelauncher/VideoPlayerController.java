@@ -36,9 +36,6 @@ public class VideoPlayerController {
     private StackPane mainPane;
 
     @FXML
-    private Button audiosButton;
-
-    @FXML
     private Label currentTime;
 
     @FXML
@@ -46,6 +43,9 @@ public class VideoPlayerController {
 
     @FXML
     private Label episodeTitle;
+
+    @FXML
+    private Button audiosButton;
 
     @FXML
     private Button videoButton;
@@ -61,6 +61,21 @@ public class VideoPlayerController {
 
     @FXML
     private Button prevButton;
+
+    @FXML
+    private Button subtitlesButton;
+
+    @FXML
+    private Button button2;
+
+    @FXML
+    private Button button3;
+
+    @FXML
+    private Button button4;
+
+    @FXML
+    private Button button1;
 
     @FXML
     private Label runtime;
@@ -81,9 +96,6 @@ public class VideoPlayerController {
     private ImageView shadowImage;
 
     @FXML
-    private Button subtitlesButton;
-
-    @FXML
     private Label toFinishTime;
 
     @FXML
@@ -94,18 +106,6 @@ public class VideoPlayerController {
 
     @FXML
     private VBox optionsContainer;
-
-    @FXML
-    private Button button1;
-
-    @FXML
-    private Button button2;
-
-    @FXML
-    private Button button3;
-
-    @FXML
-    private Button button4;
 
     @FXML
     private Label optionsTitle;
@@ -197,6 +197,18 @@ public class VideoPlayerController {
                 timeline.playFromStart();
             }
         });
+
+        addInteractionSound(audiosButton);
+        addInteractionSound(videoButton);
+        addInteractionSound(nextButton);
+        addInteractionSound(optionsButton);
+        addInteractionSound(playButton);
+        addInteractionSound(prevButton);
+        addInteractionSound(subtitlesButton);
+        addInteractionSound(button1);
+        addInteractionSound(button2);
+        addInteractionSound(button3);
+        addInteractionSound(button4);
 
         seriesTitle.setText(seriesName);
         setDiscValues(disc);
@@ -349,6 +361,11 @@ public class VideoPlayerController {
 
             scheduler.shutdown();
         }, 1, TimeUnit.SECONDS);
+    }
+    private void addInteractionSound(Button btn){
+        btn.focusedProperty().addListener(e -> {
+            parentController.getParent().playInteractionSound();
+        });
     }
     //endregion
 
@@ -633,6 +650,8 @@ public class VideoPlayerController {
         btn.setAlignment(Pos.BOTTOM_LEFT);
 
         btn.getStyleClass().add("playerOptionsButton");
+
+        addInteractionSound(btn);
 
         optionsContainer.getChildren().add(btn);
     }

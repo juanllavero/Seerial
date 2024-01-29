@@ -112,6 +112,9 @@ public class Controller implements Initializable {
         exitButton.setText(App.buttonsBundle.getString("exitFullscreen"));
         switchToDesktopButton.setText(App.buttonsBundle.getString("switchToDesktop"));
 
+        addInteractionSound(exitButton);
+        addInteractionSound(switchToDesktopButton);
+
         playBackgroundSound();
 
         //Open/Close Menu
@@ -203,6 +206,12 @@ public class Controller implements Initializable {
             currentCategory = categories.get(0);
 
         showSeriesFrom(currentCategory);
+    }
+
+    private void addInteractionSound(Button btn){
+        btn.focusedProperty().addListener(e -> {
+            playInteractionSound();
+        });
     }
 
     private void updateHour() {

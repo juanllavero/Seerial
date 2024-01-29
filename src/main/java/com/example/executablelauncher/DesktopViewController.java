@@ -8,16 +8,15 @@ import com.example.executablelauncher.tmdbMetadata.series.EpisodeMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadataBasic;
 import com.example.executablelauncher.tmdbMetadata.series.SeriesMetadata;
+import com.example.executablelauncher.utils.Utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.movito.themoviedbapi.*;
 import info.movito.themoviedbapi.model.Artwork;
-import info.movito.themoviedbapi.model.MovieDb;
 import info.movito.themoviedbapi.model.MovieImages;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import info.movito.themoviedbapi.model.tv.TvSeries;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -460,7 +459,7 @@ public class DesktopViewController {
                         seasonList.add(season);
                 }
 
-                seasonList.sort(new Utils.SeasonComparator());
+                seasonList.sort(new com.example.executablelauncher.utils.Utils.SeasonComparator());
                 showSeasons();
                 selectedSeason = seasonList.get(0);
                 selectSeasonButton(seasonsButtons.get(0));
@@ -620,7 +619,7 @@ public class DesktopViewController {
 
 
         if (!discList.isEmpty()) {
-            discList.sort(new Utils.DiscComparator().reversed());
+            discList.sort(new com.example.executablelauncher.utils.Utils.DiscComparator().reversed());
             addEpisodeCardWithDelay(0);
         }
     }

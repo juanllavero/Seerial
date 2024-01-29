@@ -3,6 +3,8 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Disc;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.utils.Configuration;
+import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -12,11 +14,8 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -257,6 +256,7 @@ public class SeasonController {
 
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
+                controllerParent.playInteractionSound();
                 playButton.setText(App.buttonsBundle.getString("playButton"));
                 ImageView img = (ImageView) playButton.getGraphic();
                 img.setImage(new Image("file:src/main/resources/img/icons/playSelected.png", 30, 30, true, true));
@@ -270,6 +270,7 @@ public class SeasonController {
         watchedButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             ImageView img = (ImageView) watchedButton.getGraphic();
             if (newVal){
+                controllerParent.playInteractionSound();
                 if (selectedDisc.isWatched()){
                     watchedButton.setText(App.buttonsBundle.getString("markUnwatched"));
                     img.setImage(new Image("file:src/main/resources/img/icons/watchedSelected.png", 30, 30, true, true));
@@ -289,6 +290,7 @@ public class SeasonController {
 
         optionsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
+                controllerParent.playInteractionSound();
                 optionsButton.setText(App.buttonsBundle.getString("moreButton"));
                 ImageView img = (ImageView) optionsButton.getGraphic();
                 img.setImage(new Image("file:src/main/resources/img/icons/optionsSelected.png", 30, 30, true, true));
@@ -306,13 +308,17 @@ public class SeasonController {
         });
 
         lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal)
+            if (newVal){
+                controllerParent.playInteractionSound();
                 lastSeason();
+            }
         });
 
         nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal)
+            if (newVal){
+                controllerParent.playInteractionSound();
                 nextSeason();
+            }
         });
 
         detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
@@ -537,6 +543,9 @@ public class SeasonController {
         }
 
         fadeInEffect(backgroundImage);
+    }
+    public Controller getParent(){
+        return controllerParent;
     }
     //endregion
 
@@ -1035,13 +1044,13 @@ public class SeasonController {
             String timeLeft;
             if (App.globalLanguage != Locale.forLanguageTag("es-ES")) {
                 if (hours > 0) {
-                    timeLeft = hours + " h " + minutes + " min left";
+                    timeLeft = hours + " " + App.textBundle.getString("hours") + " " + minutes + " " + App.textBundle.getString("minutes") + " " + App.textBundle.getString("timeLeft");
                 } else {
                     timeLeft = minutes + " min left";
                 }
             } else {
                 if (hours > 0) {
-                    timeLeft = "Quedan " + hours + " horas " + minutes + " minutos";
+                    timeLeft = App.textBundle.getString("timeLeft") + " " + hours + " " + App.textBundle.getString("hours") + " " + minutes + " " + App.textBundle.getString("minutes");
                 } else {
                     timeLeft = "Quedan " + minutes + " minutos";
                 }
@@ -1056,7 +1065,7 @@ public class SeasonController {
 
     //region BACKGROUND MUSIC
     private void setMediaPlayer(){
-        mp.setVolume(0.2);
+        mp.setVolume(Double.parseDouble(Configuration.loadConfig("volume", "0.2")));
         mp.setOnEndOfMedia(() -> {
             mp.seek(Duration.ZERO);
             mp.play();

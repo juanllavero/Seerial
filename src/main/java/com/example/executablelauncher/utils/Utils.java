@@ -1,4 +1,4 @@
-package com.example.executablelauncher;
+package com.example.executablelauncher.utils;
 
 import com.example.executablelauncher.entities.Category;
 import com.example.executablelauncher.entities.Disc;

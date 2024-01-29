@@ -4,6 +4,8 @@ import com.example.executablelauncher.entities.Category;
 import com.example.executablelauncher.entities.Disc;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.utils.Configuration;
+import com.example.executablelauncher.utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -46,11 +48,18 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        //Set global language
+        globalLanguage = Locale.forLanguageTag(Configuration.loadConfig("currentLanguageTag", "en-US"));
+
+        //Add languages
         languages.add(Locale.forLanguageTag("en-US"));
         languages.add(Locale.forLanguageTag("es-ES"));
-        globalLanguage = Locale.forLanguageTag("en-US");
+
+        //Set resource bundles
         buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
+
+        //Load local data
         LoadData();
 
         //Set a few of TheMovieDB translations for metadata
@@ -62,6 +71,7 @@ public class App extends Application {
                 Locale.forLanguageTag("fr-FR")
         });
 
+        //Start the stage
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
         stage.setTitle(textBundle.getString("desktopMode"));
@@ -178,6 +188,7 @@ public class App extends Application {
         for (Locale language : languages){
             if (language.getDisplayName().equals(lang)){
                 globalLanguage = language;
+                Configuration.saveConfig("currentLanguageTag", globalLanguage.toLanguageTag());
                 break;
             }
         }
