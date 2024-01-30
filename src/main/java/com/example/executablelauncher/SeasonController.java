@@ -14,6 +14,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -189,6 +190,7 @@ public class SeasonController {
     private Series series = null;
     private boolean episodesFocussed = true;
     private boolean playingVideo = false;
+    private boolean firstSelection = true;
     //endregion
 
     //region INITIALIZATION
@@ -397,6 +399,8 @@ public class SeasonController {
 
         stopBackgroundVideo();
 
+        firstSelection = true;
+
         if (season.getDiscs().size() > 1){
             cardContainer.setPrefHeight((Screen.getPrimary().getBounds().getHeight() / 5) + 20);
             cardContainer.setVisible(true);
@@ -517,6 +521,10 @@ public class SeasonController {
         }
 
         Platform.runLater(() -> {
+            //Set ScrollPane values
+            episodeScroll.setHmax(cardContainer.getWidth());
+            episodeScroll.setHvalue(0);
+
             if (discsButtons.size() > 1)
                 discsButtons.get(season.lastDisc).requestFocus();
             else
@@ -648,8 +656,19 @@ public class SeasonController {
     private void handleButtonFocus(Button focusedButton) {
         double screenCenter = Screen.getPrimary().getBounds().getWidth() / 2;
 
-        double localButtonCenterX = focusedButton.getBoundsInLocal().getCenterX();
-        double globalButtonCenterX = focusedButton.localToScene(localButtonCenterX, focusedButton.getBoundsInLocal().getMaxY()).getX();
+        Bounds buttonBounds = focusedButton.localToScreen(focusedButton.getBoundsInLocal());
+        double globalButtonCenterX = (buttonBounds.getMinX() + buttonBounds.getMaxX()) / 2;
+
+        if (firstSelection) {
+            if (discsButtons.indexOf(focusedButton) <= 2) {
+                firstSelection = false;
+                return;
+            }
+
+            episodeScroll.setHvalue(globalButtonCenterX + (focusedButton.getWidth() / 2));
+            firstSelection = false;
+            return;
+        }
 
         double newHvalue = getNewHvalue(globalButtonCenterX, screenCenter);
 
@@ -658,17 +677,16 @@ public class SeasonController {
 
     private double getNewHvalue(double globalButtonCenterX, double screenCenter) {
         double currentHvalue = episodeScroll.getHvalue();
-        double contentWidth = discsButtons.size() * (discsButtons.get(0).getWidth() + 50);
 
         double newHvalue;
         if (globalButtonCenterX > screenCenter) {
             //Movement to right
             double offset = globalButtonCenterX - screenCenter;
-            newHvalue = Math.min(1.0, currentHvalue + (offset / contentWidth));
+            newHvalue = Math.min(episodeScroll.getHmax(), currentHvalue + offset);
         } else {
             //Movement to left
             double offset = screenCenter - globalButtonCenterX;
-            newHvalue = Math.max(0.0, currentHvalue - (offset / contentWidth) - 0.004);
+            newHvalue = Math.max(episodeScroll.getHmin(), currentHvalue - offset);
         }
         return newHvalue;
     }
@@ -984,15 +1002,14 @@ public class SeasonController {
         fadeOutEffect(mainPane);
 
         if (isShow){
-            detailsTitle.setText(episodeName.getText());
             detailsImage.setImage(new Image("file:" + selectedDisc.imgSrc));
             genresField.setText(series.getGenres());
         }else{
-            detailsTitle.setText(seasons.get(currentSeason).name);
             detailsImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
             detailsImage.setImage(new Image("file:" + seasons.get(currentSeason).coverSrc));
             genresField.setText(seasons.get(currentSeason).getGenres());
         }
+        detailsTitle.setText(selectedDisc.name);
         detailsOverview.setText(overviewField.getText());
 
         File file = new File(selectedDisc.executableSrc);

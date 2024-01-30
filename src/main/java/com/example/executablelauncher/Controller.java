@@ -6,6 +6,7 @@ import com.example.executablelauncher.entities.Series;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.image.PixelReader;
@@ -178,6 +179,15 @@ public class Controller implements Initializable {
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
                 if (KeyCode.ENTER == event.getCode()) {
+                    /*for (Node node : categoriesBox.getChildren()) {
+                        Button catButton = (Button) node;
+                        catButton.getStyleClass().clear();
+                        catButton.getStyleClass().add("CatButton");
+                    }
+
+                    btn.getStyleClass().clear();
+                    btn.getStyleClass().add("CatButtonSelected");*/
+
                     playCategoriesSound();
                     showSeriesFrom(categories.get(categoriesBox.getChildren().indexOf(btn)));
                 }

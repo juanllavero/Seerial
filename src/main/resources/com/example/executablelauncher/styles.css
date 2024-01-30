@@ -559,20 +559,43 @@
 
 .CatButton{
     -fx-background-color: transparent;
-    -fx-text-fill: white;
+    -fx-text-fill: #bebebe;
     -fx-effect: dropShadow(gaussian, black, 10, 0.0, 0, 0);
     -fx-font-family: Impact, bold;
     -fx-font-size: 24px;
-}
-
-.CatButton:hover{
-    -fx-text-fill: #a2a2a2;
+    -fx-border-size: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color:transparent;
 }
 
 .CatButton:focused{
     -fx-text-fill: #222222;
     -fx-background-color: #ffffff;
     -fx-background-radius: 5px;
+    -fx-border-size: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color:#000000;
+}
+
+.CatButtonSelected{
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #222222;
+    -fx-effect: null;
+    -fx-font-family: Impact, bold;
+    -fx-font-size: 24px;
+    -fx-background-radius: 5px;
+    -fx-border-size: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color:transparent;
+}
+
+.CatButtonSelected:focused{
+    -fx-text-fill: #222222;
+    -fx-background-color: #b9b9b9;
+    -fx-background-radius: 5px;
+    -fx-border-size: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color:#000000;
 }
 
 .seriesSearchButton{
