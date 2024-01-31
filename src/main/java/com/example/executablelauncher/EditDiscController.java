@@ -1,11 +1,10 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.entities.Episode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -14,7 +13,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.*;
 
 import java.io.File;
@@ -81,11 +79,11 @@ public class EditDiscController {
     private DesktopViewController controllerParent;
     private List<File> imagesFiles = new ArrayList<>();
     private File selectedImage = null;
-    public Disc discToEdit = null;
+    public Episode episodeToEdit = null;
 
     //region INITIALIZATION
-    public void setDisc(Disc d){
-        discToEdit = d;
+    public void setDisc(Episode d){
+        episodeToEdit = d;
         fileField.setText(d.getExecutableSrc());
 
         titleText.setText(App.textBundle.getString("episodeWindowTitleEdit"));
@@ -145,7 +143,7 @@ public class EditDiscController {
                 }
             }
 
-            File newFile = new File("src/main/resources/img/discCovers/" + discToEdit.id + "/" + (number + 1) + ".png");
+            File newFile = new File("src/main/resources/img/discCovers/" + episodeToEdit.id + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(selectedImage.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -189,7 +187,7 @@ public class EditDiscController {
                 }
             }
 
-            File newFile = new File("src/main/resources/img/discCovers/" + discToEdit.id + "/" + (number + 1) + ".png");
+            File newFile = new File("src/main/resources/img/discCovers/" + episodeToEdit.id + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(selectedImage.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -210,7 +208,7 @@ public class EditDiscController {
     }
     private void loadImages(){
         //Add images to view
-        File dir = new File("src/main/resources/img/discCovers/" + discToEdit.id);
+        File dir = new File("src/main/resources/img/discCovers/" + episodeToEdit.id);
         if (dir.exists()){
             File[] files = dir.listFiles();
             assert files != null;
@@ -301,16 +299,16 @@ public class EditDiscController {
             return;
         }
 
-        discToEdit.name = nameField.getText();
+        episodeToEdit.name = nameField.getText();
 
         if (!orderField.getText().isEmpty() && !orderField.getText().equals("0"))
-            discToEdit.setOrder(Integer.parseInt(orderField.getText()));
+            episodeToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
         if (selectedImage != null)
-            discToEdit.imgSrc = "src/main/resources/img/discCovers/" + discToEdit.id + "/" + selectedImage.getName();
+            episodeToEdit.imgSrc = "src/main/resources/img/discCovers/" + episodeToEdit.id + "/" + selectedImage.getName();
 
         controllerParent.hideBackgroundShadow();
-        controllerParent.updateDisc(discToEdit);
+        controllerParent.updateDisc(episodeToEdit);
 
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
         stage.close();

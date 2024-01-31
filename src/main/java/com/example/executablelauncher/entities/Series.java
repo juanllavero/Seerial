@@ -1,14 +1,18 @@
 package com.example.executablelauncher.entities;
 
 import com.example.executablelauncher.App;
+import org.dizitart.no2.repository.annotations.Entity;
+import org.dizitart.no2.repository.annotations.Id;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Entity
 public class Series implements Serializable {
-    public final String id;
+    @Id
+    String id;
     public int themdbID = -1;
     public String name = "";
     public String overview = "";
@@ -26,12 +30,7 @@ public class Series implements Serializable {
     public List<String> genres = new ArrayList<>();
     public boolean playSameMusic = false;
 
-    public Series() {
-        String uuid = UUID.randomUUID().toString();
-        while (App.isRepeatedSeriesID(uuid))
-            uuid = UUID.randomUUID().toString();
-        id = uuid;
-    }
+    public Series() { }
 
     public String getId() {
         return id;

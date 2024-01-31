@@ -1,12 +1,15 @@
 package com.example.executablelauncher.entities;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.UUID;
 import com.example.executablelauncher.App;
+import org.dizitart.no2.repository.annotations.Entity;
+import org.dizitart.no2.repository.annotations.Id;
 
-public class Disc implements Serializable {
-    public final String id;
+@Entity
+public class Episode implements Serializable {
+    @Id
+    String id;
     public String name = "";
     public String overview = "";
     public String year = "";
@@ -26,12 +29,7 @@ public class Disc implements Serializable {
     //public LocalDateTime lastWatched = null;
     //endregion
 
-    public Disc() {
-        String uuid = UUID.randomUUID().toString();
-        while (App.isRepeatedID(uuid))
-            uuid = UUID.randomUUID().toString();
-        id = uuid;
-    }
+    public Episode() { }
 
     public String getId() {
         return id;

@@ -194,7 +194,7 @@ public class EditSeasonController {
         else
             musicField.setText("");
 
-        seriesName = findSeries(s.getSeriesID()).name;
+        seriesName = DBManager.INSTANCE.getSeries(s.getSeriesID()).name;
 
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));

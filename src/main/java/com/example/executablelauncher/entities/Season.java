@@ -1,20 +1,21 @@
 package com.example.executablelauncher.entities;
 
-import com.example.executablelauncher.App;
+import org.dizitart.no2.repository.annotations.Entity;
+import org.dizitart.no2.repository.annotations.Id;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
+@Entity
 public class Season implements Serializable {
-    public final String id;
+    @Id
+    String id;
     public String name = "";
     public String overview = "";
     public String year = "";
     public String tagline = "";
     public float score = 0;
-    public float imdbScore = 0;
     public int seasonNumber = 0;
     public String logoSrc = "";
     public String backgroundSrc = "";
@@ -30,15 +31,10 @@ public class Season implements Serializable {
     public boolean showName = true;
     public String folder = "";
     public int lastDisc = 0;
-    public final List<String> discs = new ArrayList<>();
+    public final List<String> episodes = new ArrayList<>();
     public List<String> genres = new ArrayList<>();
 
-    public Season() {
-        String uuid = UUID.randomUUID().toString();
-        while (App.isRepeatedSeasonID(uuid))
-            uuid = UUID.randomUUID().toString();
-        id = uuid;
-    }
+    public Season() { }
 
     public String getId() {
         return id;
@@ -108,16 +104,16 @@ public class Season implements Serializable {
         this.order = order;
     }
 
-    public List<String> getDiscs() {
-        return discs;
+    public List<String> getEpisodes() {
+        return episodes;
     }
 
-    public void setDisc(Disc disc) {
-        this.discs.add(disc.getId());
+    public void setDisc(Episode episode) {
+        this.episodes.add(episode.getId());
     }
 
-    public void removeDisc(String id){
-        discs.remove(id);
+    public void removeEpisode(String id){
+        episodes.remove(id);
     }
 
     public String getGenres(){

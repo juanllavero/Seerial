@@ -263,13 +263,13 @@ public class DesktopViewController {
 
     private List<Series> seriesList = new ArrayList<>();
     private List<Season> seasonList = new ArrayList<>();
-    private List<Disc> discList = new ArrayList<>();
+    private List<Episode> episodeList = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
     private List<Button> seasonsButtons = new ArrayList<>();
-    public Disc selectedDisc = null;
+    public Episode selectedEpisode = null;
     private Series selectedSeries = null;
     private Season selectedSeason = null;
-    private List<Disc> selectedDiscs = new ArrayList<>();
+    private List<Episode> selectedEpisodes = new ArrayList<>();
     private List<DiscController> discControllers = new ArrayList<>();
     public Category currentCategory;
     private double xOffset = 0;
@@ -281,7 +281,7 @@ public class DesktopViewController {
 
     //region THEMOVIEDB ATTRIBUTES
     TmdbApi tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
-    SeasonsGroupMetadata episodesGroup = null;                                          //Create metadata holders for episode groups
+    SeasonsGroupMetadata episodesGroup = null;
     boolean movieMetadataToCorrect = false;
     TvSeries seriesMetadataToCorrect = null;
     //endregion
@@ -317,6 +317,7 @@ public class DesktopViewController {
             }
         });
 
+        //region BACKGROUND REACTION TO WINDOW RESIZE
         ChangeListener<Number> widthListener = (obs, oldWidth, newWidth) -> {
             double scaleFactor;
             double currentAspectRatio = newWidth.doubleValue() / stage.heightProperty().doubleValue();
@@ -330,7 +331,6 @@ public class DesktopViewController {
 
         ChangeListener<Number> heightListener = (obs, oldHeight, newHeight) -> {
             double scaleFactor;
-            double currentAspectRatio = stage.widthProperty().doubleValue() / newHeight.doubleValue();
             double ratioHeight = stage.widthProperty().doubleValue() / ASPECT_RATIO;
             if (ratioHeight < newHeight.doubleValue()){
                 scaleFactor = newHeight.doubleValue() / globalBackground.getImage().getHeight();
@@ -341,6 +341,7 @@ public class DesktopViewController {
 
         stage.widthProperty().addListener(widthListener);
         stage.heightProperty().addListener(heightListener);
+        //endregion
 
         mainBox.getScene().getWindow().setOnCloseRequest(e -> closeWindow());
 
@@ -361,25 +362,7 @@ public class DesktopViewController {
         seriesScrollPane.setPrefHeight(screenHeight);
         seriesContainer.setPrefHeight(screenHeight);
 
-        //seasonScroll.prefHeightProperty().bind(seasonInfoPane.heightProperty());
-        //seasonScroll.setMinHeight(screenHeight);
-
-        //seasonsEpisodesBox.setMinHeight(discContainer.getMinHeight());
-        //seasonsEpisodesBox.prefHeightProperty().bind(discContainer.heightProperty());
-        //seasonsEpisodesBox.maxHeightProperty().bind(discContainer.heightProperty());
-        //seasonBorderPane.prefHeightProperty().bind(seasonsEpisodesBox.heightProperty().add(seasonLogoBox.heightProperty()));
-        //seasonBorderPane.maxHeightProperty().bind(seasonsEpisodesBox.heightProperty().add(seasonLogoBox.heightProperty()));
-        //seasonScroll.minHeightProperty().bind(seasonBackground.heightProperty());
-        //seasonInfoPane.minHeightProperty().bind(seasonBackground.heightProperty().add(seasonsEpisodesBox.heightProperty()));
-        //seasonInfoPane.prefHeightProperty().bind(seasonBackground.heightProperty().add(seasonsEpisodesBox.heightProperty()));
-        //seasonInfoPane.maxHeightProperty().bind(seasonBorderPane.heightProperty());
-
         seasonsEpisodesBox.setPrefWidth(Integer.MAX_VALUE);
-
-
-        //discContainer.prefHeightProperty().bind(seasonsEpisodesBox.heightProperty());
-        //discContainer.prefWidthProperty().bind(seasonsEpisodesBox.widthProperty());
-        //discContainer.prefHeightProperty().bind(seasonsEpisodesBox.heightProperty());
 
         seasonInfoPane.getChildren().add(0, seasonBackground);
         seasonInfoPane.getChildren().add(1, seasonBackgroundNoise);
@@ -445,7 +428,7 @@ public class DesktopViewController {
 
     public void selectSeries(Series s) {
         if (selectedSeries != s){
-            selectedDiscs.clear();
+            selectedEpisodes.clear();
             seasonScroll.setVisible(true);
             selectionOptions.setVisible(false);
             selectedSeries = s;
@@ -466,7 +449,7 @@ public class DesktopViewController {
 
                 fillSeasonInfo();
 
-                if (!selectedSeason.getDiscs().isEmpty()){
+                if (!selectedSeason.getEpisodes().isEmpty()){
                     showDiscs(selectedSeason);
                 }else{
                     discContainer.getChildren().clear();
@@ -486,7 +469,7 @@ public class DesktopViewController {
     }
 
     private void fillSeasonInfo() {
-        selectedDiscs.clear();
+        selectedEpisodes.clear();
         selectionOptions.setVisible(false);
 
         Image i = new Image("file:" + "src/main/resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.png");
@@ -505,7 +488,7 @@ public class DesktopViewController {
         episodesText.setText(App.textBundle.getString("episodes"));
         yearField.setText(selectedSeason.getYear());
         orderField.setText(Integer.toString(selectedSeason.getOrder()));
-        episodesField.setText(Integer.toString(selectedSeason.getDiscs().size()));
+        episodesField.setText(Integer.toString(selectedSeason.getEpisodes().size()));
         seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
         seasonNumberField.setText(String.valueOf(selectedSeason.seasonNumber));
 
@@ -594,27 +577,27 @@ public class DesktopViewController {
     }
 
     private void showDiscs(Season s) {
-        discList.clear();
+        episodeList.clear();
         discContainer.getChildren().clear();
         discControllers.clear();
-        for (String i : s.getDiscs()){
-            Disc d = App.findDisc(i);
+        for (String i : s.getEpisodes()){
+            Episode d = App.findDisc(i);
             if (d != null){
-                discList.add(d);
+                episodeList.add(d);
             }
         }
 
 
-        if (!discList.isEmpty()) {
-            discList.sort(new com.example.executablelauncher.utils.Utils.DiscComparator().reversed());
+        if (!episodeList.isEmpty()) {
+            episodeList.sort(new com.example.executablelauncher.utils.Utils.DiscComparator().reversed());
             addEpisodeCardWithDelay(0);
         }
     }
 
     private void addEpisodeCardWithDelay(int index) {
-        if (index < discList.size()) {
-            Disc disc = discList.get(index);
-            addEpisodeCard(disc);
+        if (index < episodeList.size()) {
+            Episode episode = episodeList.get(index);
+            addEpisodeCard(episode);
 
             index++;
 
@@ -660,7 +643,7 @@ public class DesktopViewController {
 
     //region UPDATE VALUES
     public void updateCategories(){
-        List<String> categories = App.getCategories();
+        categories = App.getCategoriesNames();
         categorySelector.getItems().clear();
         categorySelector.getItems().addAll(categories);
         if (!categories.isEmpty()){
@@ -670,7 +653,7 @@ public class DesktopViewController {
     }
     public void updateLanguage(){
         categorySelector.getItems().clear();
-        categorySelector.getItems().addAll(App.getCategories());
+        categorySelector.getItems().addAll(App.getCategoriesNames());
         if (categorySelector.getItems().size() > 1) {
             categorySelector.setValue(categorySelector.getItems().get(1));
             seriesList = App.getSeriesFromCategory(categorySelector.getValue());
@@ -737,7 +720,7 @@ public class DesktopViewController {
 
             fillSeasonInfo();
 
-            if (!selectedSeason.getDiscs().isEmpty()){
+            if (!selectedSeason.getEpisodes().isEmpty()){
                 showDiscs(selectedSeason);
             }else{
                 discContainer.getChildren().clear();
@@ -768,7 +751,7 @@ public class DesktopViewController {
         }
     }
     public boolean isDiscSelected(){
-        return !selectedDiscs.isEmpty();
+        return !selectedEpisodes.isEmpty();
     }
     //endregion
 
@@ -874,15 +857,15 @@ public class DesktopViewController {
     //endregion
 
     //region PLAY EPISODE
-    public void playEpisode(Disc disc) {
+    public void playEpisode(Episode episode) {
         //Run file in vlc
         String command = null;
-        String extension = disc.getExecutableSrc().substring(disc.getExecutableSrc().length() - 3);
+        String extension = episode.getExecutableSrc().substring(episode.getExecutableSrc().length() - 3);
 
         if (extension.equals("iso") || extension.equals("ISO"))
-            command = "bluray:///" + disc.getExecutableSrc();
+            command = "bluray:///" + episode.getExecutableSrc();
         else
-            command = disc.getExecutableSrc();
+            command = episode.getExecutableSrc();
 
         try {
             ProcessBuilder pBuilder = new ProcessBuilder("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe", command);
@@ -901,27 +884,27 @@ public class DesktopViewController {
     //endregion
 
     //region EPISODE SELECTION
-    public void selectDisc(Disc disc){
-        if (selectedDiscs.contains(disc)) {
-            selectedDiscs.remove(disc);
+    public void selectDisc(Episode episode){
+        if (selectedEpisodes.contains(episode)) {
+            selectedEpisodes.remove(episode);
         }else{
-            selectedDiscs.add(disc);
+            selectedEpisodes.add(episode);
         }
 
-        selectionOptions.setVisible(!selectedDiscs.isEmpty());
+        selectionOptions.setVisible(!selectedEpisodes.isEmpty());
 
-        if (selectedDiscs.size() == 1)
+        if (selectedEpisodes.size() == 1)
             elementsSelectedText.setText(App.textBundle.getString("oneSelected"));
         else
-            elementsSelectedText.setText(selectedDiscs.size() + " " + App.textBundle.getString("selectedDiscs"));
+            elementsSelectedText.setText(selectedEpisodes.size() + " " + App.textBundle.getString("selectedDiscs"));
     }
     @FXML
     void deleteSelected(ActionEvent event) {
-        for (Disc disc : selectedDiscs){
-            removeDisc(disc);
+        for (Episode episode : selectedEpisodes){
+            removeDisc(episode);
         }
-        selectedDiscs.clear();
-        selectedDisc = null;
+        selectedEpisodes.clear();
+        selectedEpisode = null;
         selectionOptions.setVisible(false);
     }
 
@@ -931,7 +914,7 @@ public class DesktopViewController {
             d.clearSelection();
         }
         selectionOptions.setVisible(false);
-        selectedDiscs.clear();
+        selectedEpisodes.clear();
     }
     @FXML
     void selectAll(ActionEvent event) {
@@ -1173,16 +1156,16 @@ public class DesktopViewController {
             }
         }
 
-        for (String discID : selectedSeason.getDiscs()){
-            Disc disc = App.findDisc(discID);
+        for (String discID : selectedSeason.getEpisodes()){
+            Episode episode = App.findDisc(discID);
 
-            if (disc == null)
+            if (episode == null)
                 continue;
 
             if (!selectedSeason.imdbID.isEmpty())
-                setIMDBScore(selectedSeason.imdbID, disc);
+                setIMDBScore(selectedSeason.imdbID, episode);
 
-            setMovieThumbnail(disc, selectedSeason.themdbID);
+            setMovieThumbnail(episode, selectedSeason.themdbID);
         }
 
         refreshSeason(selectedSeason);
@@ -1758,33 +1741,33 @@ public class DesktopViewController {
                 season.order = 100;
         }
 
-        Disc disc = App.findDisc(season, episodeMetadata.episode_number);
-        if (disc != null) {
-            disc.executableSrc = file.getAbsolutePath();
+        Episode episode = App.findDisc(season, episodeMetadata.episode_number);
+        if (episode != null) {
+            episode.executableSrc = file.getAbsolutePath();
             return;
         }
 
-        disc = new Disc();
+        episode = new Episode();
 
         //Set the metadata for the new episode
-        disc.seasonID = season.id;
-        disc.executableSrc = file.getAbsolutePath();
-        setEpisodeData(disc, episodeMetadata, series);
+        episode.seasonID = season.id;
+        episode.executableSrc = file.getAbsolutePath();
+        setEpisodeData(episode, episodeMetadata, series);
 
-        currentCategory.analyzedFiles.put(file.getAbsolutePath(), disc.id);
-        App.addDisc(disc);
+        currentCategory.analyzedFiles.put(file.getAbsolutePath(), episode.id);
+        App.addDisc(episode);
     }
-    private void setEpisodeData(Disc disc, EpisodeMetadata episodeMetadata, Series show){
-        disc.name = episodeMetadata.name;
-        disc.overview = episodeMetadata.overview;
-        disc.episodeNumber =episodeMetadata.episode_number;
-        disc.year = Utils.episodeDateFormat(episodeMetadata.air_date, currentCategory.language);
-        disc.score = (float) ((int) (episodeMetadata.vote_average * 10.0)) / 10.0f;
-        disc.runtime = episodeMetadata.runtime;
+    private void setEpisodeData(Episode episode, EpisodeMetadata episodeMetadata, Series show){
+        episode.name = episodeMetadata.name;
+        episode.overview = episodeMetadata.overview;
+        episode.episodeNumber =episodeMetadata.episode_number;
+        episode.year = Utils.episodeDateFormat(episodeMetadata.air_date, currentCategory.language);
+        episode.score = (float) ((int) (episodeMetadata.vote_average * 10.0)) / 10.0f;
+        episode.runtime = episodeMetadata.runtime;
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + disc.id + "/"));
+            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + episode.id + "/"));
         } catch (IOException e) {
             System.err.println("setEpisodeData: Directory could not be created");
         }
@@ -1801,13 +1784,13 @@ public class DesktopViewController {
 
         //region THUMBNAIL DOWNLOADER
         if (!thumbnailsUrls.isEmpty()){
-            saveThumbnail(disc, thumbnailsUrls.get(0), 0);
+            saveThumbnail(episode, thumbnailsUrls.get(0), 0);
 
             Task<Void> thumbnailTask = new Task<>() {
                 @Override
                 protected Void call() {
                     for (int i = 1; i < thumbnailsUrls.size(); i++){
-                        saveThumbnail(disc, thumbnailsUrls.get(i), i);
+                        saveThumbnail(episode, thumbnailsUrls.get(i), i);
                     }
                     return null;
                 }
@@ -1817,11 +1800,11 @@ public class DesktopViewController {
         }
         //endregion
 
-        File img = new File("src/main/resources/img/discCovers/" + disc.id + "/0.png");
+        File img = new File("src/main/resources/img/discCovers/" + episode.id + "/0.png");
         if (!img.exists()){
-            disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+            episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
         }else{
-            disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "/0.png";
+            episode.imgSrc = "src/main/resources/img/discCovers/" + episode.id + "/0.png";
         }
     }
     private void saveCover(String id, int i, Image originalImage) {
@@ -2239,67 +2222,67 @@ public class DesktopViewController {
         return -1;
     }
     private void saveDiscWithoutMetadata(File f, Season season) {
-        Disc disc;
+        Episode episode;
 
         if (currentCategory.analyzedFiles.get(f.getAbsolutePath()) != null){
-            disc = App.findDisc(currentCategory.analyzedFiles.get(f.getAbsolutePath()));
+            episode = App.findDisc(currentCategory.analyzedFiles.get(f.getAbsolutePath()));
         }else{
-            disc = new Disc();
-            disc.seasonID = season.id;
-            currentCategory.analyzedFiles.put(f.getAbsolutePath(), disc.id);
-            App.addDisc(disc);
+            episode = new Episode();
+            episode.seasonID = season.id;
+            currentCategory.analyzedFiles.put(f.getAbsolutePath(), episode.id);
+            App.addDisc(episode);
         }
 
-        disc.name = f.getName().substring(0, f.getName().lastIndexOf("."));
-        disc.executableSrc = f.getAbsolutePath();
-        disc.seasonNumber = season.seasonNumber;
-        disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+        episode.name = f.getName().substring(0, f.getName().lastIndexOf("."));
+        episode.executableSrc = f.getAbsolutePath();
+        episode.seasonNumber = season.seasonNumber;
+        episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
     }
     private void processMovie(File file, Season season, int runtime){
-        Disc disc;
+        Episode episode;
 
         if (currentCategory.analyzedFiles.get(file.getAbsolutePath()) != null){
-            disc = App.findDisc(currentCategory.analyzedFiles.get(file.getAbsolutePath()));
+            episode = App.findDisc(currentCategory.analyzedFiles.get(file.getAbsolutePath()));
         }else{
-            disc = new Disc();
-            disc.seasonID = season.id;
-            currentCategory.analyzedFiles.put(file.getAbsolutePath(), disc.id);
-            App.addDisc(disc);
+            episode = new Episode();
+            episode.seasonID = season.id;
+            currentCategory.analyzedFiles.put(file.getAbsolutePath(), episode.id);
+            App.addDisc(episode);
         }
 
-        disc.name = file.getName().substring(0, file.getName().lastIndexOf("."));
-        disc.episodeNumber = season.getDiscs().size();
-        disc.score = season.score;
-        disc.overview = season.overview;
-        disc.year = season.year;
-        disc.runtime = runtime;
-        disc.seasonNumber = season.seasonNumber;
-        disc.executableSrc = file.getAbsolutePath();
+        episode.name = file.getName().substring(0, file.getName().lastIndexOf("."));
+        episode.episodeNumber = season.getEpisodes().size();
+        episode.score = season.score;
+        episode.overview = season.overview;
+        episode.year = season.year;
+        episode.runtime = runtime;
+        episode.seasonNumber = season.seasonNumber;
+        episode.executableSrc = file.getAbsolutePath();
 
         if (!season.imdbID.isEmpty())
-            setIMDBScore(season.imdbID, disc);
+            setIMDBScore(season.imdbID, episode);
 
-        setMovieThumbnail(disc, season.themdbID);
+        setMovieThumbnail(episode, season.themdbID);
     }
-    private void setIMDBScore(String imdbID, Disc disc){
+    private void setIMDBScore(String imdbID, Episode episode){
         try{
             Document doc= Jsoup.connect("https://www.imdb.com/title/" + imdbID).timeout(6000).get();
             Elements body = doc.select("div.sc-bde20123-2");
             for (Element e : body.select("span.sc-bde20123-1"))
             {
                 String score = e.text();
-                disc.imdbScore = Float.parseFloat(score);
+                episode.imdbScore = Float.parseFloat(score);
                 break;
             }
         } catch (IOException e) {
             System.err.println("setIMDBScore: IMDB connection lost");
         }
     }
-    private void setMovieThumbnail(Disc disc, int themdbID){
+    private void setMovieThumbnail(Episode episode, int themdbID){
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + disc.id + "/"));
+            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + episode.id + "/"));
         } catch (IOException e) {
             System.err.println("setEpisodeData: Directory could not be created");
         }
@@ -2316,13 +2299,13 @@ public class DesktopViewController {
 
         //region THUMBNAIL DOWNLOADER
         if (!thumbnailsUrls.isEmpty()){
-            saveThumbnail(disc, thumbnailsUrls.get(0), 0);
+            saveThumbnail(episode, thumbnailsUrls.get(0), 0);
 
             Task<Void> thumbnailTask = new Task<>() {
                 @Override
                 protected Void call() {
                     for (int i = 1; i < thumbnailsUrls.size(); i++){
-                        saveThumbnail(disc, thumbnailsUrls.get(i), i);
+                        saveThumbnail(episode, thumbnailsUrls.get(i), i);
                     }
                     return null;
                 }
@@ -2332,14 +2315,14 @@ public class DesktopViewController {
         }
         //endregion
 
-        File img = new File("src/main/resources/img/discCovers/" + disc.id + "/0.png");
+        File img = new File("src/main/resources/img/discCovers/" + episode.id + "/0.png");
         if (!img.exists()){
-            disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+            episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
         }else{
-            disc.imgSrc = "src/main/resources/img/discCovers/" + disc.id + "/0.png";
+            episode.imgSrc = "src/main/resources/img/discCovers/" + episode.id + "/0.png";
         }
     }
-    private void saveThumbnail(Disc disc, String url, int number){
+    private void saveThumbnail(Episode episode, String url, int number){
         try{
             Image originalImage = new Image(url, 480, 270, true, true);
 
@@ -2365,7 +2348,7 @@ public class DesktopViewController {
             }
 
             if (!originalImage.isError()){
-                File file = new File("src/main/resources/img/discCovers/" + disc.id + "/" + number + ".png");
+                File file = new File("src/main/resources/img/discCovers/" + episode.id + "/" + number + ".png");
                 try{
                     RenderedImage renderedImage = SwingFXUtils.fromFXImage(compressedImage, null);
                     ImageIO.write(renderedImage,"jpg", file);
@@ -2692,17 +2675,17 @@ public class DesktopViewController {
             throw new RuntimeException(e);
         }
     }
-    public void addDisc(Disc newDisc){
-        addEpisodeCard(newDisc);
+    public void addDisc(Episode newEpisode){
+        addEpisodeCard(newEpisode);
     }
-    private void addEpisodeCard(Disc disc){
+    private void addEpisodeCard(Episode episode){
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(getClass().getResource("discCard.fxml"));
             Pane cardBox = fxmlLoader.load();
             DiscController discController = fxmlLoader.getController();
             discController.setDesktopParentParent(this);
-            discController.setData(disc);
+            discController.setData(episode);
 
             discContainer.getChildren().add(cardBox);
             discControllers.add(discController);
@@ -2710,9 +2693,9 @@ public class DesktopViewController {
             throw new RuntimeException(e);
         }
     }
-    public void updateDisc(Disc d){
+    public void updateDisc(Episode d){
         for (DiscController discController : discControllers) {
-            if (discController.disc.id.equals(d.id)){
+            if (discController.episode.id.equals(d.id)){
                 discController.setData(d);
                 return;
             }
@@ -2791,9 +2774,9 @@ public class DesktopViewController {
     }
     @FXML
     void editDisc(MouseEvent event){
-        editDisc(selectedDisc);
+        editDisc(selectedEpisode);
     }
-    void editDisc(Disc d){
+    void editDisc(Episode d){
         showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editDisc-view.fxml"));
@@ -2893,25 +2876,24 @@ public class DesktopViewController {
 
         if (acceptRemove){
             acceptRemove = false;
-            removeDisc(selectedDisc);
+            removeDisc(selectedEpisode);
         }
 
         hideBackgroundShadow();
     }
-    void removeDisc(Disc d) {
+    void removeDisc(Episode d) {
         if (d == null)
             return;
 
-        int index = discList.indexOf(d);
+        int index = episodeList.indexOf(d);
 
         if (index != -1) {
             discContainer.getChildren().remove(index);
             discControllers.remove(index);
         }
 
-        discList.remove(d);
-        App.removeDisc(d, selectedSeason, currentCategory);
-        selectedSeason.removeDisc(d.id);
+        episodeList.remove(d);
+        DBManager.INSTANCE.deleteEpisode(d);
 
         selectSeason(selectedSeason);
         hideMenu();
@@ -2989,10 +2971,10 @@ public class DesktopViewController {
         seasonMenu.setLayoutY(event.getSceneY() - seasonMenu.getHeight());
         seasonMenu.setVisible(true);
     }
-    public void openDiscMenu(MouseEvent event, Disc disc) {
+    public void openDiscMenu(MouseEvent event, Episode episode) {
         menuParentPane.setVisible(true);
         discMenu.setLayoutX(event.getSceneX());
-        if (discList.indexOf(disc) > 2)
+        if (episodeList.indexOf(episode) > 2)
             discMenu.setLayoutY(event.getSceneY() - discMenu.getHeight());
         else
             discMenu.setLayoutY(event.getSceneY());

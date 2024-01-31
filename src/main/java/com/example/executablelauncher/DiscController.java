@@ -1,9 +1,8 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.entities.Episode;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.*;
@@ -11,10 +10,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -53,13 +50,13 @@ public class DiscController {
     @FXML
     private Button playButton;
 
-    public Disc disc;
+    public Episode episode;
     private SeasonController parentController = null;
     private DesktopViewController desktopParent = null;
     public boolean discSelected = false;
     private String oldThumbnailPath = "";
 
-    public void setData(Disc d) {
+    public void setData(Episode d) {
         name.setText(d.getName());
 
         if (d.getEpisodeNumber() == 0 || !desktopParent.currentCategory.type.equals("Shows")){
@@ -68,7 +65,7 @@ public class DiscController {
             number.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber());
         }
 
-        disc = d;
+        episode = d;
 
         clearSelection();
         if (!d.imgSrc.isEmpty())
@@ -88,9 +85,9 @@ public class DiscController {
             if (playButton.isVisible()){
                 if (event.getCode().equals(KeyCode.ENTER)){
                     if (desktopParent != null)
-                        desktopParent.playEpisode(disc);
+                        desktopParent.playEpisode(episode);
                     else
-                        parentController.playEpisode(disc);
+                        parentController.playEpisode(episode);
                 }/*else if (event.getCode().equals(KeyCode.X) || event.getCode().equals(KeyCode.GAME_C)){
                 //showSeriesMenu();
             }*/
@@ -101,14 +98,14 @@ public class DiscController {
             if (playButton.isVisible()){
                 if (event.getButton().equals(MouseButton.PRIMARY)){
                     if (parentController != null)
-                        parentController.playEpisode(disc);
+                        parentController.playEpisode(episode);
                 }
             }
         });
 
         playButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (desktopParent != null)
-                desktopParent.playEpisode(disc);
+                desktopParent.playEpisode(episode);
         });
 
         thumbnailStackPane.setOnMouseEntered(e -> {
@@ -172,12 +169,12 @@ public class DiscController {
 
     @FXML
     void openMenu(MouseEvent event){
-        desktopParent.selectedDisc = disc;
-        desktopParent.openDiscMenu(event, disc);
+        desktopParent.selectedEpisode = episode;
+        desktopParent.openDiscMenu(event, episode);
     }
 
     public void selectDiscDesktop(){
-        desktopParent.selectDisc(disc);
+        desktopParent.selectDisc(episode);
         if (discSelected){
             clearSelection();
         }else{
@@ -215,19 +212,19 @@ public class DiscController {
     }
 
     public void setThumbnail(){
-        if (disc.imgSrc.isEmpty() || oldThumbnailPath.equals(disc.imgSrc))
+        if (episode.imgSrc.isEmpty() || oldThumbnailPath.equals(episode.imgSrc))
             return;
 
         double targetWidth = thumbnail.getFitWidth();
         double targetHeight = thumbnail.getFitHeight();
 
-        File newFile = new File(disc.imgSrc);
+        File newFile = new File(episode.imgSrc);
         if (!newFile.exists())
-            disc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+            episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
 
-        Image originalImage = new Image("file:" + disc.imgSrc, targetWidth, targetHeight, true, true);
+        Image originalImage = new Image("file:" + episode.imgSrc, targetWidth, targetHeight, true, true);
 
-        oldThumbnailPath = disc.imgSrc;
+        oldThumbnailPath = episode.imgSrc;
 
         /*double aspectRatio = targetWidth / targetHeight;
         double originalWidth = originalImage.getWidth();

@@ -33,6 +33,8 @@ module com.example.executablelauncher {
     requires android.json;
     requires org.bytedeco.ffmpeg;
     requires com.github.kokorin.jaffree;
+    requires nitrite;
+    requires nitrite.mvstore.adapter;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

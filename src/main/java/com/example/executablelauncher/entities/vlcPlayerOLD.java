@@ -1,38 +1,21 @@
 package com.example.executablelauncher.entities;
 
-import com.example.executablelauncher.App;
 import com.example.executablelauncher.SeasonController;
-import com.example.executablelauncher.entities.Disc;
-import javafx.animation.FadeTransition;
-import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.util.Duration;
 import com.jfoenix.controls.JFXSlider;
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
-import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
-import uk.co.caprica.vlcj.player.base.MediaPlayer;
-import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
-import uk.co.caprica.vlcj.player.embedded.fullscreen.FullScreenStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class vlcPlayerOLD {
@@ -116,7 +99,7 @@ public class vlcPlayerOLD {
     private Timer clockTimer;
     double percentageStep = 0;
 
-    List<Disc> discList = new ArrayList<>();
+    List<Episode> episodeList = new ArrayList<>();
     int currentDisc = 0;
     /*
     public void setVideo(SeasonController parent, List<Disc> discList, Disc disc, String seriesName, Scene scene){

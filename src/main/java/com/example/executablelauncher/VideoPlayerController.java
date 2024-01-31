@@ -1,13 +1,12 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.videoPlayer.Track;
 import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -17,7 +16,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -120,7 +118,7 @@ public class VideoPlayerController {
     Timeline timeline = null;
     Timeline volumeCount = null;
     double percentageStep = 0;
-    List<Disc> discList = new ArrayList<>();
+    List<Episode> episodeList = new ArrayList<>();
     private List<Track> videoTracks = new ArrayList<>();
     private List<Track> audioTracks = new ArrayList<>();
     private List<Track> subtitleTracks = new ArrayList<>();
@@ -130,12 +128,12 @@ public class VideoPlayerController {
     int currentDisc = 0;
 
     //region INITIALIZATION
-    public void setVideo(SeasonController parent, List<Disc> discList, Disc disc, String seriesName, Scene scene){
+    public void setVideo(SeasonController parent, List<Episode> episodeList, Episode episode, String seriesName, Scene scene){
         parentController = parent;
-        this.discList = discList;
+        this.episodeList = episodeList;
         onLoad();
 
-        currentDisc = discList.indexOf(disc);
+        currentDisc = episodeList.indexOf(episode);
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -211,7 +209,7 @@ public class VideoPlayerController {
         addInteractionSound(button4);
 
         seriesTitle.setText(seriesName);
-        setDiscValues(disc);
+        setDiscValues(episode);
     }
     private void onLoad(){
         runtimeSlider.setOnKeyPressed(e -> {
@@ -307,25 +305,25 @@ public class VideoPlayerController {
         });
         //endregion
     }
-    private void setDiscValues(Disc disc){
-        episodeTitle.setText(disc.name);
-        episodeDate.setText(disc.year);
-        seasonEpisode.setText(App.textBundle.getString("seasonLetter") + disc.seasonNumber + " " + App.textBundle.getString("episodeLetter") + disc.episodeNumber);
-        runtime.setText(parentController.setRuntime(disc.runtime));
+    private void setDiscValues(Episode episode){
+        episodeTitle.setText(episode.name);
+        episodeDate.setText(episode.year);
+        seasonEpisode.setText(App.textBundle.getString("seasonLetter") + episode.seasonNumber + " " + App.textBundle.getString("episodeLetter") + episode.episodeNumber);
+        runtime.setText(parentController.setRuntime(episode.runtime));
 
-        double durationInSeconds = disc.runtime * 60;
+        double durationInSeconds = episode.runtime * 60;
         double fiveSecondsPercentage = (5.0 / durationInSeconds) * 100.0;
         percentageStep = (fiveSecondsPercentage / 100.0) * 100;
 
-        nextButton.setDisable(discList.indexOf(disc) == (discList.size() - 1));
+        nextButton.setDisable(episodeList.indexOf(episode) == (episodeList.size() - 1));
 
-        if (disc.isWatched())
-            disc.setUnWatched();
+        if (episode.isWatched())
+            episode.setUnWatched();
 
         float position;
 
-        if (disc.getTimeWatched() > 0){
-            position = (float) ((disc.runtime * 60L * 1000) - disc.getTimeWatched()) / 100;
+        if (episode.getTimeWatched() > 0){
+            position = (float) ((episode.runtime * 60L * 1000) - episode.getTimeWatched()) / 100;
         } else {
             position = 0;
         }
@@ -336,7 +334,7 @@ public class VideoPlayerController {
 
         fade.setOnFinished(event -> {
             //Set video and start
-            videoPlayer.playVideo(disc.executableSrc, disc.getTimeWatched());
+            videoPlayer.playVideo(episode.executableSrc, episode.getTimeWatched());
             runtimeSlider.setBlockIncrement(percentageStep);
 
             loadTracks();
@@ -413,8 +411,8 @@ public class VideoPlayerController {
 
     //region CONTROLS
     public void stop() {
-        Disc disc = discList.get(currentDisc);
-        disc.setTime(videoPlayer.getCurrentTime());
+        Episode episode = episodeList.get(currentDisc);
+        episode.setTime(videoPlayer.getCurrentTime());
 
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.7), videoPlayer);
         fadeOut.setFromValue(1.0);
@@ -464,24 +462,24 @@ public class VideoPlayerController {
         runtimeSlider.requestFocus();
     }
     public void nextEpisode(){
-        Disc disc = discList.get(currentDisc);
-        disc.setTime(videoPlayer.getCurrentTime());
+        Episode episode = episodeList.get(currentDisc);
+        episode.setTime(videoPlayer.getCurrentTime());
 
         videoPlayer.stop();
 
-        setDiscValues(discList.get(++currentDisc));
+        setDiscValues(episodeList.get(++currentDisc));
     }
     public void prevEpisode(){
         if (videoPlayer.getCurrentTime() > 2000){
             runtimeSlider.setValue(0);
         }else{
             if (currentDisc > 0) {
-                Disc disc = discList.get(currentDisc);
-                disc.setTime(videoPlayer.getCurrentTime());
+                Episode episode = episodeList.get(currentDisc);
+                episode.setTime(videoPlayer.getCurrentTime());
 
                 videoPlayer.stop();
 
-                setDiscValues(discList.get(--currentDisc));
+                setDiscValues(episodeList.get(--currentDisc));
             }else
                 runtimeSlider.setValue(0);
         }

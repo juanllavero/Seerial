@@ -1,7 +1,7 @@
 package com.example.executablelauncher.utils;
 
 import com.example.executablelauncher.entities.Category;
-import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 
@@ -41,9 +41,9 @@ public class Utils {
         }
     }
 
-    public static class DiscComparator implements Comparator<Disc> {
+    public static class DiscComparator implements Comparator<Episode> {
         @Override
-        public int compare(Disc a, Disc b) {
+        public int compare(Episode a, Episode b) {
             return Integer.compare(b.getEpisodeNumber(), a.getEpisodeNumber());
         }
     }

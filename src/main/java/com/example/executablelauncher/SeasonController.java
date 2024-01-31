@@ -1,6 +1,6 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Disc;
+import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
@@ -173,10 +173,10 @@ public class SeasonController {
     private Controller controllerParent;
 
     private List<Season> seasons = new ArrayList<>();
-    private List<Disc> discs = new ArrayList<>();
+    private List<Episode> episodes = new ArrayList<>();
     private List<Button> discsButtons = new ArrayList<>();
     private int currentSeason = 0;
-    private Disc selectedDisc = null;
+    private Episode selectedEpisode = null;
     private Timeline timeline = null;
     private MediaPlayer mp = null;
     public MediaPlayerFactory mediaPlayerFactory;
@@ -268,7 +268,7 @@ public class SeasonController {
             ImageView img = (ImageView) watchedButton.getGraphic();
             if (newVal){
                 controllerParent.playInteractionSound();
-                if (selectedDisc.isWatched()){
+                if (selectedEpisode.isWatched()){
                     watchedButton.setText(App.buttonsBundle.getString("markUnwatched"));
                     img.setImage(new Image("file:src/main/resources/img/icons/watchedSelected.png", 30, 30, true, true));
                 }else{
@@ -277,7 +277,7 @@ public class SeasonController {
                 }
             }else{
                 watchedButton.setText("");
-                if (selectedDisc.isWatched()){
+                if (selectedEpisode.isWatched()){
                     img.setImage(new Image("file:src/main/resources/img/icons/watched.png", 30, 30, true, true));
                 }else{
                     img.setImage(new Image("file:src/main/resources/img/icons/toWatch.png", 30, 30, true, true));
@@ -323,7 +323,7 @@ public class SeasonController {
                 if (discsButtons.size() <= 1)
                     playButton.requestFocus();
                 else
-                    discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+                    discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
             }else if (event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
                 lastSeasonButton.requestFocus();
             else if (event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
@@ -335,7 +335,7 @@ public class SeasonController {
                 if (discsButtons.size() <= 1)
                     detailsButton.requestFocus();
                 else
-                    discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+                    discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
             }else if (event.getCode().equals(KeyCode.RIGHT))
                 watchedButton.requestFocus();
             else if (event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
@@ -347,7 +347,7 @@ public class SeasonController {
                 if (discsButtons.size() <= 1)
                     detailsButton.requestFocus();
                 else
-                    discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+                    discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
             }else if (event.getCode().equals(KeyCode.RIGHT))
                 optionsButton.requestFocus();
             else if (event.getCode().equals(KeyCode.LEFT))
@@ -359,7 +359,7 @@ public class SeasonController {
                 if (discsButtons.size() <= 1)
                     detailsButton.requestFocus();
                 else
-                    discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+                    discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
             }else if (event.getCode().equals(KeyCode.LEFT))
                 watchedButton.requestFocus();
             else if (event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
@@ -394,7 +394,7 @@ public class SeasonController {
 
         stopBackgroundVideo();
 
-        if (season.getDiscs().size() > 1){
+        if (season.getEpisodes().size() > 1){
             cardContainer.setPrefHeight((Screen.getPrimary().getBounds().getHeight() / 5) + 20);
             cardContainer.setVisible(true);
         }else{
@@ -496,21 +496,21 @@ public class SeasonController {
 
         cardContainer.getChildren().clear();
         discsButtons.clear();
-        discs.clear();
-        List<String> discs = season.getDiscs();
-        List<Disc> discList = new ArrayList<>();
+        episodes.clear();
+        List<String> discs = season.getEpisodes();
+        List<Episode> episodeList = new ArrayList<>();
         for (String i : discs){
-            Disc d = App.findDisc(i);
-            discList.add(d);
+            Episode d = App.findDisc(i);
+            episodeList.add(d);
         }
 
-        discList.sort(new Utils.DiscComparator().reversed());
-        for (Disc disc : discList){
-            addEpisodeCard(disc);
+        episodeList.sort(new Utils.DiscComparator().reversed());
+        for (Episode episode : episodeList){
+            addEpisodeCard(episode);
         }
 
         if (discsButtons.size() <= 1){
-            setTimeLeft(discList.get(0));
+            setTimeLeft(episodeList.get(0));
         }
 
         Platform.runLater(() -> {
@@ -522,19 +522,19 @@ public class SeasonController {
                 playButton.requestFocus();
         });
 
-        selectedDisc = App.findDisc(discs.get(0));
+        selectedEpisode = App.findDisc(discs.get(0));
 
         overviewField.setText(season.overview);
         yearField.setText(season.getYear());
-        durationField.setText(setRuntime(selectedDisc.runtime));
+        durationField.setText(setRuntime(selectedEpisode.runtime));
         episodeName.setText(season.name);
 
-        if (selectedDisc.imdbScore != 0){
+        if (selectedEpisode.imdbScore != 0){
             scoreProviderImg.setImage(new Image("file:src/main/resources/img/icons/imdb.png", 30, 30, true, true));
-            scoreField.setText(String.valueOf(selectedDisc.imdbScore));
+            scoreField.setText(String.valueOf(selectedEpisode.imdbScore));
         }else{
             scoreProviderImg.setImage(new Image("file:src/main/resources/img/icons/tmdb.png", 30, 30, true, true));
-            scoreField.setText(String.valueOf(selectedDisc.score));
+            scoreField.setText(String.valueOf(selectedEpisode.score));
         }
 
         if (!isShow){
@@ -577,20 +577,20 @@ public class SeasonController {
         playingVideo = false;
 
         if (discsButtons.size() > 1)
-            discsButtons.get(discs.indexOf(selectedDisc)).requestFocus();
+            discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
         else
             playButton.requestFocus();
 
-        setTimeLeft(selectedDisc);
+        setTimeLeft(selectedEpisode);
         reloadEpisodeCard();
         updateWatchedButton();
     }
     //endregion
 
     //region EPISODES
-    public void addEpisodeCard(Disc disc){
-        if (disc != null){
-            discs.add(disc);
+    public void addEpisodeCard(Episode episode){
+        if (episode != null){
+            episodes.add(episode);
             Button btn = new Button();
             btn.setPadding(new Insets(0));
 
@@ -612,7 +612,7 @@ public class SeasonController {
                     btn.setScaleY(1.1);
                     controllerParent.playInteractionSound();
 
-                    updateDiscInfo(discs.get(discsButtons.indexOf(btn)));
+                    updateDiscInfo(episodes.get(discsButtons.indexOf(btn)));
                 }else{
                     btn.setScaleX(1);
                     btn.setScaleY(1);
@@ -621,7 +621,7 @@ public class SeasonController {
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
                 if (event.getCode().equals(KeyCode.ENTER)){
-                    playEpisode(discs.get(discsButtons.indexOf(btn)));
+                    playEpisode(episodes.get(discsButtons.indexOf(btn)));
                 }
             });
 
@@ -654,7 +654,7 @@ public class SeasonController {
                 }
             });
 
-            setEpisodeCardValues(btn, disc);
+            setEpisodeCardValues(btn, episode);
 
             cardContainer.getChildren().add(btn);
             discsButtons.add(btn);
@@ -696,7 +696,7 @@ public class SeasonController {
         transition.play();
     }
 
-    public void playEpisode(Disc disc){
+    public void playEpisode(Episode episode){
         if (mp != null)
             mp.stop();
 
@@ -727,7 +727,7 @@ public class SeasonController {
                 name = seasons.get(currentSeason).name;
 
             VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setVideo(this, discs, disc, name, scene);
+            playerController.setVideo(this, episodes, episode, name, scene);
 
             stage.setMaximized(true);
             stage.show();
@@ -776,7 +776,7 @@ public class SeasonController {
 
     private void disableAllButCurrentEpisode(){
         episodesFocussed = false;
-        int index = discs.indexOf(selectedDisc);
+        int index = episodes.indexOf(selectedEpisode);
         for (int i = 0; i < discsButtons.size(); i++){
             if (i != index){
                 discsButtons.get(i).setDisable(true);
@@ -791,10 +791,10 @@ public class SeasonController {
     }
 
     private void toggleWatched(){
-        if (selectedDisc.isWatched())
-            selectedDisc.setUnWatched();
+        if (selectedEpisode.isWatched())
+            selectedEpisode.setUnWatched();
         else
-            selectedDisc.setWatched();
+            selectedEpisode.setWatched();
 
         reloadEpisodeCard();
 
@@ -804,13 +804,13 @@ public class SeasonController {
         ImageView img = (ImageView) watchedButton.getGraphic();
 
         if (watchedButton.isFocused()){
-            if (selectedDisc.isWatched()){
+            if (selectedEpisode.isWatched()){
                 img.setImage(new Image("file:src/main/resources/img/icons/watchedSelected.png", 30, 30, true, true));
             }else{
                 img.setImage(new Image("file:src/main/resources/img/icons/toWatchSelected.png", 30, 30, true, true));
             }
         }else{
-            if (selectedDisc.isWatched()){
+            if (selectedEpisode.isWatched()){
                 img.setImage(new Image("file:src/main/resources/img/icons/watched.png", 30, 30, true, true));
             }else{
                 img.setImage(new Image("file:src/main/resources/img/icons/toWatch.png", 30, 30, true, true));
@@ -818,12 +818,12 @@ public class SeasonController {
         }
     }
     private void reloadEpisodeCard(){
-        Button btn = discsButtons.get(discs.indexOf(selectedDisc));
+        Button btn = discsButtons.get(episodes.indexOf(selectedEpisode));
         btn.setGraphic(null);
 
-        setEpisodeCardValues(btn, selectedDisc);
+        setEpisodeCardValues(btn, selectedEpisode);
     }
-    private void setEpisodeCardValues(Button btn, Disc selectedDisc) {
+    private void setEpisodeCardValues(Button btn, Episode selectedEpisode) {
         ImageView thumbnail = new ImageView();
 
         double targetHeight = Screen.getPrimary().getBounds().getHeight() / 5.5;
@@ -832,11 +832,11 @@ public class SeasonController {
         thumbnail.setFitWidth(targetWidth);
         thumbnail.setFitHeight(targetHeight);
 
-        File newFile = new File(selectedDisc.imgSrc);
+        File newFile = new File(selectedEpisode.imgSrc);
         if (!newFile.exists())
-            selectedDisc.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+            selectedEpisode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
 
-        Image originalImage = new Image("file:" + selectedDisc.imgSrc, targetWidth, targetHeight, true, true);
+        Image originalImage = new Image("file:" + selectedEpisode.imgSrc, targetWidth, targetHeight, true, true);
 
         thumbnail.setImage(originalImage);
         thumbnail.setPreserveRatio(false);
@@ -847,9 +847,9 @@ public class SeasonController {
         StackPane main = new StackPane(thumbnail);
         BorderPane details = new BorderPane();
 
-        if (selectedDisc.getTimeWatched() > 5000){
-            JFXSlider slider = new JFXSlider(0, selectedDisc.runtime * 60 * 1000
-                    , selectedDisc.getTimeWatched());
+        if (selectedEpisode.getTimeWatched() > 5000){
+            JFXSlider slider = new JFXSlider(0, selectedEpisode.runtime * 60 * 1000
+                    , selectedEpisode.getTimeWatched());
             slider.setFocusTraversable(false);
             details.setBottom(slider);
         }
@@ -868,13 +868,13 @@ public class SeasonController {
         videoInfoParent.getChildren().add(videoInfo);
 
         if (isShow){
-            Label info = new Label("S" + seasons.get(currentSeason).seasonNumber + "E" + selectedDisc.episodeNumber);
+            Label info = new Label("S" + seasons.get(currentSeason).seasonNumber + "E" + selectedEpisode.episodeNumber);
             info.setFont(new Font(24));
             info.setTextFill(Color.WHITE);
             videoInfo.getChildren().add(info);
         }
 
-        if (selectedDisc.isWatched()){
+        if (selectedEpisode.isWatched()){
             ImageView watched = new ImageView(
                     new Image("file:src/main/resources/img/icons/tick.png", 25, 25, true, true));
             videoInfo.getChildren().add(watched);
@@ -951,8 +951,8 @@ public class SeasonController {
     }
     @FXML
     void play(){
-        if (selectedDisc != null)
-            playEpisode(selectedDisc);
+        if (selectedEpisode != null)
+            playEpisode(selectedEpisode);
     }
     @FXML
     void editSeason(){
@@ -1000,17 +1000,17 @@ public class SeasonController {
         fadeOutEffect(mainPane);
 
         if (isShow){
-            detailsImage.setImage(new Image("file:" + selectedDisc.imgSrc));
+            detailsImage.setImage(new Image("file:" + selectedEpisode.imgSrc));
             genresField.setText(series.getGenres());
         }else{
             detailsImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
             detailsImage.setImage(new Image("file:" + seasons.get(currentSeason).coverSrc));
             genresField.setText(seasons.get(currentSeason).getGenres());
         }
-        detailsTitle.setText(selectedDisc.name);
+        detailsTitle.setText(selectedEpisode.name);
         detailsOverview.setText(overviewField.getText());
 
-        File file = new File(selectedDisc.executableSrc);
+        File file = new File(selectedEpisode.executableSrc);
         fileNameField.setText(file.getName());
 
         fadeInEffect(menuShadow);
@@ -1035,23 +1035,23 @@ public class SeasonController {
 
         return (h + "h " + m + "m");
     }
-    private void updateDiscInfo(Disc disc) {
-        selectedDisc = disc;
-        episodeName.setText(disc.name);
-        overviewField.setText(disc.overview);
-        seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).seasonNumber + " " + App.textBundle.getString("episodeLetter") + disc.episodeNumber);
-        yearField.setText(disc.year);
-        durationField.setText(setRuntime(disc.runtime));
-        scoreField.setText(String.valueOf(disc.score));
+    private void updateDiscInfo(Episode episode) {
+        selectedEpisode = episode;
+        episodeName.setText(episode.name);
+        overviewField.setText(episode.overview);
+        seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).seasonNumber + " " + App.textBundle.getString("episodeLetter") + episode.episodeNumber);
+        yearField.setText(episode.year);
+        durationField.setText(setRuntime(episode.runtime));
+        scoreField.setText(String.valueOf(episode.score));
 
-        setTimeLeft(disc);
+        setTimeLeft(episode);
 
         updateWatchedButton();
     }
-    private void setTimeLeft(Disc disc){
-        if (disc.getTimeWatched() > 5000){
+    private void setTimeLeft(Episode episode){
+        if (episode.getTimeWatched() > 5000){
             timeLeftBox.setVisible(true);
-            long leftTime = ((long) disc.runtime * 60 * 1000) - disc.getTimeWatched();
+            long leftTime = ((long) episode.runtime * 60 * 1000) - episode.getTimeWatched();
 
             long hours = leftTime / 3600000;
             long minutes = (leftTime % 3600000) / 60000;

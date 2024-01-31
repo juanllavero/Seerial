@@ -2,7 +2,7 @@
   <profile version="1.0">
     <option name="myName" value="Project Default" />
     <inspection_tool class="AutoCloseableResource" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="METHOD_MATCHER_CONFIG" value="java.util.Formatter,format,java.io.Writer,append,com.google.common.base.Preconditions,checkNotNull,org.hibernate.Session,close,java.io.PrintWriter,printf,java.io.PrintStream,printf,okhttp3.Call,execute,java.util.concurrent.Executors,newSingleThreadScheduledExecutor,org.bytedeco.ffmpeg.global.avutil,av_get_media_type_string,org.bytedeco.ffmpeg.global.avcodec,avcodec_get_name" />
+      <option name="METHOD_MATCHER_CONFIG" value="java.util.Formatter,format,java.io.Writer,append,com.google.common.base.Preconditions,checkNotNull,org.hibernate.Session,close,java.io.PrintWriter,printf,java.io.PrintStream,printf,okhttp3.Call,execute,java.util.concurrent.Executors,newSingleThreadScheduledExecutor,org.bytedeco.ffmpeg.global.avutil,av_get_media_type_string,org.bytedeco.ffmpeg.global.avcodec,avcodec_get_name,org.dizitart.no2.NitriteBuilder,openOrCreate" />
     </inspection_tool>
   </profile>
 </component>
