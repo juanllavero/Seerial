@@ -201,7 +201,7 @@ public class SeasonController {
         this.playSameMusic = playSameMusic;
         if (seasons != null){
             for (String id : seasonList){
-                seasons.add(App.findSeason(id));
+                seasons.add(DBManager.INSTANCE.getSeason(id));
             }
         }
 
@@ -500,11 +500,11 @@ public class SeasonController {
         List<String> discs = season.getEpisodes();
         List<Episode> episodeList = new ArrayList<>();
         for (String i : discs){
-            Episode d = App.findDisc(i);
+            Episode d = DBManager.INSTANCE.getEpisode(i);
             episodeList.add(d);
         }
 
-        episodeList.sort(new Utils.DiscComparator().reversed());
+        episodeList.sort(new Utils.EpisodeComparator().reversed());
         for (Episode episode : episodeList){
             addEpisodeCard(episode);
         }
@@ -522,7 +522,7 @@ public class SeasonController {
                 playButton.requestFocus();
         });
 
-        selectedEpisode = App.findDisc(discs.get(0));
+        selectedEpisode = DBManager.INSTANCE.getEpisode(discs.get(0));
 
         overviewField.setText(season.overview);
         yearField.setText(season.getYear());

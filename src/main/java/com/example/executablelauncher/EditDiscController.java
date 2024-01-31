@@ -143,7 +143,7 @@ public class EditDiscController {
                 }
             }
 
-            File newFile = new File("src/main/resources/img/discCovers/" + episodeToEdit.id + "/" + (number + 1) + ".png");
+            File newFile = new File("src/main/resources/img/discCovers/" + episodeToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(selectedImage.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -187,7 +187,7 @@ public class EditDiscController {
                 }
             }
 
-            File newFile = new File("src/main/resources/img/discCovers/" + episodeToEdit.id + "/" + (number + 1) + ".png");
+            File newFile = new File("src/main/resources/img/discCovers/" + episodeToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(selectedImage.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -208,7 +208,7 @@ public class EditDiscController {
     }
     private void loadImages(){
         //Add images to view
-        File dir = new File("src/main/resources/img/discCovers/" + episodeToEdit.id);
+        File dir = new File("src/main/resources/img/discCovers/" + episodeToEdit.getId());
         if (dir.exists()){
             File[] files = dir.listFiles();
             assert files != null;
@@ -305,7 +305,7 @@ public class EditDiscController {
             episodeToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
         if (selectedImage != null)
-            episodeToEdit.imgSrc = "src/main/resources/img/discCovers/" + episodeToEdit.id + "/" + selectedImage.getName();
+            episodeToEdit.imgSrc = "src/main/resources/img/discCovers/" + episodeToEdit.getId() + "/" + selectedImage.getName();
 
         controllerParent.hideBackgroundShadow();
         controllerParent.updateDisc(episodeToEdit);

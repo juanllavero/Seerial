@@ -3,13 +3,14 @@ package com.example.executablelauncher.entities;
 import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Id;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Entity
-public class Category {
+public class Category implements Serializable {
     @Id
     String id;
     public String name;
@@ -21,6 +22,10 @@ public class Category {
     public Map<String, String> analyzedFiles = new HashMap<>();               //<File, DiscID>
     public Map<String, String> analyzedFolders = new HashMap<>();             //<Folder, SeriesID>
     public Map<String, String> seasonFolders = new HashMap<>();               //<Folder, SeasonID>
+
+    public Category() {
+
+    }
 
     public Category(String n, String lang, String t, List<String> f, boolean s){
         name = n;

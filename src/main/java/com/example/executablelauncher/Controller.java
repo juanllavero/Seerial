@@ -101,7 +101,7 @@ public class Controller implements Initializable {
     @FXML
     private void close(ActionEvent event) throws IOException {
         playInteractionSound();
-        App.SaveData();
+        App.close();
         Stage stage = (Stage) mainBox.getScene().getWindow();
         stage.close();
     }
@@ -164,7 +164,7 @@ public class Controller implements Initializable {
         globalShadow.setFitHeight(screenHeight);
         globalShadow.setVisible(false);
 
-        categories = App.getFullscreenCategories();
+        categories = App.getCategories(true);
 
         for (Category cat : categories){
             Button btn = new Button();
@@ -243,8 +243,14 @@ public class Controller implements Initializable {
         categoryType = currentCategory.type;
         cardContainer.getChildren().clear();
         seriesButtons.clear();
-        collectionList = App.getSeriesFromCategory(cat.name);
-        assert collectionList != null;
+
+        for (String seriesID : currentCategory.getSeries()){
+            Series series = DBManager.INSTANCE.getSeries(seriesID);
+
+            if (series != null)
+                collectionList.add(series);
+        }
+
         for (Series col : collectionList) {
             addCard(col);
         }
@@ -254,7 +260,7 @@ public class Controller implements Initializable {
         String src;
         if (!collectionList.isEmpty() && !collectionList.get(0).getSeasons().isEmpty()){
             seriesToEdit = collectionList.get(0);
-            src = "file:src/main/resources/img/backgrounds/" + (Objects.requireNonNull(App.findSeason(collectionList.get(0).getSeasons().get(0))).id) + "/fullBlur.png";
+            src = "file:src/main/resources/img/backgrounds/" + (Objects.requireNonNull(DBManager.INSTANCE.getSeason(collectionList.get(0).getSeasons().get(0))).getId()) + "/fullBlur.png";
         }else{
             src = "file:src/main/resources/img/backgroundDefault.jpeg";
         }
@@ -304,9 +310,9 @@ public class Controller implements Initializable {
             delay = new PauseTransition(Duration.millis(300));
             delay.setOnFinished(event -> Platform.runLater(() -> {
                 if (!s.getSeasons().isEmpty() && seriesButtons.get(collectionList.indexOf(s)).isFocused()) {
-                    Season season = App.findSeason(s.getSeasons().get(0));
+                    Season season = DBManager.INSTANCE.getSeason(s.getSeasons().get(0));
                     if (season != null) {
-                        String imagePath = "src/main/resources/img/backgrounds/" + season.id;
+                        String imagePath = "src/main/resources/img/backgrounds/" + season.getId();
                         File fullBlur = new File(imagePath + "/fullBlur.png");
                         String backgroundPath = fullBlur.exists() ? "fullBlur.png" : "background.png";
 
@@ -488,7 +494,7 @@ public class Controller implements Initializable {
                 Parent root = fxmlLoader.load();
                 SeasonController seasonController = fxmlLoader.getController();
                 seasonController.setParent(this);
-                Series newSeries = App.findSeries(s.id);
+                Series newSeries = DBManager.INSTANCE.getSeries(s.getId());
                 if (newSeries != null)
                     seasonController.setSeasons(seriesToEdit, newSeries.getSeasons(), newSeries.playSameMusic, categoryType.equals("Shows"));
                 Stage stage = (Stage) mainPane.getScene().getWindow();
@@ -539,7 +545,6 @@ public class Controller implements Initializable {
     void switchToDesktop(ActionEvent event){
         playInteractionSound();
         try {
-            App.SaveData();
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();

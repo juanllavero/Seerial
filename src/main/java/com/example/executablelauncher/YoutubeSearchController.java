@@ -144,22 +144,22 @@ public class YoutubeSearchController {
 
     @FXML
     void downloadMedia(){
-        parentController.downloadMedia(seasonParentController.seasonToEdit.id, selectedVideo.watch_url);
+        parentController.downloadMedia(seasonParentController.seasonToEdit.getId(), selectedVideo.watch_url);
 
-        File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + seasonParentController.seasonToEdit.id + "/");
+        File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + seasonParentController.seasonToEdit.getId() + "/");
         File[] filesInMediaCache = mediaCahceDir.listFiles();
 
         if (filesInMediaCache != null && filesInMediaCache.length != 0){
             File audioFile = filesInMediaCache[0];
 
             try{
-                Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + seasonParentController.seasonToEdit.id + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
-                seasonParentController.seasonToEdit.musicSrc = "src/main/resources/music/" + seasonParentController.seasonToEdit.id + ".mp4";
+                Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + seasonParentController.seasonToEdit.getId() + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
+                seasonParentController.seasonToEdit.musicSrc = "src/main/resources/music/" + seasonParentController.seasonToEdit.getId() + ".mp4";
 
-                File directory = new File("src/main/resources/downloadedMediaCache/" + seasonParentController.seasonToEdit.id + "/");
+                File directory = new File("src/main/resources/downloadedMediaCache/" + seasonParentController.seasonToEdit.getId() + "/");
                 FileUtils.deleteDirectory(directory);
 
-                seasonParentController.selectedMusic = new File("src/main/resources/music/" + seasonParentController.seasonToEdit.id + ".mp4");
+                seasonParentController.selectedMusic = new File("src/main/resources/music/" + seasonParentController.seasonToEdit.getId() + ".mp4");
             } catch (IOException e) {
                 System.err.println("processEpisode: Could not copy downloaded audio file");
             }

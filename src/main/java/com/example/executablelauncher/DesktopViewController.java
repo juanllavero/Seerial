@@ -72,9 +72,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -261,14 +259,15 @@ public class DesktopViewController {
     private final ImageViewPane seasonBackgroundNoise = new ImageViewPane();
     private final ImageViewPane seriesBackgroundNoise = new ImageViewPane();
 
+    private List<Category> categories = new ArrayList<>();
     private List<Series> seriesList = new ArrayList<>();
     private List<Season> seasonList = new ArrayList<>();
     private List<Episode> episodeList = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
     private List<Button> seasonsButtons = new ArrayList<>();
-    public Episode selectedEpisode = null;
     private Series selectedSeries = null;
     private Season selectedSeason = null;
+    public Episode selectedEpisode = null;
     private List<Episode> selectedEpisodes = new ArrayList<>();
     private List<DiscController> discControllers = new ArrayList<>();
     public Category currentCategory;
@@ -292,7 +291,7 @@ public class DesktopViewController {
 
         categorySelector.getSelectionModel()
                 .selectedItemProperty()
-                .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectCategory(newValue) );
+                .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectCategory(categories.get(categorySelector.getItems().indexOf(newValue))) );
 
         setDragWindow(topBar);
 
@@ -437,7 +436,7 @@ public class DesktopViewController {
             if (!s.getSeasons().isEmpty()){
                 seasonList.clear();
                 for (String id : s.getSeasons()){
-                    Season season = App.findSeason(id);
+                    Season season = DBManager.INSTANCE.getSeason(id);
                     if (season != null)
                         seasonList.add(season);
                 }
@@ -581,7 +580,7 @@ public class DesktopViewController {
         discContainer.getChildren().clear();
         discControllers.clear();
         for (String i : s.getEpisodes()){
-            Episode d = App.findDisc(i);
+            Episode d = DBManager.INSTANCE.getEpisode(i);
             if (d != null){
                 episodeList.add(d);
             }
@@ -589,7 +588,7 @@ public class DesktopViewController {
 
 
         if (!episodeList.isEmpty()) {
-            episodeList.sort(new com.example.executablelauncher.utils.Utils.DiscComparator().reversed());
+            episodeList.sort(new Utils.EpisodeComparator().reversed());
             addEpisodeCardWithDelay(0);
         }
     }
@@ -643,11 +642,14 @@ public class DesktopViewController {
 
     //region UPDATE VALUES
     public void updateCategories(){
-        categories = App.getCategoriesNames();
+        categories.addAll(App.getCategories(false));
+
         categorySelector.getItems().clear();
-        categorySelector.getItems().addAll(categories);
+        for (Category category : categories)
+            categorySelector.getItems().add(category.getName());
+
         if (!categories.isEmpty()){
-            categorySelector.setValue(categories.get(0));
+            categorySelector.setValue(categories.get(0).getName());
             selectCategory(categories.get(0));
         }
     }
@@ -656,8 +658,7 @@ public class DesktopViewController {
         categorySelector.getItems().addAll(App.getCategoriesNames());
         if (categorySelector.getItems().size() > 1) {
             categorySelector.setValue(categorySelector.getItems().get(1));
-            seriesList = App.getSeriesFromCategory(categorySelector.getValue());
-            selectCategory(categorySelector.getValue());
+            selectCategory(categories.get(categorySelector.getItems().indexOf(categorySelector.getValue())));
         }
 
         settingsButton.setText(App.buttonsBundle.getString("settings"));
@@ -673,14 +674,19 @@ public class DesktopViewController {
     //endregion
 
     //region SELECTION
-    public void selectCategory(String category){
+    public void selectCategory(Category category){
         seriesContainer.getChildren().clear();
-        currentCategory = App.findCategory(category);
+        currentCategory = category;
 
         if (currentCategory == null)
             return;
 
-        seriesList = App.getSeriesFromCategory(category);
+        for (String seriesID : currentCategory.getSeries()){
+            Series series = DBManager.INSTANCE.getSeries(seriesID);
+
+            if (series != null)
+                seriesList.add(series);
+        }
 
         if (currentCategory.type.equals("Shows")) {
             identificationShow.setDisable(false);
@@ -758,34 +764,34 @@ public class DesktopViewController {
     //region IMAGE EFFECTS
     public void saveBackground(Season s, String imageToCopy){
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/backgrounds/" + s.id + "/"));
+            Files.createDirectories(Paths.get("src/main/resources/img/backgrounds/" + s.getId() + "/"));
         } catch (IOException e) {
             System.err.println("saveBackground: Directory could not be created");
         }
 
         //Clear old images
-        File dir = new File("src/main/resources/img/backgrounds/" + s.id);
+        File dir = new File("src/main/resources/img/backgrounds/" + s.getId());
         if (dir.exists()){
             try {
                 deleteFile(s.getBackgroundSrc());
-                deleteFile("src/main/resources/img/backgrounds/" + s.id + "/fullBlur.png");
-                deleteFile("src/main/resources/img/backgrounds/" + s.id + "/transparencyEffect.png");
+                deleteFile("src/main/resources/img/backgrounds/" + s.getId() + "/fullBlur.png");
+                deleteFile("src/main/resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
             } catch (IOException e) {
                 System.err.println("EditSeasonController: Error removing old images");
             }
         }
 
-        File destination = new File("src/main/resources/img/backgrounds/" + s.id + "/background.png");
+        File destination = new File("src/main/resources/img/backgrounds/" + s.getId() + "/background.png");
         try {
             Files.copy(Paths.get(imageToCopy), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             System.err.println("Background not copied");
         }
 
-        s.backgroundSrc = "src/main/resources/img/backgrounds/" + s.id + "/background.png";
+        s.backgroundSrc = "src/main/resources/img/backgrounds/" + s.getId() + "/background.png";
 
-        setTransparencyEffect(s.getBackgroundSrc(), "src/main/resources/img/backgrounds/" + s.id + "/transparencyEffect.png");
-        processBlurAndSave(s.getBackgroundSrc(), "src/main/resources/img/backgrounds/" + s.id + "/fullBlur.png");
+        setTransparencyEffect(s.getBackgroundSrc(), "src/main/resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
+        processBlurAndSave(s.getBackgroundSrc(), "src/main/resources/img/backgrounds/" + s.getId() + "/fullBlur.png");
     }
     private void deleteFile(String filePath) throws IOException {
         Path path = Paths.get(filePath);
@@ -927,12 +933,7 @@ public class DesktopViewController {
 
     //region WINDOW
     private void closeWindow(){
-        try{
-            App.SaveData();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        System.exit(0);
+        App.close();
     }
     @FXML
     void close(MouseEvent event) {
@@ -1122,11 +1123,11 @@ public class DesktopViewController {
         Images images = downloadImages(selectedSeason.themdbID);
 
         if (images != null)
-            loadImages(selectedSeason.id, images, selectedSeason.themdbID, false);
+            loadImages(selectedSeason.getId(), images, selectedSeason.themdbID, false);
 
-        File posterDir = new File("src/main/resources/img/seriesCovers/" + selectedSeason.id + "/0.png");
+        File posterDir = new File("src/main/resources/img/seriesCovers/" + selectedSeason.getId() + "/0.png");
         if (posterDir.exists()){
-            selectedSeason.coverSrc = "src/main/resources/img/seriesCovers/" + selectedSeason.id + "/0.png";
+            selectedSeason.coverSrc = "src/main/resources/img/seriesCovers/" + selectedSeason.getId() + "/0.png";
         }
 
         downloadLogos(selectedSeries, selectedSeason, selectedSeason.themdbID);
@@ -1136,19 +1137,19 @@ public class DesktopViewController {
         List<YoutubeVideo> results = searchYoutube(selectedSeason.name + " main theme");
 
         if (results != null){
-            downloadMedia(selectedSeason.id, results.get(0).watch_url);
+            downloadMedia(selectedSeason.getId(), results.get(0).watch_url);
 
-            File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.id + "/");
+            File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
             File[] filesInMediaCache = mediaCahceDir.listFiles();
 
             if (filesInMediaCache != null){
                 File audioFile = filesInMediaCache[0];
 
                 try{
-                    Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + selectedSeason.id + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
-                    selectedSeason.musicSrc = "src/main/resources/music/" + selectedSeason.id + ".mp3";
+                    Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + selectedSeason.getId() + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                    selectedSeason.musicSrc = "src/main/resources/music/" + selectedSeason.getId() + ".mp3";
 
-                    File directory = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.id + "/");
+                    File directory = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
                     FileUtils.deleteDirectory(directory);
                 } catch (IOException e) {
                     System.err.println("processEpisode: Could not copy downloaded audio file");
@@ -1157,7 +1158,7 @@ public class DesktopViewController {
         }
 
         for (String discID : selectedSeason.getEpisodes()){
-            Episode episode = App.findDisc(discID);
+            Episode episode = DBManager.INSTANCE.getEpisode(discID);
 
             if (episode == null)
                 continue;
@@ -1212,14 +1213,11 @@ public class DesktopViewController {
             }
         }
     }
-    public void loadCategory(String name){
-        categorySelector.getItems().add(name);
-        categorySelector.setValue(name);
+    public void loadCategory(Category category){
+        categorySelector.getItems().add(category.getName());
+        categorySelector.setValue(category.getName());
 
-        currentCategory = App.findCategory(name);
-
-        if (currentCategory == null)
-            return;
+        currentCategory = category;
 
         searchFiles();
     }
@@ -1282,12 +1280,12 @@ public class DesktopViewController {
 
                 List<String> seriesIDs = List.copyOf(currentCategory.series);
                 for (String id : seriesIDs){
-                    Series series = App.findSeries(id);
+                    Series series = DBManager.INSTANCE.getSeries(id);
 
                     if (series == null)
                         continue;
 
-                    Season season = App.findSeason(series.seasons.get(0));
+                    Season season = DBManager.INSTANCE.getSeason(series.seasons.get(0));
 
                     if (!season.musicSrc.isEmpty())
                         continue;
@@ -1295,19 +1293,19 @@ public class DesktopViewController {
                     List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
 
                     if (results != null){
-                        downloadMedia(season.id, results.get(0).watch_url);
+                        downloadMedia(season.getId(), results.get(0).watch_url);
 
-                        File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                        File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.getId() + "/");
                         File[] filesInMediaCache = mediaCahceDir.listFiles();
 
                         if (filesInMediaCache != null){
                             File audioFile = filesInMediaCache[0];
 
                             try{
-                                Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
-                                season.musicSrc = "src/main/resources/music/" + season.id + ".mp4";
+                                Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.getId() + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
+                                season.musicSrc = "src/main/resources/music/" + season.getId() + ".mp4";
 
-                                File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                                File directory = new File("src/main/resources/downloadedMediaCache/" + season.getId() + "/");
                                 FileUtils.deleteDirectory(directory);
                             } catch (IOException e) {
                                 System.err.println("processEpisode: Could not copy downloaded audio file");
@@ -1368,13 +1366,13 @@ public class DesktopViewController {
         Series series;
 
         if (currentCategory.analyzedFolders.get(directory.getAbsolutePath()) != null){
-            series = App.findSeries(currentCategory.analyzedFolders.get(directory.getAbsolutePath()));
+            series = DBManager.INSTANCE.getSeries(currentCategory.analyzedFolders.get(directory.getAbsolutePath()));
         }else{
             series = new Series();
             series.folder = directory.getAbsolutePath();
-            currentCategory.analyzedFolders.put(directory.getAbsolutePath(), series.id);
-            currentCategory.series.add(series.id);
-            App.addCollection(series);
+            currentCategory.analyzedFolders.put(directory.getAbsolutePath(), series.getId());
+            currentCategory.series.add(series.getId());
+            DBManager.INSTANCE.createSeries(series);
         }
 
         int themdbID = series.themdbID;
@@ -1455,11 +1453,11 @@ public class DesktopViewController {
             Images images = downloadImages(series.themdbID);
 
             if (images != null)
-                loadImages(series.id, images, series.themdbID, false);
+                loadImages(series.getId(), images, series.themdbID, false);
 
-            File posterDir = new File("src/main/resources/img/seriesCovers/" + series.id + "/0.png");
+            File posterDir = new File("src/main/resources/img/seriesCovers/" + series.getId() + "/0.png");
             if (posterDir.exists()){
-                series.coverSrc = "src/main/resources/img/seriesCovers/" + series.id + "/0.png";
+                series.coverSrc = "src/main/resources/img/seriesCovers/" + series.getId() + "/0.png";
             }
         }
     }
@@ -1708,7 +1706,7 @@ public class DesktopViewController {
         if (seasonMetadata == null || episodeMetadata == null)
             return;
 
-        Season season = App.findSeason(series, seasonMetadata.season_number);
+        Season season = DBManager.INSTANCE.getSeasonInSeries(series, seasonMetadata.season_number);
         if (season == null){
             season = new Season();
 
@@ -1717,14 +1715,14 @@ public class DesktopViewController {
             season.year = seasonMetadata.air_date.substring(0, seasonMetadata.air_date.indexOf("-"));
             season.seasonNumber = seasonMetadata.season_number;
             season.score = (float) ((int) (seasonMetadata.vote_average * 10.0)) / 10.0f;
-            season.seriesID = series.id;
+            season.seriesID = series.getId();
 
-            App.addSeason(season, series.id);
+            DBManager.INSTANCE.createSeason(season);
 
             if (season.backgroundSrc.isEmpty() || season.backgroundSrc.equals("src/main/resources/img/DefaultBackground.png")) {
                 File f = new File("src/main/resources/img/DownloadCache/" + series.themdbID + ".png");
-                if (!f.exists() && series.seasons.size() > 1){
-                    Season s = App.findSeason(series.seasons.get(0));
+                if (!f.exists() && series.getSeasons().size() > 1){
+                    Season s = DBManager.INSTANCE.getSeason(series.getSeasons().get(0));
 
                     if (s != null){
                         saveBackground(season, s.backgroundSrc);
@@ -1741,7 +1739,7 @@ public class DesktopViewController {
                 season.order = 100;
         }
 
-        Episode episode = App.findDisc(season, episodeMetadata.episode_number);
+        Episode episode = DBManager.INSTANCE.getEpisodeInSeason(season, episodeMetadata.episode_number);
         if (episode != null) {
             episode.executableSrc = file.getAbsolutePath();
             return;
@@ -1750,12 +1748,12 @@ public class DesktopViewController {
         episode = new Episode();
 
         //Set the metadata for the new episode
-        episode.seasonID = season.id;
+        episode.seasonID = season.getId();
         episode.executableSrc = file.getAbsolutePath();
         setEpisodeData(episode, episodeMetadata, series);
 
-        currentCategory.analyzedFiles.put(file.getAbsolutePath(), episode.id);
-        App.addDisc(episode);
+        currentCategory.analyzedFiles.put(file.getAbsolutePath(), episode.getId());
+        DBManager.INSTANCE.createEpisode(episode);
     }
     private void setEpisodeData(Episode episode, EpisodeMetadata episodeMetadata, Series show){
         episode.name = episodeMetadata.name;
@@ -1767,7 +1765,7 @@ public class DesktopViewController {
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + episode.id + "/"));
+            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + episode.getId() + "/"));
         } catch (IOException e) {
             System.err.println("setEpisodeData: Directory could not be created");
         }
@@ -1800,11 +1798,11 @@ public class DesktopViewController {
         }
         //endregion
 
-        File img = new File("src/main/resources/img/discCovers/" + episode.id + "/0.png");
+        File img = new File("src/main/resources/img/discCovers/" + episode.getId() + "/0.png");
         if (!img.exists()){
             episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
         }else{
-            episode.imgSrc = "src/main/resources/img/discCovers/" + episode.id + "/0.png";
+            episode.imgSrc = "src/main/resources/img/discCovers/" + episode.getId() + "/0.png";
         }
     }
     private void saveCover(String id, int i, Image originalImage) {
@@ -1877,9 +1875,9 @@ public class DesktopViewController {
             //region CREATE/EDIT SERIES
             Series series = new Series();
             series.folder = f.getAbsolutePath();
-            currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.id);
-            currentCategory.series.add(series.id);
-            App.addCollection(series);
+            currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.getId());
+            currentCategory.series.add(series.getId());
+            DBManager.INSTANCE.createSeries(series);
 
             Matcher matcher = regex.matcher(f.getName());
             if (!matcher.find())
@@ -1899,11 +1897,11 @@ public class DesktopViewController {
                 Season newSeason = new Season();
                 newSeason.name = movieName;
                 newSeason.year = year;
-                newSeason.seriesID = series.id;
+                newSeason.seriesID = series.getId();
                 newSeason.seasonNumber = series.seasons.size();
 
-                App.addSeason(newSeason, series.id);
-                currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.id);
+                DBManager.INSTANCE.createSeason(newSeason);
+                currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.getId());
 
                 saveDiscWithoutMetadata(f, newSeason);
                 addSeries(series);
@@ -1915,7 +1913,7 @@ public class DesktopViewController {
             series.name = movieMetadata.title;
             Season season = new Season();
             season.folder = f.getAbsolutePath();
-            season.seriesID = series.id;
+            season.seriesID = series.getId();
             season.themdbID = themdbID;
             season.imdbID = movieMetadata.imdb_id;
 
@@ -1937,24 +1935,24 @@ public class DesktopViewController {
                 season.genres = genreList;
             }
 
-            currentCategory.seasonFolders.put(f.getAbsolutePath(), season.id);
-            App.addSeason(season, series.id);
+            currentCategory.seasonFolders.put(f.getAbsolutePath(), season.getId());
+            DBManager.INSTANCE.createSeason(season);
 
             Images images = downloadImages(season.themdbID);
 
             if (images != null){
-                loadImages(season.id, images, season.themdbID, false);
-                loadImages(series.id, images, season.themdbID, true);
+                loadImages(season.getId(), images, season.themdbID, false);
+                loadImages(series.getId(), images, season.themdbID, true);
             }
 
-            File posterDir = new File("src/main/resources/img/seriesCovers/" + season.id + "/0.png");
+            File posterDir = new File("src/main/resources/img/seriesCovers/" + season.getId() + "/0.png");
             if (posterDir.exists()){
-                season.coverSrc = "src/main/resources/img/seriesCovers/" + season.id + "/0.png";
+                season.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
             }
 
-            posterDir = new File("src/main/resources/img/seriesCovers/" + series.id + "/0.png");
+            posterDir = new File("src/main/resources/img/seriesCovers/" + series.getId() + "/0.png");
             if (posterDir.exists()){
-                series.coverSrc = "src/main/resources/img/seriesCovers/" + season.id + "/0.png";
+                series.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
             }
 
             downloadLogos(series, season, season.themdbID);
@@ -1981,7 +1979,7 @@ public class DesktopViewController {
             Series series;
 
             if (currentCategory.analyzedFolders.get(f.getAbsolutePath()) != null) {
-                series = App.findSeries(currentCategory.analyzedFolders.get(f.getAbsolutePath()));
+                series = DBManager.INSTANCE.getSeries(currentCategory.analyzedFolders.get(f.getAbsolutePath()));
                 exists = true;
 
                 if (series == null)
@@ -1990,9 +1988,9 @@ public class DesktopViewController {
                 series = new Series();
                 series.name = f.getName();
                 series.folder = f.getAbsolutePath();
-                currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.id);
-                currentCategory.series.add(series.id);
-                App.addCollection(series);
+                currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.getId());
+                currentCategory.series.add(series.getId());
+                DBManager.INSTANCE.createSeries(series);
             }
 
             if (!folders.isEmpty()){
@@ -2016,14 +2014,14 @@ public class DesktopViewController {
 
                     Season season;
                     if (currentCategory.seasonFolders.get(folder.getAbsolutePath()) != null){
-                        season = App.findSeason(currentCategory.seasonFolders.get(folder.getAbsolutePath()));
+                        season = DBManager.INSTANCE.getSeason(currentCategory.seasonFolders.get(folder.getAbsolutePath()));
                     }else {
                         season = new Season();
-                        currentCategory.seasonFolders.put(folder.getAbsolutePath(), season.id);
+                        currentCategory.seasonFolders.put(folder.getAbsolutePath(), season.getId());
                         season.seasonNumber = series.seasons.size() + 1;
-                        season.seriesID = series.id;
+                        season.seriesID = series.getId();
                         season.folder = folder.getAbsolutePath();
-                        App.addSeason(season, series.id);
+                        DBManager.INSTANCE.createSeason(season);
 
                         updateMetadata = true;
                     }
@@ -2053,7 +2051,7 @@ public class DesktopViewController {
 
                     if (updateMetadata){
                         season.folder = f.getAbsolutePath();
-                        season.seriesID = series.id;
+                        season.seriesID = series.getId();
 
                         season.name = movieMetadata.title;
                         season.overview = movieMetadata.overview;
@@ -2076,18 +2074,18 @@ public class DesktopViewController {
                         Images images = downloadImages(season.themdbID);
 
                         if (images != null){
-                            loadImages(season.id, images, season.themdbID, false);
-                            loadImages(series.id, images, season.themdbID, true);
+                            loadImages(season.getId(), images, season.themdbID, false);
+                            loadImages(series.getId(), images, season.themdbID, true);
                         }
 
-                        File posterDir = new File("src/main/resources/img/seriesCovers/" + season.id + "/0.png");
+                        File posterDir = new File("src/main/resources/img/seriesCovers/" + season.getId() + "/0.png");
                         if (posterDir.exists()){
-                            season.coverSrc = "src/main/resources/img/seriesCovers/" + season.id + "/0.png";
+                            season.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
                         }
 
-                        posterDir = new File("src/main/resources/img/seriesCovers/" + series.id + "/0.png");
+                        posterDir = new File("src/main/resources/img/seriesCovers/" + series.getId() + "/0.png");
                         if (posterDir.exists()){
-                            series.coverSrc = "src/main/resources/img/seriesCovers/" + season.id + "/0.png";
+                            series.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
                         }
 
                         downloadLogos(series, season, season.themdbID);
@@ -2119,14 +2117,14 @@ public class DesktopViewController {
 
                 Season season;
                 if (currentCategory.seasonFolders.get(f.getAbsolutePath()) != null){
-                    season = App.findSeason(currentCategory.seasonFolders.get(f.getAbsolutePath()));
+                    season = DBManager.INSTANCE.getSeason(currentCategory.seasonFolders.get(f.getAbsolutePath()));
                 }else {
                     season = new Season();
-                    currentCategory.seasonFolders.put(f.getAbsolutePath(), season.id);
+                    currentCategory.seasonFolders.put(f.getAbsolutePath(), season.getId());
                     season.seasonNumber = series.seasons.size() + 1;
-                    season.seriesID = series.id;
+                    season.seriesID = series.getId();
                     season.folder = f.getAbsolutePath();
-                    App.addSeason(season, series.id);
+                    DBManager.INSTANCE.createSeason(season);
 
                     updateMetadata = true;
                 }
@@ -2159,7 +2157,7 @@ public class DesktopViewController {
 
                 if (updateMetadata){
                     season.folder = f.getAbsolutePath();
-                    season.seriesID = series.id;
+                    season.seriesID = series.getId();
 
                     season.name = movieMetadata.title;
                     season.overview = movieMetadata.overview;
@@ -2179,23 +2177,23 @@ public class DesktopViewController {
                         season.genres = genreList;
                     }
 
-                    currentCategory.seasonFolders.put(f.getAbsolutePath(), season.id);
+                    currentCategory.seasonFolders.put(f.getAbsolutePath(), season.getId());
 
                     Images images = downloadImages(season.themdbID);
 
                     if (images != null){
-                        loadImages(season.id, images, season.themdbID, false);
-                        loadImages(series.id, images, season.themdbID, true);
+                        loadImages(season.getId(), images, season.themdbID, false);
+                        loadImages(series.getId(), images, season.themdbID, true);
                     }
 
-                    File posterDir = new File("src/main/resources/img/seriesCovers/" + season.id + "/0.png");
+                    File posterDir = new File("src/main/resources/img/seriesCovers/" + season.getId() + "/0.png");
                     if (posterDir.exists()){
-                        season.coverSrc = "src/main/resources/img/seriesCovers/" + season.id + "/0.png";
+                        season.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
                     }
 
-                    posterDir = new File("src/main/resources/img/seriesCovers/" + series.id + "/0.png");
+                    posterDir = new File("src/main/resources/img/seriesCovers/" + series.getId() + "/0.png");
                     if (posterDir.exists()){
-                        series.coverSrc = "src/main/resources/img/seriesCovers/" + season.id + "/0.png";
+                        series.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
                     }
 
                     downloadLogos(series, season, season.themdbID);
@@ -2225,12 +2223,12 @@ public class DesktopViewController {
         Episode episode;
 
         if (currentCategory.analyzedFiles.get(f.getAbsolutePath()) != null){
-            episode = App.findDisc(currentCategory.analyzedFiles.get(f.getAbsolutePath()));
+            episode = DBManager.INSTANCE.getEpisode(currentCategory.analyzedFiles.get(f.getAbsolutePath()));
         }else{
             episode = new Episode();
-            episode.seasonID = season.id;
-            currentCategory.analyzedFiles.put(f.getAbsolutePath(), episode.id);
-            App.addDisc(episode);
+            episode.seasonID = season.getId();
+            currentCategory.analyzedFiles.put(f.getAbsolutePath(), episode.getId());
+            DBManager.INSTANCE.createEpisode(episode);
         }
 
         episode.name = f.getName().substring(0, f.getName().lastIndexOf("."));
@@ -2242,12 +2240,12 @@ public class DesktopViewController {
         Episode episode;
 
         if (currentCategory.analyzedFiles.get(file.getAbsolutePath()) != null){
-            episode = App.findDisc(currentCategory.analyzedFiles.get(file.getAbsolutePath()));
+            episode = DBManager.INSTANCE.getEpisode(currentCategory.analyzedFiles.get(file.getAbsolutePath()));
         }else{
             episode = new Episode();
-            episode.seasonID = season.id;
-            currentCategory.analyzedFiles.put(file.getAbsolutePath(), episode.id);
-            App.addDisc(episode);
+            episode.seasonID = season.getId();
+            currentCategory.analyzedFiles.put(file.getAbsolutePath(), episode.getId());
+            DBManager.INSTANCE.createEpisode(episode);
         }
 
         episode.name = file.getName().substring(0, file.getName().lastIndexOf("."));
@@ -2282,7 +2280,7 @@ public class DesktopViewController {
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + episode.id + "/"));
+            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + episode.getId() + "/"));
         } catch (IOException e) {
             System.err.println("setEpisodeData: Directory could not be created");
         }
@@ -2315,11 +2313,11 @@ public class DesktopViewController {
         }
         //endregion
 
-        File img = new File("src/main/resources/img/discCovers/" + episode.id + "/0.png");
+        File img = new File("src/main/resources/img/discCovers/" + episode.getId() + "/0.png");
         if (!img.exists()){
             episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
         }else{
-            episode.imgSrc = "src/main/resources/img/discCovers/" + episode.id + "/0.png";
+            episode.imgSrc = "src/main/resources/img/discCovers/" + episode.getId() + "/0.png";
         }
     }
     private void saveThumbnail(Episode episode, String url, int number){
@@ -2348,7 +2346,7 @@ public class DesktopViewController {
             }
 
             if (!originalImage.isError()){
-                File file = new File("src/main/resources/img/discCovers/" + episode.id + "/" + number + ".png");
+                File file = new File("src/main/resources/img/discCovers/" + episode.getId() + "/" + number + ".png");
                 try{
                     RenderedImage renderedImage = SwingFXUtils.fromFXImage(compressedImage, null);
                     ImageIO.write(renderedImage,"jpg", file);
@@ -2489,9 +2487,9 @@ public class DesktopViewController {
         String id;
 
         if (currentCategory.type.equals("Shows"))
-            id = series.id;
+            id = series.getId();
         else
-            id = season.id;
+            id = season.getId();
 
         if (!currentCategory.type.equals("Shows")){
             type = "movie";
@@ -2695,7 +2693,7 @@ public class DesktopViewController {
     }
     public void updateDisc(Episode d){
         for (DiscController discController : discControllers) {
-            if (discController.episode.id.equals(d.id)){
+            if (discController.episode.getId().equals(d.getId())){
                 discController.setData(d);
                 return;
             }
@@ -2819,20 +2817,20 @@ public class DesktopViewController {
         }
     }
     @FXML
-    void removeCategory(MouseEvent event) {
+    void removeCategory() {
         Stage stage = showConfirmationWindow(App.textBundle.getString("removeElement"), App.textBundle.getString("removeElementMessage"));
         stage.showAndWait();
 
         if (acceptRemove){
             acceptRemove = false;
-            App.removeCategory(currentCategory.name);
+            DBManager.INSTANCE.deleteCategory(currentCategory);
             updateCategories();
         }
 
         hideBackgroundShadow();
     }
     @FXML
-    void removeCollection(MouseEvent event) {
+    void removeCollection() {
         if (selectedSeries != null){
             Stage stage = showConfirmationWindow(App.textBundle.getString("removeElement"), App.textBundle.getString("removeElementMessage"));
             stage.showAndWait();
@@ -2843,7 +2841,7 @@ public class DesktopViewController {
                 seriesList.remove(selectedSeries);
                 seriesButtons.remove(index);
                 seriesContainer.getChildren().remove(index);
-                App.removeCollection(selectedSeries, currentCategory);
+                DBManager.INSTANCE.deleteSeries(selectedSeries);
                 selectedSeries = null;
                 if (!seriesList.isEmpty()){
                     selectSeriesButton(seriesButtons.get(0));
@@ -2854,14 +2852,14 @@ public class DesktopViewController {
         hideBackgroundShadow();
     }
     @FXML
-    void removeSeason(MouseEvent event){
+    void removeSeason(){
         Stage stage = showConfirmationWindow(App.textBundle.getString("removeElement"), App.textBundle.getString("removeElementMessage"));
         stage.showAndWait();
 
         if (acceptRemove){
             acceptRemove = false;
             seasonList.remove(selectedSeason);
-            App.removeSeason(selectedSeason, selectedSeries, currentCategory);
+            DBManager.INSTANCE.deleteSeason(selectedSeason);
 
             selectedSeason = null;
             selectSeries(selectedSeries);
@@ -2870,7 +2868,7 @@ public class DesktopViewController {
         hideBackgroundShadow();
     }
     @FXML
-    void removeDisc(MouseEvent event){
+    void removeDisc(){
         Stage stage = showConfirmationWindow(App.textBundle.getString("removeElement"), App.textBundle.getString("removeElementMessage"));
         stage.showAndWait();
 

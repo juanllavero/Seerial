@@ -159,7 +159,7 @@ public class EditCollectionController {
                 }
             }
 
-            File newFile = new File("src/main/resources/img/logos/" + seriesToEdit.id + "/" + (number + 1) + ".png");
+            File newFile = new File("src/main/resources/img/logos/" + seriesToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(selectedLogo.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -260,7 +260,7 @@ public class EditCollectionController {
                     }
                 }
 
-                cropperController.initValues("src/main/resources/img/seriesCovers/" + seriesToEdit.id + "/" + (number + 1) + ".png", false);
+                cropperController.initValues("src/main/resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + (number + 1) + ".png", false);
                 Stage stage = new Stage();
                 stage.setResizable(true);
                 stage.setMaximized(false);
@@ -344,7 +344,7 @@ public class EditCollectionController {
     private void loadImages(){
         posterContainer.getChildren().clear();
         //Add images to view
-        File dir = new File("src/main/resources/img/seriesCovers/" + seriesToEdit.id);
+        File dir = new File("src/main/resources/img/seriesCovers/" + seriesToEdit.getId());
         if (dir.exists()) {
             File[] files = dir.listFiles();
             assert files != null;
@@ -402,7 +402,7 @@ public class EditCollectionController {
     }
     private void loadLogos(){
         //Add images to view
-        File dir = new File("src/main/resources/img/logos/" + seriesToEdit.id);
+        File dir = new File("src/main/resources/img/logos/" + seriesToEdit.getId());
         if (dir.exists()){
             File[] files = dir.listFiles();
             assert files != null;
@@ -477,10 +477,10 @@ public class EditCollectionController {
             seriesToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
         if (selectedImage != null)
-            seriesToEdit.setCoverSrc("src/main/resources/img/seriesCovers/" + seriesToEdit.id + "/" + selectedImage.getName());
+            seriesToEdit.setCoverSrc("src/main/resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + selectedImage.getName());
 
         if (selectedLogo != null)
-            seriesToEdit.logoSrc = "src/main/resources/img/logos/" + seriesToEdit.id + "/" + selectedLogo.getName();
+            seriesToEdit.logoSrc = "src/main/resources/img/logos/" + seriesToEdit.getId() + "/" + selectedLogo.getName();
 
         //Refresh Series Data in DesktopView
         controllerParent.hideBackgroundShadow();

@@ -11,10 +11,8 @@ module com.example.executablelauncher {
     requires javafx.web;
     requires com.fasterxml.jackson.annotation;
     requires org.apache.commons.io;
-    requires FX.BorderlessScene;
     requires com.sun.jna.platform;
     requires com.sun.jna;
-    requires thetvdb.java.api;
     requires thumbnailator;
     requires info.movito.themoviedbapi;
     requires org.slf4j;

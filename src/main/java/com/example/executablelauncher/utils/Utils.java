@@ -41,7 +41,7 @@ public class Utils {
         }
     }
 
-    public static class DiscComparator implements Comparator<Episode> {
+    public static class EpisodeComparator implements Comparator<Episode> {
         @Override
         public int compare(Episode a, Episode b) {
             return Integer.compare(b.getEpisodeNumber(), a.getEpisodeNumber());

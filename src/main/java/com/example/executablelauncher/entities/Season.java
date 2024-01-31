@@ -112,6 +112,8 @@ public class Season implements Serializable {
         this.episodes.add(episode.getId());
     }
 
+    public int getSeasonNumber(){ return seasonNumber; }
+
     public void removeEpisode(String id){
         episodes.remove(id);
     }

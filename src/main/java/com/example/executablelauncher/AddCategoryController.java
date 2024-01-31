@@ -169,11 +169,6 @@ public class AddCategoryController {
                 return;
             }
 
-            if ((!catName.equals(nameField.getText()) && App.categoryExist(nameField.getText()))){
-                App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("categoryExists"));
-                return;
-            }
-
             String language = "es";
             List<Locale> languages = App.tmdbLanguages;
             for (Locale locale : languages){
@@ -191,8 +186,8 @@ public class AddCategoryController {
 
                 parentController.searchFiles();
             }else{
-                App.addCategory(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
-                parentController.loadCategory(nameField.getText());
+                Category category = DBManager.INSTANCE.createCategory(new Category(nameField.getText(), language, type, folders, showOnFullscreen.isSelected()));
+                parentController.loadCategory(category);
             }
 
             parentController.hideBackgroundShadow();

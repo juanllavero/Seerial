@@ -19,7 +19,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<?import com.example.executablelauncher.SmoothishScrollpane?>
 <StackPane fx:id="mainBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
    <children>
       <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="2027.0" pickOnBounds="true">
@@ -152,7 +151,7 @@
             </BorderPane>
          </top>
          <center>
-            <SmoothishScrollpane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="30.0" />
                </BorderPane.margin>
@@ -323,7 +322,7 @@
                      </children>
                   </StackPane>
                </content>
-            </SmoothishScrollpane>
+            </ScrollPane>
          </center>
          <left>
             <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="350.0" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">

@@ -1,13 +1,11 @@
 package com.example.executablelauncher.entities;
 
-import com.example.executablelauncher.App;
 import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Id;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 public class Series implements Serializable {

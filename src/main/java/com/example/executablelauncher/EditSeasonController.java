@@ -249,7 +249,7 @@ public class EditSeasonController {
                 }
             }
 
-            File newFile = new File("src/main/resources/img/logos/" + seasonToEdit.id + "/" + (number + 1) + ".png");
+            File newFile = new File("src/main/resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(selectedLogo.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -274,7 +274,7 @@ public class EditSeasonController {
                 }
             }
 
-            File newFile = new File("src/main/resources/img/seriesCovers/" + seasonToEdit.id + "/" + (number + 1) + ".png");
+            File newFile = new File("src/main/resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(selectedPoster.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -438,7 +438,7 @@ public class EditSeasonController {
     }
     private void loadPosters(){
         //Add images to view
-        File dir = new File("src/main/resources/img/seriesCovers/" + seasonToEdit.id);
+        File dir = new File("src/main/resources/img/seriesCovers/" + seasonToEdit.getId());
         if (dir.exists()){
             File[] files = dir.listFiles();
             assert files != null;
@@ -496,7 +496,7 @@ public class EditSeasonController {
     }
     private void loadImages(){
         //Add images to view
-        File dir = new File("src/main/resources/img/logos/" + seasonToEdit.id);
+        File dir = new File("src/main/resources/img/logos/" + seasonToEdit.getId());
         if (dir.exists()){
             File[] files = dir.listFiles();
             assert files != null;
@@ -767,11 +767,11 @@ public class EditSeasonController {
 
         //Save Logo
         if (selectedLogo != null)
-            seasonToEdit.logoSrc = "src/main/resources/img/logos/" + seasonToEdit.id + "/" + selectedLogo.getName();
+            seasonToEdit.logoSrc = "src/main/resources/img/logos/" + seasonToEdit.getId() + "/" + selectedLogo.getName();
 
         //Save Poster
         if (selectedPoster != null)
-            seasonToEdit.coverSrc = "src/main/resources/img/seriesCovers/" + seasonToEdit.id + "/" + selectedPoster.getName();
+            seasonToEdit.coverSrc = "src/main/resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + selectedPoster.getName();
 
         parentController.hideBackgroundShadow();
         parentController.refreshSeason(seasonToEdit);

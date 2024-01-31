@@ -51,8 +51,10 @@ public class DBManager {
     }
 
     //region CREATE
-    public void createCategory(Category category){
+    public Category createCategory(Category category){
         categoriesRepository.insert(category);
+
+        return getCategory(category.getId());
     }
     public void createSeries(Series series){
         seriesRepository.insert(series);
@@ -75,6 +77,32 @@ public class DBManager {
             return categoriesRepository.find(where("showOnFullscreen").eq(true)).toList();
         else
             return categoriesRepository.find().toList();
+    }
+    public Season getSeasonInSeries(Series series, int seasonNumber){
+        for (String seasonID : series.getSeasons()){
+            Season season = getSeason(seasonID);
+
+            if (season == null)
+                continue;
+
+            if (season.getSeasonNumber() == seasonNumber)
+                return season;
+        }
+
+        return null;
+    }
+    public Episode getEpisodeInSeason(Season season, int episodeNumber){
+        for (String episodeID : season.getEpisodes()){
+            Episode episode = getEpisode(episodeID);
+
+            if (episode == null)
+                continue;
+
+            if (episode.getEpisodeNumber() == episodeNumber)
+                return episode;
+        }
+
+        return null;
     }
     //endregion
 
