@@ -28,7 +28,9 @@ public class Utils {
     public static class SeriesComparator implements Comparator<Series> {
         @Override
         public int compare(Series a, Series b) {
-            return CompareMedia(a.getOrder(), b.getOrder(), a.getName(), b.getName());
+            if (a != null && b != null)
+                return CompareMedia(a.getOrder(), b.getOrder(), a.getName(), b.getName());
+            return 0;
         }
     }
 

@@ -537,23 +537,10 @@ public class DesktopViewController {
                 file = new File("src/main/resources/img/DefaultPoster.png");
             }
 
-            Image image = new Image(file.toURI().toURL().toExternalForm(), 200, 251, true, true);
-            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
-
-            //Compress image
-            BufferedImage resizedImage = Thumbnails.of(bufferedImage)
-                    .size(200, 251)
-                    .outputFormat("jpg")
-                    .asBufferedImage();
-
-            Image compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
-            bufferedImage.flush();
-            resizedImage.flush();
-            seriesCover.setImage(compressedImage);
+            Image image = new Image(file.toURI().toURL().toExternalForm());
+            seriesCover.setImage(image);
         } catch (MalformedURLException e) {
             System.err.println("Series cover not found");
-        } catch (IOException e) {
-            System.err.println("DesktopView: Series Cover not properly compressed");
         }
     }
 
@@ -646,7 +633,7 @@ public class DesktopViewController {
 
     private int getSeriesIndex(Series s){
         for (int i = 0; i < seriesList.size(); i++){
-            if (seriesList.get(i).getId() == s.getId())
+            if (seriesList.get(i).getId().equals(s.getId()))
                 return i;
         }
         return 0;
@@ -1281,21 +1268,93 @@ public class DesktopViewController {
             numFilesToCheck--;
             if (numFilesToCheck == 0)
                 downloadingContentWindow.setVisible(false);
+            //downloadDefaultMusic();
         });
 
         loadHalfTask.setOnCancelled(e -> {
             numFilesToCheck--;
             if (numFilesToCheck == 0)
                 downloadingContentWindow.setVisible(false);
+            //downloadDefaultMusic();
         });
 
         loadHalfTask.setOnFailed(e -> {
             numFilesToCheck--;
             if (numFilesToCheck == 0)
                 downloadingContentWindow.setVisible(false);
+            //downloadDefaultMusic();
         });
 
         new Thread(loadHalfTask).start();
+    }
+    private void downloadDefaultMusic(){
+        Task<Void> musicDownloadTask = new Task<>() {
+            @Override
+            protected Void call() {
+                Platform.runLater(() -> {
+                    downloadingContentText.setText(App.textBundle.getString("downloadingMusicMessage"));
+                    downloadingContentWindow.setVisible(true);
+                    numFilesToCheck = 1;
+                });
+
+                List<String> seriesIDs = List.copyOf(currentCategory.series);
+                for (String id : seriesIDs){
+                    Series series = App.findSeries(id);
+
+                    if (series == null)
+                        continue;
+
+                    Season season = App.findSeason(series.seasons.get(0));
+
+                    if (!season.musicSrc.isEmpty())
+                        continue;
+
+                    List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
+
+                    if (results != null){
+                        downloadMedia(season.id, results.get(0).watch_url);
+
+                        File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                        File[] filesInMediaCache = mediaCahceDir.listFiles();
+
+                        if (filesInMediaCache != null){
+                            File audioFile = filesInMediaCache[0];
+
+                            try{
+                                Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
+                                season.musicSrc = "src/main/resources/music/" + season.id + ".mp4";
+
+                                File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
+                                FileUtils.deleteDirectory(directory);
+                            } catch (IOException e) {
+                                System.err.println("processEpisode: Could not copy downloaded audio file");
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+        };
+
+        musicDownloadTask.setOnSucceeded(e -> {
+            numFilesToCheck--;
+            if (numFilesToCheck == 0)
+                downloadingContentWindow.setVisible(false);
+        });
+
+        musicDownloadTask.setOnCancelled(e -> {
+            numFilesToCheck--;
+            if (numFilesToCheck == 0)
+                downloadingContentWindow.setVisible(false);
+        });
+
+        musicDownloadTask.setOnFailed(e -> {
+            numFilesToCheck--;
+            if (numFilesToCheck == 0)
+                downloadingContentWindow.setVisible(false);
+        });
+
+        new Thread(musicDownloadTask).start();
     }
     private void scanTVShow(File directory, File[] filesInDir, boolean updateMetadata){
         //All video files in directory (not taking into account two subdirectories ahead, like Series/Folder1/Folder2/File)
@@ -1435,7 +1494,7 @@ public class DesktopViewController {
                 protected Void call() {
                     int processedFiles = 1;
                     for (int i = processedFiles; i < posterList.size(); i++){
-                        if (processedFiles == 31)
+                        if (processedFiles == 19)
                             break;
 
                         Image originalImage = new Image(imageBaseURL + posterList.get(i).file_path);
@@ -1697,31 +1756,6 @@ public class DesktopViewController {
 
             if (season.seasonNumber == 0)
                 season.order = 100;
-
-            if (series.getSeasons().size() == 1){
-                List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
-
-                if (results != null){
-                    downloadMedia(season.id, results.get(0).watch_url);
-
-                    File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
-                    File[] filesInMediaCache = mediaCahceDir.listFiles();
-
-                    if (filesInMediaCache != null){
-                        File audioFile = filesInMediaCache[0];
-
-                        try{
-                            Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
-                            season.musicSrc = "src/main/resources/music/" + season.id + ".mp4";
-
-                            File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
-                            FileUtils.deleteDirectory(directory);
-                        } catch (IOException e) {
-                            System.err.println("processEpisode: Could not copy downloaded audio file");
-                        }
-                    }
-                }
-            }
         }
 
         Disc disc = App.findDisc(season, episodeMetadata.episode_number);
@@ -1798,6 +1832,23 @@ public class DesktopViewController {
         }
 
         if (!originalImage.isError()){
+            try{
+                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(originalImage, null);
+
+                //Compress image
+                BufferedImage resizedImage = Thumbnails.of(bufferedImage)
+                        .size(376, 540)
+                        .outputFormat("jpg")
+                        .outputQuality(1)
+                        .asBufferedImage();
+
+                originalImage = SwingFXUtils.toFXImage(resizedImage, null);
+                bufferedImage.flush();
+                resizedImage.flush();
+            } catch (IOException e) {
+                System.err.println("DesktopViewController: Error compressing image");
+            }
+
             File file = new File("src/main/resources/img/seriesCovers/" + id + "/" + i + ".png");
             try{
                 RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
@@ -1925,30 +1976,6 @@ public class DesktopViewController {
 
             downloadLogos(series, season, season.themdbID);
             saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
-
-            //Process background music
-            List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
-
-            if (results != null){
-                downloadMedia(season.id, results.get(0).watch_url);
-
-                File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
-                File[] filesInMediaCache = mediaCahceDir.listFiles();
-
-                if (filesInMediaCache != null){
-                    File audioFile = filesInMediaCache[0];
-
-                    try{
-                        Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
-                        season.musicSrc = "src/main/resources/music/" + season.id + ".mp3";
-
-                        File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
-                        FileUtils.deleteDirectory(directory);
-                    } catch (IOException e) {
-                        System.err.println("processEpisode: Could not copy downloaded audio file");
-                    }
-                }
-            }
 
             processMovie(f, season, movieMetadata.runtime);
 
@@ -2082,30 +2109,6 @@ public class DesktopViewController {
 
                         downloadLogos(series, season, season.themdbID);
                         saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
-
-                        //Process background music
-                        List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
-
-                        if (results != null){
-                            downloadMedia(season.id, results.get(0).watch_url);
-
-                            File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
-                            File[] filesInMediaCache = mediaCahceDir.listFiles();
-
-                            if (filesInMediaCache != null){
-                                File audioFile = filesInMediaCache[0];
-
-                                try{
-                                    Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
-                                    season.musicSrc = "src/main/resources/music/" + season.id + ".mp3";
-
-                                    File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
-                                    FileUtils.deleteDirectory(directory);
-                                } catch (IOException e) {
-                                    System.err.println("processEpisode: Could not copy downloaded audio file");
-                                }
-                            }
-                        }
                     }
 
                     for (File file : filesInFolder){
@@ -2214,30 +2217,6 @@ public class DesktopViewController {
 
                     downloadLogos(series, season, season.themdbID);
                     saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
-
-                    //Process background music
-                    List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
-
-                    if (results != null){
-                        downloadMedia(season.id, results.get(0).watch_url);
-
-                        File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
-                        File[] filesInMediaCache = mediaCahceDir.listFiles();
-
-                        if (filesInMediaCache != null){
-                            File audioFile = filesInMediaCache[0];
-
-                            try{
-                                Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.id + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
-                                season.musicSrc = "src/main/resources/music/" + season.id + ".mp3";
-
-                                File directory = new File("src/main/resources/downloadedMediaCache/" + season.id + "/");
-                                FileUtils.deleteDirectory(directory);
-                            } catch (IOException e) {
-                                System.err.println("processEpisode: Could not copy downloaded audio file");
-                            }
-                        }
-                    }
                 }
 
                 for (File file : filesInRoot){

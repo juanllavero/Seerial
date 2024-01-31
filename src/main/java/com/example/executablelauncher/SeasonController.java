@@ -6,10 +6,7 @@ import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
-import javafx.animation.FadeTransition;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -17,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -102,9 +100,6 @@ public class SeasonController {
     private Label episodeName;
 
     @FXML
-    private ScrollPane episodeScroll;
-
-    @FXML
     private Label fileDetailsText;
 
     @FXML
@@ -156,6 +151,9 @@ public class SeasonController {
     private Label seasonEpisodeNumber;
 
     @FXML
+    private ScrollPane episodeScroll;
+
+    @FXML
     private Label writtenByField;
 
     @FXML
@@ -190,7 +188,7 @@ public class SeasonController {
     private Series series = null;
     private boolean episodesFocussed = true;
     private boolean playingVideo = false;
-    private boolean firstSelection = true;
+    private int buttonCount = 0;
     //endregion
 
     //region INITIALIZATION
@@ -247,14 +245,11 @@ public class SeasonController {
         backgroundShadow.setFitHeight(screenHeight);
         backgroundShadow2.setFitWidth(screenWidth);
         backgroundShadow2.setFitHeight(screenHeight);
+
         episodeScroll.setPrefWidth(screenWidth);
 
         detailsText.setPrefWidth(screenWidth / 2);
         detailsBox.setVisible(false);
-
-        //Remove horizontal and vertical scroll
-        episodeScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        episodeScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
@@ -399,8 +394,6 @@ public class SeasonController {
 
         stopBackgroundVideo();
 
-        firstSelection = true;
-
         if (season.getDiscs().size() > 1){
             cardContainer.setPrefHeight((Screen.getPrimary().getBounds().getHeight() / 5) + 20);
             cardContainer.setVisible(true);
@@ -521,9 +514,7 @@ public class SeasonController {
         }
 
         Platform.runLater(() -> {
-            //Set ScrollPane values
-            episodeScroll.setHmax(cardContainer.getWidth());
-            episodeScroll.setHvalue(0);
+            buttonCount = getVisibleButtonsCount();
 
             if (discsButtons.size() > 1)
                 discsButtons.get(season.lastDisc).requestFocus();
@@ -551,6 +542,23 @@ public class SeasonController {
         }
 
         fadeInEffect(backgroundImage);
+    }
+    private int getVisibleButtonsCount() {
+        double scrollPaneWidth = episodeScroll.getWidth();
+        double scrollPaneX = episodeScroll.getLayoutX();
+
+        int visibleButtons = 0;
+
+        for (Node button : cardContainer.getChildren()) {
+            Bounds buttonBounds = button.localToScene(button.getBoundsInLocal());
+            double buttonX = buttonBounds.getMinX();
+
+            if (buttonX >= scrollPaneX && buttonX + buttonBounds.getWidth() <= scrollPaneX + scrollPaneWidth) {
+                visibleButtons++;
+            }
+        }
+
+        return visibleButtons;
     }
     public Controller getParent(){
         return controllerParent;
@@ -654,48 +662,38 @@ public class SeasonController {
     }
 
     private void handleButtonFocus(Button focusedButton) {
-        double screenCenter = Screen.getPrimary().getBounds().getWidth() / 2;
+        double screenCenter, buttonCenterX, offset, finalPos;
 
-        Bounds buttonBounds = focusedButton.localToScreen(focusedButton.getBoundsInLocal());
-        double globalButtonCenterX = (buttonBounds.getMinX() + buttonBounds.getMaxX()) / 2;
+        if (discsButtons.indexOf(focusedButton) <= buttonCount / 2 || discsButtons.size() <= 3){
+            finalPos = 0;
+        }else{
+            //Get center of screen
+            screenCenter = Screen.getPrimary().getBounds().getWidth() / 2;
 
-        if (firstSelection) {
-            if (discsButtons.indexOf(focusedButton) <= 2) {
-                firstSelection = false;
-                return;
-            }
+            //Check aspect ratio to limit the right end of the button list
+            double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+            int maxButtons = (discsButtons.size() - (buttonCount / 2));
+            if (aspectRatio > 1.8)
+                maxButtons--;
 
-            episodeScroll.setHvalue(globalButtonCenterX + (focusedButton.getWidth() / 2));
-            firstSelection = false;
-            return;
+            if (discsButtons.indexOf(focusedButton) >= (discsButtons.size() - (buttonCount / 2)))
+                focusedButton = discsButtons.get(Math.max(2, maxButtons));
+
+            //Get center of button in the screen
+            Bounds buttonBounds = focusedButton.localToScene(focusedButton.getBoundsInLocal());
+            buttonCenterX = buttonBounds.getMinX() + buttonBounds.getWidth() / 2;
+
+            //Calculate offset
+            offset = screenCenter - buttonCenterX;
+
+            //Calculate position
+            finalPos = cardContainer.getTranslateX() + offset;
         }
 
-        double newHvalue = getNewHvalue(globalButtonCenterX, screenCenter);
-
-        animateScrollTransition(newHvalue);
-    }
-
-    private double getNewHvalue(double globalButtonCenterX, double screenCenter) {
-        double currentHvalue = episodeScroll.getHvalue();
-
-        double newHvalue;
-        if (globalButtonCenterX > screenCenter) {
-            //Movement to right
-            double offset = globalButtonCenterX - screenCenter;
-            newHvalue = Math.min(episodeScroll.getHmax(), currentHvalue + offset);
-        } else {
-            //Movement to left
-            double offset = screenCenter - globalButtonCenterX;
-            newHvalue = Math.max(episodeScroll.getHmin(), currentHvalue - offset);
-        }
-        return newHvalue;
-    }
-
-    private void animateScrollTransition(double endValue) {
-        Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.25), new KeyValue(episodeScroll.hvalueProperty(), endValue))
-        );
-        timeline.play();
+        //Translation with animation
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.2), cardContainer);
+        transition.setToX(finalPos);
+        transition.play();
     }
 
     public void playEpisode(Disc disc){

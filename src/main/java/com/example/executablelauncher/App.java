@@ -343,6 +343,7 @@ public class App extends Application {
 
         try{
             FileUtils.deleteDirectory(new File("src/main/resources/img/seriesCovers/" + s.id));
+            FileUtils.deleteDirectory(new File("src/main/resources/img/logos/" + s.id));
         } catch (IOException e) {
             System.err.println("App.removeCollection: Error deleting cover images directory");
         }
@@ -367,6 +368,7 @@ public class App extends Application {
         try{
             FileUtils.deleteDirectory(new File("src/main/resources/img/backgrounds/" + season.id));
             FileUtils.deleteDirectory(new File("src/main/resources/img/logos/" + season.id));
+            FileUtils.deleteDirectory(new File("src/main/resources/img/seriesCovers/" + season.id));
             if (!season.getMusicSrc().isEmpty())
                 Files.delete(FileSystems.getDefault().getPath(season.getMusicSrc()));
             if (!season.getVideoSrc().isEmpty())
