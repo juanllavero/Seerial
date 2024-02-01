@@ -24,7 +24,7 @@
         </repository>
         <repository>
             <id>dcm4che repository</id>
-            <url>http://www.dcm4che.org/maven2/</url>
+            <url>https://www.dcm4che.org/maven2/</url>
         </repository>
     </repositories>
 

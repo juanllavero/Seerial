@@ -287,11 +287,13 @@ public class DesktopViewController {
 
     public void initValues(){
         Stage stage = (Stage) mainBox.getScene().getWindow();
+
+        updateCategories();
         updateLanguage();
 
         categorySelector.getSelectionModel()
                 .selectedItemProperty()
-                .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectCategory(categories.get(categorySelector.getItems().indexOf(newValue))) );
+                .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectCategory(categories.get(categorySelector.getItems().indexOf(newValue))));
 
         setDragWindow(topBar);
 
@@ -300,9 +302,7 @@ public class DesktopViewController {
         downloadingContentWindow.setVisible(false);
         downloadingContentWindowStatic.setVisible(false);
 
-        menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
-            hideMenu();
-        });
+        menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> hideMenu());
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (KeyCode.F11 == event.getCode()) {
@@ -398,8 +398,6 @@ public class DesktopViewController {
 
         identificationMovie.setDisable(true);
         identificationShow.setDisable(true);
-
-        updateCategories();
     }
 
     public void showSeries(){

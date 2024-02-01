@@ -38,6 +38,10 @@ public class DBManager {
 
         database = Nitrite.builder()
                 .loadModule(storeModule)
+                .registerEntityConverter(new Category.CategoryConverter())
+                .registerEntityConverter(new Series.SeriesConverter())
+                .registerEntityConverter(new Season.SeasonConverter())
+                .registerEntityConverter(new Episode.EpisodeConverter())
                 .openOrCreate();
 
         //Repositories Initialization

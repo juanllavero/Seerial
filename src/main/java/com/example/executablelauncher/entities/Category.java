@@ -1,13 +1,13 @@
 package com.example.executablelauncher.entities;
 
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.mapper.EntityConverter;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Id;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
 public class Category implements Serializable {
@@ -24,10 +24,11 @@ public class Category implements Serializable {
     public Map<String, String> seasonFolders = new HashMap<>();               //<Folder, SeasonID>
 
     public Category() {
-
+        id = UUID.randomUUID().toString();
     }
 
     public Category(String n, String lang, String t, List<String> f, boolean s){
+        id = UUID.randomUUID().toString();
         name = n;
         language = lang;
         type = t;
@@ -110,4 +111,42 @@ public class Category implements Serializable {
     }
 
     public void removeSeries(String seriesID){ series.remove(seriesID); }
+
+    public static class CategoryConverter implements EntityConverter<Category> {
+        @Override
+        public Class<Category> getEntityType() {
+            return Category.class;
+        }
+
+        @Override
+        public Document toDocument(Category entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                    .put("id", entity.getId())
+                    .put("name", entity.getName())
+                    .put("language", entity.getLanguage())
+                    .put("type", entity.getType())
+                    .put("folders", entity.getFolders())
+                    .put("showOnFullscreen", entity.isShowOnFullscreen())
+                    .put("series", entity.getSeries())
+                    .put("analyzedFiles", entity.getAnalyzedFiles())
+                    .put("analyzedFolders", entity.getAnalyzedFolders())
+                    .put("seasonFolders", entity.getSeasonFolders());
+        }
+
+        @Override
+        public Category fromDocument(Document document, NitriteMapper nitriteMapper) {
+            Category category = new Category();
+            category.id = document.get("id", String.class);
+            category.setName(document.get("name", String.class));
+            category.setLanguage(document.get("language", String.class));
+            category.setType(document.get("type", String.class));
+            category.setFolders(document.get("folders", List.class));
+            category.setShowOnFullscreen(document.get("showOnFullscreen", Boolean.class) != null ? document.get("showOnFullscreen", Boolean.class) : false);
+            category.setSeries(document.get("series", List.class));
+            category.setAnalyzedFiles(document.get("analyzedFiles", Map.class));
+            category.setAnalyzedFolders(document.get("analyzedFolders", Map.class));
+            category.setSeasonFolders(document.get("seasonFolders", Map.class));
+            return category;
+        }
+    }
 }
