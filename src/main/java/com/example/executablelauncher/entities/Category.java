@@ -99,7 +99,9 @@ public class Category implements Serializable {
         this.seasonFolders = seasonFolders;
     }
 
-    public void removeSeries(Series s){ series.remove(s); }
+    public void removeSeries(Series s){
+        series.remove(s);
+    }
 
     public Series getSeries(String id){
         for (Series series : series)

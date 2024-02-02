@@ -2570,6 +2570,11 @@ public class DesktopViewController {
     //region ADD SECTION
     public void addSeries(Series s){
         Platform.runLater(() -> {
+            DataManager.INSTANCE.checkEmptySeasons(currentCategory, s, true);
+
+            if (s.getSeasons().isEmpty())
+                return;
+
             seriesList.add(s);
             addSeriesCard(s);
         });

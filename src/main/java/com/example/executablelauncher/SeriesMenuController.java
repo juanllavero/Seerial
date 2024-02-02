@@ -57,11 +57,7 @@ public class SeriesMenuController {
 
     @FXML
     void removeSeason(ActionEvent event) {
-        try{
-            parentController.Remove();
-        } catch (IOException e) {
-            System.err.println("Series not removed");
-        }
+        //parentController.Remove();
         cancelButton(event);
     }
 }

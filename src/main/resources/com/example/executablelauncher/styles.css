@@ -194,7 +194,7 @@
 }
 
 .playerOptionsSelected{
-    -fx-background-color: #9d9d9d;
+    -fx-background-color: #c9c9c9;
     -fx-background-radius: 5px;
     -fx-text-fill: black;
 }
@@ -275,7 +275,7 @@
 }
 
 .selectionOptions{
-    -fx-background-color: #0E0F19;
+    -fx-background-color: #282828;
     -fx-border-width: 1px;
     -fx-border-color: #8EDCE6;
     -fx-border-radius: 5px;

@@ -6,6 +6,7 @@ import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -361,8 +362,9 @@ public class VideoPlayerController {
         }, 1, TimeUnit.SECONDS);
     }
     private void addInteractionSound(Button btn){
-        btn.focusedProperty().addListener(e -> {
-            parentController.getParent().playInteractionSound();
+        btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                parentController.getParent().playInteractionSound();
         });
     }
     //endregion
@@ -646,6 +648,7 @@ public class VideoPlayerController {
         btn.setMaxWidth(Integer.MAX_VALUE);
         btn.setPrefWidth(Integer.MAX_VALUE);
         btn.setAlignment(Pos.BOTTOM_LEFT);
+        btn.setPadding(new Insets(10));
 
         btn.getStyleClass().add("playerOptionsButton");
 

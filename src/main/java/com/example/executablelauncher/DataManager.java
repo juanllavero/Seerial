@@ -21,6 +21,7 @@ public class DataManager {
     public static DataManager INSTANCE = new DataManager();
     final String LOCAL_FILE = "data.json";
     List<Category> categories = new ArrayList<>();
+    List<Series> seriesToRemove = new ArrayList<>();
     public Category currentCategory = null;
 
     //region LOAD/SAVE DATA
@@ -31,6 +32,18 @@ public class DataManager {
             categories = new Gson().fromJson(reader, type);
         } catch (FileNotFoundException e) {
             System.err.println("loadData: Json files not found");
+        }
+
+        for (Category category : categories){
+            for (Series series : category.getSeries())
+                checkEmptySeasons(category, series, false);
+
+            for (Series series : seriesToRemove) {
+                deleteSeriesData(series);
+                category.removeSeries(series);
+            }
+
+            seriesToRemove.clear();
         }
     }
     public void saveData(){
@@ -73,6 +86,23 @@ public class DataManager {
                 return true;
         }
         return false;
+    }
+
+    public void checkEmptySeasons(Category category, Series s, boolean removeHere){
+        List<Season> seasonsToDelete = new ArrayList<>();
+        for (Season season : s.getSeasons()){
+            if (season.getEpisodes().isEmpty())
+                seasonsToDelete.add(season);
+        }
+
+        for (Season season : seasonsToDelete)
+            s.removeSeason(season);
+
+        if (removeHere && s.getSeasons().isEmpty()) {
+            deleteSeriesData(s);
+            category.removeSeries(s);
+        }else if (s.getSeasons().isEmpty())
+            seriesToRemove.add(s);
     }
 
     //region DELETE

@@ -3,12 +3,13 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Category;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.utils.Configuration;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
@@ -82,6 +83,36 @@ public class Controller implements Initializable {
     private Button exitButton;
 
     @FXML
+    private VBox menuOptions;
+
+    @FXML
+    private BorderPane settingsWindow;
+
+    @FXML
+    private Button settingsButton;
+
+    @FXML
+    private Button cardSizeButton;
+
+    @FXML
+    private VBox cardSizeOptions;
+
+    @FXML
+    private Button tinyCardButton;
+
+    @FXML
+    private Button smallCardButton;
+
+    @FXML
+    private Button normalCardButton;
+
+    @FXML
+    private Button largeCardButton;
+
+    @FXML
+    private VBox leftOptionsPane;
+
+    @FXML
     private Label clock;
 
     @FXML
@@ -110,6 +141,7 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         mainMenu.setVisible(false);
 
+        settingsButton.setText(App.buttonsBundle.getString("settings"));
         exitButton.setText(App.buttonsBundle.getString("exitFullscreen"));
         switchToDesktopButton.setText(App.buttonsBundle.getString("switchToDesktop"));
 
@@ -127,10 +159,7 @@ public class Controller implements Initializable {
                     hideContextMenu();
                 }else{
                     playInteractionSound();
-                    globalShadow.setVisible(true);
-                    mainMenu.setVisible(true);
-                    mainPane.setDisable(true);
-                    switchToDesktopButton.requestFocus();
+                    showMenu();
                 }
             }
         });
@@ -145,6 +174,86 @@ public class Controller implements Initializable {
         //Add css to scrollPane to make it look modern
         scrollPane.getStylesheets().add(Objects.requireNonNull(this.getClass().getResource("styles.css")).toExternalForm());
 
+        cardSizeButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                cardSizeOptions.setVisible(true);
+        });
+
+        switch (Configuration.loadConfig("cardSize", "1")){
+            case "1":
+                largeCardButton.getStyleClass().clear();
+                largeCardButton.getStyleClass().add("playerOptionsSelected");
+                break;
+            case "0.8":
+                normalCardButton.getStyleClass().clear();
+                normalCardButton.getStyleClass().add("playerOptionsSelected");
+                break;
+            case "0.6":
+                smallCardButton.getStyleClass().clear();
+                smallCardButton.getStyleClass().add("playerOptionsSelected");
+                break;
+            case "0.4":
+                tinyCardButton.getStyleClass().clear();
+                tinyCardButton.getStyleClass().add("playerOptionsSelected");
+                break;
+        }
+
+        tinyCardButton.setOnKeyPressed(e -> {
+            if (e.getCode().equals(KeyCode.ENTER)){
+                for (Node node : cardSizeOptions.getChildren()){
+                    node.getStyleClass().clear();
+                    node.getStyleClass().add("playerOptionsButton");
+                }
+
+                tinyCardButton.getStyleClass().add("playerOptionsSelected");
+
+                Configuration.saveConfig("cardSize", "0.4");
+                showSeriesFrom(currentCategory);
+            }
+        });
+
+        smallCardButton.setOnKeyPressed(e -> {
+            if (e.getCode().equals(KeyCode.ENTER)){
+                for (Node node : cardSizeOptions.getChildren()){
+                    node.getStyleClass().clear();
+                    node.getStyleClass().add("playerOptionsButton");
+                }
+
+                smallCardButton.getStyleClass().add("playerOptionsSelected");
+
+                Configuration.saveConfig("cardSize", "0.6");
+                showSeriesFrom(currentCategory);
+            }
+        });
+
+        normalCardButton.setOnKeyPressed(e -> {
+            if (e.getCode().equals(KeyCode.ENTER)){
+                for (Node node : cardSizeOptions.getChildren()){
+                    node.getStyleClass().clear();
+                    node.getStyleClass().add("playerOptionsButton");
+                }
+
+                normalCardButton.getStyleClass().add("playerOptionsSelected");
+
+                Configuration.saveConfig("cardSize", "0.8");
+                showSeriesFrom(currentCategory);
+            }
+        });
+
+        largeCardButton.setOnKeyPressed(e -> {
+            if (e.getCode().equals(KeyCode.ENTER)){
+                for (Node node : cardSizeOptions.getChildren()){
+                    node.getStyleClass().clear();
+                    node.getStyleClass().add("playerOptionsButton");
+                }
+
+                largeCardButton.getStyleClass().add("playerOptionsSelected");
+
+                Configuration.saveConfig("cardSize", "1");
+                showSeriesFrom(currentCategory);
+            }
+        });
+
         //Fit width and height of components to window size
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -152,6 +261,8 @@ public class Controller implements Initializable {
         backgroundImage.setFitHeight(screenHeight);
         backgroundImage.setFitWidth(screenWidth);
         backgroundImage.setPreserveRatio(false);
+
+        leftOptionsPane.setPrefWidth(screenWidth * 0.5);
 
         //Remove horizontal and vertical scroll
         DesktopViewController.scrollModification(scrollPane);
@@ -302,7 +413,7 @@ public class Controller implements Initializable {
             App.setSelectedSeries(seriesToEdit);
             App.setSelectedSeries(seriesToEdit);
 
-            delay = new PauseTransition(Duration.millis(300));
+            delay = new PauseTransition(Duration.millis(200));
             delay.setOnFinished(event -> Platform.runLater(() -> {
                 if (!s.getSeasons().isEmpty() && seriesButtons.get(series.indexOf(s)).isFocused()) {
                     Season season = s.getSeasons().get(0);
@@ -383,12 +494,18 @@ public class Controller implements Initializable {
     }
 
     private void addCard(Series s){
+        double originalWidth = 320;
+        double originalHeight = 410;
+
+        float scaleTo = Float.parseFloat(Configuration.loadConfig("cardSize", "1"));
+
         String coverSrc = "src/main/resources/img/DefaultPoster.png";
 
         if (!s.coverSrc.isEmpty())
             coverSrc = s.getCoverSrc();
         //Image img = new Image("file:" + coverSrc, 260, 350, false, true);
-        Image img = new Image("file:" + coverSrc, 290, 380, false, true);
+        Image img = new Image("file:" + coverSrc
+                , originalWidth * scaleTo, originalHeight * scaleTo, false, true);
         ImageView image = new ImageView(img);
 
         Button btn = new Button();
@@ -445,26 +562,6 @@ public class Controller implements Initializable {
         cardContainer.getChildren().add(btn);
     }
 
-    public void Remove() throws IOException {
-        /*if (seriesToEdit != null){
-            int index = collectionList.indexOf(seriesToEdit);
-            if (!cardContainer.getChildren().isEmpty() && cardContainer.getChildren().size() > index)
-                cardContainer.getChildren().remove(index);
-            collectionList.remove(index);
-            App.removeCollection(seriesToEdit);
-            Files.delete(FileSystems.getDefault().getPath(seriesToEdit.getCoverSrc()));
-            seriesToEdit = null;
-            defaultSelection();
-        }*/
-        hideContextMenu();
-    }
-
-    public void showContextMenu(Series s){
-        playInteractionSound();
-        seriesToEdit = s;
-        mainMenu.setVisible(true);
-    }
-
     public void showSeriesMenu(){
         menuShadow.setVisible(true);
         try{
@@ -493,6 +590,23 @@ public class Controller implements Initializable {
         globalShadow.setVisible(false);
         mainPane.setDisable(false);
         restoreSelection();
+    }
+
+    private void showMenu(){
+        globalShadow.setVisible(true);
+        mainMenu.setVisible(true);
+        mainPane.setDisable(true);
+        menuOptions.setVisible(true);
+        settingsWindow.setVisible(false);
+        switchToDesktopButton.requestFocus();
+    }
+
+    @FXML
+    void openSettings(){
+        globalShadow.setVisible(false);
+        menuOptions.setVisible(false);
+        settingsWindow.setVisible(true);
+        cardSizeButton.requestFocus();
     }
 
     public void showSeason(Series s){

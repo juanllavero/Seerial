@@ -726,34 +726,6 @@ public class SeasonController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
-
-        /*
-        //Run file in vlc
-        String command = null;
-        String extension = disc.getExecutableSrc().substring(disc.getExecutableSrc().length() - 3);
-
-        if (extension.equals("iso") || extension.equals("ISO"))
-            command = "bluray:///" + disc.getExecutableSrc();
-        else
-            command = disc.getExecutableSrc();
-
-        try {
-            ProcessBuilder pBuilder = new ProcessBuilder("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe", command);
-
-            // don't forget to handle the error stream, and so
-            // either combine error stream with input stream, as shown here
-            // or gobble it separately
-            pBuilder.redirectErrorStream(true);
-            final Process process = pBuilder.start();
-
-            process.waitFor();
-            if (mp != null)
-                mp.play();
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Error playing episode in DesktopViewController");
-        }*/
     }
 
     private void setEpisodesOutOfFocusButton(Button btn){

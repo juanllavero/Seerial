@@ -297,21 +297,33 @@
                      <font>
                         <Font size="24.0" />
                      </font>
+                     <padding>
+                        <Insets bottom="11.0" left="11.0" right="11.0" top="11.0" />
+                     </padding>
                   </Button>
                   <Button fx:id="button2" alignment="BOTTOM_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Button" textFill="WHITE">
                      <font>
                         <Font size="24.0" />
                      </font>
+                     <padding>
+                        <Insets bottom="11.0" left="11.0" right="11.0" top="11.0" />
+                     </padding>
                   </Button>
                   <Button fx:id="button3" alignment="BOTTOM_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Button" textFill="WHITE">
                      <font>
                         <Font size="24.0" />
                      </font>
+                     <padding>
+                        <Insets bottom="11.0" left="11.0" right="11.0" top="11.0" />
+                     </padding>
                   </Button>
                   <Button fx:id="button4" alignment="BOTTOM_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Button" textFill="WHITE">
                      <font>
                         <Font size="24.0" />
                      </font>
+                     <padding>
+                        <Insets bottom="11.0" left="11.0" right="11.0" top="11.0" />
+                     </padding>
                   </Button>
                </children>
                <padding>
