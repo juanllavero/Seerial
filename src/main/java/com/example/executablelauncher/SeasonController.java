@@ -195,15 +195,11 @@ public class SeasonController {
     public void setParent(Controller c){
         controllerParent = c;
     }
-    public void setSeasons(Series series, List<String> seasonList, boolean playSameMusic, boolean isShow){
+    public void setSeasons(Series series, boolean playSameMusic, boolean isShow){
         this.isShow = isShow;
         this.series = series;
         this.playSameMusic = playSameMusic;
-        if (seasons != null){
-            for (String id : seasonList){
-                seasons.add(DBManager.INSTANCE.getSeason(id));
-            }
-        }
+        seasons = series.getSeasons();
 
         assert seasons != null;
         seasons.sort(new Utils.SeasonComparator());
@@ -496,21 +492,18 @@ public class SeasonController {
 
         cardContainer.getChildren().clear();
         discsButtons.clear();
-        episodes.clear();
-        List<String> discs = season.getEpisodes();
-        List<Episode> episodeList = new ArrayList<>();
-        for (String i : discs){
-            Episode d = DBManager.INSTANCE.getEpisode(i);
-            episodeList.add(d);
-        }
+        episodes = season.getEpisodes();
 
-        episodeList.sort(new Utils.EpisodeComparator().reversed());
-        for (Episode episode : episodeList){
+        episodes.sort(new Utils.EpisodeComparator().reversed());
+        for (Episode episode : episodes){
             addEpisodeCard(episode);
         }
 
+        if (!episodes.isEmpty())
+            selectedEpisode = episodes.get(0);
+
         if (discsButtons.size() <= 1){
-            setTimeLeft(episodeList.get(0));
+            setTimeLeft(episodes.get(0));
         }
 
         Platform.runLater(() -> {
@@ -521,8 +514,6 @@ public class SeasonController {
             else
                 playButton.requestFocus();
         });
-
-        selectedEpisode = DBManager.INSTANCE.getEpisode(discs.get(0));
 
         overviewField.setText(season.overview);
         yearField.setText(season.getYear());
@@ -590,7 +581,6 @@ public class SeasonController {
     //region EPISODES
     public void addEpisodeCard(Episode episode){
         if (episode != null){
-            episodes.add(episode);
             Button btn = new Button();
             btn.setPadding(new Insets(0));
 
@@ -1010,7 +1000,7 @@ public class SeasonController {
         detailsTitle.setText(selectedEpisode.name);
         detailsOverview.setText(overviewField.getText());
 
-        File file = new File(selectedEpisode.executableSrc);
+        File file = new File(selectedEpisode.videoSrc);
         fileNameField.setText(file.getName());
 
         fadeInEffect(menuShadow);

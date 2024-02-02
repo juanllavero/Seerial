@@ -84,7 +84,7 @@ public class EditDiscController {
     //region INITIALIZATION
     public void setDisc(Episode d){
         episodeToEdit = d;
-        fileField.setText(d.getExecutableSrc());
+        fileField.setText(d.getVideoSrc());
 
         titleText.setText(App.textBundle.getString("episodeWindowTitleEdit"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));

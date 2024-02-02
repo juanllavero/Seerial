@@ -1,7 +1,6 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Season;
-import com.example.executablelauncher.entities.Series;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,7 +27,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static com.example.executablelauncher.App.*;
 
@@ -194,7 +192,7 @@ public class EditSeasonController {
         else
             musicField.setText("");
 
-        seriesName = DBManager.INSTANCE.getSeries(s.getSeriesID()).name;
+        seriesName = s.getName();
 
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));

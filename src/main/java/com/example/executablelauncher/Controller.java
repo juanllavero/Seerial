@@ -6,9 +6,9 @@ import com.example.executablelauncher.entities.Series;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
@@ -90,7 +90,7 @@ public class Controller implements Initializable {
     private List<Category> categories = null;
     private Category currentCategory = null;
     private Series seriesToEdit;
-    private List<Series> collectionList = new ArrayList<>();
+    private List<Series> series = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
 
     private MediaPlayer backgroundMusicPlayer;
@@ -244,23 +244,18 @@ public class Controller implements Initializable {
         cardContainer.getChildren().clear();
         seriesButtons.clear();
 
-        for (String seriesID : currentCategory.getSeries()){
-            Series series = DBManager.INSTANCE.getSeries(seriesID);
+        series = currentCategory.getSeries();
 
-            if (series != null)
-                collectionList.add(series);
-        }
-
-        for (Series col : collectionList) {
+        for (Series col : series) {
             addCard(col);
         }
 
         seriesToEdit = null;
 
         String src;
-        if (!collectionList.isEmpty() && !collectionList.get(0).getSeasons().isEmpty()){
-            seriesToEdit = collectionList.get(0);
-            src = "file:src/main/resources/img/backgrounds/" + (Objects.requireNonNull(DBManager.INSTANCE.getSeason(collectionList.get(0).getSeasons().get(0))).getId()) + "/fullBlur.png";
+        if (!series.isEmpty() && !series.get(0).getSeasons().isEmpty()){
+            seriesToEdit = series.get(0);
+            src = "file:src/main/resources/img/backgrounds/" + series.get(0).getSeasons().get(0).getId() + "/fullBlur.png";
         }else{
             src = "file:src/main/resources/img/backgroundDefault.jpeg";
         }
@@ -289,13 +284,13 @@ public class Controller implements Initializable {
         Series seriesToSelect = App.getSelectedSeries();
 
         if (seriesToSelect == null)
-            seriesToSelect = collectionList.get(0);
+            seriesToSelect = series.get(0);
 
-        int index = collectionList.indexOf(seriesToSelect);
+        int index = series.indexOf(seriesToSelect);
         if (index == -1)
             index = 0;
 
-        App.setSelectedSeries(collectionList.get(0));
+        App.setSelectedSeries(series.get(0));
 
         cardContainer.getChildren().get(index).requestFocus();
     }
@@ -309,8 +304,8 @@ public class Controller implements Initializable {
 
             delay = new PauseTransition(Duration.millis(300));
             delay.setOnFinished(event -> Platform.runLater(() -> {
-                if (!s.getSeasons().isEmpty() && seriesButtons.get(collectionList.indexOf(s)).isFocused()) {
-                    Season season = DBManager.INSTANCE.getSeason(s.getSeasons().get(0));
+                if (!s.getSeasons().isEmpty() && seriesButtons.get(series.indexOf(s)).isFocused()) {
+                    Season season = s.getSeasons().get(0);
                     if (season != null) {
                         String imagePath = "src/main/resources/img/backgrounds/" + season.getId();
                         File fullBlur = new File(imagePath + "/fullBlur.png");
@@ -321,15 +316,19 @@ public class Controller implements Initializable {
                         ImageView background = new ImageView(new Image("file:" + imagePath + "/" + backgroundPath,
                                 Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
 
-                        BackgroundImage myBI = new BackgroundImage(
-                                Objects.requireNonNull(getCroppedImage(background)),
-                                BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                                BackgroundSize.DEFAULT);
+                        WritableImage image = getCroppedImage(background);
 
-                        Platform.runLater(() -> {
-                            fadeEffectComplete(currentImage, getCroppedImage(background));
-                            mainBox.setBackground(new Background(myBI));
-                        });
+                        if (image != null){
+                            BackgroundImage myBI = new BackgroundImage(
+                                    Objects.requireNonNull(getCroppedImage(background)),
+                                    BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                                    BackgroundSize.DEFAULT);
+
+                            Platform.runLater(() -> {
+                                fadeEffectComplete(currentImage, getCroppedImage(background));
+                                mainBox.setBackground(new Background(myBI));
+                            });
+                        }
                     }
                 }
             }));
@@ -388,7 +387,8 @@ public class Controller implements Initializable {
 
         if (!s.coverSrc.isEmpty())
             coverSrc = s.getCoverSrc();
-        Image img = new Image("file:" + coverSrc, 260, 350, false, true);
+        //Image img = new Image("file:" + coverSrc, 260, 350, false, true);
+        Image img = new Image("file:" + coverSrc, 290, 380, false, true);
         ImageView image = new ImageView(img);
 
         Button btn = new Button();
@@ -402,14 +402,23 @@ public class Controller implements Initializable {
 
         btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                btn.setScaleX(1.1);
-                btn.setScaleY(1.1);
                 playInteractionSound();
 
-                CompletableFuture.runAsync(() -> selectSeries(collectionList.get(seriesButtons.indexOf(btn))));
+                ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.15), btn);
+                scaleTransition.setToX(1.1);
+                scaleTransition.setToY(1.1);
+
+                scaleTransition.setOnFinished(e -> {
+                    CompletableFuture.runAsync(() -> selectSeries(series.get(seriesButtons.indexOf(btn))));
+                });
+
+                scaleTransition.play();
             }else{
-                btn.setScaleX(1);
-                btn.setScaleY(1);
+                ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.15), btn);
+                scaleTransition.setToX(1);
+                scaleTransition.setToY(1);
+
+                scaleTransition.play();
             }
         });
 
@@ -426,7 +435,7 @@ public class Controller implements Initializable {
 
         btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (event.getButton().equals(MouseButton.PRIMARY)){
-                selectSeries(collectionList.get(seriesButtons.indexOf(btn)));
+                selectSeries(series.get(seriesButtons.indexOf(btn)));
                 playInteractionSound();
             }else if (event.getButton().equals(MouseButton.SECONDARY)){
                 showSeriesMenu();
@@ -494,9 +503,7 @@ public class Controller implements Initializable {
                 Parent root = fxmlLoader.load();
                 SeasonController seasonController = fxmlLoader.getController();
                 seasonController.setParent(this);
-                Series newSeries = DBManager.INSTANCE.getSeries(s.getId());
-                if (newSeries != null)
-                    seasonController.setSeasons(seriesToEdit, newSeries.getSeasons(), newSeries.playSameMusic, categoryType.equals("Shows"));
+                seasonController.setSeasons(s, s.playSameMusic, categoryType.equals("Shows"));
                 Stage stage = (Stage) mainPane.getScene().getWindow();
                 stage.setTitle(App.textBundle.getString("season"));
                 stage.setScene(new Scene(root));

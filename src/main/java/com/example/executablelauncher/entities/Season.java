@@ -1,41 +1,30 @@
 package com.example.executablelauncher.entities;
 
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.EntityConverter;
-import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.repository.annotations.Entity;
-import org.dizitart.no2.repository.annotations.Id;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
 public class Season implements Serializable {
-    @Id
-    String id;
+    final String id;
     public String name = "";
     public String overview = "";
     public String year = "";
-    public String tagline = "";
+    public int order = 0;
     public float score = 0;
     public int seasonNumber = 0;
     public String logoSrc = "";
+    public String coverSrc = "";
     public String backgroundSrc = "";
     public String videoSrc = "";
     public String musicSrc = "";
-
-    public String coverSrc = "";
     public String seriesID = "";
-
-    public int order = 0;
     public int themdbID = -1;
     public String imdbID = "";
-    public boolean showName = true;
-    public String folder = "";
     public int lastDisc = 0;
-    public List<String> episodes = new ArrayList<>();
+    public String folder = "";
+    public boolean showName = true;
+    public List<Episode> episodes = new ArrayList<>();
     public List<String> genres = new ArrayList<>();
 
     public Season() {
@@ -110,20 +99,20 @@ public class Season implements Serializable {
         this.order = order;
     }
 
-    public List<String> getEpisodes() {
+    public List<Episode> getEpisodes() {
         return episodes;
     }
 
-    public void setEpisodes(List<String> episodes){ this.episodes = episodes; }
+    public void setEpisodes(List<Episode> episodes){ this.episodes = episodes; }
 
-    public void setDisc(Episode episode) {
-        this.episodes.add(episode.getId());
+    public void addEpisode(Episode episode) {
+        this.episodes.add(episode);
     }
 
     public int getSeasonNumber(){ return seasonNumber; }
 
-    public void removeEpisode(String id){
-        episodes.remove(id);
+    public void removeEpisode(Episode e){
+        episodes.remove(e);
     }
 
     public String getGenres(){
@@ -136,14 +125,6 @@ public class Season implements Serializable {
 
     public void setOverview(String overview) {
         this.overview = overview;
-    }
-
-    public String getTagline() {
-        return tagline;
-    }
-
-    public void setTagline(String tagline) {
-        this.tagline = tagline;
     }
 
     public float getScore() {
@@ -229,65 +210,19 @@ public class Season implements Serializable {
         return genresText.toString();
     }
 
-    public static class SeasonConverter implements EntityConverter<Season> {
-        @Override
-        public Class<Season> getEntityType() {
-            return Season.class;
-        }
+    public Episode getEpisode(int episodeNumber){
+        for (Episode episode : episodes)
+            if (episode.getEpisodeNumber() == episodeNumber)
+                return episode;
 
-        @Override
-        public Document toDocument(Season entity, NitriteMapper nitriteMapper) {
-            return Document.createDocument()
-                    .put("id", entity.getId())
-                    .put("name", entity.getName())
-                    .put("overview", entity.getOverview())
-                    .put("year", entity.getYear())
-                    .put("tagline", entity.getTagline())
-                    .put("score", entity.getScore())
-                    .put("seasonNumber", entity.getSeasonNumber())
-                    .put("logoSrc", entity.getLogoSrc())
-                    .put("backgroundSrc", entity.getBackgroundSrc())
-                    .put("videoSrc", entity.getVideoSrc())
-                    .put("musicSrc", entity.getMusicSrc())
-                    .put("coverSrc", entity.getCoverSrc())
-                    .put("seriesID", entity.getSeriesID())
-                    .put("coverSrc", entity.getCoverSrc())
-                    .put("order", entity.getOrder())
-                    .put("themdbID", entity.getThemdbID())
-                    .put("imdbID", entity.getImdbID())
-                    .put("showName", entity.isShowName())
-                    .put("folder", entity.getFolder())
-                    .put("lastDisc", entity.getLastDisc())
-                    .put("episodes", entity.getEpisodes())
-                    .put("genres", entity.getGenres());
-        }
+        return null;
+    }
 
-        @Override
-        public Season fromDocument(Document document, NitriteMapper nitriteMapper) {
-            Season season = new Season();
-            season.id = document.get("id", String.class);
-            season.setName(document.get("name", String.class));
-            season.setOverview(document.get("overview", String.class));
-            season.setYear(document.get("year", String.class));
-            season.setTagline(document.get("tagline", String.class));
-            season.setScore(document.get("score", Float.class) != null ? document.get("score", Float.class) : 0.0f);
-            season.setSeasonNumber(document.get("seasonNumber", Integer.class) != null ? document.get("seasonNumber", Integer.class) : 0);
-            season.setLogoSrc(document.get("logoSrc", String.class));
-            season.setBackgroundSrc(document.get("backgroundSrc", String.class));
-            season.setVideoSrc(document.get("videoSrc", String.class));
-            season.setMusicSrc(document.get("musicSrc", String.class));
-            season.setCoverSrc(document.get("coverSrc", String.class));
-            season.setSeriesID(document.get("seriesID", String.class));
-            season.setCoverSrc(document.get("coverSrc", String.class));
-            season.setOrder(document.get("order", Integer.class) != null ? document.get("order", Integer.class) : 0);
-            season.setThemdbID(document.get("themdbID", Integer.class) != null ? document.get("themdbID", Integer.class) : 0);
-            season.setImdbID(document.get("imdbID", String.class));
-            season.setShowName(document.get("showName", Boolean.class) != null ? document.get("showName", Boolean.class) : false);
-            season.setFolder(document.get("folder", String.class));
-            season.setLastDisc(document.get("lastDisc", Integer.class) != null ? document.get("lastDisc", Integer.class) : 0);
-            season.setEpisodes(document.get("episodes", List.class));
-            season.setGenres(document.get("genres", List.class));
-            return season;
-        }
+    public Episode getEpisode(String id){
+        for (Episode episode : episodes)
+            if (episode.getId().equals(id))
+                return episode;
+
+        return null;
     }
 }

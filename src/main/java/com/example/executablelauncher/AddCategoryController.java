@@ -8,15 +8,14 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.dizitart.no2.common.DBNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -169,6 +168,11 @@ public class AddCategoryController {
                 return;
             }
 
+            if ((!catName.equals(nameField.getText()) && DataManager.INSTANCE.categoryExist(nameField.getText()))){
+                App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("categoryExists"));
+                return;
+            }
+
             String language = "es";
             List<Locale> languages = App.tmdbLanguages;
             for (Locale locale : languages){
@@ -186,7 +190,8 @@ public class AddCategoryController {
 
                 parentController.searchFiles();
             }else{
-                Category category = DBManager.INSTANCE.createCategory(new Category(nameField.getText(), language, type, folders, showOnFullscreen.isSelected()));
+                Category category = new Category(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
+                DataManager.INSTANCE.createCategory(category);
                 parentController.loadCategory(category);
             }
 
@@ -201,7 +206,8 @@ public class AddCategoryController {
         clearTypeSelection();
         moviesTypeButton.getStyleClass().clear();
         moviesTypeButton.getStyleClass().add("buttonSelected");
-        nameField.setText(App.textBundle.getString("movies"));
+        if (categoryToEdit == null)
+            nameField.setText(App.textBundle.getString("movies"));
         moviesTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/moviesSelected.png"))));
         showsTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/shows.png"))));
     }
@@ -212,7 +218,8 @@ public class AddCategoryController {
         clearTypeSelection();
         showsTypeButton.getStyleClass().clear();
         showsTypeButton.getStyleClass().add("buttonSelected");
-        nameField.setText(App.textBundle.getString("shows"));
+        if (categoryToEdit == null)
+            nameField.setText(App.textBundle.getString("shows"));
         moviesTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/movies.png"))));
         showsTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/showsSelected.png"))));
     }

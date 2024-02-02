@@ -334,7 +334,7 @@ public class VideoPlayerController {
 
         fade.setOnFinished(event -> {
             //Set video and start
-            videoPlayer.playVideo(episode.executableSrc, episode.getTimeWatched());
+            videoPlayer.playVideo(episode.videoSrc, episode.getTimeWatched());
             runtimeSlider.setBlockIncrement(percentageStep);
 
             loadTracks();

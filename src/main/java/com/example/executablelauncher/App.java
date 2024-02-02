@@ -1,11 +1,8 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Category;
-import com.example.executablelauncher.entities.Episode;
-import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
-import com.example.executablelauncher.utils.Utils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -18,11 +15,8 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.apache.commons.io.FileUtils;
 
 import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.util.*;
 
 public class App extends Application {
@@ -42,8 +36,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        //DB Initialization
-        DBManager.INSTANCE.openDB();
+        //Data Initialization
+        DataManager.INSTANCE.loadData();
 
         //Set global language
         globalLanguage = Locale.forLanguageTag(Configuration.loadConfig("currentLanguageTag", "en-US"));
@@ -86,7 +80,7 @@ public class App extends Application {
     }
 
     public static void close(){
-        DBManager.INSTANCE.closeDB();
+        DataManager.INSTANCE.saveData();
         Platform.exit();
     }
 
@@ -118,11 +112,11 @@ public class App extends Application {
     }
 
     public static List<Category> getCategories(boolean fullscreen){
-        return DBManager.INSTANCE.getCategories(fullscreen);
+        return DataManager.INSTANCE.getCategories(fullscreen);
     }
 
     public static List<String> getCategoriesNames(){
-        List<Category> catList = DBManager.INSTANCE.getCategories(false);
+        List<Category> catList = DataManager.INSTANCE.getCategories(false);
         List<String> categoriesNames = new ArrayList<>();
 
         for (Category cat : catList)
@@ -130,7 +124,6 @@ public class App extends Application {
 
         return categoriesNames;
     }
-    //endregion
 
     public static void setCurrentCategory(Category cat){ currentCategory = cat; }
 

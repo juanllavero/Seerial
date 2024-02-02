@@ -74,7 +74,7 @@
                   <Insets />
                </opaqueInsets>
                <content>
-                  <FlowPane fx:id="cardContainer" hgap="30.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="50.0">
+                  <FlowPane fx:id="cardContainer" hgap="15.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="40.0">
                      <padding>
                         <Insets bottom="50.0" left="100.0" right="100.0" top="30.0" />
                      </padding>
@@ -147,6 +147,26 @@
                   <Insets bottom="500.0" left="500.0" right="500.0" top="250.0" />
                </StackPane.margin>
             </VBox>
+            <BorderPane prefHeight="200.0" prefWidth="200.0" visible="false">
+               <center>
+                  <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <Button mnemonicParsing="false" text="Button" />
+                        <Button mnemonicParsing="false" text="Button" />
+                        <Button mnemonicParsing="false" text="Button" />
+                     </children>
+                  </VBox>
+               </center>
+               <right>
+                  <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <Button mnemonicParsing="false" text="Button" />
+                        <Button mnemonicParsing="false" text="Button" />
+                        <Button mnemonicParsing="false" text="Button" />
+                     </children>
+                  </VBox>
+               </right>
+            </BorderPane>
          </children>
       </StackPane>
    </children>

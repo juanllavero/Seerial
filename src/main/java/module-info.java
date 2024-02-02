@@ -37,7 +37,7 @@ module com.example.executablelauncher {
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;
     exports com.example.executablelauncher.entities;
-    opens com.example.executablelauncher.entities to javafx.fxml;
+    opens com.example.executablelauncher.entities;
     exports com.example.executablelauncher.tmdbMetadata.movies;
     opens com.example.executablelauncher.tmdbMetadata.movies to javafx.fxml;
     exports com.example.executablelauncher.tmdbMetadata.series;
