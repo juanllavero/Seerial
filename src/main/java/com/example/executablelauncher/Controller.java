@@ -8,8 +8,10 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
@@ -40,6 +42,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -281,6 +285,7 @@ public class Controller implements Initializable {
             Button btn = new Button();
             btn.setText(cat.name);
             btn.getStyleClass().add("CatButton");
+            btn.setPadding(new Insets(12));
             HBox.setMargin(btn, new Insets(0, 5, 0, 0));
 
             btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
@@ -290,14 +295,7 @@ public class Controller implements Initializable {
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
                 if (KeyCode.ENTER == event.getCode()) {
-                    /*for (Node node : categoriesBox.getChildren()) {
-                        Button catButton = (Button) node;
-                        catButton.getStyleClass().clear();
-                        catButton.getStyleClass().add("CatButton");
-                    }
-
-                    btn.getStyleClass().clear();
-                    btn.getStyleClass().add("CatButtonSelected");*/
+                    selectCategoryButton(btn);
 
                     playCategoriesSound();
                     showSeriesFrom(categories.get(categoriesBox.getChildren().indexOf(btn)));
@@ -326,7 +324,20 @@ public class Controller implements Initializable {
         if (currentCategory == null)
             currentCategory = categories.get(0);
 
+        selectCategoryButton((Button) categoriesBox.getChildren().get(categories.indexOf(currentCategory)));
+
         showSeriesFrom(currentCategory);
+    }
+
+    private void selectCategoryButton(Button btn){
+        for (Node node : categoriesBox.getChildren()) {
+            Button catButton = (Button) node;
+            catButton.getStyleClass().clear();
+            catButton.getStyleClass().add("CatButton");
+        }
+
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("CatButtonSelected");
     }
 
     private void addInteractionSound(Button btn){
@@ -410,7 +421,6 @@ public class Controller implements Initializable {
         if (seriesToEdit != s){
             seriesToEdit = s;
 
-            App.setSelectedSeries(seriesToEdit);
             App.setSelectedSeries(seriesToEdit);
 
             delay = new PauseTransition(Duration.millis(200));
@@ -504,12 +514,12 @@ public class Controller implements Initializable {
         if (!s.coverSrc.isEmpty())
             coverSrc = s.getCoverSrc();
         //Image img = new Image("file:" + coverSrc, 260, 350, false, true);
-        Image img = new Image("file:" + coverSrc
+        /*Image img = new Image("file:" + coverSrc
                 , originalWidth * scaleTo, originalHeight * scaleTo, false, true);
-        ImageView image = new ImageView(img);
+        ImageView image = new ImageView(img);*/
 
         Button btn = new Button();
-        btn.setGraphic(image);
+        btn.setGraphic(setRoundedBorders(coverSrc, originalWidth * scaleTo, originalHeight * scaleTo));
         btn.setAlignment(Pos.CENTER);
         btn.setContentDisplay(ContentDisplay.CENTER);
 
@@ -562,6 +572,21 @@ public class Controller implements Initializable {
         cardContainer.getChildren().add(btn);
     }
 
+    private Rectangle setRoundedBorders(String imageSrc, double width, double height){
+        Rectangle rectangle = new Rectangle(0, 0, width, height);
+        rectangle.setArcWidth(20.0);
+        rectangle.setArcHeight(20.0);
+
+        ImagePattern pattern = new ImagePattern(
+                new Image("file:" + imageSrc, width, height, false, false)
+        );
+
+        rectangle.setFill(pattern);
+        rectangle.setEffect(new DropShadow(15, Color.BLACK));
+
+        return rectangle;
+    }
+
     public void showSeriesMenu(){
         menuShadow.setVisible(true);
         try{
@@ -598,7 +623,7 @@ public class Controller implements Initializable {
         mainPane.setDisable(true);
         menuOptions.setVisible(true);
         settingsWindow.setVisible(false);
-        switchToDesktopButton.requestFocus();
+        settingsButton.requestFocus();
     }
 
     @FXML

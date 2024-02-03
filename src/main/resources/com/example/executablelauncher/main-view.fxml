@@ -50,7 +50,7 @@
                      <left>
                         <ScrollPane hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
                            <content>
-                              <HBox fx:id="categoriesBox" alignment="BOTTOM_LEFT" prefHeight="50.0">
+                              <HBox fx:id="categoriesBox" alignment="BOTTOM_LEFT">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>
@@ -177,9 +177,9 @@
                   </VBox>
                </center>
                <right>
-                  <StackPane prefHeight="735.0" prefWidth="428.0" BorderPane.alignment="CENTER">
+                  <StackPane BorderPane.alignment="CENTER">
                      <children>
-                        <VBox fx:id="cardSizeOptions">
+                        <VBox fx:id="cardSizeOptions" styleClass="translucent" stylesheets="@styles.css">
                            <children>
                               <Button fx:id="tinyCardButton" alignment="TOP_LEFT" maxWidth="-Infinity" mnemonicParsing="false" prefWidth="500.0" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Tiny" textFill="WHITE">
                                  <font>
@@ -214,6 +214,9 @@
                                  </padding>
                               </Button>
                            </children>
+                           <padding>
+                              <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+                           </padding>
                         </VBox>
                      </children>
                      <BorderPane.margin>

@@ -18,6 +18,7 @@ public class Series implements Serializable {
     public String coverSrc = "";
     public String logoSrc = "";
     public String folder = "";
+    public float videoZoom = 0;
     public List<Season> seasons = new ArrayList<>();
     public List<String> genres = new ArrayList<>();
     public boolean playSameMusic = false;
@@ -44,6 +45,14 @@ public class Series implements Serializable {
 
     public void setCoverSrc(String coverSrc) {
         this.coverSrc = coverSrc;
+    }
+
+    public float getVideoZoom() {
+        return videoZoom;
+    }
+
+    public void setVideoZoom(float videoZoom) {
+        this.videoZoom = videoZoom;
     }
 
     public List<Season> getSeasons() {

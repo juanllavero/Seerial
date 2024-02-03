@@ -332,17 +332,20 @@
             </VBox>
          </center>
          <right>
-            <ScrollPane hbarPolicy="NEVER" hmax="0.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="rightOptions" hbarPolicy="NEVER" hmax="0.0" prefHeight="637.0" prefWidth="742.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
                <content>
-                  <VBox fx:id="optionsContainer" fillWidth="false" minWidth="600.0" prefHeight="657.0" prefWidth="834.0" styleClass="transparent" stylesheets="@styles.css">
+                  <VBox fx:id="optionsContainer" fillWidth="false" minWidth="600.0" styleClass="transparent" stylesheets="@styles.css">
                      <padding>
-                        <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+                        <Insets bottom="50.0" top="50.0" />
                      </padding>
                   </VBox>
                </content>
                <BorderPane.margin>
-                  <Insets bottom="20.0" right="20.0" />
+                  <Insets bottom="20.0" />
                </BorderPane.margin>
+               <padding>
+                  <Insets left="50.0" right="200.0" />
+               </padding>
             </ScrollPane>
          </right>
       </BorderPane>

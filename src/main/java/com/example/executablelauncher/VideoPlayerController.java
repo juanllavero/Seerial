@@ -1,6 +1,8 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
+import com.example.executablelauncher.entities.Season;
+import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.videoPlayer.Track;
 import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import javafx.animation.FadeTransition;
@@ -8,12 +10,15 @@ import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -33,6 +38,9 @@ public class VideoPlayerController {
     //region FXML ATTRIBUTES
     @FXML
     private StackPane mainPane;
+
+    @FXML
+    private ScrollPane rightOptions;
 
     @FXML
     private Label currentTime;
@@ -152,6 +160,8 @@ public class VideoPlayerController {
 
         volumeBox.setVisible(false);
         optionsBox.setVisible(false);
+
+        rightOptions.setPrefWidth(screenWidth * 0.5);
 
         timeline = new javafx.animation.Timeline(
             new javafx.animation.KeyFrame(Duration.seconds(5), event -> {
@@ -337,6 +347,15 @@ public class VideoPlayerController {
             //Set video and start
             videoPlayer.playVideo(episode.videoSrc, episode.getTimeWatched());
             runtimeSlider.setBlockIncrement(percentageStep);
+
+            Series series = App.getSelectedSeries();
+            if (series.getVideoZoom() == 0) {
+                videoPlayer.fixZoom(0);
+                series.setVideoZoom(0);
+            }else{
+                videoPlayer.fixZoom(0.5f);
+                series.setVideoZoom(0.5f);
+            }
 
             loadTracks();
         });
@@ -527,16 +546,37 @@ public class VideoPlayerController {
     }
     private void showZoomOptions(){
         optionsContainer.getChildren().clear();
-        addOptionCard("Normal");
+        Series series = App.getSelectedSeries();
 
+        addOptionCard("Normal");
         Button btn = (Button) optionsContainer.getChildren().get(0);
-        btn.getStyleClass().clear();
-        btn.getStyleClass().add("playerOptionsSelected");
+        btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+            if (event.getCode().equals(KeyCode.ENTER)){
+                videoPlayer.fixZoom(0);
+                series.setVideoZoom(0);
+                btn.getStyleClass().clear();
+                btn.getStyleClass().add("playerOptionsSelected");
+
+                Button b2 = (Button) optionsContainer.getChildren().get(1);
+                b2.getStyleClass().clear();
+                b2.getStyleClass().add("playerOptionsButton");
+            }
+        });
 
         addOptionCard("Zoom");
-        addOptionCard("Fixed 4:3");
-        addOptionCard("Fixed 16:9");
-        addOptionCard("Expanded");
+        Button button = (Button) optionsContainer.getChildren().get(1);
+        button.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+            if (event.getCode().equals(KeyCode.ENTER)){
+                videoPlayer.fixZoom(0.5f);
+                series.setVideoZoom(0.5f);
+                button.getStyleClass().clear();
+                button.getStyleClass().add("playerOptionsSelected");
+
+                Button b1 = (Button) optionsContainer.getChildren().get(0);
+                b1.getStyleClass().clear();
+                b1.getStyleClass().add("playerOptionsButton");
+            }
+        });
     }
     public void showAudioOptions(){
         if (!videoPlayer.isPaused())
@@ -584,11 +624,7 @@ public class VideoPlayerController {
 
             addOptionCard( title + " (" + track.lang.toUpperCase() + ") " + track.codec.toUpperCase() + " " + channels);
 
-            if (track.selected) {
-                Button btn = (Button) optionsContainer.getChildren().get(audioTracks.indexOf(track));
-                btn.getStyleClass().clear();
-                btn.getStyleClass().add("playerOptionsSelected");
-            }
+            setTrackButton(track, true);
         }
     }
     public void showSubtitleOptions(){
@@ -633,13 +669,41 @@ public class VideoPlayerController {
 
             addOptionCard( title + " (" + track.lang.toUpperCase() + ") " + forced);
 
-            if (track.selected) {
-                Button btn = (Button) optionsContainer.getChildren().get(subtitleTracks.indexOf(track));
+            setTrackButton(track, false);
+        }
+    }
+
+    private void setTrackButton(Track track, boolean isAudio) {
+        Button btn;
+        if (isAudio)
+            btn = (Button) optionsContainer.getChildren().get(audioTracks.indexOf(track));
+        else
+            btn = (Button) optionsContainer.getChildren().get(subtitleTracks.indexOf(track));
+
+        if (track.selected) {
+            btn.getStyleClass().clear();
+            btn.getStyleClass().add("playerOptionsSelected");
+        }
+
+        btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+            if (event.getCode().equals(KeyCode.ENTER)){
+                if (isAudio)
+                    videoPlayer.setAudioTrack(audioTracks.get(optionsContainer.getChildren().indexOf(btn)).id);
+                else
+                    videoPlayer.setSubtitleTrack(subtitleTracks.get(optionsContainer.getChildren().indexOf(btn)).id);
+
+                for (Node node : optionsContainer.getChildren()){
+                    Button button = (Button) node;
+                    button.getStyleClass().clear();
+                    button.getStyleClass().add("playerOptionsButton");
+                }
+
                 btn.getStyleClass().clear();
                 btn.getStyleClass().add("playerOptionsSelected");
             }
-        }
+        });
     }
+
     private void addOptionCard(String title){
         Button btn = new Button();
         btn.setText(title);

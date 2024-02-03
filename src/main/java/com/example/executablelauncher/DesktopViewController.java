@@ -56,6 +56,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.name.Rename;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -1078,6 +1079,9 @@ public class DesktopViewController {
         selectedSeason.score = (float) ((int) (metadata.vote_average * 10.0)) / 10.0f;
         selectedSeason.imdbID = metadata.imdb_id;
 
+        if (selectedSeason.imdbID == null)
+            selectedSeason.imdbID = "";
+
         Images images = downloadImages(selectedSeason.themdbID);
 
         if (images != null)
@@ -1100,7 +1104,7 @@ public class DesktopViewController {
             File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
             File[] filesInMediaCache = mediaCahceDir.listFiles();
 
-            if (filesInMediaCache != null){
+            if (filesInMediaCache != null && filesInMediaCache.length > 0){
                 File audioFile = filesInMediaCache[0];
 
                 try{
@@ -1109,20 +1113,29 @@ public class DesktopViewController {
 
                     File directory = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
                     FileUtils.deleteDirectory(directory);
-                } catch (IOException e) {
+                } catch (IOException error) {
                     System.err.println("processEpisode: Could not copy downloaded audio file");
                 }
             }
         }
 
-        for (Episode episode : selectedSeason.getEpisodes()){
-            if (episode == null)
-                continue;
+        if (selectedSeason.getEpisodes().size() == 1){
+            Episode episode = selectedSeason.getEpisodes().get(0);
+            episode.name = selectedSeason.getName();
+            episode.score = selectedSeason.score;
+            episode.overview = selectedSeason.getOverview();
+            episode.year = selectedSeason.getYear();
+            episode.seasonNumber = selectedSeason.getSeasonNumber();
+        }else{
+            for (Episode episode : selectedSeason.getEpisodes()){
+                if (episode == null)
+                    continue;
 
-            if (!selectedSeason.imdbID.isEmpty())
-                setIMDBScore(selectedSeason.imdbID, episode);
+                if (!selectedSeason.imdbID.isEmpty())
+                    setIMDBScore(selectedSeason.imdbID, episode);
 
-            setMovieThumbnail(episode, selectedSeason.themdbID);
+                setMovieThumbnail(episode, selectedSeason.themdbID);
+            }
         }
 
         refreshSeason(selectedSeason);
@@ -1205,21 +1218,21 @@ public class DesktopViewController {
             numFilesToCheck--;
             if (numFilesToCheck == 0)
                 downloadingContentWindow.setVisible(false);
-            //downloadDefaultMusic();
+            downloadDefaultMusic();
         });
 
         loadHalfTask.setOnCancelled(e -> {
             numFilesToCheck--;
             if (numFilesToCheck == 0)
                 downloadingContentWindow.setVisible(false);
-            //downloadDefaultMusic();
+            downloadDefaultMusic();
         });
 
         loadHalfTask.setOnFailed(e -> {
             numFilesToCheck--;
             if (numFilesToCheck == 0)
                 downloadingContentWindow.setVisible(false);
-            //downloadDefaultMusic();
+            downloadDefaultMusic();
         });
 
         new Thread(loadHalfTask).start();
@@ -1251,7 +1264,7 @@ public class DesktopViewController {
                         File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.getId() + "/");
                         File[] filesInMediaCache = mediaCahceDir.listFiles();
 
-                        if (filesInMediaCache != null){
+                        if (filesInMediaCache != null && filesInMediaCache.length > 0){
                             File audioFile = filesInMediaCache[0];
 
                             try{
@@ -1260,7 +1273,7 @@ public class DesktopViewController {
 
                                 File directory = new File("src/main/resources/downloadedMediaCache/" + season.getId() + "/");
                                 FileUtils.deleteDirectory(directory);
-                            } catch (IOException e) {
+                            } catch (IOException error) {
                                 System.err.println("processEpisode: Could not copy downloaded audio file");
                             }
                         }
@@ -1805,9 +1818,6 @@ public class DesktopViewController {
         }
     }
     private void scanMovie(File f){
-        //Regular expression to catch name and/or year of the movie
-        Pattern regex = Pattern.compile("([^(]*)\\s*(?:\\((\\d{4})\\))?");
-
         //If the movie exists, do not add a new Card in the main view
         boolean exists = false;
 
@@ -1825,14 +1835,12 @@ public class DesktopViewController {
             series.folder = f.getAbsolutePath();
             currentCategory.analyzedFolders.put(f.getAbsolutePath(), series.getId());
 
-            Matcher matcher = regex.matcher(f.getName());
-            if (!matcher.find())
-                return;
+            NameYearContainer result = extractNameAndYear(f.getName());
 
-            String movieName = matcher.group(1).trim();
-            String year = matcher.group(2);
+            String movieName = result.name;
+            String year = result.year;
 
-            if (year == null)
+            if (year.isEmpty())
                 year = "1";
 
             //Search show by name of the folder
@@ -1863,6 +1871,9 @@ public class DesktopViewController {
             season.seriesID = series.getId();
             season.themdbID = themdbID;
             season.imdbID = movieMetadata.imdb_id;
+
+            if (season.imdbID == null)
+                season.imdbID = "";
 
             season.name = movieMetadata.title;
             season.overview = movieMetadata.overview;
@@ -1943,14 +1954,12 @@ public class DesktopViewController {
                     if (filesInFolder == null)
                         continue;
 
-                    Matcher matcher = regex.matcher(folder.getName());
-                    if (!matcher.find())
-                        return;
+                    NameYearContainer result = extractNameAndYear(folder.getName());
 
-                    String movieName = matcher.group(1).trim();
-                    String year = matcher.group(2);
+                    String movieName = result.name;
+                    String year = result.year;
 
-                    if (year == null)
+                    if (year.isEmpty())
                         year = "1";
 
                     boolean updateMetadata = false;
@@ -2002,6 +2011,9 @@ public class DesktopViewController {
                         season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
                         season.imdbID = movieMetadata.imdb_id;
 
+                        if (season.imdbID == null)
+                            season.imdbID = "";
+
                         List<Genre> genres = movieMetadata.genres;
 
                         if (genres != null){
@@ -2045,14 +2057,12 @@ public class DesktopViewController {
                 //endregion
             }else if (!filesInRoot.isEmpty()){
                 //region MOVIE FILE/CONCERT FILES INSIDE FOLDER
-                Matcher matcher = regex.matcher(f.getName());
-                if (!matcher.find())
-                    return;
+                NameYearContainer result = extractNameAndYear(f.getName());
 
-                String movieName = matcher.group(1).trim();
-                String year = matcher.group(2);
+                String movieName = result.name;
+                String year = result.year;
 
-                if (year == null)
+                if (year.isEmpty())
                     year = "1";
 
                 boolean updateMetadata = false;
@@ -2107,6 +2117,9 @@ public class DesktopViewController {
                     season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
                     season.imdbID = movieMetadata.imdb_id;
 
+                    if (season.imdbID == null)
+                        season.imdbID = "";
+
                     List<Genre> genres = movieMetadata.genres;
 
                     if (genres != null){
@@ -2151,6 +2164,33 @@ public class DesktopViewController {
                 //endregion
             }
         }
+    }
+    private static NameYearContainer extractNameAndYear(String source) {
+        NameYearContainer container = new NameYearContainer("", "");
+
+        //Remove all "." except for the last one
+        source = source.replaceAll("\\.(?=[^.]*\\.)", " ");
+
+        //Remove extension + "." + parenthesis
+        String cleanSource = source.replaceAll("\\..+$", "").replaceAll("\\.", " ").replaceAll("[()]", "");
+
+        //Regex to get name and year
+        String regex = "^(.*?)(?:\\s(\\d{4}))?$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(cleanSource);
+
+        if (matcher.matches()) {
+            container.name = matcher.group(1);
+            container.year = matcher.group(2) != null ? matcher.group(2) : "";
+        } else {
+            container.name = cleanSource.replaceAll("\\([^()]*\\)", "");
+            container.year = "";
+        }
+
+        // Limpiar y formatear el nombre
+        container.name = container.name.replaceAll("-", " ").replaceAll("_", " ").replaceAll("\\s{1,}", " ").trim();
+
+        return container;
     }
     private int searchFirstMovie(String name, int year){
         MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(name, year, currentCategory.language, true, 1);
@@ -2944,4 +2984,14 @@ public class DesktopViewController {
         backgroundShadow.setVisible(false);
     }
     //endregion
+}
+
+class NameYearContainer {
+    public String name;
+    public String year;
+
+    public NameYearContainer(String name, String year){
+        this.name = name;
+        this.year = year;
+    }
 }

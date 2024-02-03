@@ -263,7 +263,7 @@ public class DiscController {
             BufferedImage resizedImage = Thumbnails.of(bufferedImage)
                     .size((int) targetWidth, (int) targetHeight)
                     .outputFormat("jpg")
-                    .outputQuality(1)
+                    .outputQuality(0.9)
                     .asBufferedImage();
 
             originalImage = SwingFXUtils.toFXImage(resizedImage, null);

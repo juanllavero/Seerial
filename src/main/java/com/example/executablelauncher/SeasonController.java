@@ -804,7 +804,7 @@ public class SeasonController {
         thumbnail.setPreserveRatio(false);
         thumbnail.setSmooth(true);
 
-        btn.getStyleClass().add("seriesCoverButton");
+        btn.getStyleClass().add("episodeButton");
 
         StackPane main = new StackPane(thumbnail);
         BorderPane details = new BorderPane();
