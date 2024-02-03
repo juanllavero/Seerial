@@ -2,6 +2,7 @@ package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.*;
 import com.example.executablelauncher.tmdbMetadata.common.Genre;
+import com.example.executablelauncher.tmdbMetadata.groups.*;
 import com.example.executablelauncher.tmdbMetadata.images.*;
 import com.example.executablelauncher.tmdbMetadata.movies.MovieMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.EpisodeMetadata;
@@ -56,7 +57,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import net.coobird.thumbnailator.Thumbnails;
-import net.coobird.thumbnailator.name.Rename;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -1506,6 +1506,14 @@ public class DesktopViewController {
                         seasonGroupID = seasonsGroup.id;
                     }
                 }
+
+                if (seasonGroupID.isEmpty()){
+                    for (SeasonsGroup seasonsGroup : groups.results) {
+                        if (seasonsGroup.name.equals("All episodes")) {
+                            seasonGroupID = seasonsGroup.id;
+                        }
+                    }
+                }
             } else {
                 System.out.println("getEpisodeGroup: Response not successful: " + response.code());
             }
@@ -1560,6 +1568,9 @@ public class DesktopViewController {
         SeasonMetadata seasonMetadata = null;
         EpisodeMetadata episodeMetadata = null;
 
+        int realSeason = 0;
+        int realEpisode = -1;
+
         if (!matcher.find()){
             Pattern newPattern = Pattern.compile(regexOnlyEpisode, Pattern.MULTILINE);
             Matcher newMatch = newPattern.matcher(fullName);
@@ -1601,6 +1612,9 @@ public class DesktopViewController {
             int seasonNumber = Integer.parseInt(matcher.group("season").substring(1));
             int episodeNumber = Integer.parseInt(matcher.group("episode").substring(1));
 
+            realSeason = seasonNumber;
+            realEpisode = episodeNumber;
+
             boolean toFindMetadata = true;
             for (SeasonMetadata season : seasonsMetadata){
                 if (season.season_number == seasonNumber) {
@@ -1613,6 +1627,7 @@ public class DesktopViewController {
                 if (episodesGroup == null)
                     episodesGroup = getEpisodesGroup(series.themdbID);
 
+                boolean found = false;
                 if (episodesGroup != null){
                     for (EpisodeGroup episodeGroup : episodesGroup.groups){
                         if (episodeGroup.order != seasonNumber)
@@ -1622,11 +1637,12 @@ public class DesktopViewController {
                             if ((episode.order + 1) == episodeNumber){
                                 seasonNumber = episode.season_number;
                                 episodeNumber = episode.episode_number;
+                                found = true;
                                 break;
                             }
                         }
 
-                        if (episodeGroup.order == seasonNumber)
+                        if (found)
                             break;
                     }
 
@@ -1668,7 +1684,12 @@ public class DesktopViewController {
         if (seasonMetadata == null || episodeMetadata == null)
             return;
 
-        Season season = series.getSeason(seasonMetadata.season_number);
+        Season season;
+        if (realEpisode != -1)
+            season = series.getSeason(realSeason);
+        else
+            season = series.getSeason(seasonMetadata.season_number);
+
         if (season == null){
             season = new Season();
             series.addSeason(season);
@@ -1676,7 +1697,12 @@ public class DesktopViewController {
             season.name = seasonMetadata.name;
             season.overview = seasonMetadata.overview;
             season.year = seasonMetadata.air_date.substring(0, seasonMetadata.air_date.indexOf("-"));
-            season.seasonNumber = seasonMetadata.season_number;
+
+            if (realEpisode != -1)
+                season.seasonNumber = realSeason;
+            else
+                season.seasonNumber = seasonMetadata.season_number;
+
             season.score = (float) ((int) (seasonMetadata.vote_average * 10.0)) / 10.0f;
             season.seriesID = series.getId();
 
@@ -1700,7 +1726,12 @@ public class DesktopViewController {
                 season.order = 100;
         }
 
-        Episode episode = season.getEpisode(episodeMetadata.episode_number);
+        Episode episode;
+        if (realEpisode != -1)
+            episode = season.getEpisode(realEpisode);
+        else
+            episode = season.getEpisode(episodeMetadata.episode_number);
+
         if (episode != null) {
             episode.videoSrc = file.getAbsolutePath();
             return;
@@ -1712,14 +1743,19 @@ public class DesktopViewController {
         //Set the metadata for the new episode
         episode.seasonID = season.getId();
         episode.videoSrc = file.getAbsolutePath();
-        setEpisodeData(episode, episodeMetadata, series);
+        setEpisodeData(episode, episodeMetadata, series, realEpisode);
 
         currentCategory.analyzedFiles.put(file.getAbsolutePath(), episode.getId());
     }
-    private void setEpisodeData(Episode episode, EpisodeMetadata episodeMetadata, Series show){
+    private void setEpisodeData(Episode episode, EpisodeMetadata episodeMetadata, Series show, int realEpisode){
         episode.name = episodeMetadata.name;
         episode.overview = episodeMetadata.overview;
-        episode.episodeNumber =episodeMetadata.episode_number;
+
+        if (realEpisode != -1)
+            episode.episodeNumber = realEpisode;
+        else
+            episode.episodeNumber = episodeMetadata.episode_number;
+
         episode.year = Utils.episodeDateFormat(episodeMetadata.air_date, currentCategory.language);
         episode.score = (float) ((int) (episodeMetadata.vote_average * 10.0)) / 10.0f;
         episode.runtime = episodeMetadata.runtime;

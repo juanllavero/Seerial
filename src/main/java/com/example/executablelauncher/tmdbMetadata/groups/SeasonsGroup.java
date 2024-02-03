@@ -1,4 +1,4 @@
-package com.example.executablelauncher.tmdbMetadata.images;
+package com.example.executablelauncher.tmdbMetadata.groups;
 
 import com.example.executablelauncher.tmdbMetadata.common.Network;
 

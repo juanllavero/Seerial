@@ -37,7 +37,7 @@ public class Utils {
     public static class SeasonComparator implements Comparator<Season> {
         @Override
         public int compare(Season a, Season b) {
-            return CompareMedia(a.getOrder(), b.getOrder(), a.getName(), b.getName());
+            return CompareMedia(a.getSeasonNumber(), b.getSeasonNumber(), a.getName(), b.getName());
         }
     }
 

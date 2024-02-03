@@ -50,4 +50,6 @@ module com.example.executablelauncher {
     opens com.example.executablelauncher.videoPlayer to javafx.fxml;
     exports com.example.executablelauncher.utils;
     opens com.example.executablelauncher.utils to javafx.fxml;
+    exports com.example.executablelauncher.tmdbMetadata.groups;
+    opens com.example.executablelauncher.tmdbMetadata.groups to javafx.fxml;
 }
