@@ -60,12 +60,12 @@
                   </HBox>
                   <HBox alignment="CENTER">
                      <children>
-                        <ChoiceBox fx:id="categorySelector" prefWidth="163.0">
+                        <ChoiceBox fx:id="librarySelector" prefWidth="163.0">
                            <HBox.margin>
                               <Insets left="10.0" />
                            </HBox.margin>
                         </ChoiceBox>
-                        <Button mnemonicParsing="false" onMouseClicked="#addCategory" styleClass="desktopButton" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onMouseClicked="#addLibrary" styleClass="desktopButton" stylesheets="@styles.css">
                            <graphic>
                               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -77,7 +77,7 @@
                               <Insets left="5.0" right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button mnemonicParsing="false" onMouseClicked="#editCategory" styleClass="desktopButton" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onMouseClicked="#editLibrary" styleClass="desktopButton" stylesheets="@styles.css">
                            <graphic>
                               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
@@ -89,7 +89,7 @@
                               <Insets right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button mnemonicParsing="false" onMouseClicked="#removeCategory" styleClass="desktopButton" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onMouseClicked="#removeLibrary" styleClass="desktopButton" stylesheets="@styles.css">
                            <graphic>
                               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                  <image>

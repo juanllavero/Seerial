@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="329.0" prefWidth="533.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddCategoryController">
+<BorderPane prefHeight="329.0" prefWidth="533.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddLibraryController">
    <top>
       <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>

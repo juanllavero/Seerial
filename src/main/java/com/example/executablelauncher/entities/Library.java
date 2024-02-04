@@ -3,7 +3,7 @@ package com.example.executablelauncher.entities;
 import java.io.Serializable;
 import java.util.*;
 
-public class Category implements Serializable {
+public class Library implements Serializable {
     final String id;
     public String name;
     public String language;
@@ -16,11 +16,11 @@ public class Category implements Serializable {
     public Map<String, String> analyzedFolders = new HashMap<>();             //<Folder, SeriesID>
     public Map<String, String> seasonFolders = new HashMap<>();               //<Folder, SeasonID>
 
-    public Category() {
+    public Library() {
         id = UUID.randomUUID().toString();
     }
 
-    public Category(String n, String lang, String t, List<String> f, boolean s){
+    public Library(String n, String lang, String t, List<String> f, boolean s){
         id = UUID.randomUUID().toString();
         name = n;
         language = lang;

@@ -139,10 +139,6 @@ public class SearchSeriesController {
                 cardBox.getStyleClass().add("searchResultButton");
 
                 cardBox.setOnMouseClicked(event -> {
-                    /*if (isShow)
-                        System.out.println("Selected series with name: " + resultShows.get(resultsCards.indexOf(cardBox)).getName());
-                    else
-                        System.out.println("Selected series with name: " + resultMovies.get(resultsCards.indexOf(cardBox)).getTitle());*/
                     if (isShow)
                         parentController.setCorrectIdentificationShow(resultShows.get(resultsCards.indexOf(cardBox)).getId());
                     else

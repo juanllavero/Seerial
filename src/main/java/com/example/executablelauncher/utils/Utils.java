@@ -1,6 +1,6 @@
 package com.example.executablelauncher.utils;
 
-import com.example.executablelauncher.entities.Category;
+import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
@@ -48,9 +48,9 @@ public class Utils {
         }
     }
 
-    public static class CategoryComparator implements Comparator<Category> {
+    public static class CategoryComparator implements Comparator<Library> {
         @Override
-        public int compare(Category a, Category b) {
+        public int compare(Library a, Library b) {
             return a.name.compareTo(b.name);
         }
     }

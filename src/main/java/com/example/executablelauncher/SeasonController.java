@@ -374,6 +374,21 @@ public class SeasonController {
         setEpisodesOutOfFocusButton(watchedButton);
         setEpisodesOutOfFocusButton(optionsButton);
 
+        if (playSameMusic){
+            for (Season season : seasons){
+                if (!season.getMusicSrc().isEmpty()){
+                    File file = new File(season.getMusicSrc());
+                    Media media = new Media(file.toURI().toString());
+                    mp = new MediaPlayer(media);
+                    isVideo = false;
+
+                    setMediaPlayer();
+
+                    break;
+                }
+            }
+        }
+
         currentSeason = 0;
         assert seasons != null;
         updateInfo(seasons.get(0));
@@ -479,15 +494,13 @@ public class SeasonController {
             //normalizeVolume(file);
 
             setVideoPlayer();
-        }else if (!season.getMusicSrc().isEmpty()){
-            if (!playSameMusic || (currentSeason == 0 && mp == null)){
-                File file = new File(season.getMusicSrc());
-                Media media = new Media(file.toURI().toString());
-                mp = new MediaPlayer(media);
-                isVideo = false;
+        }else if (!playSameMusic && !season.getMusicSrc().isEmpty()){
+            File file = new File(season.getMusicSrc());
+            Media media = new Media(file.toURI().toString());
+            mp = new MediaPlayer(media);
+            isVideo = false;
 
-                setMediaPlayer();
-            }
+            setMediaPlayer();
         }
 
         cardContainer.getChildren().clear();
@@ -861,6 +874,7 @@ public class SeasonController {
             timeline.stop();
 
         stopBackgroundVideo();
+        embeddedMediaPlayer.controls().stop();
         embeddedMediaPlayer.release();
         mediaPlayerFactory.release();
 

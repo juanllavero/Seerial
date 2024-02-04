@@ -177,7 +177,7 @@ public class OldDesignController {
     private SeasonMetadataBasic selectedSeason = null;
     private List<Disc> selectedDiscs = new ArrayList<>();
     private Disc discToEdit = null;
-    private String currentCategory = "";
+    private String currentLibrary = "";
 
     private double xOffset = 0;
     private double yOffset = 0;
@@ -216,7 +216,7 @@ public class OldDesignController {
 
     public void selectCategory(String category){
         seriesContainer.getChildren().clear();
-        currentCategory = category;
+        currentLibrary = category;
         seriesList = App.getSeriesFromCategory(category);
         showSeries();
     }
@@ -626,13 +626,13 @@ public class OldDesignController {
     void addCategory(MouseEvent event) {
         showBackgroundShadow();
         try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCategory-view.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addLibrary-view.fxml"));
             Parent root1 = fxmlLoader.load();
-            AddCategoryController addCategoryController = fxmlLoader.getController();
+            AddLibraryController addCategoryController = fxmlLoader.getController();
             addCategoryController.setParent(this);
             addCategoryController.initValues();
             Stage stage = new Stage();
-            stage.setTitle("Add Category");
+            stage.setTitle("Add Library");
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setScene(new Scene(root1));
             App.setPopUpProperties(stage);
@@ -646,20 +646,20 @@ public class OldDesignController {
 
     @FXML
     void editCategory(MouseEvent event) {
-        if (currentCategory.equals("NO CATEGORY"))
+        if (currentLibrary.equals("NO CATEGORY"))
             return;
 
-        Category cat = App.findCategory(currentCategory);
+        Library cat = App.findCategory(currentLibrary);
         if (cat != null){
             showBackgroundShadow();
             try{
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addCategory-view.fxml"));
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addLibrary-view.fxml"));
                 Parent root1 = fxmlLoader.load();
-                AddCategoryController addCategoryController = fxmlLoader.getController();
+                AddLibraryController addCategoryController = fxmlLoader.getController();
                 addCategoryController.setParent(this);
                 addCategoryController.setValues(cat.name, cat.showOnFullscreen);
                 Stage stage = new Stage();
-                stage.setTitle("Edit Category");
+                stage.setTitle("Edit Library");
                 stage.initStyle(StageStyle.UNDECORATED);
                 stage.setScene(new Scene(root1));
                 App.setPopUpProperties(stage);
@@ -674,7 +674,7 @@ public class OldDesignController {
 
     @FXML
     void removeCategory(MouseEvent event) {
-        App.removeCategory(currentCategory);
+        App.removeCategory(currentLibrary);
         updateCategories();
     }
 
@@ -921,7 +921,7 @@ public class OldDesignController {
 
     public void addSeries(Series s){
         seriesList.add(s);
-        selectCategory(currentCategory);
+        selectCategory(currentLibrary);
     }
 
     @FXML

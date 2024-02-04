@@ -59,14 +59,14 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <ChoiceBox fx:id="categorySelector" prefWidth="163.0">
+                        <ChoiceBox fx:id="librarySelector" prefWidth="163.0">
                            <HBox.margin>
                               <Insets left="10.0" />
                            </HBox.margin>
                         </ChoiceBox>
-                        <Button mnemonicParsing="false" onMouseClicked="#addCategory" styleClass="desktopMenuButtons" stylesheets="@styles.css">
+                        <Button contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#addLibrary" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/add.png" />
                                  </image>
@@ -76,23 +76,11 @@
                               <Insets left="5.0" right="5.0" />
                            </HBox.margin>
                         </Button>
-                        <Button mnemonicParsing="false" onMouseClicked="#editCategory" styleClass="desktopMenuButtons" stylesheets="@styles.css">
+                        <Button mnemonicParsing="false" onMouseClicked="#openLibraryMenu" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
                               <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../../../img/icons/edit.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                           <HBox.margin>
-                              <Insets right="5.0" />
-                           </HBox.margin>
-                        </Button>
-                        <Button mnemonicParsing="false" onMouseClicked="#removeCategory" styleClass="desktopMenuButtons" stylesheets="@styles.css">
-                           <graphic>
-                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../img/icons/remove.png" />
+                                    <Image url="@../../../img/icons/discOptions.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -468,6 +456,39 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+               </children>
+               <padding>
+                  <Insets bottom="2.0" top="2.0" />
+               </padding>
+            </VBox>
+            <VBox fx:id="libraryMenu" layoutX="319.0" layoutY="95.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
+               <children>
+                  <Button fx:id="editLibraryButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editLibrary" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
+                     <VBox.margin>
+                        <Insets left="2.0" right="2.0" />
+                     </VBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="searchFilesButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#searchFiles" onMouseClicked="#switchToFullScreen" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Search files" textFill="WHITE">
+                     <VBox.margin>
+                        <Insets left="2.0" right="2.0" />
+                     </VBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="searchMusicButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#downloadDefaultMusic" onMouseClicked="#close" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Search Music" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="removeLibraryButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#removeLibrary" onMouseClicked="#close" styleClass="closeButton" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <font>
                         <Font size="14.0" />
                      </font>

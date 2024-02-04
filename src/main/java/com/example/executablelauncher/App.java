@@ -1,6 +1,6 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Category;
+import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import javafx.application.Application;
@@ -14,7 +14,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.io.*;
 import java.util.*;
@@ -27,7 +26,7 @@ public class App extends Application {
     public static ResourceBundle buttonsBundle;
     public static ResourceBundle textBundle;
     //endregion
-    public static Category currentCategory = null;
+    public static Library currentLibrary = null;
     public static Series selectedSeries = null;
     public static Stage primaryStage;
     public static String lastDirectory = null;
@@ -62,8 +61,8 @@ public class App extends Application {
         //Start the stage
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
-        stage.setTitle(textBundle.getString("desktopMode"));
-        stage.initStyle(StageStyle.UNDECORATED);
+        stage.setTitle("VideoLauncher");
+        //stage.initStyle(StageStyle.UNDECORATED);
         stage.getIcons().add(new Image("file:src/main/resources/img/icons/AppIcon.png"));
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
@@ -73,7 +72,7 @@ public class App extends Application {
         DesktopViewController desktopViewController = fxmlLoader.getController();
         desktopViewController.initValues();
         primaryStage = stage;
-        FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
+        //FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
         stage.show();
 
         primaryStage.setOnCloseRequest(event -> close());
@@ -111,24 +110,24 @@ public class App extends Application {
         textBundle = ResourceBundle.getBundle("text", globalLanguage);
     }
 
-    public static List<Category> getCategories(boolean fullscreen){
+    public static List<Library> getCategories(boolean fullscreen){
         return DataManager.INSTANCE.getCategories(fullscreen);
     }
 
     public static List<String> getCategoriesNames(){
-        List<Category> catList = DataManager.INSTANCE.getCategories(false);
+        List<Library> catList = DataManager.INSTANCE.getCategories(false);
         List<String> categoriesNames = new ArrayList<>();
 
-        for (Category cat : catList)
+        for (Library cat : catList)
             categoriesNames.add(cat.name);
 
         return categoriesNames;
     }
 
-    public static void setCurrentCategory(Category cat){ currentCategory = cat; }
+    public static void setCurrentLibrary(Library cat){ currentLibrary = cat; }
 
-    public static Category getCurrentCategory(){
-        return currentCategory;
+    public static Library getCurrentLibrary(){
+        return currentLibrary;
     }
 
     public static void setSelectedSeries(Series series){ selectedSeries = series; }

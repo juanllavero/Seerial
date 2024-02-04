@@ -59,7 +59,7 @@ public class DiscController {
     public void setData(Episode d) {
         name.setText(d.getName());
 
-        if (d.getEpisodeNumber() == 0 || !DataManager.INSTANCE.currentCategory.type.equals("Shows")){
+        if (d.getEpisodeNumber() == 0 || !DataManager.INSTANCE.currentLibrary.type.equals("Shows")){
             mainBox.getChildren().remove(number);
         }else{
             number.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber());

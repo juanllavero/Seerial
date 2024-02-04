@@ -1,6 +1,6 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Category;
+import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
@@ -8,7 +8,6 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
@@ -122,14 +121,14 @@ public class Controller implements Initializable {
     @FXML
     private ImageView globalShadow;
 
-    private List<Category> categories = null;
-    private Category currentCategory = null;
+    private List<Library> categories = null;
+    private Library currentLibrary = null;
     private Series seriesToEdit;
     private List<Series> series = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
 
     private MediaPlayer backgroundMusicPlayer;
-    private String categoryType = null;
+    private String libraryType = null;
     private FadeTransition fadeTransition = null;
     private PauseTransition delay = null;
 
@@ -170,7 +169,7 @@ public class Controller implements Initializable {
 
         categoriesBox.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                int index = categories.indexOf(currentCategory);
+                int index = categories.indexOf(currentLibrary);
                 categoriesBox.getChildren().get(index).requestFocus();
             }
         });
@@ -212,7 +211,7 @@ public class Controller implements Initializable {
                 tinyCardButton.getStyleClass().add("playerOptionsSelected");
 
                 Configuration.saveConfig("cardSize", "0.4");
-                showSeriesFrom(currentCategory);
+                showSeriesFrom(currentLibrary);
             }
         });
 
@@ -226,7 +225,7 @@ public class Controller implements Initializable {
                 smallCardButton.getStyleClass().add("playerOptionsSelected");
 
                 Configuration.saveConfig("cardSize", "0.6");
-                showSeriesFrom(currentCategory);
+                showSeriesFrom(currentLibrary);
             }
         });
 
@@ -240,7 +239,7 @@ public class Controller implements Initializable {
                 normalCardButton.getStyleClass().add("playerOptionsSelected");
 
                 Configuration.saveConfig("cardSize", "0.8");
-                showSeriesFrom(currentCategory);
+                showSeriesFrom(currentLibrary);
             }
         });
 
@@ -254,7 +253,7 @@ public class Controller implements Initializable {
                 largeCardButton.getStyleClass().add("playerOptionsSelected");
 
                 Configuration.saveConfig("cardSize", "1");
-                showSeriesFrom(currentCategory);
+                showSeriesFrom(currentLibrary);
             }
         });
 
@@ -281,7 +280,7 @@ public class Controller implements Initializable {
 
         categories = App.getCategories(true);
 
-        for (Category cat : categories){
+        for (Library cat : categories){
             Button btn = new Button();
             btn.setText(cat.name);
             btn.getStyleClass().add("CatButton");
@@ -295,7 +294,7 @@ public class Controller implements Initializable {
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
                 if (KeyCode.ENTER == event.getCode()) {
-                    selectCategoryButton(btn);
+                    selectLibraryButton(btn);
 
                     playCategoriesSound();
                     showSeriesFrom(categories.get(categoriesBox.getChildren().indexOf(btn)));
@@ -319,17 +318,17 @@ public class Controller implements Initializable {
         timeline.play();
         //endregion
 
-        currentCategory = App.getCurrentCategory();
+        currentLibrary = App.getCurrentLibrary();
 
-        if (currentCategory == null)
-            currentCategory = categories.get(0);
+        if (currentLibrary == null)
+            currentLibrary = categories.get(0);
 
-        selectCategoryButton((Button) categoriesBox.getChildren().get(categories.indexOf(currentCategory)));
+        selectLibraryButton((Button) categoriesBox.getChildren().get(categories.indexOf(currentLibrary)));
 
-        showSeriesFrom(currentCategory);
+        showSeriesFrom(currentLibrary);
     }
 
-    private void selectCategoryButton(Button btn){
+    private void selectLibraryButton(Button btn){
         for (Node node : categoriesBox.getChildren()) {
             Button catButton = (Button) node;
             catButton.getStyleClass().clear();
@@ -356,17 +355,17 @@ public class Controller implements Initializable {
         clock.setText(time);
     }
 
-    public void showSeriesFrom(Category cat){
-        if (cat != currentCategory)
-            App.setCurrentCategory(cat);
+    public void showSeriesFrom(Library cat){
+        if (cat != currentLibrary)
+            App.setCurrentLibrary(cat);
 
-        currentCategory = cat;
+        currentLibrary = cat;
 
-        categoryType = currentCategory.type;
+        libraryType = currentLibrary.type;
         cardContainer.getChildren().clear();
         seriesButtons.clear();
 
-        series = currentCategory.getSeries();
+        series = currentLibrary.getSeries();
 
         for (Series col : series) {
             addCard(col);
@@ -642,7 +641,7 @@ public class Controller implements Initializable {
                 Parent root = fxmlLoader.load();
                 SeasonController seasonController = fxmlLoader.getController();
                 seasonController.setParent(this);
-                seasonController.setSeasons(s, s.playSameMusic, categoryType.equals("Shows"));
+                seasonController.setSeasons(s, s.playSameMusic, libraryType.equals("Shows"));
                 Stage stage = (Stage) mainPane.getScene().getWindow();
                 stage.setTitle(App.textBundle.getString("season"));
                 stage.setScene(new Scene(root));
@@ -716,7 +715,7 @@ public class Controller implements Initializable {
 
     @FXML
     void editSeries(){
-        //Edit "sorting order" and "category"
+        //Edit "sorting order" and "library"
     }
 
     public void hideMenuShadow(){

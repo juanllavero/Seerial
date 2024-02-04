@@ -1,6 +1,6 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Category;
+import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
@@ -20,27 +20,27 @@ import java.util.List;
 public class DataManager {
     public static DataManager INSTANCE = new DataManager();
     final String LOCAL_FILE = "data.json";
-    List<Category> categories = new ArrayList<>();
+    List<Library> libraries = new ArrayList<>();
     List<Series> seriesToRemove = new ArrayList<>();
-    public Category currentCategory = null;
+    public Library currentLibrary = null;
 
     //region LOAD/SAVE DATA
     public void loadData(){
         try{
             JsonReader reader = new JsonReader(new FileReader(LOCAL_FILE));
-            Type type = new TypeToken<List<Category>>() {}.getType();
-            categories = new Gson().fromJson(reader, type);
+            Type type = new TypeToken<List<Library>>() {}.getType();
+            libraries = new Gson().fromJson(reader, type);
         } catch (FileNotFoundException e) {
             System.err.println("loadData: Json files not found");
         }
 
-        for (Category category : categories){
-            for (Series series : category.getSeries())
-                checkEmptySeasons(category, series, false);
+        for (Library library : libraries){
+            for (Series series : library.getSeries())
+                checkEmptySeasons(library, series, false);
 
             for (Series series : seriesToRemove) {
                 deleteSeriesData(series);
-                category.removeSeries(series);
+                library.removeSeries(series);
             }
 
             seriesToRemove.clear();
@@ -49,46 +49,46 @@ public class DataManager {
     public void saveData(){
         try (Writer writer = new FileWriter(LOCAL_FILE)) {
             Gson gson = new GsonBuilder().create();
-            gson.toJson(categories, writer);
+            gson.toJson(libraries, writer);
         } catch (IOException e) {
             System.err.println("saveData: Error saving data");
         }
     }
     //endregion
 
-    public void createCategory(Category category){
-        categories.add(category);
+    public void createCategory(Library library){
+        libraries.add(library);
     }
-    public List<Category> getCategories(boolean fullscreen){
+    public List<Library> getCategories(boolean fullscreen){
         if (!fullscreen)
-            return categories;
+            return libraries;
 
-        List<Category> categoriesList = new ArrayList<>();
+        List<Library> categoriesList = new ArrayList<>();
 
-        for (Category cat : categories)
+        for (Library cat : libraries)
             if (cat.isShowOnFullscreen())
                 categoriesList.add(cat);
 
         return categoriesList;
     }
 
-    public Category getCategory(String name){
-        for (Category category : categories){
-            if (category.name.equals(name))
-                return category;
+    public Library getLibrary(String name){
+        for (Library library : libraries){
+            if (library.name.equals(name))
+                return library;
         }
         return null;
     }
 
-    public boolean categoryExist(String name){
-        for (Category category : categories){
-            if (category.name.equals(name))
+    public boolean libraryExists(String name){
+        for (Library library : libraries){
+            if (library.name.equals(name))
                 return true;
         }
         return false;
     }
 
-    public void checkEmptySeasons(Category category, Series s, boolean removeHere){
+    public void checkEmptySeasons(Library library, Series s, boolean removeHere){
         List<Season> seasonsToDelete = new ArrayList<>();
         for (Season season : s.getSeasons()){
             if (season.getEpisodes().isEmpty())
@@ -100,20 +100,20 @@ public class DataManager {
 
         if (removeHere && s.getSeasons().isEmpty()) {
             deleteSeriesData(s);
-            category.removeSeries(s);
+            library.removeSeries(s);
         }else if (s.getSeasons().isEmpty())
             seriesToRemove.add(s);
     }
 
     //region DELETE
-    public void deleteCategory(Category category){
-        if (category == null)
+    public void deleteLibrary(Library library){
+        if (library == null)
             return;
 
-        for (Series series : category.getSeries())
+        for (Series series : library.getSeries())
             deleteSeriesData(series);
 
-        categories.remove(category);
+        libraries.remove(library);
     }
     public void deleteSeriesData(Series series){
         try{
@@ -126,7 +126,7 @@ public class DataManager {
         for (Season season : series.getSeasons())
             deleteSeasonData(season);
 
-        currentCategory.analyzedFolders.remove(series.folder);
+        currentLibrary.analyzedFolders.remove(series.folder);
     }
     public void deleteSeasonData(Season season){
         try{
@@ -144,8 +144,8 @@ public class DataManager {
         for (Episode episode : season.getEpisodes())
             deleteEpisodeData(episode);
 
-        currentCategory.seasonFolders.remove(season.folder);
-        currentCategory.analyzedFolders.remove(season.folder);
+        currentLibrary.seasonFolders.remove(season.folder);
+        currentLibrary.analyzedFolders.remove(season.folder);
     }
     public void deleteEpisodeData(Episode episode){
         try{
@@ -154,7 +154,7 @@ public class DataManager {
             System.err.println("App.removeDisc: Error deleting directory: src/main/resources/img/discCovers/" + episode.getId());
         }
 
-        currentCategory.analyzedFiles.remove(episode.videoSrc);
+        currentLibrary.analyzedFiles.remove(episode.videoSrc);
     }
     //endregion
 }

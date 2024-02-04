@@ -1,6 +1,6 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Category;
+import com.example.executablelauncher.entities.Library;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -15,14 +15,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.dizitart.no2.common.DBNull;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class AddCategoryController {
+public class AddLibraryController {
     //region FXML ATTRIBUTES
     @FXML
     private Button addFolderButton;
@@ -84,7 +83,7 @@ public class AddCategoryController {
     private String type = "";
     private List<String> folders = new ArrayList<>();
     private boolean inGeneralView = true;
-    private Category categoryToEdit = null;
+    private Library libraryToEdit = null;
 
     //region INITIALIZATION
     @FXML
@@ -114,23 +113,23 @@ public class AddCategoryController {
         showGeneralView();
     }
 
-    public void setValues(Category toEdit){
-        categoryToEdit = toEdit;
+    public void setValues(Library toEdit){
+        libraryToEdit = toEdit;
         title.setText(App.textBundle.getString("categoryWindowTitleEdit"));
-        nameField.setText(categoryToEdit.name);
-        showOnFullscreen.setSelected(categoryToEdit.showOnFullscreen);
+        nameField.setText(libraryToEdit.name);
+        showOnFullscreen.setSelected(libraryToEdit.showOnFullscreen);
         generalBox.setVisible(true);
         folderBox.setVisible(false);
-        this.type = categoryToEdit.type;
-        this.catName = categoryToEdit.name;
-        this.folders = categoryToEdit.folders;
+        this.type = libraryToEdit.type;
+        this.catName = libraryToEdit.name;
+        this.folders = libraryToEdit.folders;
 
         List<Locale> languages = App.tmdbLanguages;
         for (Locale locale : languages){
             languageChoice.getItems().add(locale.getDisplayName());
         }
 
-        Locale locale = Locale.forLanguageTag(categoryToEdit.language);
+        Locale locale = Locale.forLanguageTag(libraryToEdit.language);
         languageChoice.setValue(locale.getDisplayName());
 
         saveButton.setText(App.buttonsBundle.getString("next"));
@@ -168,7 +167,7 @@ public class AddCategoryController {
                 return;
             }
 
-            if ((!catName.equals(nameField.getText()) && DataManager.INSTANCE.categoryExist(nameField.getText()))){
+            if ((!catName.equals(nameField.getText()) && DataManager.INSTANCE.libraryExists(nameField.getText()))){
                 App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("categoryExists"));
                 return;
             }
@@ -181,18 +180,18 @@ public class AddCategoryController {
                 }
             }
 
-            if (categoryToEdit != null){
-                categoryToEdit.name = nameField.getText();
-                categoryToEdit.language = language;
-                categoryToEdit.type = type;
-                categoryToEdit.folders = folders;
-                categoryToEdit.showOnFullscreen = showOnFullscreen.isSelected();
+            if (libraryToEdit != null){
+                libraryToEdit.name = nameField.getText();
+                libraryToEdit.language = language;
+                libraryToEdit.type = type;
+                libraryToEdit.folders = folders;
+                libraryToEdit.showOnFullscreen = showOnFullscreen.isSelected();
 
                 parentController.searchFiles();
             }else{
-                Category category = new Category(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
-                DataManager.INSTANCE.createCategory(category);
-                parentController.loadCategory(category);
+                Library library = new Library(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
+                DataManager.INSTANCE.createCategory(library);
+                parentController.loadLibrary(library);
             }
 
             parentController.hideBackgroundShadow();
@@ -206,7 +205,7 @@ public class AddCategoryController {
         clearTypeSelection();
         moviesTypeButton.getStyleClass().clear();
         moviesTypeButton.getStyleClass().add("buttonSelected");
-        if (categoryToEdit == null)
+        if (libraryToEdit == null)
             nameField.setText(App.textBundle.getString("movies"));
         moviesTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/moviesSelected.png"))));
         showsTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/shows.png"))));
@@ -218,7 +217,7 @@ public class AddCategoryController {
         clearTypeSelection();
         showsTypeButton.getStyleClass().clear();
         showsTypeButton.getStyleClass().add("buttonSelected");
-        if (categoryToEdit == null)
+        if (libraryToEdit == null)
             nameField.setText(App.textBundle.getString("shows"));
         moviesTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/movies.png"))));
         showsTypeButton.setGraphic(new ImageView(new Image(("file:src/main/resources/img/icons/showsSelected.png"))));
