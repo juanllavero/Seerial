@@ -42,12 +42,10 @@
             <Image url="@../../../img/backgroundShadow.png" />
          </image>
       </ImageView>
-      <MediaView fx:id="backgroundVideo" fitHeight="200.0" fitWidth="200.0" />
-      <ImageView fx:id="videoImage" fitHeight="1080.0" fitWidth="2175.0" pickOnBounds="true" preserveRatio="true" smooth="false" StackPane.alignment="TOP_RIGHT">
+      <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
          <effect>
             <DropShadow height="255.0" radius="127.0" spread="0.44" width="255.0" />
-         </effect>
-      </ImageView>
+         </effect></MediaView>
       <BorderPane fx:id="mainPane" prefWidth="1280.0">
          <right>
             <Button fx:id="nextSeasonButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#nextSeason" styleClass="fullscreenButtonTransparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">

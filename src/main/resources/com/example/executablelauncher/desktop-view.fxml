@@ -98,7 +98,7 @@
                   </HBox>
                </left>
                <right>
-                  <HBox fx:id="topRightBar" alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
+                  <HBox fx:id="topRightBar" alignment="TOP_RIGHT" visible="false" BorderPane.alignment="CENTER">
                      <children>
                         <Button mnemonicParsing="false" onMouseClicked="#minimizeWindow" prefHeight="35.0" prefWidth="35.0" styleClass="minimizeButton" stylesheets="@styles.css">
                            <graphic>
@@ -151,9 +151,6 @@
                               <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" fillHeight="false" prefHeight="450.0" prefWidth="1195.0">
                                  <children>
                                     <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
-                                       <image>
-                                          <Image url="@../../../img/logoTest.png" />
-                                       </image>
                                        <HBox.margin>
                                           <Insets bottom="5.0" left="20.0" />
                                        </HBox.margin>
@@ -288,9 +285,6 @@
                                              </VBox.margin>
                                           </HBox>
                                           <ImageView fx:id="seriesCover" fitHeight="319.0" fitWidth="308.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@../../../img/testCover.png" />
-                                             </image>
                                              <VBox.margin>
                                                 <Insets top="20.0" />
                                              </VBox.margin>
@@ -479,11 +473,6 @@
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="searchMusicButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#downloadDefaultMusic" onMouseClicked="#close" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Search Music" textFill="WHITE">
                      <font>
                         <Font size="14.0" />
                      </font>

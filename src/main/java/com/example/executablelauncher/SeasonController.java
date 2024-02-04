@@ -28,6 +28,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
@@ -37,9 +38,6 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory;
-import uk.co.caprica.vlcj.javafx.videosurface.ImageViewVideoSurface;
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -49,7 +47,7 @@ import java.util.Locale;
 public class SeasonController {
     //region FXML ATTRIBUTES
     @FXML
-    private ImageView videoImage;
+    private MediaView backgroundVideo;
 
     @FXML
     private ImageView backgroundImage;
@@ -179,9 +177,6 @@ public class SeasonController {
     private Episode selectedEpisode = null;
     private Timeline timeline = null;
     private MediaPlayer mp = null;
-    public MediaPlayerFactory mediaPlayerFactory;
-
-    public EmbeddedMediaPlayer embeddedMediaPlayer;
     private boolean isVideo = false;
     private boolean playSameMusic = false;
     private boolean isShow = false;
@@ -203,11 +198,6 @@ public class SeasonController {
 
         assert seasons != null;
         seasons.sort(new Utils.SeasonComparator());
-
-        videoImage.setFitWidth(Screen.getPrimary().getBounds().getWidth());
-        videoImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
-        videoImage.setVisible(false);
-        initVideoPlayer();
 
         menuShadow.setFitWidth(Screen.getPrimary().getBounds().getWidth());
         menuShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
@@ -241,11 +231,18 @@ public class SeasonController {
         backgroundShadow.setFitHeight(screenHeight);
         backgroundShadow2.setFitWidth(screenWidth);
         backgroundShadow2.setFitHeight(screenHeight);
+        backgroundVideo.setFitHeight(screenHeight);
+        backgroundVideo.setFitWidth(screenWidth);
 
         episodeScroll.setPrefWidth(screenWidth);
 
         detailsText.setPrefWidth(screenWidth / 2);
         detailsBox.setVisible(false);
+
+        detailsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                controllerParent.playInteractionSound();
+        });
 
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
@@ -403,8 +400,6 @@ public class SeasonController {
         if (timeline != null)
             timeline.stop();
 
-        stopBackgroundVideo();
-
         if (season.getEpisodes().size() > 1){
             cardContainer.setPrefHeight((Screen.getPrimary().getBounds().getHeight() / 5) + 20);
             cardContainer.setVisible(true);
@@ -485,15 +480,13 @@ public class SeasonController {
 
         if (!season.getVideoSrc().isEmpty()){
             File file = new File(season.getVideoSrc());
-            //Media media = new Media(file.toURI().toString());
-            //mp = new MediaPlayer(media);
-            //backgroundVideo.setMediaPlayer(mp);
-            //backgroundVideo.setVisible(false);
+            Media media = new Media(file.toURI().toString());
+            mp = new MediaPlayer(media);
+            backgroundVideo.setMediaPlayer(mp);
+            backgroundVideo.setVisible(false);
             isVideo = true;
 
-            //normalizeVolume(file);
-
-            setVideoPlayer();
+            setMediaPlayer();
         }else if (!playSameMusic && !season.getMusicSrc().isEmpty()){
             File file = new File(season.getMusicSrc());
             Media media = new Media(file.toURI().toString());
@@ -706,8 +699,6 @@ public class SeasonController {
         if (timeline != null)
             timeline.stop();
 
-        stopBackgroundVideo();
-
         playingVideo = true;
 
         try{
@@ -873,11 +864,6 @@ public class SeasonController {
         if (timeline != null)
             timeline.stop();
 
-        stopBackgroundVideo();
-        embeddedMediaPlayer.controls().stop();
-        embeddedMediaPlayer.release();
-        mediaPlayerFactory.release();
-
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
@@ -973,6 +959,7 @@ public class SeasonController {
     //region DETAILS
     @FXML
     void openDetails(){
+        controllerParent.playCategoriesSound();
         fadeOutEffect(mainPane);
 
         if (isShow){
@@ -1054,7 +1041,7 @@ public class SeasonController {
     }
     //endregion
 
-    //region BACKGROUND MUSIC
+    //region BACKGROUND VIDEO/MUSIC
     private void setMediaPlayer(){
         mp.setVolume(Double.parseDouble(Configuration.loadConfig("volume", "0.2")));
         mp.setOnEndOfMedia(() -> {
@@ -1064,15 +1051,33 @@ public class SeasonController {
 
         timeline = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
-                    playVideo();
+                    playBackgroundMedia();
                 })
         );
         timeline.play();
     }
-    private void playVideo(){
+    private void playBackgroundMedia(){
         Platform.runLater(() ->{
             if (isVideo){
-                playBackgroundVideo();
+                double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+                double mediaRatio = (double) backgroundVideo.getMediaPlayer().getMedia().getWidth() / backgroundVideo.getMediaPlayer().getMedia().getHeight();
+
+                backgroundVideo.setPreserveRatio(true);
+
+                if (screenRatio > 1.8f && mediaRatio > 1.8f){
+                    backgroundVideo.setPreserveRatio(false);
+                }
+
+                backgroundVideo.setVisible(true);
+
+                //Fade In Transition
+                FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
+                fadeIn.setFromValue(0);
+                fadeIn.setToValue(1.0);
+                fadeIn.play();
+                mp.stop();
+                mp.seek(mp.getStartTime());
+                mp.play();
             }else{
                 if (mp != null) {
                     mp.stop();
@@ -1081,55 +1086,6 @@ public class SeasonController {
                 }
             }
         });
-    }
-    //endregion
-
-    //region BACKGROUND VIDEO
-    private void initVideoPlayer(){
-        mediaPlayerFactory = new MediaPlayerFactory();
-        embeddedMediaPlayer = mediaPlayerFactory.mediaPlayers().newEmbeddedMediaPlayer();
-
-        embeddedMediaPlayer.videoSurface().set(new ImageViewVideoSurface(videoImage));
-    }
-    private void setVideoPlayer(){
-        timeline = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
-                    playVideo();
-                })
-        );
-        timeline.play();
-    }
-    public void playBackgroundVideo(){
-        embeddedMediaPlayer.media().play(seasons.get(currentSeason).videoSrc);
-        embeddedMediaPlayer.controls().setPosition(0);
-        embeddedMediaPlayer.controls().pause();
-
-        //Get video ratio
-        //double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
-        //double mediaRatio = Double.parseDouble(embeddedMediaPlayer.video().aspectRatio());
-
-        /*if (screenRatio > 1.8f && mediaRatio > 1.8f){
-            backgroundVideo.setPreserveRatio(false);
-        }
-
-        backgroundVideo.setVisible(true);
-
-        //Fade In Transition
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
-        mp.stop();
-        mp.seek(mp.getStartTime());
-        mp.play();*/
-
-        //embeddedMediaPlayer.audio().setVolume(20);
-        embeddedMediaPlayer.controls().play();
-        fadeInEffect(videoImage);
-    }
-    public void stopBackgroundVideo(){
-        embeddedMediaPlayer.controls().stop();
-        fadeOutEffect(videoImage);
     }
     //endregion
 }

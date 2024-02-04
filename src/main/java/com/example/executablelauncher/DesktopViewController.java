@@ -98,9 +98,6 @@ public class DesktopViewController {
     private Button searchFilesButton;
 
     @FXML
-    private Button searchMusicButton;
-
-    @FXML
     private Button removeLibraryButton;
 
     @FXML
@@ -449,7 +446,6 @@ public class DesktopViewController {
         editLibraryButton.setText(App.buttonsBundle.getString("editButton"));
 
         searchFilesButton.setText(App.buttonsBundle.getString("searchFiles"));
-        searchMusicButton.setText(App.buttonsBundle.getString("searchMusic"));
     }
     public void updateCategories(){
         categories = App.getCategories(false);
@@ -1336,6 +1332,12 @@ public class DesktopViewController {
                     if (results != null){
                         downloadMedia(season.getId(), results.get(0).watch_url);
 
+                        try{
+                            Files.createDirectory(Paths.get("src/main/resources/downloadedMediaCache/"));
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+
                         File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.getId() + "/");
                         File[] filesInMediaCache = mediaCahceDir.listFiles();
 
@@ -1542,6 +1544,12 @@ public class DesktopViewController {
                     path = backdropList.get(backdropList.size() - 1).file_path;
 
                 Image originalImage = new Image(imageBaseURL + path);
+
+                try{
+                    Files.createDirectory(Path.of("src/main/resources/img/DownloadCache/"));
+                } catch (IOException e) {
+                    System.err.println("loadImages: Error creating directory");
+                }
 
                 if (!originalImage.isError()){
                     File file;

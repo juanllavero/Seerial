@@ -133,11 +133,10 @@ public class Controller implements Initializable {
     private PauseTransition delay = null;
 
     @FXML
-    private void close(ActionEvent event) throws IOException {
+    private void close() {
         playInteractionSound();
         App.close();
-        Stage stage = (Stage) mainBox.getScene().getWindow();
-        stage.close();
+        Platform.exit();
     }
 
     @Override
@@ -340,8 +339,9 @@ public class Controller implements Initializable {
     }
 
     private void addInteractionSound(Button btn){
-        btn.focusedProperty().addListener(e -> {
-            playInteractionSound();
+        btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                playInteractionSound();
         });
     }
 
@@ -693,13 +693,13 @@ public class Controller implements Initializable {
             stage.getIcons().add(new Image("file:src/main/resources/img/icons/AppIcon.png"));
             stage.setScene(new Scene(root));
             stage.setMaximized(false);
-            stage.initStyle(StageStyle.UNDECORATED);
+            //stage.initStyle(StageStyle.UNDECORATED);
             stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
             stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
 
             DesktopViewController desktopViewController = fxmlLoader.getController();
             desktopViewController.initValues();
-            FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
+            //FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
             stage.show();
 
             Stage thisStage = (Stage) mainBox.getScene().getWindow();
