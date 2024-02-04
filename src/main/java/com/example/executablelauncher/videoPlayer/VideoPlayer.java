@@ -211,6 +211,12 @@ public class VideoPlayer extends MediaView {
         double newZoom = Math.max(currentZoom - 0.05, 0.05);
         mpvSetProperty("video-zoom", Double.toString(newZoom));
     }
+    public void setSubtitleVerticalPosition(double position) {
+        mpvSetProperty("sub-pos", Double.toString(position));
+    }
+    public void setSubtitleSize(double size) {
+        mpvSetProperty("sub-scale", Double.toString(size));
+    }
     //endregion
 
     //region AUX METHODS TO EXECUTE COMMANDS AND GET PROPERTIES

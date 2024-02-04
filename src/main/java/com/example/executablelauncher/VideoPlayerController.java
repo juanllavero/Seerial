@@ -3,6 +3,7 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.videoPlayer.Track;
 import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import javafx.animation.FadeTransition;
@@ -73,16 +74,10 @@ public class VideoPlayerController {
     private Button subtitlesButton;
 
     @FXML
-    private Button button2;
-
-    @FXML
-    private Button button3;
-
-    @FXML
-    private Button button4;
-
-    @FXML
     private Button button1;
+
+    @FXML
+    private Button button2;
 
     @FXML
     private Label runtime;
@@ -216,8 +211,6 @@ public class VideoPlayerController {
         addInteractionSound(subtitlesButton);
         addInteractionSound(button1);
         addInteractionSound(button2);
-        addInteractionSound(button3);
-        addInteractionSound(button4);
 
         seriesTitle.setText(seriesName);
         setDiscValues(episode);
@@ -356,6 +349,8 @@ public class VideoPlayerController {
                 videoPlayer.fixZoom(0.5f);
                 series.setVideoZoom(0.5f);
             }
+
+            videoPlayer.setSubtitleSize(Float.parseFloat(Configuration.loadConfig("subtitleSize", "0.8")));
 
             loadTracks();
         });
@@ -517,8 +512,6 @@ public class VideoPlayerController {
         button1.setText(App.textBundle.getString("video"));
         button2.setVisible(true);
         button2.setText(App.textBundle.getString("zoom"));
-        button3.setVisible(false);
-        button4.setVisible(false);
 
         button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
@@ -553,6 +546,8 @@ public class VideoPlayerController {
         btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (event.getCode().equals(KeyCode.ENTER)){
                 videoPlayer.fixZoom(0);
+                videoPlayer.setSubtitleVerticalPosition(100);
+                videoPlayer.setSubtitleSize(1);
                 series.setVideoZoom(0);
                 btn.getStyleClass().clear();
                 btn.getStyleClass().add("playerOptionsSelected");
@@ -568,6 +563,8 @@ public class VideoPlayerController {
         button.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (event.getCode().equals(KeyCode.ENTER)){
                 videoPlayer.fixZoom(0.5f);
+                videoPlayer.setSubtitleVerticalPosition(88);
+                videoPlayer.setSubtitleSize(0.8);
                 series.setVideoZoom(0.5f);
                 button.getStyleClass().clear();
                 button.getStyleClass().add("playerOptionsSelected");
@@ -589,16 +586,10 @@ public class VideoPlayerController {
 
         button1.setText(App.textBundle.getString("audio"));
         button2.setVisible(false);
-        button3.setVisible(false);
-        button4.setVisible(false);
 
         button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
                 showAudioTracks();
-        });
-        button2.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            /*if (newVal)
-                showAudioDevices();*/
         });
 
         optionsBox.requestFocus();
@@ -637,16 +628,17 @@ public class VideoPlayerController {
         optionsTitle.setText(App.textBundle.getString("subs"));
 
         button1.setText(App.textBundle.getString("languageText"));
-        button2.setVisible(true);
-        button2.setText(App.textBundle.getString("color"));
-        button3.setVisible(true);
-        button3.setText(App.textBundle.getString("size"));
-        button3.setVisible(true);
-        button4.setText(App.textBundle.getString("position"));
+        button2.setVisible(false);                                              //Option disabled for now
+        button2.setText(App.textBundle.getString("size"));
 
         button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
                 showSubtitleTracks();
+        });
+
+        button2.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                showSubtitleSize();
         });
 
         optionsBox.requestFocus();
@@ -673,6 +665,94 @@ public class VideoPlayerController {
         }
     }
 
+    private void showSubtitleSize(){
+        optionsContainer.getChildren().clear();
+
+        Button small = addSimpleButton(App.buttonsBundle.getString("small"));
+        Button normal = addSimpleButton(App.buttonsBundle.getString("normal"));
+        Button large = addSimpleButton(App.buttonsBundle.getString("large"));
+
+        switch(Configuration.loadConfig("subtitleSize", "0.8")){
+            case "0.8":
+                small.getStyleClass().clear();
+                small.getStyleClass().add("playerOptionsSelected");
+                Configuration.saveConfig("subtitleSize", "0.8");
+                break;
+            case "0.9":
+                normal.getStyleClass().clear();
+                normal.getStyleClass().add("playerOptionsSelected");
+                Configuration.saveConfig("subtitleSize", "0.9");
+                break;
+            case "1":
+                large.getStyleClass().clear();
+                large.getStyleClass().add("playerOptionsSelected");
+                Configuration.saveConfig("subtitleSize", "1");
+                break;
+        }
+
+        small.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+            if (event.getCode().equals(KeyCode.ENTER)){
+                videoPlayer.setSubtitleSize(0.8);
+
+                for (Node node : optionsContainer.getChildren()){
+                    Button button = (Button) node;
+                    button.getStyleClass().clear();
+                    button.getStyleClass().add("playerOptionsButton");
+                }
+
+                small.getStyleClass().clear();
+                small.getStyleClass().add("playerOptionsSelected");
+            }
+        });
+
+        normal.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+            if (event.getCode().equals(KeyCode.ENTER)){
+                videoPlayer.setSubtitleSize(0.9);
+
+                for (Node node : optionsContainer.getChildren()){
+                    Button button = (Button) node;
+                    button.getStyleClass().clear();
+                    button.getStyleClass().add("playerOptionsButton");
+                }
+
+                normal.getStyleClass().clear();
+                normal.getStyleClass().add("playerOptionsSelected");
+            }
+        });
+
+        large.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+            if (event.getCode().equals(KeyCode.ENTER)){
+                videoPlayer.setSubtitleSize(1);
+
+                for (Node node : optionsContainer.getChildren()){
+                    Button button = (Button) node;
+                    button.getStyleClass().clear();
+                    button.getStyleClass().add("playerOptionsButton");
+                }
+
+                large.getStyleClass().clear();
+                large.getStyleClass().add("playerOptionsSelected");
+            }
+        });
+
+        optionsContainer.getChildren().add(small);
+        optionsContainer.getChildren().add(normal);
+        optionsContainer.getChildren().add(large);
+    }
+
+    private Button addSimpleButton(String name){
+        Button btn = new Button(name);
+        btn.setFont(new Font("Arial", 24));
+        btn.setTextFill(Color.WHITE);
+        btn.setMaxWidth(Integer.MAX_VALUE);
+        btn.setPrefWidth(Integer.MAX_VALUE);
+        btn.setAlignment(Pos.BOTTOM_LEFT);
+        btn.setPadding(new Insets(10));
+        btn.getStyleClass().add("playerOptionsButton");
+
+        return btn;
+    }
+
     private void setTrackButton(Track track, boolean isAudio) {
         Button btn;
         if (isAudio)
@@ -687,10 +767,18 @@ public class VideoPlayerController {
 
         btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (event.getCode().equals(KeyCode.ENTER)){
-                if (isAudio)
+                if (isAudio) {
                     videoPlayer.setAudioTrack(audioTracks.get(optionsContainer.getChildren().indexOf(btn)).id);
-                else
+                }else {
                     videoPlayer.setSubtitleTrack(subtitleTracks.get(optionsContainer.getChildren().indexOf(btn)).id);
+
+                    Series series = App.getSelectedSeries();
+                    if (series.getVideoZoom() == 0) {
+                        videoPlayer.setSubtitleVerticalPosition(100);
+                    }else{
+                        videoPlayer.setSubtitleVerticalPosition(88);
+                    }
+                }
 
                 for (Node node : optionsContainer.getChildren()){
                     Button button = (Button) node;

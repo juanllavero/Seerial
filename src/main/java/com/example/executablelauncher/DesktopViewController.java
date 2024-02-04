@@ -830,7 +830,7 @@ public class DesktopViewController {
     private void fadeInTransition(ImageView imageV){
         //Fade In Transition
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(1.5), imageV);
-        fadeIn.setFromValue(0);
+        fadeIn.setFromValue(0.1);
         fadeIn.setToValue(1.0);
         fadeIn.play();
     }

@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
 <StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="2569.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
@@ -41,6 +42,7 @@
             <Image url="@../../../img/backgroundShadow.png" />
          </image>
       </ImageView>
+      <MediaView fx:id="backgroundVideo" fitHeight="200.0" fitWidth="200.0" />
       <ImageView fx:id="videoImage" fitHeight="1080.0" fitWidth="2175.0" pickOnBounds="true" preserveRatio="true" smooth="false" StackPane.alignment="TOP_RIGHT">
          <effect>
             <DropShadow height="255.0" radius="127.0" spread="0.44" width="255.0" />

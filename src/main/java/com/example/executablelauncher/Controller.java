@@ -393,7 +393,7 @@ public class Controller implements Initializable {
 
             mainBox.setBackground(new Background(myBI));
             //Fade in effect
-            FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), backgroundImage);
+            FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
             fadeIn.setFromValue(0);
             fadeIn.setToValue(1);
 
@@ -422,7 +422,7 @@ public class Controller implements Initializable {
 
             App.setSelectedSeries(seriesToEdit);
 
-            delay = new PauseTransition(Duration.millis(200));
+            delay = new PauseTransition(Duration.millis(150));
             delay.setOnFinished(event -> Platform.runLater(() -> {
                 if (!s.getSeasons().isEmpty() && seriesButtons.get(series.indexOf(s)).isFocused()) {
                     Season season = s.getSeasons().get(0);
@@ -459,7 +459,7 @@ public class Controller implements Initializable {
 
     public void fadeEffectComplete(Image first, Image second){
         backgroundImage.setImage(first);
-        fadeTransition = new FadeTransition(Duration.seconds(0.2), backgroundImage);
+        fadeTransition = new FadeTransition(Duration.seconds(0.3), backgroundImage);
         fadeTransition.setFromValue(1);
         fadeTransition.setToValue(0.1);
         fadeTransition.play();
@@ -512,10 +512,6 @@ public class Controller implements Initializable {
 
         if (!s.coverSrc.isEmpty())
             coverSrc = s.getCoverSrc();
-        //Image img = new Image("file:" + coverSrc, 260, 350, false, true);
-        /*Image img = new Image("file:" + coverSrc
-                , originalWidth * scaleTo, originalHeight * scaleTo, false, true);
-        ImageView image = new ImageView(img);*/
 
         Button btn = new Button();
         btn.setGraphic(setRoundedBorders(coverSrc, originalWidth * scaleTo, originalHeight * scaleTo));
