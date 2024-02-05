@@ -117,8 +117,8 @@ public class DataManager {
     }
     public void deleteSeriesData(Series series){
         try{
-            FileUtils.deleteDirectory(new File("src/main/resources/img/seriesCovers/" + series.getId()));
-            FileUtils.deleteDirectory(new File("src/main/resources/img/logos/" + series.getId()));
+            FileUtils.deleteDirectory(new File("resources/img/seriesCovers/" + series.getId()));
+            FileUtils.deleteDirectory(new File("resources/img/logos/" + series.getId()));
         } catch (IOException e) {
             System.err.println("App.removeCollection: Error deleting cover images directory");
         }
@@ -130,9 +130,9 @@ public class DataManager {
     }
     public void deleteSeasonData(Season season){
         try{
-            FileUtils.deleteDirectory(new File("src/main/resources/img/backgrounds/" + season.getId()));
-            FileUtils.deleteDirectory(new File("src/main/resources/img/logos/" + season.getId()));
-            FileUtils.deleteDirectory(new File("src/main/resources/img/seriesCovers/" + season.getId()));
+            FileUtils.deleteDirectory(new File("resources/img/backgrounds/" + season.getId()));
+            FileUtils.deleteDirectory(new File("resources/img/logos/" + season.getId()));
+            FileUtils.deleteDirectory(new File("resources/img/seriesCovers/" + season.getId()));
             if (!season.getMusicSrc().isEmpty())
                 Files.delete(FileSystems.getDefault().getPath(season.getMusicSrc()));
             if (!season.getVideoSrc().isEmpty())
@@ -149,9 +149,9 @@ public class DataManager {
     }
     public void deleteEpisodeData(Episode episode){
         try{
-            FileUtils.deleteDirectory(new File("src/main/resources/img/discCovers/" + episode.getId()));
+            FileUtils.deleteDirectory(new File("resources/img/discCovers/" + episode.getId()));
         } catch (IOException e) {
-            System.err.println("App.removeDisc: Error deleting directory: src/main/resources/img/discCovers/" + episode.getId());
+            System.err.println("App.removeDisc: Error deleting directory: resources/img/discCovers/" + episode.getId());
         }
 
         currentLibrary.analyzedFiles.remove(episode.videoSrc);

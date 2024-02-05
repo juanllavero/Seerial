@@ -43,16 +43,10 @@ build/
 *.jar
 
 ## Local images, audio and video files ###
-/resources/img/backgrounds/
-/resources/img/discCovers/
-/resources/img/DownloadCache/
-/resources/img/logos/
-/resources/img/seriesCovers/
-/src/main/resources/music/
-/src/main/resources/videos/
-/resources/audio/*
-/resources/downloadedMediaCache/*
-/resources/img/*
-/resources/MediaInfo/
+/resources/img/
+/resources/audio/
+/resources/music/
+/resources/videos/
+/resources/downloadedMediaCache/
 
 *.mp4
