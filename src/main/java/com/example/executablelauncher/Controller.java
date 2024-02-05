@@ -319,12 +319,13 @@ public class Controller implements Initializable {
 
         currentLibrary = App.getCurrentLibrary();
 
-        if (currentLibrary == null)
+        if (currentLibrary == null && !categories.isEmpty())
             currentLibrary = categories.get(0);
 
-        selectLibraryButton((Button) categoriesBox.getChildren().get(categories.indexOf(currentLibrary)));
-
-        showSeriesFrom(currentLibrary);
+        if (currentLibrary != null){
+            selectLibraryButton((Button) categoriesBox.getChildren().get(categories.indexOf(currentLibrary)));
+            showSeriesFrom(currentLibrary);
+        }
     }
 
     private void selectLibraryButton(Button btn){

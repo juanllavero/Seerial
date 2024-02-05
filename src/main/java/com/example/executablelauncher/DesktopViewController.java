@@ -1222,8 +1222,14 @@ public class DesktopViewController {
 
     //region AUTOMATED FILE SEARCH
     public void searchFiles(){
+        if (currentLibrary == null)
+            return;
+
         downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindow.setVisible(true);
+
+        //Disable library and fullscreen buttons
+        topBar.setDisable(true);
 
         List<String> folders = currentLibrary.folders;
 
@@ -1362,20 +1368,32 @@ public class DesktopViewController {
 
         musicDownloadTask.setOnSucceeded(e -> {
             numFilesToCheck--;
-            if (numFilesToCheck == 0)
+            if (numFilesToCheck == 0){
+                //Enable library and fullscreen buttons
+                topBar.setDisable(false);
+
                 downloadingContentWindow.setVisible(false);
+            }
         });
 
         musicDownloadTask.setOnCancelled(e -> {
             numFilesToCheck--;
-            if (numFilesToCheck == 0)
+            if (numFilesToCheck == 0){
+                //Enable library and fullscreen buttons
+                topBar.setDisable(false);
+
                 downloadingContentWindow.setVisible(false);
+            }
         });
 
         musicDownloadTask.setOnFailed(e -> {
             numFilesToCheck--;
-            if (numFilesToCheck == 0)
+            if (numFilesToCheck == 0){
+                //Enable library and fullscreen buttons
+                topBar.setDisable(false);
+
                 downloadingContentWindow.setVisible(false);
+            }
         });
 
         new Thread(musicDownloadTask).start();
