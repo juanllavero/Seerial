@@ -10,12 +10,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class App extends Application {
@@ -63,12 +66,12 @@ public class App extends Application {
         Parent root = fxmlLoader.load();
         stage.setTitle("VideoLauncher");
         //stage.initStyle(StageStyle.UNDECORATED);
-        stage.getIcons().add(new Image("file:src/main/resources/img/icons/AppIcon.png"));
+        stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
         stage.setScene(scene);
         stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
-        stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+        stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
         DesktopViewController desktopViewController = fxmlLoader.getController();
         desktopViewController.initValues();
         primaryStage = stage;

@@ -1,7 +1,6 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
-import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.videoPlayer.Track;
@@ -252,60 +251,60 @@ public class VideoPlayerController {
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
                 if (videoPlayer.isPaused())
-                    playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/playSelected.png", 35, 35, true, true)));
+                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playSelected.png", 35, 35, true, true)));
                 else
-                    playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/pauseSelected.png", 35, 35, true, true)));
+                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/pauseSelected.png", 35, 35, true, true)));
             }else{
                 if (videoPlayer.isPaused())
-                    playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/play.png", 35, 35, true, true)));
+                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/play.png", 35, 35, true, true)));
                 else
-                    playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/pause.png", 35, 35, true, true)));
+                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/pause.png", 35, 35, true, true)));
             }
         });
 
         nextButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                nextButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/nextTrackSelected.png", 35, 35, true, true)));
+                nextButton.setGraphic(new ImageView(new Image("file:resources/img/icons/nextTrackSelected.png", 35, 35, true, true)));
             else
-                nextButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/nextTrack.png", 35, 35, true, true)));
+                nextButton.setGraphic(new ImageView(new Image("file:resources/img/icons/nextTrack.png", 35, 35, true, true)));
         });
 
         prevButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                prevButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/prevTrackSelected.png", 35, 35, true, true)));
+                prevButton.setGraphic(new ImageView(new Image("file:resources/img/icons/prevTrackSelected.png", 35, 35, true, true)));
             else
-                prevButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/prevTrack.png", 35, 35, true, true)));
+                prevButton.setGraphic(new ImageView(new Image("file:resources/img/icons/prevTrack.png", 35, 35, true, true)));
         });
 
         optionsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                optionsButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/playerOptionsSelected.png", 35, 35, true, true)));
+                optionsButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playerOptionsSelected.png", 35, 35, true, true)));
             else
-                optionsButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/playerOptions.png", 35, 35, true, true)));
+                optionsButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playerOptions.png", 35, 35, true, true)));
         });
 
         audiosButton.setDisable(true);
         audiosButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                audiosButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/audioSelected.png", 35, 35, true, true)));
+                audiosButton.setGraphic(new ImageView(new Image("file:resources/img/icons/audioSelected.png", 35, 35, true, true)));
             else
-                audiosButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/audio.png", 35, 35, true, true)));
+                audiosButton.setGraphic(new ImageView(new Image("file:resources/img/icons/audio.png", 35, 35, true, true)));
         });
 
         subtitlesButton.setDisable(true);
         subtitlesButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                subtitlesButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/subsSelected.png", 35, 35, true, true)));
+                subtitlesButton.setGraphic(new ImageView(new Image("file:resources/img/icons/subsSelected.png", 35, 35, true, true)));
             else
-                subtitlesButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/subs.png", 35, 35, true, true)));
+                subtitlesButton.setGraphic(new ImageView(new Image("file:resources/img/icons/subs.png", 35, 35, true, true)));
         });
 
         videoButton.setDisable(true);
         videoButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                videoButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/dvdMenuSelected.png", 35, 35, true, true)));
+                videoButton.setGraphic(new ImageView(new Image("file:resources/img/icons/dvdMenuSelected.png", 35, 35, true, true)));
             else
-                videoButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/dvdMenu.png", 35, 35, true, true)));
+                videoButton.setGraphic(new ImageView(new Image("file:resources/img/icons/dvdMenu.png", 35, 35, true, true)));
         });
         //endregion
     }
@@ -453,7 +452,7 @@ public class VideoPlayerController {
         videoPlayer.togglePause();
 
         if (controlsShown)
-            playButton.setGraphic(new ImageView(new Image("file:src/main/resources/img/icons/playSelected.png", 35, 35, true, true)));
+            playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playSelected.png", 35, 35, true, true)));
     }
     public void volumeUp(){
         volumeCount.playFromStart();
@@ -582,9 +581,9 @@ public class VideoPlayerController {
         timeline.stop();
         shadowImage.setVisible(true);
         controlsBox.setVisible(false);
-        optionsTitle.setText(App.textBundle.getString("audio"));
+        optionsTitle.setText(App.textBundle.getString("resources/audio"));
 
-        button1.setText(App.textBundle.getString("audio"));
+        button1.setText(App.textBundle.getString("resources/audio"));
         button2.setVisible(false);
 
         button1.focusedProperty().addListener((obs, oldVal, newVal) -> {

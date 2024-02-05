@@ -8,7 +8,7 @@ import com.sun.jna.win32.StdCallLibrary;
 import java.util.List;
 
 public interface MPV extends StdCallLibrary {
-    MPV INSTANCE = Native.load("src/main/resources/lib/libmpv-2.dll", MPV.class);
+    MPV INSTANCE = Native.load("resources/lib/libmpv-2.dll", MPV.class);
 
     /*
      * Event ID's

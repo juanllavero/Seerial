@@ -141,8 +141,8 @@ public class ImageDownloaderController {
             protected Void call() {
                 try {
                     ProcessBuilder pb =
-                            new ProcessBuilder("python", "src/main/resources/python/BingDownloader.py"
-                                    , "-o", "src/main/resources/img/DownloadCache"
+                            new ProcessBuilder("resources/python", "resources/python/BingDownloader.py"
+                                    , "-o", "resources/img/DownloadCache"
                                     , "--filters", filters
                                     , "--limit", Integer.toString(numberOfImages)
                                     , searchTextField.getText());
@@ -175,7 +175,7 @@ public class ImageDownloaderController {
         selectedFile = null;
 
         try{
-            FileUtils.cleanDirectory(new File("src/main/resources/img/DownloadCache"));
+            FileUtils.cleanDirectory(new File("resources/img/DownloadCache"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -187,7 +187,7 @@ public class ImageDownloaderController {
             downloadingPane.setVisible(false);
 
             //Add images to view
-            File dir = new File("src/main/resources/img/DownloadCache/");
+            File dir = new File("resources/img/DownloadCache/");
             File[] files = dir.listFiles();
             assert files != null;
             for (File f : files){

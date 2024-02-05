@@ -249,11 +249,11 @@ public class SeasonController {
                 controllerParent.playInteractionSound();
                 playButton.setText(App.buttonsBundle.getString("playButton"));
                 ImageView img = (ImageView) playButton.getGraphic();
-                img.setImage(new Image("file:src/main/resources/img/icons/playSelected.png", 30, 30, true, true));
+                img.setImage(new Image("file:resources/img/icons/playSelected.png", 30, 30, true, true));
             }else{
                 playButton.setText("");
                 ImageView img = (ImageView) playButton.getGraphic();
-                img.setImage(new Image("file:src/main/resources/img/icons/play.png", 30, 30, true, true));
+                img.setImage(new Image("file:resources/img/icons/play.png", 30, 30, true, true));
             }
         });
 
@@ -263,17 +263,17 @@ public class SeasonController {
                 controllerParent.playInteractionSound();
                 if (selectedEpisode.isWatched()){
                     watchedButton.setText(App.buttonsBundle.getString("markUnwatched"));
-                    img.setImage(new Image("file:src/main/resources/img/icons/watchedSelected.png", 30, 30, true, true));
+                    img.setImage(new Image("file:resources/img/icons/watchedSelected.png", 30, 30, true, true));
                 }else{
                     watchedButton.setText(App.buttonsBundle.getString("markWatched"));
-                    img.setImage(new Image("file:src/main/resources/img/icons/toWatchSelected.png", 30, 30, true, true));
+                    img.setImage(new Image("file:resources/img/icons/toWatchSelected.png", 30, 30, true, true));
                 }
             }else{
                 watchedButton.setText("");
                 if (selectedEpisode.isWatched()){
-                    img.setImage(new Image("file:src/main/resources/img/icons/watched.png", 30, 30, true, true));
+                    img.setImage(new Image("file:resources/img/icons/watched.png", 30, 30, true, true));
                 }else{
-                    img.setImage(new Image("file:src/main/resources/img/icons/toWatch.png", 30, 30, true, true));
+                    img.setImage(new Image("file:resources/img/icons/toWatch.png", 30, 30, true, true));
                 }
             }
         });
@@ -283,11 +283,11 @@ public class SeasonController {
                 controllerParent.playInteractionSound();
                 optionsButton.setText(App.buttonsBundle.getString("moreButton"));
                 ImageView img = (ImageView) optionsButton.getGraphic();
-                img.setImage(new Image("file:src/main/resources/img/icons/optionsSelected.png", 30, 30, true, true));
+                img.setImage(new Image("file:resources/img/icons/optionsSelected.png", 30, 30, true, true));
             }else{
                 optionsButton.setText("");
                 ImageView img = (ImageView) optionsButton.getGraphic();
-                img.setImage(new Image("file:src/main/resources/img/icons/options.png", 30, 30, true, true));
+                img.setImage(new Image("file:resources/img/icons/options.png", 30, 30, true, true));
             }
         });
 
@@ -527,10 +527,10 @@ public class SeasonController {
         episodeName.setText(season.name);
 
         if (selectedEpisode.imdbScore != 0){
-            scoreProviderImg.setImage(new Image("file:src/main/resources/img/icons/imdb.png", 30, 30, true, true));
+            scoreProviderImg.setImage(new Image("file:resources/img/icons/imdb.png", 30, 30, true, true));
             scoreField.setText(String.valueOf(selectedEpisode.imdbScore));
         }else{
-            scoreProviderImg.setImage(new Image("file:src/main/resources/img/icons/tmdb.png", 30, 30, true, true));
+            scoreProviderImg.setImage(new Image("file:resources/img/icons/tmdb.png", 30, 30, true, true));
             scoreField.setText(String.valueOf(selectedEpisode.score));
         }
 
@@ -771,15 +771,15 @@ public class SeasonController {
 
         if (watchedButton.isFocused()){
             if (selectedEpisode.isWatched()){
-                img.setImage(new Image("file:src/main/resources/img/icons/watchedSelected.png", 30, 30, true, true));
+                img.setImage(new Image("file:resources/img/icons/watchedSelected.png", 30, 30, true, true));
             }else{
-                img.setImage(new Image("file:src/main/resources/img/icons/toWatchSelected.png", 30, 30, true, true));
+                img.setImage(new Image("file:resources/img/icons/toWatchSelected.png", 30, 30, true, true));
             }
         }else{
             if (selectedEpisode.isWatched()){
-                img.setImage(new Image("file:src/main/resources/img/icons/watched.png", 30, 30, true, true));
+                img.setImage(new Image("file:resources/img/icons/watched.png", 30, 30, true, true));
             }else{
-                img.setImage(new Image("file:src/main/resources/img/icons/toWatch.png", 30, 30, true, true));
+                img.setImage(new Image("file:resources/img/icons/toWatch.png", 30, 30, true, true));
             }
         }
     }
@@ -800,7 +800,7 @@ public class SeasonController {
 
         File newFile = new File(selectedEpisode.imgSrc);
         if (!newFile.exists())
-            selectedEpisode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+            selectedEpisode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
 
         Image originalImage = new Image("file:" + selectedEpisode.imgSrc, targetWidth, targetHeight, true, true);
 
@@ -842,7 +842,7 @@ public class SeasonController {
 
         if (selectedEpisode.isWatched()){
             ImageView watched = new ImageView(
-                    new Image("file:src/main/resources/img/icons/tick.png", 25, 25, true, true));
+                    new Image("file:resources/img/icons/tick.png", 25, 25, true, true));
             videoInfo.getChildren().add(watched);
             watched.setTranslateY(5);
         }
@@ -889,36 +889,9 @@ public class SeasonController {
         updateButtons();
     }
     @FXML
-    void openMenu(ActionEvent event){
-        menuShadow.setVisible(true);
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("seasonMenu-view.fxml"));
-            Parent root = fxmlLoader.load();
-            SeasonMenuController controller = fxmlLoader.getController();
-            controller.setParentController(this);
-            controller.setLabel(seasons.get(currentSeason).getName());
-            Stage stage = new Stage();
-            stage.initStyle(StageStyle.TRANSPARENT);
-            Scene scene = new Scene(root);
-            scene.setFill(Color.TRANSPARENT);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("Cannot load menu");
-        }
-    }
-    @FXML
-    void removeSeason(){
-
-    }
-    @FXML
     void play(){
         if (selectedEpisode != null)
             playEpisode(selectedEpisode);
-    }
-    @FXML
-    void editSeason(){
-        //Edit "sorting order"
     }
     //endregion
 

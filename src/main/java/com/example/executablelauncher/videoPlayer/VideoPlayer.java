@@ -3,7 +3,6 @@ package com.example.executablelauncher.videoPlayer;
 import com.example.executablelauncher.App;
 import com.example.executablelauncher.VideoPlayerController;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
@@ -94,7 +93,7 @@ public class VideoPlayer extends MediaView {
                     case "video":
                         videoTracks.add(track);
                         break;
-                    case "audio":
+                    case "resources/audio":
                         audioTracks.add(track);
                         break;
                     case "sub":

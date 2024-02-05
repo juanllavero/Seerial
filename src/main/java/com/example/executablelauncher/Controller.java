@@ -377,9 +377,9 @@ public class Controller implements Initializable {
         String src;
         if (!series.isEmpty() && !series.get(0).getSeasons().isEmpty()){
             seriesToEdit = series.get(0);
-            src = "file:src/main/resources/img/backgrounds/" + series.get(0).getSeasons().get(0).getId() + "/fullBlur.png";
+            src = "file:resources/img/backgrounds/" + series.get(0).getSeasons().get(0).getId() + "/fullBlur.png";
         }else{
-            src = "file:src/main/resources/img/backgroundDefault.jpeg";
+            src = "file:resources/img/backgroundDefault.jpeg";
         }
 
         Image image = new Image(src);
@@ -428,7 +428,7 @@ public class Controller implements Initializable {
                 if (!s.getSeasons().isEmpty() && seriesButtons.get(series.indexOf(s)).isFocused()) {
                     Season season = s.getSeasons().get(0);
                     if (season != null) {
-                        String imagePath = "src/main/resources/img/backgrounds/" + season.getId();
+                        String imagePath = "resources/img/backgrounds/" + season.getId();
                         File fullBlur = new File(imagePath + "/fullBlur.png");
                         String backgroundPath = fullBlur.exists() ? "fullBlur.png" : "background.png";
 
@@ -509,7 +509,7 @@ public class Controller implements Initializable {
 
         float scaleTo = Float.parseFloat(Configuration.loadConfig("cardSize", "1"));
 
-        String coverSrc = "src/main/resources/img/DefaultPoster.png";
+        String coverSrc = "resources/img/DefaultPoster.png";
 
         if (!s.coverSrc.isEmpty())
             coverSrc = s.getCoverSrc();
@@ -551,8 +551,6 @@ public class Controller implements Initializable {
                     playCategoriesSound();
                     showSeason(seriesToEdit);
                 }
-            }else if (event.getCode().equals(KeyCode.X) || event.getCode().equals(KeyCode.GAME_C)){
-                showSeriesMenu();
             }
         });
 
@@ -560,8 +558,6 @@ public class Controller implements Initializable {
             if (event.getButton().equals(MouseButton.PRIMARY)){
                 selectSeries(series.get(seriesButtons.indexOf(btn)));
                 playInteractionSound();
-            }else if (event.getButton().equals(MouseButton.SECONDARY)){
-                showSeriesMenu();
             }
         });
 
@@ -581,26 +577,6 @@ public class Controller implements Initializable {
         rectangle.setEffect(new DropShadow(15, Color.BLACK));
 
         return rectangle;
-    }
-
-    public void showSeriesMenu(){
-        menuShadow.setVisible(true);
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("seriesMenu-view.fxml"));
-            Parent root = fxmlLoader.load();
-            SeriesMenuController controller = fxmlLoader.getController();
-            controller.setParentController(this);
-            controller.setLabel(seriesToEdit.getName());
-            Stage stage = new Stage();
-            stage.initStyle(StageStyle.TRANSPARENT);
-            stage.setAlwaysOnTop(true);
-            Scene scene = new Scene(root);
-            scene.setFill(Color.TRANSPARENT);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("Cannot load menu");
-        }
     }
 
     @FXML
@@ -653,7 +629,7 @@ public class Controller implements Initializable {
     }
 
     public void playInteractionSound() {
-        File file = new File("src/main/resources/audio/interaction.wav");
+        File file = new File("resources/audio/interaction.wav");
         Media media = new Media(file.toURI().toString());
         MediaPlayer player = new MediaPlayer(media);
         player.setVolume(1);
@@ -662,7 +638,7 @@ public class Controller implements Initializable {
     }
 
     public void playCategoriesSound() {
-        File file = new File("src/main/resources/audio/categories.wav");
+        File file = new File("resources/audio/categories.wav");
         Media media = new Media(file.toURI().toString());
         MediaPlayer player = new MediaPlayer(media);
         player.setVolume(1);
@@ -671,7 +647,7 @@ public class Controller implements Initializable {
     }
 
     public void playBackgroundSound() {
-        File file = new File("src/main/resources/audio/background.mp3");
+        File file = new File("resources/audio/background.mp3");
         Media media = new Media(file.toURI().toString());
         backgroundMusicPlayer = new MediaPlayer(media);
         backgroundMusicPlayer.setVolume(0.05);
@@ -691,12 +667,12 @@ public class Controller implements Initializable {
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("desktopMode"));
-            stage.getIcons().add(new Image("file:src/main/resources/img/icons/AppIcon.png"));
+            stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
             stage.setScene(new Scene(root));
             stage.setMaximized(false);
             //stage.initStyle(StageStyle.UNDECORATED);
             stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
-            stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
+            stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
 
             DesktopViewController desktopViewController = fxmlLoader.getController();
             desktopViewController.initValues();
@@ -708,11 +684,6 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @FXML
-    void editSeries(){
-        //Edit "sorting order" and "library"
     }
 
     public void hideMenuShadow(){

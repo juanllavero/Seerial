@@ -136,11 +136,11 @@ public class DiscController {
         });
 
         playButton.setOnMouseEntered(e -> {
-            playImage.setImage(new Image("file:src/main/resources/img/icons/playSelected.png"));
+            playImage.setImage(new Image("file:resources/img/icons/playSelected.png"));
         });
 
         playButton.setOnMouseExited(e -> {
-            playImage.setImage(new Image("file:src/main/resources/img/icons/play.png"));
+            playImage.setImage(new Image("file:resources/img/icons/play.png"));
         });
     }
 
@@ -184,7 +184,7 @@ public class DiscController {
             discMenu.setVisible(false);
             selectDiscButton.setVisible(true);
             thumbnailStackPane.getStyleClass().add("discSelected");
-            selectDiscButton.setImage(new Image("file:src/main/resources/img/icons/tick.png"));
+            selectDiscButton.setImage(new Image("file:resources/img/icons/tick.png"));
         }
     }
 
@@ -208,7 +208,7 @@ public class DiscController {
         selectDiscButton.setVisible(false);
         discMenu.setVisible(false);
         thumbnailStackPane.getStyleClass().add("discButton");
-        selectDiscButton.setImage(new Image("file:src/main/resources/img/icons/circle.png"));
+        selectDiscButton.setImage(new Image("file:resources/img/icons/circle.png"));
     }
 
     public void setThumbnail(){
@@ -220,7 +220,7 @@ public class DiscController {
 
         File newFile = new File(episode.imgSrc);
         if (!newFile.exists())
-            episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+            episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
 
         Image originalImage = new Image("file:" + episode.imgSrc, targetWidth, targetHeight, true, true);
 

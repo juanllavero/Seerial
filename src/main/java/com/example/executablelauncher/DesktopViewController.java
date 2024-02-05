@@ -126,9 +126,6 @@ public class DesktopViewController {
     private ChoiceBox<String> librarySelector;
 
     @FXML
-    private Button closeButton;
-
-    @FXML
     private VBox seasonsEpisodesBox;
 
     @FXML
@@ -228,9 +225,6 @@ public class DesktopViewController {
     private BorderPane topBar;
 
     @FXML
-    private HBox topRightBar;
-
-    @FXML
     private ImageView noiseImage;
 
     @FXML
@@ -291,8 +285,6 @@ public class DesktopViewController {
     public Episode selectedEpisode = null;
     private List<Episode> selectedEpisodes = new ArrayList<>();
     private List<DiscController> discControllers = new ArrayList<>();
-    private double xOffset = 0;
-    private double yOffset = 0;
     private double ASPECT_RATIO = 16.0 / 9.0;
     private boolean acceptRemove = false;
     private static int numFilesToCheck = 0;
@@ -312,7 +304,7 @@ public class DesktopViewController {
                 .selectedItemProperty()
                 .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectLibrary(newValue));
 
-        setDragWindow(topBar);
+        //App.setDragWindow(topBar);
 
         selectionOptions.setVisible(false);
 
@@ -384,7 +376,7 @@ public class DesktopViewController {
         seasonInfoPane.getChildren().add(0, seasonBackground);
         seasonInfoPane.getChildren().add(1, seasonBackgroundNoise);
 
-        ImageView seasonNoise = new ImageView(new Image("file:src/main/resources/img/noise.png"));
+        ImageView seasonNoise = new ImageView(new Image("file:resources/img/noise.png"));
         seasonNoise.setPreserveRatio(false);
         seasonNoise.setOpacity(0.03);
         seasonBackgroundNoise.setImageView(seasonNoise);
@@ -392,7 +384,7 @@ public class DesktopViewController {
         seriesStack.prefHeightProperty().bind(seriesScrollPane.heightProperty());
         seriesStack.getChildren().add(0, seriesBackgroundNoise);
 
-        ImageView seriesNoise = new ImageView(new Image("file:src/main/resources/img/noise.png"));
+        ImageView seriesNoise = new ImageView(new Image("file:resources/img/noise.png"));
         seriesNoise.setPreserveRatio(false);
         seriesNoise.setOpacity(0.03);
         seriesBackgroundNoise.setImageView(seriesNoise);
@@ -459,6 +451,8 @@ public class DesktopViewController {
         if (!categories.isEmpty()){
             librarySelector.setValue(categories.get(0).getName());
             selectLibrary(categories.get(0).getName());
+        }else{
+            blankSelection();
         }
     }
     public void showSeries(){
@@ -500,10 +494,10 @@ public class DesktopViewController {
         selectedEpisodes.clear();
         selectionOptions.setVisible(false);
 
-        Image i = new Image("file:" + "src/main/resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.png");
+        Image i = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.png");
         ASPECT_RATIO = i.getWidth() / i.getHeight();
         globalBackground.setImage(i);
-        ImageView img = new ImageView(new Image("file:" + "src/main/resources/img/backgrounds/" + selectedSeason.getId() + "/" + "transparencyEffect.png"));
+        ImageView img = new ImageView(new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "transparencyEffect.png"));
         img.setPreserveRatio(true);
         seasonBackground.setImageView(img);
         fadeInTransition(globalBackground);
@@ -545,7 +539,7 @@ public class DesktopViewController {
             if (!selectedSeries.getCoverSrc().isEmpty()){
                 file = new File(selectedSeries.getCoverSrc());
             }else{
-                file = new File("src/main/resources/img/DefaultPoster.png");
+                file = new File("resources/img/DefaultPoster.png");
             }
 
             Image image = new Image(file.toURI().toURL().toExternalForm());
@@ -612,11 +606,11 @@ public class DesktopViewController {
     public void refreshSeries(){
         seriesButtons.get(seriesList.indexOf(selectedSeries)).setText(selectedSeries.getName());
 
-        File[] files = new File("src/main/resources/img/seriesCovers/" + selectedSeries.getId() + "/").listFiles();
+        File[] files = new File("resources/img/seriesCovers/" + selectedSeries.getId() + "/").listFiles();
 
         if (files != null){
             File posterDir = files[0];
-            selectedSeries.coverSrc = "src/main/resources/img/seriesCovers/" + selectedSeries.getId() + "/" + posterDir.getName();
+            selectedSeries.coverSrc = "resources/img/seriesCovers/" + selectedSeries.getId() + "/" + posterDir.getName();
         }
 
         Series series = selectedSeries;
@@ -632,6 +626,7 @@ public class DesktopViewController {
     //region SELECTION
     public void blankSelection(){
         seasonScroll.setVisible(false);
+        globalBackground.setImage(new Image("file:resources/img/Background.png"));
     }
     public void selectLibrary(String catName){
         seriesContainer.getChildren().clear();
@@ -727,34 +722,34 @@ public class DesktopViewController {
     //region EFFECTS AND MODIFICATIONS
     public void saveBackground(Season s, String imageToCopy){
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/backgrounds/" + s.getId() + "/"));
+            Files.createDirectories(Paths.get("resources/img/backgrounds/" + s.getId() + "/"));
         } catch (IOException e) {
             System.err.println("saveBackground: Directory could not be created");
         }
 
         //Clear old images
-        File dir = new File("src/main/resources/img/backgrounds/" + s.getId());
+        File dir = new File("resources/img/backgrounds/" + s.getId());
         if (dir.exists()){
             try {
                 deleteFile(s.getBackgroundSrc());
-                deleteFile("src/main/resources/img/backgrounds/" + s.getId() + "/fullBlur.png");
-                deleteFile("src/main/resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
+                deleteFile("resources/img/backgrounds/" + s.getId() + "/fullBlur.png");
+                deleteFile("resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
             } catch (IOException e) {
                 System.err.println("EditSeasonController: Error removing old images");
             }
         }
 
-        File destination = new File("src/main/resources/img/backgrounds/" + s.getId() + "/background.png");
+        File destination = new File("resources/img/backgrounds/" + s.getId() + "/background.png");
         try {
             Files.copy(Paths.get(imageToCopy), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             System.err.println("Background not copied");
         }
 
-        s.backgroundSrc = "src/main/resources/img/backgrounds/" + s.getId() + "/background.png";
+        s.backgroundSrc = "resources/img/backgrounds/" + s.getId() + "/background.png";
 
-        setTransparencyEffect(s.getBackgroundSrc(), "src/main/resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
-        processBlurAndSave(s.getBackgroundSrc(), "src/main/resources/img/backgrounds/" + s.getId() + "/fullBlur.png");
+        setTransparencyEffect(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
+        processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.png");
     }
     private void deleteFile(String filePath) throws IOException {
         Path path = Paths.get(filePath);
@@ -871,6 +866,9 @@ public class DesktopViewController {
 
     //region EPISODE SELECTION
     public void selectDisc(Episode episode){
+        if (!selectAllButton.isVisible())
+            selectAllButton.setVisible(true);
+
         if (selectedEpisodes.contains(episode)) {
             selectedEpisodes.remove(episode);
         }else{
@@ -904,6 +902,7 @@ public class DesktopViewController {
     }
     @FXML
     void selectAll(ActionEvent event) {
+        selectAllButton.setVisible(false);
         for (DiscController d : discControllers){
             if (!d.discSelected)
                 d.selectDiscDesktop();
@@ -912,10 +911,11 @@ public class DesktopViewController {
     //endregion
 
     //region WINDOW
+    @FXML
     private void closeWindow(){
         App.close();
     }
-    @FXML
+    /*@FXML
     void close(MouseEvent event) {
         closeWindow();
     }
@@ -924,27 +924,16 @@ public class DesktopViewController {
         Stage stage = (Stage)((Button) event.getSource()).getScene().getWindow();
 
         if (stage.isMaximized())
-            maximizeRestoreImage.setImage(new Image("file:src/main/resources/img/icons/windowMaximize.png"));
+            maximizeRestoreImage.setImage(new Image("file:resources/img/icons/windowMaximize.png"));
         else
-            maximizeRestoreImage.setImage(new Image("file:src/main/resources/img/icons/windowRestore.png"));
+            maximizeRestoreImage.setImage(new Image("file:resources/img/icons/windowRestore.png"));
 
         stage.setMaximized(!stage.isMaximized());
     }
     @FXML
     void minimizeWindow(MouseEvent event) {
         ((Stage)((Button) event.getSource()).getScene().getWindow()).setIconified(true);
-    }
-    private void setDragWindow(BorderPane topBar) {
-        topBar.setOnMousePressed(event -> {
-            xOffset = event.getSceneX();
-            yOffset = event.getSceneY();
-        });
-        topBar.setOnMouseDragged(event -> {
-            Stage stage = (Stage) mainBox.getScene().getWindow();
-            stage.setX(event.getScreenX() - xOffset);
-            stage.setY(event.getScreenY() - yOffset);
-        });
-    }
+    }*/
     //endregion
 
     //region IDENTIFICATION
@@ -1074,17 +1063,17 @@ public class DesktopViewController {
                 if (results != null){
                     downloadMedia(season.getId(), results.get(0).watch_url);
 
-                    File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.getId() + "/");
+                    File mediaCahceDir = new File("resources/downloadedMediaCache/" + season.getId() + "/");
                     File[] filesInMediaCache = mediaCahceDir.listFiles();
 
                     if (filesInMediaCache != null && filesInMediaCache.length > 0){
                         File audioFile = filesInMediaCache[0];
 
                         try{
-                            Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.getId() + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
-                            season.musicSrc = "src/main/resources/music/" + season.getId() + ".mp3";
+                            Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                            season.musicSrc = "resources/music/" + season.getId() + ".mp3";
 
-                            directory = new File("src/main/resources/downloadedMediaCache/" + season.getId() + "/");
+                            directory = new File("resources/downloadedMediaCache/" + season.getId() + "/");
                             FileUtils.deleteDirectory(directory);
                         } catch (IOException error) {
                             System.err.println("correctIdentificationShow: Could not copy downloaded audio file");
@@ -1139,13 +1128,13 @@ public class DesktopViewController {
                 if (images != null)
                     loadImages(selectedSeason.getId(), images, selectedSeason.themdbID, false);
 
-                File posterDir = new File("src/main/resources/img/seriesCovers/" + selectedSeason.getId() + "/0.png");
+                File posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.png");
                 if (posterDir.exists()){
-                    selectedSeason.coverSrc = "src/main/resources/img/seriesCovers/" + selectedSeason.getId() + "/0.png";
+                    selectedSeason.coverSrc = "resources/img/seriesCovers/" + selectedSeason.getId() + "/0.png";
                 }
 
                 downloadLogos(selectedSeries, selectedSeason, selectedSeason.themdbID);
-                saveBackground(selectedSeason, "src/main/resources/img/DownloadCache/" + selectedSeason.themdbID + ".png");
+                saveBackground(selectedSeason, "resources/img/DownloadCache/" + selectedSeason.themdbID + ".png");
 
                 //Process background music
                 List<YoutubeVideo> results = searchYoutube(selectedSeason.name + " main theme");
@@ -1153,17 +1142,17 @@ public class DesktopViewController {
                 if (results != null){
                     downloadMedia(selectedSeason.getId(), results.get(0).watch_url);
 
-                    File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
+                    File mediaCahceDir = new File("resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
                     File[] filesInMediaCache = mediaCahceDir.listFiles();
 
                     if (filesInMediaCache != null && filesInMediaCache.length > 0){
                         File audioFile = filesInMediaCache[0];
 
                         try{
-                            Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + selectedSeason.getId() + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
-                            selectedSeason.musicSrc = "src/main/resources/music/" + selectedSeason.getId() + ".mp3";
+                            Files.copy(audioFile.toPath(), Paths.get("resources/music/" + selectedSeason.getId() + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                            selectedSeason.musicSrc = "resources/music/" + selectedSeason.getId() + ".mp3";
 
-                            File directory = new File("src/main/resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
+                            File directory = new File("resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
                             FileUtils.deleteDirectory(directory);
                         } catch (IOException error) {
                             System.err.println("correctIdentificationMovie: Could not copy downloaded audio file");
@@ -1339,22 +1328,22 @@ public class DesktopViewController {
                         downloadMedia(season.getId(), results.get(0).watch_url);
 
                         try{
-                            Files.createDirectory(Paths.get("src/main/resources/downloadedMediaCache/"));
+                            Files.createDirectory(Paths.get("resources/downloadedMediaCache/"));
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
 
-                        File mediaCahceDir = new File("src/main/resources/downloadedMediaCache/" + season.getId() + "/");
+                        File mediaCahceDir = new File("resources/downloadedMediaCache/" + season.getId() + "/");
                         File[] filesInMediaCache = mediaCahceDir.listFiles();
 
                         if (filesInMediaCache != null && filesInMediaCache.length > 0){
                             File audioFile = filesInMediaCache[0];
 
                             try{
-                                Files.copy(audioFile.toPath(), Paths.get("src/main/resources/music/" + season.getId() + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
-                                season.musicSrc = "src/main/resources/music/" + season.getId() + ".mp4";
+                                Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
+                                season.musicSrc = "resources/music/" + season.getId() + ".mp4";
 
-                                File directory = new File("src/main/resources/downloadedMediaCache/" + season.getId() + "/");
+                                File directory = new File("resources/downloadedMediaCache/" + season.getId() + "/");
                                 FileUtils.deleteDirectory(directory);
                             } catch (IOException error) {
                                 System.err.println("downloadDefaultMusic: Could not copy downloaded audio file");
@@ -1512,11 +1501,11 @@ public class DesktopViewController {
             if (images != null)
                 loadImages(series.getId(), images, series.themdbID, false);
 
-            File[] files = new File("src/main/resources/img/seriesCovers/" + series.getId() + "/").listFiles();
+            File[] files = new File("resources/img/seriesCovers/" + series.getId() + "/").listFiles();
 
             if (files != null){
                 File posterDir = files[0];
-                series.coverSrc = "src/main/resources/img/seriesCovers/" + series.getId() + "/" + posterDir.getName();
+                series.coverSrc = "resources/img/seriesCovers/" + series.getId() + "/" + posterDir.getName();
             }
         }
     }
@@ -1564,14 +1553,14 @@ public class DesktopViewController {
                 Image originalImage = new Image(imageBaseURL + path);
 
                 try{
-                    Files.createDirectory(Path.of("src/main/resources/img/DownloadCache/"));
+                    Files.createDirectory(Path.of("resources/img/DownloadCache/"));
                 } catch (IOException e) {
                     System.err.println("loadImages: Error creating directory");
                 }
 
                 if (!originalImage.isError()){
                     File file;
-                    file = new File("src/main/resources/img/DownloadCache/" + tmdbID + ".png");
+                    file = new File("resources/img/DownloadCache/" + tmdbID + ".png");
 
                     try{
                         RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
@@ -1809,8 +1798,8 @@ public class DesktopViewController {
             season.score = (float) ((int) (seasonMetadata.vote_average * 10.0)) / 10.0f;
             season.seriesID = series.getId();
 
-            if (season.backgroundSrc.isEmpty() || season.backgroundSrc.equals("src/main/resources/img/DefaultBackground.png")) {
-                File f = new File("src/main/resources/img/DownloadCache/" + series.themdbID + ".png");
+            if (season.backgroundSrc.isEmpty() || season.backgroundSrc.equals("resources/img/DefaultBackground.png")) {
+                File f = new File("resources/img/DownloadCache/" + series.themdbID + ".png");
                 if (!f.exists() && series.getSeasons().size() > 1){
                     Season s = series.getSeasons().get(0);
 
@@ -1818,7 +1807,7 @@ public class DesktopViewController {
                         saveBackground(season, s.backgroundSrc);
                     }
                 }else if (f.exists()){
-                    saveBackground(season, "src/main/resources/img/DownloadCache/" + series.themdbID + ".png");
+                    saveBackground(season, "resources/img/DownloadCache/" + series.themdbID + ".png");
                 }
             }
 
@@ -1873,7 +1862,7 @@ public class DesktopViewController {
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + episode.getId() + "/"));
+            Files.createDirectories(Paths.get("resources/img/discCovers/" + episode.getId() + "/"));
         } catch (IOException e) {
             System.err.println("setEpisodeData: Directory could not be created");
         }
@@ -1906,16 +1895,16 @@ public class DesktopViewController {
         }
         //endregion
 
-        File img = new File("src/main/resources/img/discCovers/" + episode.getId() + "/0.png");
+        File img = new File("resources/img/discCovers/" + episode.getId() + "/0.png");
         if (!img.exists()){
-            episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+            episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
         }else{
-            episode.imgSrc = "src/main/resources/img/discCovers/" + episode.getId() + "/0.png";
+            episode.imgSrc = "resources/img/discCovers/" + episode.getId() + "/0.png";
         }
     }
     private void saveCover(String id, int i, Image originalImage) {
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/seriesCovers/" + id + "/"));
+            Files.createDirectories(Paths.get("resources/img/seriesCovers/" + id + "/"));
         } catch (IOException e) {
             System.err.println("Directory could not be created");
         }
@@ -1938,7 +1927,7 @@ public class DesktopViewController {
                 System.err.println("DesktopViewController: Error compressing image");
             }
 
-            File file = new File("src/main/resources/img/seriesCovers/" + id + "/" + i + ".png");
+            File file = new File("resources/img/seriesCovers/" + id + "/" + i + ".png");
             try{
                 RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
                 ImageIO.write(renderedImage,"png", file);
@@ -1949,13 +1938,13 @@ public class DesktopViewController {
     }
     private void saveLogo(String id, int i, Image originalImage) {
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/logos/" + id + "/"));
+            Files.createDirectories(Paths.get("resources/img/logos/" + id + "/"));
         } catch (IOException e) {
             System.err.println("Directory could not be created");
         }
 
         if (!originalImage.isError()){
-            File file = new File("src/main/resources/img/logos/" + id + "/" + i + ".png");
+            File file = new File("resources/img/logos/" + id + "/" + i + ".png");
             try{
                 RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
                 ImageIO.write(renderedImage,"png", file);
@@ -2048,18 +2037,18 @@ public class DesktopViewController {
                 loadImages(series.getId(), images, season.themdbID, true);
             }
 
-            File posterDir = new File("src/main/resources/img/seriesCovers/" + season.getId() + "/0.png");
+            File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.png");
             if (posterDir.exists()){
-                season.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
+                season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
             }
 
-            posterDir = new File("src/main/resources/img/seriesCovers/" + series.getId() + "/0.png");
+            posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.png");
             if (posterDir.exists()){
-                series.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
+                series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
             }
 
             downloadLogos(series, season, season.themdbID);
-            saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
+            saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".png");
 
             processMovie(f, season, movieMetadata.runtime);
 
@@ -2179,18 +2168,18 @@ public class DesktopViewController {
                             loadImages(series.getId(), images, season.themdbID, true);
                         }
 
-                        File posterDir = new File("src/main/resources/img/seriesCovers/" + season.getId() + "/0.png");
+                        File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.png");
                         if (posterDir.exists()){
-                            season.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
+                            season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
                         }
 
-                        posterDir = new File("src/main/resources/img/seriesCovers/" + series.getId() + "/0.png");
+                        posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.png");
                         if (posterDir.exists()){
-                            series.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
+                            series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
                         }
 
                         downloadLogos(series, season, season.themdbID);
-                        saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
+                        saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".png");
                     }
 
                     for (File file : filesInFolder){
@@ -2287,18 +2276,18 @@ public class DesktopViewController {
                         loadImages(series.getId(), images, season.themdbID, true);
                     }
 
-                    File posterDir = new File("src/main/resources/img/seriesCovers/" + season.getId() + "/0.png");
+                    File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.png");
                     if (posterDir.exists()){
-                        season.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
+                        season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
                     }
 
-                    posterDir = new File("src/main/resources/img/seriesCovers/" + series.getId() + "/0.png");
+                    posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.png");
                     if (posterDir.exists()){
-                        series.coverSrc = "src/main/resources/img/seriesCovers/" + season.getId() + "/0.png";
+                        series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
                     }
 
                     downloadLogos(series, season, season.themdbID);
-                    saveBackground(season, "src/main/resources/img/DownloadCache/" + season.themdbID + ".png");
+                    saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".png");
                 }
 
                 for (File file : filesInRoot){
@@ -2362,7 +2351,7 @@ public class DesktopViewController {
         episode.name = f.getName().substring(0, f.getName().lastIndexOf("."));
         episode.videoSrc = f.getAbsolutePath();
         episode.seasonNumber = season.seasonNumber;
-        episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+        episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
     }
     private void processMovie(File file, Season season, int runtime){
         Episode episode;
@@ -2408,7 +2397,7 @@ public class DesktopViewController {
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
         try{
-            Files.createDirectories(Paths.get("src/main/resources/img/discCovers/" + episode.getId() + "/"));
+            Files.createDirectories(Paths.get("resources/img/discCovers/" + episode.getId() + "/"));
         } catch (IOException e) {
             System.err.println("setEpisodeData: Directory could not be created");
         }
@@ -2441,11 +2430,11 @@ public class DesktopViewController {
         }
         //endregion
 
-        File img = new File("src/main/resources/img/discCovers/" + episode.getId() + "/0.png");
+        File img = new File("resources/img/discCovers/" + episode.getId() + "/0.png");
         if (!img.exists()){
-            episode.imgSrc = "src/main/resources/img/Default_video_thumbnail.jpg";
+            episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
         }else{
-            episode.imgSrc = "src/main/resources/img/discCovers/" + episode.getId() + "/0.png";
+            episode.imgSrc = "resources/img/discCovers/" + episode.getId() + "/0.png";
         }
     }
     private void saveThumbnail(Episode episode, String url, int number){
@@ -2474,7 +2463,7 @@ public class DesktopViewController {
             }
 
             if (!originalImage.isError()){
-                File file = new File("src/main/resources/img/discCovers/" + episode.getId() + "/" + number + ".png");
+                File file = new File("resources/img/discCovers/" + episode.getId() + "/" + number + ".png");
                 try{
                     RenderedImage renderedImage = SwingFXUtils.fromFXImage(compressedImage, null);
                     ImageIO.write(renderedImage,"jpg", file);
@@ -2674,12 +2663,12 @@ public class DesktopViewController {
                     new Thread(logosTask).start();
                 }
 
-                File posterDir = new File("src/main/resources/img/logos/" + id + "/0.png");
+                File posterDir = new File("resources/img/logos/" + id + "/0.png");
                 if (posterDir.exists()){
                     if (currentLibrary.type.equals("Shows"))
-                        series.logoSrc = "src/main/resources/img/logos/" + id + "/0.png";
+                        series.logoSrc = "resources/img/logos/" + id + "/0.png";
                     else
-                        season.logoSrc = "src/main/resources/img/logos/" + id + "/0.png";
+                        season.logoSrc = "resources/img/logos/" + id + "/0.png";
                 }
                 //endregion
             } else {
@@ -2692,7 +2681,7 @@ public class DesktopViewController {
     }
     public void clearImageCache(){
         try{
-            FileUtils.cleanDirectory(new File("src/main/resources/img/DownloadCache"));
+            FileUtils.cleanDirectory(new File("resources/img/DownloadCache"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -2702,7 +2691,7 @@ public class DesktopViewController {
     //region DOWNLOAD MEDIA
     public List<YoutubeVideo> searchYoutube(String videoName){
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "src/main/resources/python/YoutubeSearch.py", videoName);
+            ProcessBuilder processBuilder = new ProcessBuilder("resources/python", "resources/python/YoutubeSearch.py", videoName);
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
@@ -2737,8 +2726,8 @@ public class DesktopViewController {
 
     public void downloadMedia(String seasonID, String url){
         try {
-            Files.createDirectories(Paths.get("src/main/resources/downloadedMediaCache/" + seasonID + "/"));
-            File directory = new File("src/main/resources/downloadedMediaCache/" + seasonID + "/");
+            Files.createDirectories(Paths.get("resources/downloadedMediaCache/" + seasonID + "/"));
+            File directory = new File("resources/downloadedMediaCache/" + seasonID + "/");
 
             ProcessBuilder pb;
             pb = new ProcessBuilder("pytube"
@@ -2964,6 +2953,9 @@ public class DesktopViewController {
             updateCategories();
         }
 
+        if (librarySelector.getItems().isEmpty())
+            blankSelection();
+
         hideBackgroundShadow();
     }
     @FXML
@@ -3041,12 +3033,19 @@ public class DesktopViewController {
         fullScreen();
     }
     private void fullScreen(){
+        hideMenu();
+
+        if (librarySelector.getItems().isEmpty()) {
+            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("noLibraries"));
+            return;
+        }
+
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("fullscreenMode"));
-            stage.getIcons().add(new Image("file:src/main/resources/img/icons/AppIcon.png"));
+            stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
             Scene scene = new Scene(root);
             scene.setFill(Color.BLACK);
             //scene.setCursor(Cursor.NONE);

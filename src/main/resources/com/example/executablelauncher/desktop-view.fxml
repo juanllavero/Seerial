@@ -23,7 +23,7 @@
    <children>
       <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="2027.0" pickOnBounds="true">
          <image>
-            <Image url="@../../../img/backgroundDefault.png" />
+            <Image url="@../../../../../../resources/img/backgroundDefault.png" />
          </image>
          <effect>
             <GaussianBlur radius="63.0" />
@@ -31,17 +31,17 @@
       </ImageView>
       <ImageView fx:id="noiseImage" fitHeight="1080.0" fitWidth="1920.0" opacity="0.02" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../img/noise.png" />
+            <Image url="@../../../../../../resources/img/noise.png" />
          </image>
       </ImageView>
       <ImageView fx:id="globalBackgroundShadow" fitHeight="1080.0" fitWidth="1920.0" pickOnBounds="true" StackPane.alignment="TOP_LEFT">
          <image>
-            <Image url="@../../../img/desktopBackgroundShadow.png" />
+            <Image url="@../../../../../../resources/img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
       <ImageView fx:id="globalBackgroundShadow2" fitHeight="1080.0" fitWidth="1920.0" opacity="0.7" pickOnBounds="true">
          <image>
-            <Image url="@../../../img/desktopBackgroundShadow.png" />
+            <Image url="@../../../../../../resources/img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
       <BorderPane fx:id="mainBorderPane">
@@ -54,7 +54,7 @@
                            <graphic>
                               <ImageView fitHeight="25.0" fitWidth="20.0" pickOnBounds="true">
                                  <image>
-                                    <Image url="@../../../img/icons/menu.png" />
+                                    <Image url="@../../../../../../resources/img/icons/menu.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -68,7 +68,7 @@
                            <graphic>
                               <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../../../img/icons/add.png" />
+                                    <Image url="@../../../../../../resources/img/icons/add.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -97,51 +97,18 @@
                      </BorderPane.margin>
                   </HBox>
                </left>
-               <right>
-                  <HBox fx:id="topRightBar" alignment="TOP_RIGHT" visible="false" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button mnemonicParsing="false" onMouseClicked="#minimizeWindow" prefHeight="35.0" prefWidth="35.0" styleClass="minimizeButton" stylesheets="@styles.css">
-                           <graphic>
-                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../img/icons/windowMinimize.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                        <Button mnemonicParsing="false" onMouseClicked="#maximizeWindow" prefHeight="35.0" prefWidth="35.0" styleClass="maximizeButton" stylesheets="@styles.css">
-                           <graphic>
-                              <ImageView fx:id="maximizeRestoreImage" fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../img/icons/windowMaximize.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                        <Button fx:id="closeButton" mnemonicParsing="false" onMouseClicked="#close" prefHeight="35.0" prefWidth="35.0" styleClass="closeButton" stylesheets="@styles.css">
-                           <graphic>
-                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../img/icons/windowClose.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                     </children>
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                  </HBox>
-               </right>
                <padding>
                   <Insets top="5.0" />
                </padding>
+               <BorderPane.margin>
+                  <Insets left="20.0" />
+               </BorderPane.margin>
             </BorderPane>
          </top>
          <center>
             <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <BorderPane.margin>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="30.0" />
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
                </BorderPane.margin>
                <content>
                   <StackPane fx:id="seasonInfoPane">
@@ -309,7 +276,7 @@
          <left>
             <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="350.0" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <BorderPane.margin>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="30.0" />
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
                </BorderPane.margin>
                <content>
                   <StackPane fx:id="seriesStack" prefHeight="150.0" prefWidth="200.0">
@@ -352,7 +319,7 @@
                            <graphic>
                               <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../../../img/icons/circle.png" />
+                                    <Image url="@../../../../../../resources/img/icons/circle.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -364,7 +331,7 @@
                            <graphic>
                               <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../../../img/icons/close.png" />
+                                    <Image url="@../../../../../../resources/img/icons/close.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -386,7 +353,7 @@
       </HBox>
       <ImageView fx:id="backgroundShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" visible="false">
          <image>
-            <Image url="@../../../img/desktopBackgroundShadow.png" />
+            <Image url="@../../../../../../resources/img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
       <HBox fx:id="downloadingContentWindow" alignment="CENTER_RIGHT" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 5;" styleClass="midSectionLightColor" stylesheets="@styles.css" StackPane.alignment="BOTTOM_RIGHT">
@@ -416,7 +383,7 @@
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@../../../img/icons/settings.png" />
+                              <Image url="@../../../../../../resources/img/icons/settings.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -431,7 +398,7 @@
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@../../../img/icons/fullscreen.png" />
+                              <Image url="@../../../../../../resources/img/icons/fullscreen.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -446,7 +413,7 @@
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@../../../img/icons/exit.png" />
+                              <Image url="@../../../../../../resources/img/icons/exit.png" />
                            </image>
                         </ImageView>
                      </graphic>

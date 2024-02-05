@@ -20,7 +20,7 @@
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="1080.0" fitWidth="2175.0" pickOnBounds="true" preserveRatio="true" smooth="false" StackPane.alignment="TOP_LEFT">
          <image>
-            <Image url="@../../../img/TEST_NoBlur.png" />
+            <Image url="@../../../../../../resources/img/TEST_NoBlur.png" />
          </image>
          <effect>
             <ColorAdjust brightness="-0.28" />
@@ -31,7 +31,7 @@
             <ColorAdjust contrast="0.21" />
          </effect>
          <image>
-            <Image url="@../../../img/backgroundShadow.png" />
+            <Image url="@../../../../../../resources/img/backgroundShadow.png" />
          </image>
       </ImageView>
       <ImageView fx:id="backgroundShadow2" fitHeight="1080.0" fitWidth="2573.0" pickOnBounds="true">
@@ -39,7 +39,7 @@
             <ColorAdjust contrast="0.21" />
          </effect>
          <image>
-            <Image url="@../../../img/backgroundShadow.png" />
+            <Image url="@../../../../../../resources/img/backgroundShadow.png" />
          </image>
       </ImageView>
       <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
@@ -90,9 +90,6 @@
                   <VBox fx:id="infoBox" alignment="BOTTOM_LEFT" prefHeight="310.0" prefWidth="1108.0" spacing="5.0" stylesheets="@styles.css">
                      <children>
                         <ImageView fx:id="logo" fitHeight="138.0" fitWidth="344.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../../../img/logos/d0b8365f-f76c-485d-a46a-f720abf65b71_sl.png" />
-                           </image>
                            <VBox.margin>
                               <Insets bottom="10.0" />
                            </VBox.margin>
@@ -152,7 +149,7 @@
                            <children>
                               <ImageView fx:id="scoreProviderImg" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../../../img/icons/tmdb.png" />
+                                    <Image url="@../../../../../../resources/img/icons/tmdb.png" />
                                  </image>
                               </ImageView>
                               <Label fx:id="scoreField" text="8.5" textFill="WHITE">
@@ -238,7 +235,7 @@
                               <Insets />
                            </HBox.margin>
                         </Button>
-                        <Button fx:id="optionsButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
+                        <Button fx:id="optionsButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c" visible="false">
                            <graphic>
                               <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
                                  <image>
@@ -267,7 +264,7 @@
       </BorderPane>
       <ImageView fx:id="menuShadow" fitHeight="1078.0" fitWidth="1918.0" pickOnBounds="true" visible="false">
          <image>
-            <Image url="@../../../img/desktopBackgroundShadow.png" />
+            <Image url="@../../../../../../resources/img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
       <BorderPane fx:id="detailsBox" StackPane.alignment="CENTER">
@@ -351,7 +348,7 @@
          <center>
             <ImageView fx:id="detailsImage" fitHeight="363.0" fitWidth="652.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_RIGHT">
                <image>
-                  <Image url="@../../../img/TEST_NoBlur.png" />
+                  <Image url="@../../../../../../resources/img/TEST_NoBlur.png" />
                </image>
                <BorderPane.margin>
                   <Insets right="50.0" />

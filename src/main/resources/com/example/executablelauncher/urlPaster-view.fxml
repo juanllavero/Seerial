@@ -29,7 +29,7 @@
                <graphic>
                   <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../../../img/icons/close.png" />
+                        <Image url="@../../../../../../resources/img/icons/close.png" />
                      </image>
                   </ImageView>
                </graphic></Button>

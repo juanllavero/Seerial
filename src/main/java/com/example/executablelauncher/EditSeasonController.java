@@ -219,7 +219,7 @@ public class EditSeasonController {
     @FXML
     void cancelButton(ActionEvent event) {
         try{
-            FileUtils.cleanDirectory(new File("src/main/resources/img/DownloadCache"));
+            FileUtils.cleanDirectory(new File("resources/img/DownloadCache"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -247,7 +247,7 @@ public class EditSeasonController {
                 }
             }
 
-            File newFile = new File("src/main/resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
+            File newFile = new File("resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(selectedLogo.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -272,7 +272,7 @@ public class EditSeasonController {
                 }
             }
 
-            File newFile = new File("src/main/resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
+            File newFile = new File("resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(selectedPoster.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -436,7 +436,7 @@ public class EditSeasonController {
     }
     private void loadPosters(){
         //Add images to view
-        File dir = new File("src/main/resources/img/seriesCovers/" + seasonToEdit.getId());
+        File dir = new File("resources/img/seriesCovers/" + seasonToEdit.getId());
         if (dir.exists()){
             File[] files = dir.listFiles();
             assert files != null;
@@ -494,7 +494,7 @@ public class EditSeasonController {
     }
     private void loadImages(){
         //Add images to view
-        File dir = new File("src/main/resources/img/logos/" + seasonToEdit.getId());
+        File dir = new File("resources/img/logos/" + seasonToEdit.getId());
         if (dir.exists()){
             File[] files = dir.listFiles();
             assert files != null;
@@ -765,11 +765,11 @@ public class EditSeasonController {
 
         //Save Logo
         if (selectedLogo != null)
-            seasonToEdit.logoSrc = "src/main/resources/img/logos/" + seasonToEdit.getId() + "/" + selectedLogo.getName();
+            seasonToEdit.logoSrc = "resources/img/logos/" + seasonToEdit.getId() + "/" + selectedLogo.getName();
 
         //Save Poster
         if (selectedPoster != null)
-            seasonToEdit.coverSrc = "src/main/resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + selectedPoster.getName();
+            seasonToEdit.coverSrc = "resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + selectedPoster.getName();
 
         parentController.hideBackgroundShadow();
         parentController.refreshSeason(seasonToEdit);
@@ -788,14 +788,14 @@ public class EditSeasonController {
             if (i > 0) {
                 extension = selectedVideo.getName().substring(i+1);
             }
-            File newVideo = new File("src/main/resources/video/" + s.getId() + "_sv." + extension);
+            File newVideo = new File("resources/video/" + s.getId() + "_sv." + extension);
 
             try{
                 Files.copy(selectedVideo.toPath(), newVideo.toPath());
             }catch (IOException e){
                 System.err.println("Video not copied");
             }
-            s.setVideoSrc("src/main/resources/video/" + newVideo.getName());
+            s.setVideoSrc("resources/video/" + newVideo.getName());
         }else{
             s.setVideoSrc("");
         }
@@ -810,7 +810,7 @@ public class EditSeasonController {
             if (i > 0) {
                 extension = selectedMusic.getName().substring(i+1);
             }
-            File newMusic = new File("src/main/resources/music/" + s.getId() + "_sm." + extension);
+            File newMusic = new File("resources/music/" + s.getId() + "_sm." + extension);
 
             try{
                 Files.copy(selectedMusic.toPath(), newMusic.toPath());
@@ -818,7 +818,7 @@ public class EditSeasonController {
                 System.err.println("Music not copied");
             }
 
-            s.setMusicSrc("src/main/resources/music/" + newMusic.getName());
+            s.setMusicSrc("resources/music/" + newMusic.getName());
         }else{
             s.setMusicSrc("");
         }

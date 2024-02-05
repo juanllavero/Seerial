@@ -65,7 +65,7 @@ public class UrlPasterController {
         if (newImage.isError())
             System.out.println("Error loading image from " + urlField.getText());
 
-        String imageURL = "src/main/resources/img/DownloadCache/newUrlImage.png";
+        String imageURL = "resources/img/DownloadCache/newUrlImage.png";
         File file = new File(imageURL);
         try{
             RenderedImage renderedImage = SwingFXUtils.fromFXImage(newImage, null);

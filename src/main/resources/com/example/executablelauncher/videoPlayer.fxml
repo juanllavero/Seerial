@@ -18,7 +18,7 @@
    <children>
       <ImageView fx:id="shadowImage" fitHeight="406.0" fitWidth="916.0" opacity="0.6" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../img/desktopBackgroundShadow.png" />
+            <Image url="@../../../../../../resources/img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
       <VBox fx:id="controlsBox" alignment="BOTTOM_LEFT" maxWidth="2560.0">
@@ -167,11 +167,11 @@
                         </Label>
                         <HBox>
                            <children>
-                              <Button fx:id="videoButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showVideoOptions" styleClass="playerButton" stylesheets="@styles.css">
+                              <Button fx:id="optionsButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css" visible="false">
                                  <graphic>
                                     <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="@../../../img/icons/dvdMenu.png" />
+                                          <Image url="@../../../../../../resources/img/icons/discOptions.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
@@ -179,7 +179,7 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </padding>
                               </Button>
-                              <Button fx:id="optionsButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                              <Button fx:id="videoButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showVideoOptions" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
                                     <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
