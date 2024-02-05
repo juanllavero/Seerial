@@ -1,6 +1,7 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
+import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.videoPlayer.Track;
@@ -121,6 +122,7 @@ public class VideoPlayerController {
     Timeline timeline = null;
     Timeline volumeCount = null;
     double percentageStep = 0;
+    Season season = null;
     List<Episode> episodeList = new ArrayList<>();
     private List<Track> videoTracks = new ArrayList<>();
     private List<Track> audioTracks = new ArrayList<>();
@@ -131,9 +133,10 @@ public class VideoPlayerController {
     int currentDisc = 0;
 
     //region INITIALIZATION
-    public void setVideo(SeasonController parent, List<Episode> episodeList, Episode episode, String seriesName, Scene scene){
+    public void setVideo(SeasonController parent, Season season, Episode episode, String seriesName, Scene scene){
         parentController = parent;
-        this.episodeList = episodeList;
+        this.season = season;
+        this.episodeList = season.getEpisodes();
         onLoad();
 
         currentDisc = episodeList.indexOf(episode);
@@ -323,14 +326,6 @@ public class VideoPlayerController {
         if (episode.isWatched())
             episode.setUnWatched();
 
-        float position;
-
-        if (episode.getTimeWatched() > 0){
-            position = (float) ((episode.runtime * 60L * 1000) - episode.getTimeWatched()) / 100;
-        } else {
-            position = 0;
-        }
-
         FadeTransition fade = new FadeTransition(Duration.seconds(0.8), videoPlayer);
         fade.setFromValue(0);
         fade.setToValue(1.0);
@@ -365,6 +360,38 @@ public class VideoPlayerController {
             videoTracks = videoPlayer.getVideoTracks();
             audioTracks = videoPlayer.getAudioTracks();
             subtitleTracks = videoPlayer.getSubtitleTracks();
+
+            String audioTrackLanguage = season.getAudioTrackLanguage();
+
+            if (audioTrackLanguage != null && !audioTrackLanguage.isEmpty() && audioTracks.size() > 1) {
+                for (Track track : audioTracks)
+                    if (track.lang.equals(audioTrackLanguage)) {
+                        for (Track aTrack : audioTracks)
+                            aTrack.selected = false;
+
+                        track.selected = true;
+
+                        videoPlayer.setAudioTrack(track.id);
+                        break;
+                    }
+            }
+
+            String subtitleTrackLanguage = season.getSubtitleTrackLanguage();
+
+            if (subtitleTrackLanguage != null && !subtitleTrackLanguage.isEmpty() && subtitleTracks.size() > 1){
+                for (Track track : subtitleTracks)
+                    if (track.lang.equals(subtitleTrackLanguage)) {
+                        for (Track sTrack : subtitleTracks)
+                            sTrack.selected = false;
+
+                        track.selected = true;
+
+                        videoPlayer.setSubtitleTrack(track.id);
+                    }
+            }else if (!subtitleTracks.isEmpty()){
+                videoPlayer.setSubtitleTrack(subtitleTracks.get(0).id);
+                subtitleTracks.get(0).selected = true;
+            }
 
             //Initialize Buttons
             videoButton.setDisable(videoTracks == null || videoTracks.isEmpty());
@@ -428,6 +455,14 @@ public class VideoPlayerController {
     public void stop() {
         Episode episode = episodeList.get(currentDisc);
         episode.setTime(videoPlayer.getCurrentTime());
+
+        for (Track aTrack : audioTracks)
+            if (aTrack.selected && !aTrack.lang.isEmpty())
+                season.setAudioTrackLanguage(aTrack.lang);
+
+        for (Track sTrack : subtitleTracks)
+            if (sTrack.selected && !sTrack.lang.isEmpty())
+                season.setSubtitleTrackLanguage(sTrack.lang);
 
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.7), videoPlayer);
         fadeOut.setFromValue(1.0);
@@ -527,13 +562,33 @@ public class VideoPlayerController {
     private void showVideoTracks(){
         optionsContainer.getChildren().clear();
         for (Track track : videoTracks){
+
+            if (track.demux_h == 0)
+                continue;
+
             addOptionCard(track.demux_h + " (" + track.codec.toUpperCase() + ")");
 
+            Button btn = (Button) optionsContainer.getChildren().get(videoTracks.indexOf(track));
+
             if (track.selected) {
-                Button btn = (Button) optionsContainer.getChildren().get(videoTracks.indexOf(track));
                 btn.getStyleClass().clear();
                 btn.getStyleClass().add("playerOptionsSelected");
             }
+
+            btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+                if (event.getCode().equals(KeyCode.ENTER)){
+                    videoPlayer.setVideoTrack(videoTracks.get(optionsContainer.getChildren().indexOf(btn)).id);
+
+                    for (Node node : optionsContainer.getChildren()){
+                        Button button = (Button) node;
+                        button.getStyleClass().clear();
+                        button.getStyleClass().add("playerOptionsButton");
+                    }
+
+                    btn.getStyleClass().clear();
+                    btn.getStyleClass().add("playerOptionsSelected");
+                }
+            });
         }
     }
     private void showZoomOptions(){
@@ -546,7 +601,7 @@ public class VideoPlayerController {
             if (event.getCode().equals(KeyCode.ENTER)){
                 videoPlayer.fixZoom(0);
                 videoPlayer.setSubtitleVerticalPosition(100);
-                videoPlayer.setSubtitleSize(1);
+                videoPlayer.setSubtitleSize(0.7);
                 series.setVideoZoom(0);
                 btn.getStyleClass().clear();
                 btn.getStyleClass().add("playerOptionsSelected");
@@ -562,8 +617,8 @@ public class VideoPlayerController {
         button.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (event.getCode().equals(KeyCode.ENTER)){
                 videoPlayer.fixZoom(0.5f);
-                videoPlayer.setSubtitleVerticalPosition(88);
-                videoPlayer.setSubtitleSize(0.8);
+                videoPlayer.setSubtitleVerticalPosition(90);
+                videoPlayer.setSubtitleSize(0.9);
                 series.setVideoZoom(0.5f);
                 button.getStyleClass().clear();
                 button.getStyleClass().add("playerOptionsSelected");
@@ -581,9 +636,9 @@ public class VideoPlayerController {
         timeline.stop();
         shadowImage.setVisible(true);
         controlsBox.setVisible(false);
-        optionsTitle.setText(App.textBundle.getString("resources/audio"));
+        optionsTitle.setText(App.textBundle.getString("audio"));
 
-        button1.setText(App.textBundle.getString("resources/audio"));
+        button1.setText(App.textBundle.getString("audio"));
         button2.setVisible(false);
 
         button1.focusedProperty().addListener((obs, oldVal, newVal) -> {
@@ -767,15 +822,25 @@ public class VideoPlayerController {
         btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (event.getCode().equals(KeyCode.ENTER)){
                 if (isAudio) {
+                    for (Track aTrack : audioTracks){
+                        aTrack.selected = aTrack == track;
+                    }
+
                     videoPlayer.setAudioTrack(audioTracks.get(optionsContainer.getChildren().indexOf(btn)).id);
                 }else {
+                    for (Track sTrack : subtitleTracks){
+                        sTrack.selected = sTrack == track;
+                    }
+
                     videoPlayer.setSubtitleTrack(subtitleTracks.get(optionsContainer.getChildren().indexOf(btn)).id);
 
                     Series series = App.getSelectedSeries();
                     if (series.getVideoZoom() == 0) {
+                        videoPlayer.setSubtitleSize(0.7);
                         videoPlayer.setSubtitleVerticalPosition(100);
                     }else{
-                        videoPlayer.setSubtitleVerticalPosition(88);
+                        videoPlayer.setSubtitleSize(0.9);
+                        videoPlayer.setSubtitleVerticalPosition(90);
                     }
                 }
 

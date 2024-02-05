@@ -93,7 +93,7 @@ public class VideoPlayer extends MediaView {
                     case "video":
                         videoTracks.add(track);
                         break;
-                    case "resources/audio":
+                    case "audio":
                         audioTracks.add(track);
                         break;
                     case "sub":
@@ -178,6 +178,9 @@ public class VideoPlayer extends MediaView {
     }
     public List<Track> getSubtitleTracks() {
         return subtitleTracks;
+    }
+    public void setVideoTrack(int videoId) {
+        mpvSetProperty("vid", Integer.toString(videoId));
     }
     public void setAudioTrack(int audioId) {
         mpvSetProperty("aid", Integer.toString(audioId));

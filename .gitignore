@@ -44,7 +44,6 @@ build/
 
 ## Local images, audio and video files ###
 /resources/img/
-/resources/audio/
 /resources/music/
 /resources/videos/
 /resources/downloadedMediaCache/

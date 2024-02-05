@@ -20,7 +20,7 @@
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../../resources/img/backgroundDefault.png" />
+            <Image url="@../../../img/Background.png" />
          </image>
       </ImageView>
       <BorderPane fx:id="mainPane" prefHeight="720.0" prefWidth="1280.0" styleClass="transparent" stylesheets="@styles.css">
@@ -91,7 +91,7 @@
       </BorderPane>
       <ImageView fx:id="menuShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" visible="false">
          <image>
-            <Image url="@../../../../../../resources/img/desktopBackgroundShadow.png" />
+            <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
          <effect>
             <GaussianBlur radius="27.0" />
@@ -99,7 +99,7 @@
       </ImageView>
       <ImageView fx:id="globalShadow" fitHeight="720.0" fitWidth="1280.0" nodeOrientation="RIGHT_TO_LEFT" pickOnBounds="true">
          <image>
-            <Image url="@../../../../../../resources/img/aaa.png" />
+            <Image url="@../../../img/aaa.png" />
          </image>
          <effect>
             <ColorAdjust contrast="1.0" />

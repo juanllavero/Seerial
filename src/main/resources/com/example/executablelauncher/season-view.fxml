@@ -20,7 +20,7 @@
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="1080.0" fitWidth="2175.0" pickOnBounds="true" preserveRatio="true" smooth="false" StackPane.alignment="TOP_LEFT">
          <image>
-            <Image url="@../../../../../../resources/img/TEST_NoBlur.png" />
+            <Image url="@../../../img/Background.png" />
          </image>
          <effect>
             <ColorAdjust brightness="-0.28" />
@@ -31,7 +31,7 @@
             <ColorAdjust contrast="0.21" />
          </effect>
          <image>
-            <Image url="@../../../../../../resources/img/backgroundShadow.png" />
+            <Image url="@../../../img/backgroundShadow.png" />
          </image>
       </ImageView>
       <ImageView fx:id="backgroundShadow2" fitHeight="1080.0" fitWidth="2573.0" pickOnBounds="true">
@@ -39,7 +39,7 @@
             <ColorAdjust contrast="0.21" />
          </effect>
          <image>
-            <Image url="@../../../../../../resources/img/backgroundShadow.png" />
+            <Image url="@../../../img/backgroundShadow.png" />
          </image>
       </ImageView>
       <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
@@ -217,7 +217,7 @@
                               <Insets />
                            </HBox.margin>
                         </Button>
-                        <Button fx:id="watchedButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
+                        <Button fx:id="watchedButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
                            <graphic>
                               <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
                                  <image>
@@ -264,7 +264,7 @@
       </BorderPane>
       <ImageView fx:id="menuShadow" fitHeight="1078.0" fitWidth="1918.0" pickOnBounds="true" visible="false">
          <image>
-            <Image url="@../../../../../../resources/img/desktopBackgroundShadow.png" />
+            <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
       <BorderPane fx:id="detailsBox" StackPane.alignment="CENTER">
@@ -348,7 +348,7 @@
          <center>
             <ImageView fx:id="detailsImage" fitHeight="363.0" fitWidth="652.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_RIGHT">
                <image>
-                  <Image url="@../../../../../../resources/img/TEST_NoBlur.png" />
+                  <Image url="@../../../img/aaa.png" />
                </image>
                <BorderPane.margin>
                   <Insets right="50.0" />
@@ -357,5 +357,39 @@
          </center>
       </BorderPane>
       <Pane fx:id="videoPlayerPane" style="-fx-background-color: black;" visible="false" />
+      <BorderPane fx:id="videoError" style="-fx-background-color: black;" visible="false">
+         <top>
+            <Label fx:id="errorTitle" text="Error al reproducir el archivo" textFill="WHITE" BorderPane.alignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="45.0" />
+               </font>
+            </Label>
+         </top>
+         <StackPane.margin>
+            <Insets />
+         </StackPane.margin>
+         <padding>
+            <Insets bottom="200.0" left="200.0" right="200.0" top="200.0" />
+         </padding>
+         <center>
+            <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+               <children>
+                  <Label fx:id="errorMessage" alignment="TOP_LEFT" prefHeight="139.0" prefWidth="1169.0" text="No se encuentra el archivo de video. Revise la unidad para comprobar que existe el archivo." textFill="WHITE" wrapText="true">
+                     <font>
+                        <Font size="29.0" />
+                     </font>
+                  </Label>
+                  <Button fx:id="errorButton" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="De acuerdo" textFill="WHITE">
+                     <font>
+                        <Font size="28.0" />
+                     </font>
+                  </Button>
+               </children>
+               <BorderPane.margin>
+                  <Insets top="50.0" />
+               </BorderPane.margin>
+            </VBox>
+         </center>
+      </BorderPane>
    </children>
 </StackPane>

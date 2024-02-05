@@ -8,7 +8,6 @@ import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -46,6 +45,18 @@ import java.util.Locale;
 
 public class SeasonController {
     //region FXML ATTRIBUTES
+    @FXML
+    private BorderPane videoError;
+
+    @FXML
+    private Label errorTitle;
+
+    @FXML
+    private Label errorMessage;
+
+    @FXML
+    private Button errorButton;
+
     @FXML
     private MediaView backgroundVideo;
 
@@ -172,7 +183,7 @@ public class SeasonController {
 
     private List<Season> seasons = new ArrayList<>();
     private List<Episode> episodes = new ArrayList<>();
-    private List<Button> discsButtons = new ArrayList<>();
+    private List<Button> episodeButtons = new ArrayList<>();
     private int currentSeason = 0;
     private Episode selectedEpisode = null;
     private Timeline timeline = null;
@@ -218,6 +229,23 @@ public class SeasonController {
 
         //Set buttons for next and last season
         updateButtons();
+
+        errorTitle.setText(App.textBundle.getString("playbackError"));
+        errorMessage.setText(App.textBundle.getString("videoErrorMessage"));
+        errorButton.setText(App.buttonsBundle.getString("ok"));
+
+        errorButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (event.getCode().equals(KeyCode.ENTER)) {
+                videoError.setVisible(false);
+
+                if (isShow)
+                    episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+                else
+                    playButton.requestFocus();
+            }
+        });
+
+        videoError.setVisible(false);
 
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
@@ -313,10 +341,10 @@ public class SeasonController {
 
         detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (event.getCode().equals(KeyCode.DOWN)){
-                if (discsButtons.size() <= 1)
+                if (episodeButtons.size() <= 1)
                     playButton.requestFocus();
                 else
-                    discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+                    episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
             }else if (event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
                 lastSeasonButton.requestFocus();
             else if (event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
@@ -325,10 +353,10 @@ public class SeasonController {
 
         playButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (event.getCode().equals(KeyCode.UP)){
-                if (discsButtons.size() <= 1)
+                if (episodeButtons.size() <= 1)
                     detailsButton.requestFocus();
                 else
-                    discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+                    episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
             }else if (event.getCode().equals(KeyCode.RIGHT))
                 watchedButton.requestFocus();
             else if (event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
@@ -337,10 +365,10 @@ public class SeasonController {
 
         watchedButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (event.getCode().equals(KeyCode.UP)){
-                if (discsButtons.size() <= 1)
+                if (episodeButtons.size() <= 1)
                     detailsButton.requestFocus();
                 else
-                    discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+                    episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
             }else if (event.getCode().equals(KeyCode.RIGHT))
                 optionsButton.requestFocus();
             else if (event.getCode().equals(KeyCode.LEFT))
@@ -349,10 +377,10 @@ public class SeasonController {
 
         optionsButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (event.getCode().equals(KeyCode.UP)){
-                if (discsButtons.size() <= 1)
+                if (episodeButtons.size() <= 1)
                     detailsButton.requestFocus();
                 else
-                    discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+                    episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
             }else if (event.getCode().equals(KeyCode.LEFT))
                 watchedButton.requestFocus();
             else if (event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
@@ -374,13 +402,14 @@ public class SeasonController {
         if (playSameMusic){
             for (Season season : seasons){
                 if (!season.getMusicSrc().isEmpty()){
-                    File file = new File(season.getMusicSrc());
-                    Media media = new Media(file.toURI().toString());
-                    mp = new MediaPlayer(media);
-                    isVideo = false;
+                    Platform.runLater(() -> {
+                        File file = new File(season.getMusicSrc());
+                        Media media = new Media(file.toURI().toString());
+                        mp = new MediaPlayer(media);
+                        isVideo = false;
 
-                    setMediaPlayer();
-
+                        setMediaPlayer();
+                    });
                     break;
                 }
             }
@@ -497,7 +526,7 @@ public class SeasonController {
         }
 
         cardContainer.getChildren().clear();
-        discsButtons.clear();
+        episodeButtons.clear();
         episodes = season.getEpisodes();
 
         episodes.sort(new Utils.EpisodeComparator().reversed());
@@ -508,15 +537,16 @@ public class SeasonController {
         if (!episodes.isEmpty())
             selectedEpisode = episodes.get(0);
 
-        if (discsButtons.size() <= 1){
+        if (episodeButtons.size() <= 1){
             setTimeLeft(episodes.get(0));
         }
 
         Platform.runLater(() -> {
             buttonCount = getVisibleButtonsCount();
+            cardContainer.setTranslateX(0);
 
-            if (discsButtons.size() > 1)
-                discsButtons.get(season.lastDisc).requestFocus();
+            if (episodeButtons.size() > 1)
+                episodeButtons.get(season.lastDisc).requestFocus();
             else
                 playButton.requestFocus();
         });
@@ -573,8 +603,8 @@ public class SeasonController {
     public void stopVideo(){
         playingVideo = false;
 
-        if (discsButtons.size() > 1)
-            discsButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+        if (episodeButtons.size() > 1)
+            episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
         else
             playButton.requestFocus();
 
@@ -599,7 +629,7 @@ public class SeasonController {
                         enableAllEpisodes();
                     }
 
-                    seasons.get(currentSeason).lastDisc = discsButtons.indexOf(btn);
+                    seasons.get(currentSeason).lastDisc = episodeButtons.indexOf(btn);
 
                     //Move ScrollPane
                     handleButtonFocus(btn);
@@ -608,7 +638,7 @@ public class SeasonController {
                     btn.setScaleY(1.1);
                     controllerParent.playInteractionSound();
 
-                    updateDiscInfo(episodes.get(discsButtons.indexOf(btn)));
+                    updateDiscInfo(episodes.get(episodeButtons.indexOf(btn)));
                 }else{
                     btn.setScaleX(1);
                     btn.setScaleY(1);
@@ -617,7 +647,7 @@ public class SeasonController {
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
                 if (event.getCode().equals(KeyCode.ENTER)){
-                    playEpisode(episodes.get(discsButtons.indexOf(btn)));
+                    playEpisode(episodes.get(episodeButtons.indexOf(btn)));
                 }
             });
 
@@ -628,23 +658,23 @@ public class SeasonController {
                 if (event.getCode().equals(KeyCode.UP))
                     detailsButton.requestFocus();
 
-                if (discsButtons.indexOf(btn) == 0
+                if (episodeButtons.indexOf(btn) == 0
                         && event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
                     lastSeasonButton.requestFocus();
 
-                if (discsButtons.indexOf(btn) == (discsButtons.size() - 1)
+                if (episodeButtons.indexOf(btn) == (episodeButtons.size() - 1)
                         && event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
                     nextSeasonButton.requestFocus();
 
-                int index = discsButtons.indexOf(btn);
+                int index = episodeButtons.indexOf(btn);
                 if (event.getCode().equals(KeyCode.LEFT)){
                     if (index > 0)
-                        discsButtons.get(index - 1).requestFocus();
+                        episodeButtons.get(index - 1).requestFocus();
                     else if (lastSeasonButton.isVisible())
                         lastSeasonButton.requestFocus();
                 }else if (event.getCode().equals(KeyCode.RIGHT)){
-                    if (index < discsButtons.size() - 1)
-                        discsButtons.get(index + 1).requestFocus();
+                    if (index < episodeButtons.size() - 1)
+                        episodeButtons.get(index + 1).requestFocus();
                     else if (nextSeasonButton.isVisible())
                         nextSeasonButton.requestFocus();
                 }
@@ -653,14 +683,14 @@ public class SeasonController {
             setEpisodeCardValues(btn, episode);
 
             cardContainer.getChildren().add(btn);
-            discsButtons.add(btn);
+            episodeButtons.add(btn);
         }
     }
 
     private void handleButtonFocus(Button focusedButton) {
         double screenCenter, buttonCenterX, offset, finalPos;
 
-        if (discsButtons.indexOf(focusedButton) <= buttonCount / 2 || discsButtons.size() <= 3){
+        if (episodeButtons.indexOf(focusedButton) <= buttonCount / 2 || episodeButtons.size() <= 3){
             finalPos = 0;
         }else{
             //Get center of screen
@@ -668,12 +698,12 @@ public class SeasonController {
 
             //Check aspect ratio to limit the right end of the button list
             double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
-            int maxButtons = (discsButtons.size() - (buttonCount / 2));
+            int maxButtons = (episodeButtons.size() - (buttonCount / 2));
             if (aspectRatio > 1.8)
                 maxButtons--;
 
-            if (discsButtons.indexOf(focusedButton) >= (discsButtons.size() - (buttonCount / 2)))
-                focusedButton = discsButtons.get(Math.max(2, maxButtons));
+            if (episodeButtons.indexOf(focusedButton) >= (episodeButtons.size() - (buttonCount / 2)))
+                focusedButton = episodeButtons.get(Math.max(2, maxButtons));
 
             //Get center of button in the screen
             Bounds buttonBounds = focusedButton.localToScene(focusedButton.getBoundsInLocal());
@@ -701,6 +731,15 @@ public class SeasonController {
 
         playingVideo = true;
 
+        //Check if the video file exists before showing the video player
+        File videoFile = new File(episode.getVideoSrc());
+
+        if (!videoFile.isFile()){
+            videoError.setVisible(true);
+            errorButton.requestFocus();
+            return;
+        }
+
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -721,7 +760,7 @@ public class SeasonController {
                 name = seasons.get(currentSeason).name;
 
             VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setVideo(this, episodes, episode, name, scene);
+            playerController.setVideo(this, seasons.get(currentSeason), episode, name, scene);
 
             stage.setMaximized(true);
             stage.show();
@@ -743,15 +782,15 @@ public class SeasonController {
     private void disableAllButCurrentEpisode(){
         episodesFocussed = false;
         int index = episodes.indexOf(selectedEpisode);
-        for (int i = 0; i < discsButtons.size(); i++){
+        for (int i = 0; i < episodeButtons.size(); i++){
             if (i != index){
-                discsButtons.get(i).setDisable(true);
+                episodeButtons.get(i).setDisable(true);
             }
         }
     }
 
     private void enableAllEpisodes(){
-        for (Button btn : discsButtons){
+        for (Button btn : episodeButtons){
             btn.setDisable(false);
         }
     }
@@ -784,7 +823,7 @@ public class SeasonController {
         }
     }
     private void reloadEpisodeCard(){
-        Button btn = discsButtons.get(episodes.indexOf(selectedEpisode));
+        Button btn = episodeButtons.get(episodes.indexOf(selectedEpisode));
         btn.setGraphic(null);
 
         setEpisodeCardValues(btn, selectedEpisode);
