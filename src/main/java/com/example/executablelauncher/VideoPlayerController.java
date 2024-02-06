@@ -127,9 +127,7 @@ public class VideoPlayerController {
     private List<Track> videoTracks = new ArrayList<>();
     private List<Track> audioTracks = new ArrayList<>();
     private List<Track> subtitleTracks = new ArrayList<>();
-    private int videoTrackID = -1;
-    private int audioTrackID = -1;
-    private int subtitleTrackID = -1;
+    private boolean subsActivated = true;
     int currentDisc = 0;
 
     //region INITIALIZATION
@@ -388,9 +386,11 @@ public class VideoPlayerController {
 
                         videoPlayer.setSubtitleTrack(track.id);
                     }
-            }else if (!subtitleTracks.isEmpty()){
-                videoPlayer.setSubtitleTrack(subtitleTracks.get(0).id);
-                subtitleTracks.get(0).selected = true;
+            }else{
+                videoPlayer.disableSubtitles();
+
+                for (Track sTrack : subtitleTracks)
+                    sTrack.selected = false;
             }
 
             //Initialize Buttons
@@ -460,9 +460,13 @@ public class VideoPlayerController {
             if (aTrack.selected && !aTrack.lang.isEmpty())
                 season.setAudioTrackLanguage(aTrack.lang);
 
-        for (Track sTrack : subtitleTracks)
-            if (sTrack.selected && !sTrack.lang.isEmpty())
-                season.setSubtitleTrackLanguage(sTrack.lang);
+        if (subsActivated){
+            for (Track sTrack : subtitleTracks)
+                if (sTrack.selected && !sTrack.lang.isEmpty())
+                    season.setSubtitleTrackLanguage(sTrack.lang);
+        }else{
+            season.setSubtitleTrackLanguage("");
+        }
 
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.7), videoPlayer);
         fadeOut.setFromValue(1.0);
@@ -700,6 +704,49 @@ public class VideoPlayerController {
     }
     private void showSubtitleTracks(){
         optionsContainer.getChildren().clear();
+
+        Button btn = new Button();
+        btn.setText(App.buttonsBundle.getString("none"));
+        btn.setFont(new Font("Arial", 24));
+        btn.setTextFill(Color.WHITE);
+        btn.setMaxWidth(Integer.MAX_VALUE);
+        btn.setPrefWidth(Integer.MAX_VALUE);
+        btn.setAlignment(Pos.BOTTOM_LEFT);
+        btn.setPadding(new Insets(10));
+
+        btn.getStyleClass().add("playerOptionsButton");
+
+        addInteractionSound(btn);
+
+        optionsContainer.getChildren().add(btn);
+
+        if (season.getSubtitleTrackLanguage() == null || season.getSubtitleTrackLanguage().isEmpty()) {
+            btn.getStyleClass().clear();
+            btn.getStyleClass().add("playerOptionsSelected");
+
+            videoPlayer.disableSubtitles();
+        }
+
+        btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+            if (event.getCode().equals(KeyCode.ENTER)){
+                for (Track sTrack : subtitleTracks){
+                    sTrack.selected = false;
+                }
+
+                videoPlayer.disableSubtitles();
+                subsActivated = false;
+
+                for (Node node : optionsContainer.getChildren()){
+                    Button button = (Button) node;
+                    button.getStyleClass().clear();
+                    button.getStyleClass().add("playerOptionsButton");
+                }
+
+                btn.getStyleClass().clear();
+                btn.getStyleClass().add("playerOptionsSelected");
+            }
+        });
+
         for (Track track : subtitleTracks){
 
             String forced = "";
@@ -812,7 +859,7 @@ public class VideoPlayerController {
         if (isAudio)
             btn = (Button) optionsContainer.getChildren().get(audioTracks.indexOf(track));
         else
-            btn = (Button) optionsContainer.getChildren().get(subtitleTracks.indexOf(track));
+            btn = (Button) optionsContainer.getChildren().get(subtitleTracks.indexOf(track) + 1);
 
         if (track.selected) {
             btn.getStyleClass().clear();
@@ -832,7 +879,7 @@ public class VideoPlayerController {
                         sTrack.selected = sTrack == track;
                     }
 
-                    videoPlayer.setSubtitleTrack(subtitleTracks.get(optionsContainer.getChildren().indexOf(btn)).id);
+                    videoPlayer.setSubtitleTrack(subtitleTracks.get(optionsContainer.getChildren().indexOf(btn) - 1).id);
 
                     Series series = App.getSelectedSeries();
                     if (series.getVideoZoom() == 0) {

@@ -16,6 +16,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -49,6 +50,12 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 public class Controller implements Initializable {
+    @FXML
+    private BorderPane introVideoPane;
+
+    @FXML
+    private MediaView introVideo;
+
     @FXML
     private FlowPane cardContainer;
 
@@ -119,6 +126,9 @@ public class Controller implements Initializable {
     private Label clock;
 
     @FXML
+    private Label settingsTitle;
+
+    @FXML
     private ImageView globalShadow;
 
     private List<Library> categories = null;
@@ -141,11 +151,14 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        introVideoPane.setVisible(false);
         mainMenu.setVisible(false);
 
         settingsButton.setText(App.buttonsBundle.getString("settings"));
         exitButton.setText(App.buttonsBundle.getString("exitFullscreen"));
         switchToDesktopButton.setText(App.buttonsBundle.getString("switchToDesktop"));
+
+        settingsTitle.setText(App.buttonsBundle.getString("settings"));
 
         addInteractionSound(exitButton);
         addInteractionSound(switchToDesktopButton);
@@ -328,6 +341,34 @@ public class Controller implements Initializable {
         }
     }
 
+    public void playIntroVideo(){
+        Platform.runLater(() -> {
+            mainPane.setDisable(true);
+            introVideoPane.setVisible(true);
+
+            introVideo.setFitWidth(Screen.getPrimary().getBounds().getWidth());
+            introVideo.setFitHeight(Screen.getPrimary().getBounds().getHeight());
+
+            File videoFile = new File("resources/video/Intro.mp4");
+            Media media = new Media(videoFile.toURI().toString());
+            MediaPlayer mp = new MediaPlayer(media);
+
+            introVideo.setMediaPlayer(mp);
+
+            mp.seek(Duration.millis(0));
+
+            mp.setOnEndOfMedia(() -> {
+                mainPane.setDisable(false);
+                FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.6), introVideoPane);
+                fadeOut.setFromValue(1);
+                fadeOut.setToValue(0);
+                fadeOut.play();
+            });
+
+            mp.play();
+        });
+    }
+
     private void selectLibraryButton(Button btn){
         for (Node node : categoriesBox.getChildren()) {
             Button catButton = (Button) node;
@@ -361,6 +402,11 @@ public class Controller implements Initializable {
             App.setCurrentLibrary(cat);
 
         currentLibrary = cat;
+
+        //Create temp files to keep drives on
+        for (String folder : currentLibrary.folders){
+            App.wakeUpDrive(folder);
+        }
 
         libraryType = currentLibrary.type;
         cardContainer.getChildren().clear();

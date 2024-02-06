@@ -2,7 +2,6 @@ module com.example.executablelauncher {
     requires javafx.controls;
     requires javafx.fxml;
 
-    requires org.controlsfx.controls;
     requires java.desktop;
     requires javafx.media;
     requires org.jsoup;
@@ -28,11 +27,7 @@ module com.example.executablelauncher {
     requires google.api.client;
     requires com.google.api.client;
     requires com.google.api.client.json.jackson2;
-    requires android.json;
     requires org.bytedeco.ffmpeg;
-    requires com.github.kokorin.jaffree;
-    requires nitrite;
-    requires nitrite.mvstore.adapter;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

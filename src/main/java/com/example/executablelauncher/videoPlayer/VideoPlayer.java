@@ -188,6 +188,9 @@ public class VideoPlayer extends MediaView {
     public void setSubtitleTrack(int subtitleId) {
         mpvSetProperty("sid", Integer.toString(subtitleId));
     }
+    public void disableSubtitles(){
+        mpvSetProperty("sid", "no");
+    }
     public void changeAspectRatio() {
         mpvCommand("cycle", "video-aspect");
     }

@@ -5,6 +5,7 @@ import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -64,7 +65,7 @@ public class App extends Application {
         //Start the stage
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
-        stage.setTitle("VideoLauncher");
+        stage.setTitle(App.textBundle.getString("desktopMode"));
         //stage.initStyle(StageStyle.UNDECORATED);
         stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
         Scene scene = new Scene(root);
@@ -84,6 +85,26 @@ public class App extends Application {
     public static void close(){
         DataManager.INSTANCE.saveData();
         Platform.exit();
+    }
+
+    //Create a simple file in the drive in order to avoid playing video with the drive suspended
+    public static void wakeUpDrive(String rootDir){
+        Task<Void> wakeDirTask = new Task<>() {
+            @Override
+            protected Void call() {
+                try {
+                    File tempFile = new File(rootDir + "/temp.txt");
+                    if (tempFile.createNewFile()) {
+                        tempFile.delete();
+                    }
+                } catch (IOException e) {
+                    System.err.println("wakeUpDrive: Cannot access drive");
+                }
+                return null;
+            }
+        };
+
+        new Thread(wakeDirTask).start();
     }
 
     public static void setPopUpProperties(Stage stage){

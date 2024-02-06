@@ -3043,6 +3043,8 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
+            //Controller controller = fxmlLoader.getController();
+            //controller.playIntroVideo();
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("fullscreenMode"));
             stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));

@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
 <StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1030.0" prefWidth="1719.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.Controller">
@@ -109,9 +110,9 @@
          <children>
             <VBox fx:id="menuOptions" alignment="TOP_CENTER" spacing="20.0" stylesheets="@styles.css">
                <children>
-                  <Label alignment="CENTER" text="VideoLauncher" textFill="WHITE">
+                  <Label alignment="CENTER" text="Seerial" textFill="WHITE">
                      <font>
-                        <Font size="34.0" />
+                        <Font name="System Bold" size="50.0" />
                      </font>
                      <VBox.margin>
                         <Insets bottom="20.0" />
@@ -156,10 +157,23 @@
                </StackPane.margin>
             </VBox>
             <BorderPane fx:id="settingsWindow" StackPane.alignment="CENTER">
-               <center>
-                  <VBox fx:id="leftOptionsPane" alignment="TOP_RIGHT" fillWidth="false" BorderPane.alignment="TOP_RIGHT">
+               <top>
+                  <Label fx:id="settingsTitle" text="Settings" textFill="WHITE" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="50.0" />
+                     </font>
+                     <BorderPane.margin>
+                        <Insets bottom="50.0" />
+                     </BorderPane.margin>
+                  </Label>
+               </top>
+               <padding>
+                  <Insets top="200.0" />
+               </padding>
+               <left>
+                  <VBox fx:id="leftOptionsPane" alignment="TOP_RIGHT" fillWidth="false" BorderPane.alignment="CENTER">
                      <children>
-                        <Button fx:id="cardSizeButton" alignment="TOP_LEFT" mnemonicParsing="false" prefHeight="51.0" prefWidth="550.0" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Poster size" textFill="WHITE">
+                        <Button fx:id="cardSizeButton" alignment="TOP_LEFT" mnemonicParsing="false" prefWidth="550.0" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Poster size" textFill="WHITE">
                            <font>
                               <Font size="24.0" />
                            </font>
@@ -175,8 +189,8 @@
                         <Insets right="50.0" />
                      </padding>
                   </VBox>
-               </center>
-               <right>
+               </left>
+               <center>
                   <StackPane BorderPane.alignment="CENTER">
                      <children>
                         <VBox fx:id="cardSizeOptions" styleClass="translucent" stylesheets="@styles.css">
@@ -223,15 +237,17 @@
                         <Insets />
                      </BorderPane.margin>
                      <padding>
-                        <Insets left="50.0" />
+                        <Insets bottom="200.0" left="50.0" right="200.0" />
                      </padding>
                   </StackPane>
-               </right>
-               <padding>
-                  <Insets bottom="200.0" left="200.0" right="200.0" top="200.0" />
-               </padding>
+               </center>
             </BorderPane>
          </children>
       </StackPane>
+      <BorderPane fx:id="introVideoPane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: black;" visible="false">
+         <center>
+            <MediaView fx:id="introVideo" fitHeight="200.0" fitWidth="200.0" BorderPane.alignment="CENTER" />
+         </center>
+      </BorderPane>
    </children>
 </StackPane>
