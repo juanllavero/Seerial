@@ -11,16 +11,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class App extends Application {
     //region LOCALIZATION ATTRIBUTES
@@ -80,6 +83,33 @@ public class App extends Application {
         stage.show();
 
         primaryStage.setOnCloseRequest(event -> close());
+    }
+
+    public static boolean pressedUp(KeyEvent event){
+        return event.getCode().equals(KeyCode.UP);
+    }
+    public static boolean pressedDown(KeyEvent event){
+        return event.getCode().equals(KeyCode.DOWN);
+    }
+    public static boolean pressedLeft(KeyEvent event){
+        return event.getCode().equals(KeyCode.LEFT);
+    }
+    public static boolean pressedRight(KeyEvent event){
+        return event.getCode().equals(KeyCode.RIGHT);
+    }
+    public static boolean pressedSelect(KeyEvent event){
+        return event.getCode().equals(KeyCode.ENTER) || event.getCode().equals(KeyCode.SPACE);
+    }
+    public static boolean pressedBack(KeyEvent event){
+        return event.getCode().equals(KeyCode.ESCAPE) || event.getCode().equals(KeyCode.BACK_SPACE);
+    }
+
+    public static boolean pressedRB(KeyEvent event){
+        return event.getCode().equals(KeyCode.ADD) || event.getCode().equals(KeyCode.PLUS);
+    }
+
+    public static boolean pressedLB(KeyEvent event){
+        return event.getCode().equals(KeyCode.SUBTRACT) || event.getCode().equals(KeyCode.MINUS);
     }
 
     public static void close(){

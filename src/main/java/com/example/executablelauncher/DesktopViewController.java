@@ -30,6 +30,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -2691,7 +2692,7 @@ public class DesktopViewController {
     //region DOWNLOAD MEDIA
     public List<YoutubeVideo> searchYoutube(String videoName){
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("resources/python", "resources/python/YoutubeSearch.py", videoName);
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "resources/python/YoutubeSearch.py", videoName);
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
@@ -3049,8 +3050,8 @@ public class DesktopViewController {
             stage.setTitle(App.textBundle.getString("fullscreenMode"));
             stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
             Scene scene = new Scene(root);
+            scene.setCursor(Cursor.NONE);
             scene.setFill(Color.BLACK);
-            //scene.setCursor(Cursor.NONE);
             stage.setScene(scene);
             stage.setMaximized(true);
             stage.initStyle(StageStyle.UNDECORATED);

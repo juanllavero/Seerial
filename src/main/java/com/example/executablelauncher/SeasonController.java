@@ -6,39 +6,42 @@ import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
-import javafx.animation.*;
+import javafx.animation.FadeTransition;
+import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -217,7 +220,7 @@ public class SeasonController {
         videoPlayerPane.setVisible(false);
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()){
+            if (App.pressedBack(event)){
                 if (!playingVideo){
                     if (detailsBox.isVisible())
                         closeDetails();
@@ -235,7 +238,7 @@ public class SeasonController {
         errorButton.setText(App.buttonsBundle.getString("ok"));
 
         errorButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (event.getCode().equals(KeyCode.ENTER)) {
+            if (App.pressedSelect(event)) {
                 videoError.setVisible(false);
 
                 if (isShow)
@@ -320,7 +323,7 @@ public class SeasonController {
         });
 
         watchedButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (event.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(event)){
                 toggleWatched();
             }
         });
@@ -340,50 +343,50 @@ public class SeasonController {
         });
 
         detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (event.getCode().equals(KeyCode.DOWN)){
+            if (App.pressedDown(event)){
                 if (episodeButtons.size() <= 1)
                     playButton.requestFocus();
                 else
                     episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
-            }else if (event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
+            }else if (App.pressedLeft(event) && lastSeasonButton.isVisible())
                 lastSeasonButton.requestFocus();
-            else if (event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
+            else if (App.pressedRight(event) && nextSeasonButton.isVisible())
                 nextSeasonButton.requestFocus();
         });
 
         playButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
-            if (event.getCode().equals(KeyCode.UP)){
+            if (App.pressedUp(event)){
                 if (episodeButtons.size() <= 1)
                     detailsButton.requestFocus();
                 else
                     episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
-            }else if (event.getCode().equals(KeyCode.RIGHT))
+            }else if (App.pressedRight(event))
                 watchedButton.requestFocus();
-            else if (event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
+            else if (App.pressedLeft(event) && lastSeasonButton.isVisible())
                 lastSeasonButton.requestFocus();
         });
 
         watchedButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
-            if (event.getCode().equals(KeyCode.UP)){
+            if (App.pressedUp(event)){
                 if (episodeButtons.size() <= 1)
                     detailsButton.requestFocus();
                 else
                     episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
-            }else if (event.getCode().equals(KeyCode.RIGHT))
+            }else if (App.pressedRight(event))
                 optionsButton.requestFocus();
-            else if (event.getCode().equals(KeyCode.LEFT))
+            else if (App.pressedLeft(event))
                 playButton.requestFocus();
         });
 
         optionsButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
-            if (event.getCode().equals(KeyCode.UP)){
+            if (App.pressedUp(event)){
                 if (episodeButtons.size() <= 1)
                     detailsButton.requestFocus();
                 else
                     episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
-            }else if (event.getCode().equals(KeyCode.LEFT))
+            }else if (App.pressedRight(event))
                 watchedButton.requestFocus();
-            else if (event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
+            else if (App.pressedLeft(event) && nextSeasonButton.isVisible())
                 nextSeasonButton.requestFocus();
         });
 
@@ -646,33 +649,33 @@ public class SeasonController {
             });
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-                if (event.getCode().equals(KeyCode.ENTER)){
+                if (App.pressedSelect(event)){
                     playEpisode(episodes.get(episodeButtons.indexOf(btn)));
                 }
             });
 
             btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
-                if (event.getCode().equals(KeyCode.DOWN))
+                if (App.pressedDown(event))
                     playButton.requestFocus();
 
-                if (event.getCode().equals(KeyCode.UP))
+                if (App.pressedUp(event))
                     detailsButton.requestFocus();
 
                 if (episodeButtons.indexOf(btn) == 0
-                        && event.getCode().equals(KeyCode.LEFT) && lastSeasonButton.isVisible())
+                        && App.pressedLeft(event) && lastSeasonButton.isVisible())
                     lastSeasonButton.requestFocus();
 
                 if (episodeButtons.indexOf(btn) == (episodeButtons.size() - 1)
-                        && event.getCode().equals(KeyCode.RIGHT) && nextSeasonButton.isVisible())
+                        && App.pressedRight(event) && nextSeasonButton.isVisible())
                     nextSeasonButton.requestFocus();
 
                 int index = episodeButtons.indexOf(btn);
-                if (event.getCode().equals(KeyCode.LEFT)){
+                if (App.pressedLeft(event)){
                     if (index > 0)
                         episodeButtons.get(index - 1).requestFocus();
                     else if (lastSeasonButton.isVisible())
                         lastSeasonButton.requestFocus();
-                }else if (event.getCode().equals(KeyCode.RIGHT)){
+                }else if (App.pressedRight(event)){
                     if (index < episodeButtons.size() - 1)
                         episodeButtons.get(index + 1).requestFocus();
                     else if (nextSeasonButton.isVisible())
@@ -753,6 +756,7 @@ public class SeasonController {
             stage.initOwner(thisStage);
             Scene scene = new Scene(root1);
             scene.setFill(Color.TRANSPARENT);
+            scene.setCursor(Cursor.NONE);
             stage.setScene(scene);
 
             String name = series.name;
@@ -908,7 +912,10 @@ public class SeasonController {
             Parent root = fxmlLoader.load();
             Stage stage = (Stage) mainBox.getScene().getWindow();
             stage.setTitle("ExecutableLauncher");
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            scene.setCursor(Cursor.NONE);
+            scene.setFill(Color.BLACK);
+            stage.setScene(scene);
             stage.setMaximized(true);
             stage.setWidth(Screen.getPrimary().getBounds().getWidth());
             stage.setHeight(Screen.getPrimary().getBounds().getHeight());

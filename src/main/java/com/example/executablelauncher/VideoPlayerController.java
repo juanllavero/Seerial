@@ -18,7 +18,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -172,7 +171,7 @@ public class VideoPlayerController {
         );
 
         scene.setOnKeyReleased(e -> {
-            if (e.getCode().equals(KeyCode.ESCAPE) || e.getCode().equals(KeyCode.BACK_SPACE)){
+            if (App.pressedBack(e)){
                 if (optionsBox.isVisible())
                     hideOptions();
                 else
@@ -182,20 +181,20 @@ public class VideoPlayerController {
 
         scene.setOnKeyPressed(e -> {
             if (!controlsShown){
-                if (e.getCode().equals(KeyCode.RIGHT))
+                if (App.pressedRight(e))
                     goAhead();
-                else if (e.getCode().equals(KeyCode.LEFT))
+                else if (App.pressedLeft(e))
                     goBack();
-                else if (e.getCode().equals(KeyCode.SPACE)){
+                else if (App.pressedSelect(e)){
                     showControls();
                     pause();
                 }
                 else
                     showControls();
             }else if (!optionsBox.isVisible()){
-                if (e.getCode().equals(KeyCode.PLUS))
+                if (App.pressedRB(e))
                     volumeUp();
-                else if (e.getCode().equals(KeyCode.MINUS))
+                else if (App.pressedLB(e))
                     volumeDown();
 
                 timeline.playFromStart();
@@ -217,20 +216,20 @@ public class VideoPlayerController {
     }
     private void onLoad(){
         runtimeSlider.setOnKeyPressed(e -> {
-            if (runtimeSlider.isFocused() && e.getCode().equals(KeyCode.UP))
+            if (runtimeSlider.isFocused() && App.pressedUp(e))
                 hideControls();
             else{
                 timeline.playFromStart();
             }
 
-            if (e.getCode().equals(KeyCode.LEFT))
+            if (App.pressedLeft(e))
                 videoPlayer.seekBackward();
-            else if (e.getCode().equals(KeyCode.RIGHT))
+            else if (App.pressedRight(e))
                 videoPlayer.seekForward();
         });
 
         playButton.setOnKeyPressed(e -> {
-            if (e.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(e)){
                 if (!videoPlayer.isPaused())
                     pause();
                 else
@@ -239,12 +238,12 @@ public class VideoPlayerController {
         });
 
         nextButton.setOnKeyPressed(e -> {
-            if (e.getCode().equals(KeyCode.ENTER))
+            if (App.pressedSelect(e))
                 nextEpisode();
         });
 
         prevButton.setOnKeyPressed(e -> {
-            if (e.getCode().equals(KeyCode.ENTER))
+            if (App.pressedSelect(e))
                 prevEpisode();
         });
 
@@ -580,7 +579,7 @@ public class VideoPlayerController {
             }
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-                if (event.getCode().equals(KeyCode.ENTER)){
+                if (App.pressedSelect(event)){
                     videoPlayer.setVideoTrack(videoTracks.get(optionsContainer.getChildren().indexOf(btn)).id);
 
                     for (Node node : optionsContainer.getChildren()){
@@ -602,7 +601,7 @@ public class VideoPlayerController {
         addOptionCard("Normal");
         Button btn = (Button) optionsContainer.getChildren().get(0);
         btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (event.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(event)){
                 videoPlayer.fixZoom(0);
                 videoPlayer.setSubtitleVerticalPosition(100);
                 videoPlayer.setSubtitleSize(0.7);
@@ -619,7 +618,7 @@ public class VideoPlayerController {
         addOptionCard("Zoom");
         Button button = (Button) optionsContainer.getChildren().get(1);
         button.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (event.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(event)){
                 videoPlayer.fixZoom(0.5f);
                 videoPlayer.setSubtitleVerticalPosition(90);
                 videoPlayer.setSubtitleSize(0.9);
@@ -728,7 +727,7 @@ public class VideoPlayerController {
         }
 
         btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (event.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(event)){
                 for (Track sTrack : subtitleTracks){
                     sTrack.selected = false;
                 }
@@ -792,7 +791,7 @@ public class VideoPlayerController {
         }
 
         small.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (event.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(event)){
                 videoPlayer.setSubtitleSize(0.8);
 
                 for (Node node : optionsContainer.getChildren()){
@@ -807,7 +806,7 @@ public class VideoPlayerController {
         });
 
         normal.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (event.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(event)){
                 videoPlayer.setSubtitleSize(0.9);
 
                 for (Node node : optionsContainer.getChildren()){
@@ -822,7 +821,7 @@ public class VideoPlayerController {
         });
 
         large.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (event.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(event)){
                 videoPlayer.setSubtitleSize(1);
 
                 for (Node node : optionsContainer.getChildren()){
@@ -867,7 +866,7 @@ public class VideoPlayerController {
         }
 
         btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (event.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(event)){
                 if (isAudio) {
                     for (Track aTrack : audioTracks){
                         aTrack.selected = aTrack == track;

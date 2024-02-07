@@ -141,7 +141,7 @@ public class ImageDownloaderController {
             protected Void call() {
                 try {
                     ProcessBuilder pb =
-                            new ProcessBuilder("resources/python", "resources/python/BingDownloader.py"
+                            new ProcessBuilder("python", "resources/python/BingDownloader.py"
                                     , "-o", "resources/img/DownloadCache"
                                     , "--filters", filters
                                     , "--limit", Integer.toString(numberOfImages)

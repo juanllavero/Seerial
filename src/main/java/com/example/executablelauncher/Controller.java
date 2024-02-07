@@ -7,47 +7,48 @@ import com.example.executablelauncher.utils.Configuration;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.Node;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseButton;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
-import javafx.scene.paint.Color;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
-
-import javafx.scene.image.ImageView;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.Screen;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.util.Duration;
 
 public class Controller implements Initializable {
     @FXML
@@ -169,7 +170,7 @@ public class Controller implements Initializable {
         mainMenu.setVisible(false);
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (KeyCode.ESCAPE == event.getCode() || KeyCode.BACK_SPACE == event.getCode()) {
+            if (App.pressedBack(event)) {
                 if (mainMenu.isVisible()){
                     hideContextMenu();
                 }else{
@@ -214,7 +215,7 @@ public class Controller implements Initializable {
         }
 
         tinyCardButton.setOnKeyPressed(e -> {
-            if (e.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(e)){
                 for (Node node : cardSizeOptions.getChildren()){
                     node.getStyleClass().clear();
                     node.getStyleClass().add("playerOptionsButton");
@@ -228,7 +229,7 @@ public class Controller implements Initializable {
         });
 
         smallCardButton.setOnKeyPressed(e -> {
-            if (e.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(e)){
                 for (Node node : cardSizeOptions.getChildren()){
                     node.getStyleClass().clear();
                     node.getStyleClass().add("playerOptionsButton");
@@ -242,7 +243,7 @@ public class Controller implements Initializable {
         });
 
         normalCardButton.setOnKeyPressed(e -> {
-            if (e.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(e)){
                 for (Node node : cardSizeOptions.getChildren()){
                     node.getStyleClass().clear();
                     node.getStyleClass().add("playerOptionsButton");
@@ -256,7 +257,7 @@ public class Controller implements Initializable {
         });
 
         largeCardButton.setOnKeyPressed(e -> {
-            if (e.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(e)){
                 for (Node node : cardSizeOptions.getChildren()){
                     node.getStyleClass().clear();
                     node.getStyleClass().add("playerOptionsButton");
@@ -305,7 +306,7 @@ public class Controller implements Initializable {
             });
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-                if (KeyCode.ENTER == event.getCode()) {
+                if (App.pressedSelect(event)) {
                     selectLibraryButton(btn);
 
                     playCategoriesSound();
@@ -592,7 +593,7 @@ public class Controller implements Initializable {
         });
 
         btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (event.getCode().equals(KeyCode.ENTER)){
+            if (App.pressedSelect(event)){
                 if (seriesToEdit != null) {
                     playCategoriesSound();
                     showSeason(seriesToEdit);
@@ -663,7 +664,10 @@ public class Controller implements Initializable {
                 seasonController.setSeasons(s, s.playSameMusic, libraryType.equals("Shows"));
                 Stage stage = (Stage) mainPane.getScene().getWindow();
                 stage.setTitle(App.textBundle.getString("season"));
-                stage.setScene(new Scene(root));
+                Scene scene = new Scene(root);
+                scene.setCursor(Cursor.NONE);
+                scene.setFill(Color.BLACK);
+                stage.setScene(scene);
                 stage.setMaximized(true);
                 stage.setWidth(Screen.getPrimary().getBounds().getWidth());
                 stage.setHeight(Screen.getPrimary().getBounds().getHeight());
