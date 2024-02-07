@@ -49,8 +49,23 @@ public class App extends Application {
         globalLanguage = Locale.forLanguageTag(Configuration.loadConfig("currentLanguageTag", "en-US"));
 
         //Add languages
-        languages.add(Locale.forLanguageTag("en-US"));
-        languages.add(Locale.forLanguageTag("es-ES"));
+        String languageDir = "resources";
+        File[] filesInDir = new File(languageDir).listFiles();
+
+        if (filesInDir != null){
+            for (File file : filesInDir){
+                if (file.getName().matches("^buttons.*")){
+                    String language = "";
+
+                    language = file.getName().substring(file.getName().indexOf("_") + 1, file.getName().lastIndexOf("."));
+
+                    String tag = language.substring(0, language.indexOf("_"));
+                    String country = language.substring(language.indexOf("_") + 1);
+
+                    languages.add(Locale.of(tag, country));
+                }
+            }
+        }
 
         //Set resource bundles
         buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);

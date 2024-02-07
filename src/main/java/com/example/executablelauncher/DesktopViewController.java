@@ -886,7 +886,7 @@ public class DesktopViewController {
     @FXML
     void deleteSelected(ActionEvent event) {
         for (Episode episode : selectedEpisodes){
-            removeDisc(episode);
+            removeEpisode(episode);
         }
         selectedEpisodes.clear();
         selectedEpisode = null;
@@ -1070,8 +1070,10 @@ public class DesktopViewController {
                     if (filesInMediaCache != null && filesInMediaCache.length > 0){
                         File audioFile = filesInMediaCache[0];
 
+                        String extension = audioFile.getName().substring(audioFile.getName().lastIndexOf("."));
+
                         try{
-                            Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                            Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + extension), StandardCopyOption.REPLACE_EXISTING);
                             season.musicSrc = "resources/music/" + season.getId() + ".mp3";
 
                             directory = new File("resources/downloadedMediaCache/" + season.getId() + "/");
@@ -1149,14 +1151,16 @@ public class DesktopViewController {
                     if (filesInMediaCache != null && filesInMediaCache.length > 0){
                         File audioFile = filesInMediaCache[0];
 
+                        String extension = audioFile.getName().substring(audioFile.getName().lastIndexOf("."));
+
                         try{
-                            Files.copy(audioFile.toPath(), Paths.get("resources/music/" + selectedSeason.getId() + ".mp3"), StandardCopyOption.REPLACE_EXISTING);
+                            Files.copy(audioFile.toPath(), Paths.get("resources/music/" + selectedSeason.getId() + extension), StandardCopyOption.REPLACE_EXISTING);
                             selectedSeason.musicSrc = "resources/music/" + selectedSeason.getId() + ".mp3";
 
                             File directory = new File("resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
                             FileUtils.deleteDirectory(directory);
                         } catch (IOException error) {
-                            System.err.println("correctIdentificationMovie: Could not copy downloaded audio file");
+                            System.err.println("correctIdentificationShow: Could not copy downloaded audio file");
                         }
                     }
                 }
@@ -1340,14 +1344,16 @@ public class DesktopViewController {
                         if (filesInMediaCache != null && filesInMediaCache.length > 0){
                             File audioFile = filesInMediaCache[0];
 
+                            String extension = audioFile.getName().substring(audioFile.getName().lastIndexOf("."));
+
                             try{
-                                Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
-                                season.musicSrc = "resources/music/" + season.getId() + ".mp4";
+                                Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + extension), StandardCopyOption.REPLACE_EXISTING);
+                                season.musicSrc = "resources/music/" + season.getId() + ".mp3";
 
                                 File directory = new File("resources/downloadedMediaCache/" + season.getId() + "/");
                                 FileUtils.deleteDirectory(directory);
                             } catch (IOException error) {
-                                System.err.println("downloadDefaultMusic: Could not copy downloaded audio file");
+                                System.err.println("correctIdentificationShow: Could not copy downloaded audio file");
                             }
                         }
                     }
@@ -1428,8 +1434,27 @@ public class DesktopViewController {
 
         //This means that this is a new Folder to be analyzed, so we need to search for the show metadata
         if (themdbID == -1){
+            String finalName = directory.getName();
+
+            //Remove parenthesis from folder name
+            String nameWithoutParenthesis = finalName.replaceAll("[()]", "");
+
+            //Pattern to extract name and year
+            Pattern pattern = Pattern.compile("^(.*?)(?:\\s(\\d{4}))?$");
+
+            //Get name and year
+            String year = "";
+            Matcher matcher = pattern.matcher(nameWithoutParenthesis);
+            if (matcher.matches()) {
+                finalName = matcher.group(1);
+                year = matcher.group(2);
+            }
+
+            if (year == null)
+                year = "1";
+
             //Search show by name of the folder
-            TvResultsPage tvResults = tmdbApi.getSearch().searchTv(directory.getName(), 1, currentLibrary.language, true, 1);
+            TvResultsPage tvResults = tmdbApi.getSearch().searchTv(finalName, Integer.valueOf(year), currentLibrary.language, true, 1);
 
             if (tvResults.getTotalResults() == 0)
                 return;
@@ -2998,18 +3023,18 @@ public class DesktopViewController {
         hideBackgroundShadow();
     }
     @FXML
-    void removeDisc(){
+    void removeEpisode(){
         Stage stage = showConfirmationWindow(App.textBundle.getString("removeElement"), App.textBundle.getString("removeElementMessage"));
         stage.showAndWait();
 
         if (acceptRemove){
             acceptRemove = false;
-            removeDisc(selectedEpisode);
+            removeEpisode(selectedEpisode);
         }
 
         hideBackgroundShadow();
     }
-    void removeDisc(Episode d) {
+    void removeEpisode(Episode d) {
         if (d == null)
             return;
 
