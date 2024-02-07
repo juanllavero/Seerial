@@ -1,5 +1,5 @@
 # <img src="https://github.com/juanllavero/Seerial/assets/33575454/fe9ef4f9-4fe5-4df3-a358-eefc389f4932" align="top_left" height="40" width="40"> Seerial
-A video library manager with an embedded video player. It features a desktop main application that is thought as a content manager that lets you add, edit and remove video content, analyzing your files automatically and downloading the content metadata; and a fullscreen mode controlled by keyboard that acts as the typical TV application to watch the content previoulsy set in the desktop mode.
+A video library manager with an embedded video player. It features a desktop main application that is designed as a content manager that lets you add, edit and remove video content, analyzing your files automatically and downloading the content metadata; and a fullscreen mode controlled by keyboard that acts as the typical TV application to watch the content previoulsy set in the desktop mode.
 
 ## Folder structure and naming
 ### Shows
@@ -25,8 +25,8 @@ Example of a show folder:
 
 The video files inside are processed equally and the folders inside are not taken into account, but the name of the video files is key for the algorithm to find the exact match. The video file name needs to have one of this formats:
 
-> **S02E12.ext**
-> **24.ext**
+> **S02E12.mkv**
+> **24.mkv**
 
 Everything extra is optional, like the name of the show or the name of the episode. It only needs to have the season/episode or the absolute episode format. For the first one, the S/E can be lowercase (s/e) and the numbers can be in the format (01) or (1).
 
@@ -60,20 +60,20 @@ Movie examples:
 The Dark Knight (2008)					//Only file
 
 The Dark Knight (2008)					
-└───The Dark Knight (2008).ext			        //Folder + file
+└───The Dark Knight (2008).mkv			        //Folder + file
 
 The Dark Knight Collection				
 └───The Dark Knight (2008)				//Collection + folder + file
-|	└───The Dark Knight (2008).ext		
+|	└───The Dark Knight (2008).mkv		
 ```
 
 If a folder contains various video files, it will be cataloged as a movie with extras, which will be the same as a concert with various video files.
 
 ## Installation
-Portable versions exists for Windows, Linux and MacOS.
+Portable versions exist for Windows, Linux and MacOS.
 
 ### Windows
-You can download the installer from the last release. This executable will install java, python and the required python libraries, alongside the actual application.
+You can download the installer from the last release. This executable will install Java, Python and the required Python libraries, alongside the actual application.
 
 ### Requirements
 This software is required in order for the application to run only if the installation is not from the Windows installer.
@@ -88,5 +88,5 @@ This software is required in order for the application to run only if the instal
 -   `v1.0`  - old branch with the previous version of the application. It lacks automated file search, music search, the video player and a lot of fullscreen functionality.
 
 ## Localization
-Localization is done with the help of Java's **ResourceBundle**, having two groups of `.properties` files in the folder `src/main/resources/`.  These groups are for **buttons** and **text** and more languages can be added just by creating another file in each group.
+Localization is done with the help of Java's **ResourceBundle**, having two groups of `.properties` files in the folder `src/main/resources/`.  These groups are for **buttons** and **text**, and additional languages can be added just by creating another file in each group.
 
