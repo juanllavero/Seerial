@@ -1,4 +1,4 @@
-# VideoLauncher
+# <img src="https://github.com/juanllavero/Seerial/assets/33575454/fe9ef4f9-4fe5-4df3-a358-eefc389f4932" align="top_left" height="40" width="40"> Seerial
 A video library manager with an embedded video player. It features a desktop main application that is thought as a content manager that lets you add, edit and remove video content, analyzing your files automatically and downloading the content metadata; and a fullscreen mode controlled by keyboard that acts as the typical TV application to watch the content previoulsy set in the desktop mode.
 
 ## Folder structure and naming
