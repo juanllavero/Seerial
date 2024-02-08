@@ -112,9 +112,6 @@ public class EditSeasonController {
     private Button selectPosterButton;
 
     @FXML
-    private CheckBox showName;
-
-    @FXML
     private Label sortingText;
 
     @FXML
@@ -203,8 +200,6 @@ public class EditSeasonController {
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));
 
-        showName.setSelected(s.showName);
-
         initValues();
         showGeneralView();
     }
@@ -221,6 +216,12 @@ public class EditSeasonController {
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         backgroundText.setText(App.textBundle.getString("backgroundImage"));
         musicDownloadButton.setText(buttonsBundle.getString("downloadButton"));
+        generalViewButton.setText(buttonsBundle.getString("generalButton"));
+        logosViewButton.setText(buttonsBundle.getString("logosButton"));
+        postersViewButton.setText(buttonsBundle.getString("postersButton"));
+        selectImageButton.setText(buttonsBundle.getString("selectImage"));
+        fromURLButton.setText(buttonsBundle.getString("fromURL"));
+        downloadImagesButton.setText(buttonsBundle.getString("downloadImages"));
     }
     @FXML
     void cancelButton(ActionEvent event) {
@@ -725,7 +726,6 @@ public class EditSeasonController {
 
         seasonToEdit.setName(nameField.getText());
         seasonToEdit.setYear(yearField.getText());
-        seasonToEdit.showName = showName.isSelected();
 
         //Save Background
         String newName = "";

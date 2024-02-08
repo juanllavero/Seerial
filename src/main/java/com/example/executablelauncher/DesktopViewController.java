@@ -956,6 +956,8 @@ public class DesktopViewController {
             App.setPopUpProperties(stage);
             stage.showAndWait();
 
+            hideBackgroundShadow();
+
             if (seriesMetadataToCorrect)
                 correctIdentificationShow();
         } catch (IOException e) {
@@ -979,6 +981,8 @@ public class DesktopViewController {
             stage.setScene(new Scene(root1));
             App.setPopUpProperties(stage);
             stage.showAndWait();
+
+            hideBackgroundShadow();
 
             if (movieMetadataToCorrect)
                 correctIdentificationMovie();

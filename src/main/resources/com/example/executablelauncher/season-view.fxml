@@ -201,7 +201,7 @@
                      <children>
                         <Button fx:id="playButton" accessibleRole="IMAGE_VIEW" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onAction="#play" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
                            <font>
-                              <Font size="18.0" />
+                              <Font name="System Bold" size="18.0" />
                            </font>
                            <graphic>
                               <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateX="2.0">
@@ -229,7 +229,7 @@
                               <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                            </padding>
                            <font>
-                              <Font size="18.0" />
+                              <Font name="System Bold" size="18.0" />
                            </font>
                            <HBox.margin>
                               <Insets />
@@ -250,7 +250,7 @@
                               <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                            </padding>
                            <font>
-                              <Font size="18.0" />
+                              <Font name="System Bold" size="18.0" />
                            </font>
                         </Button>
                      </children>

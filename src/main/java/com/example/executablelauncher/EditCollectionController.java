@@ -131,6 +131,10 @@ public class EditCollectionController {
         title.setText(App.textBundle.getString("collectionWindowTitleEdit"));
         selectImageButton.setText(App.buttonsBundle.getString("selectImage"));
         downloadImagesButton.setText(App.buttonsBundle.getString("downloadImages"));
+        generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
+        postersViewButton.setText(App.buttonsBundle.getString("postersButton"));
+        logosViewButton.setText(App.buttonsBundle.getString("logosButton"));
+        playSameMusic.setText(App.textBundle.getString("playSameMusic"));
 
         showGeneralView();
     }

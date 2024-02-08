@@ -86,9 +86,14 @@ public class EditDiscController {
         episodeToEdit = d;
         fileField.setText(d.getVideoSrc());
 
+        generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
+        thumbnailsViewButton.setText(App.buttonsBundle.getString("thumbnailsButton"));
+        selectImageButton.setText(App.buttonsBundle.getString("selectImage"));
+        urlImageLoadButton.setText(App.buttonsBundle.getString("downloadImages"));
         titleText.setText(App.textBundle.getString("episodeWindowTitleEdit"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         saveButton.setText(App.buttonsBundle.getString("saveButton"));
+        orderText.setText(App.textBundle.getString("sortingOrder"));
         fileText.setText(App.textBundle.getString("file"));
         nameText.setText(App.textBundle.getString("name"));
 
