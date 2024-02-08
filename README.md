@@ -69,6 +69,15 @@ The Dark Knight Collection
 
 If a folder contains various video files, it will be cataloged as a movie with extras, which will be the same as a concert with various video files.
 
+## Valid video extensions
+- mkv
+- mp4
+- mpeg
+- avi
+- mov
+- wmv
+- m2ts
+
 ## Installation
 Portable versions exist for Windows, Linux and MacOS.
 
