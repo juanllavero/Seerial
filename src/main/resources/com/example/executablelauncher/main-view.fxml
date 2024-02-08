@@ -110,7 +110,7 @@
          <children>
             <VBox fx:id="menuOptions" alignment="TOP_CENTER" spacing="20.0" stylesheets="@styles.css">
                <children>
-                  <Label alignment="CENTER" text="Seerial" textFill="WHITE">
+                  <Label fx:id="appName" alignment="CENTER" text="Seerial" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="50.0" />
                      </font>

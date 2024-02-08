@@ -7,6 +7,7 @@ import com.example.executablelauncher.utils.Configuration;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -130,6 +131,9 @@ public class Controller implements Initializable {
     private Label settingsTitle;
 
     @FXML
+    private Label appName;
+
+    @FXML
     private ImageView globalShadow;
 
     private List<Library> categories = null;
@@ -168,17 +172,6 @@ public class Controller implements Initializable {
 
         //Open/Close Menu
         mainMenu.setVisible(false);
-
-        mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-            if (App.pressedBack(event)) {
-                if (mainMenu.isVisible()){
-                    hideContextMenu();
-                }else{
-                    playInteractionSound();
-                    showMenu();
-                }
-            }
-        });
 
         categoriesBox.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
@@ -331,14 +324,31 @@ public class Controller implements Initializable {
         timeline.play();
         //endregion
 
-        currentLibrary = App.getCurrentLibrary();
+        currentLibrary = DataManager.INSTANCE.currentLibrary;
 
         if (currentLibrary == null && !categories.isEmpty())
             currentLibrary = categories.get(0);
 
         if (currentLibrary != null){
+            mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+                if (App.pressedBack(event)) {
+                    if (mainMenu.isVisible()){
+                        hideContextMenu();
+                    }else{
+                        playInteractionSound();
+                        showMenu();
+                    }
+                }
+            });
+
             selectLibraryButton((Button) categoriesBox.getChildren().get(categories.indexOf(currentLibrary)));
             showSeriesFrom(currentLibrary);
+        }else{
+            showMenu();
+            settingsButton.setDisable(true);
+            appName.setText(App.textBundle.getString("noLibraries"));
+
+            switchToDesktopButton.requestFocus();
         }
     }
 
@@ -400,7 +410,7 @@ public class Controller implements Initializable {
 
     public void showSeriesFrom(Library cat){
         if (cat != currentLibrary)
-            App.setCurrentLibrary(cat);
+            DataManager.INSTANCE.currentLibrary = cat;
 
         currentLibrary = cat;
 
@@ -712,6 +722,7 @@ public class Controller implements Initializable {
     @FXML
     void switchToDesktop(ActionEvent event){
         playInteractionSound();
+        stopBackground();
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
             Parent root = fxmlLoader.load();

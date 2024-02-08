@@ -867,7 +867,7 @@ public class DesktopViewController {
 
     //region EPISODE SELECTION
     public void selectDisc(Episode episode){
-        if (!selectAllButton.isVisible())
+        if (!selectAllButton.isVisible() && selectedEpisodes.size() != episodeList.size())
             selectAllButton.setVisible(true);
 
         if (selectedEpisodes.contains(episode)) {
@@ -1061,28 +1061,8 @@ public class DesktopViewController {
                 //Process background music
                 List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
 
-                if (results != null){
-                    downloadMedia(season.getId(), results.get(0).watch_url);
-
-                    File mediaCahceDir = new File("resources/downloadedMediaCache/" + season.getId() + "/");
-                    File[] filesInMediaCache = mediaCahceDir.listFiles();
-
-                    if (filesInMediaCache != null && filesInMediaCache.length > 0){
-                        File audioFile = filesInMediaCache[0];
-
-                        String extension = audioFile.getName().substring(audioFile.getName().lastIndexOf("."));
-
-                        try{
-                            Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + extension), StandardCopyOption.REPLACE_EXISTING);
-                            season.musicSrc = "resources/music/" + season.getId() + ".mp3";
-
-                            directory = new File("resources/downloadedMediaCache/" + season.getId() + "/");
-                            FileUtils.deleteDirectory(directory);
-                        } catch (IOException error) {
-                            System.err.println("correctIdentificationShow: Could not copy downloaded audio file");
-                        }
-                    }
-                }
+                if (results != null)
+                    downloadMedia(season, results.get(0).watch_url);
 
                 return null;
             }
@@ -1142,28 +1122,8 @@ public class DesktopViewController {
                 //Process background music
                 List<YoutubeVideo> results = searchYoutube(selectedSeason.name + " main theme");
 
-                if (results != null){
-                    downloadMedia(selectedSeason.getId(), results.get(0).watch_url);
-
-                    File mediaCahceDir = new File("resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
-                    File[] filesInMediaCache = mediaCahceDir.listFiles();
-
-                    if (filesInMediaCache != null && filesInMediaCache.length > 0){
-                        File audioFile = filesInMediaCache[0];
-
-                        String extension = audioFile.getName().substring(audioFile.getName().lastIndexOf("."));
-
-                        try{
-                            Files.copy(audioFile.toPath(), Paths.get("resources/music/" + selectedSeason.getId() + extension), StandardCopyOption.REPLACE_EXISTING);
-                            selectedSeason.musicSrc = "resources/music/" + selectedSeason.getId() + ".mp3";
-
-                            File directory = new File("resources/downloadedMediaCache/" + selectedSeason.getId() + "/");
-                            FileUtils.deleteDirectory(directory);
-                        } catch (IOException error) {
-                            System.err.println("correctIdentificationShow: Could not copy downloaded audio file");
-                        }
-                    }
-                }
+                if (results != null)
+                    downloadMedia(selectedSeason, results.get(0).watch_url);
 
                 if (selectedSeason.getEpisodes().size() == 1){
                     Episode episode = selectedSeason.getEpisodes().get(0);
@@ -1224,6 +1184,41 @@ public class DesktopViewController {
 
         //Disable library and fullscreen buttons
         topBar.setDisable(true);
+
+        List<Series> series = List.copyOf(currentLibrary.getSeries());
+        for (Series show : series){
+            List<Season> seasons = List.copyOf(show.getSeasons());
+            for (Season s : seasons){
+                List<Episode> episodes = List.copyOf(s.getEpisodes());
+                for (Episode episode : episodes){
+                    File file = new File(episode.getVideoSrc());
+
+                    if (!file.exists()) {
+                        if (selectedSeason == s)
+                            discContainer.getChildren().remove(episodeList.indexOf(episode));
+
+                        s.removeEpisode(episode);
+                        DataManager.INSTANCE.deleteEpisodeData(episode);
+                    }
+                }
+
+                if (s.getEpisodes().isEmpty()){
+                    if (selectedSeries == show)
+                        seasonContainer.getChildren().remove(seasonList.indexOf(s));
+
+                    show.removeSeason(s);
+                    DataManager.INSTANCE.deleteSeasonData(s);
+                }
+            }
+
+            if (show.getSeasons().isEmpty()){
+                if (selectedSeries == show)
+                    seriesContainer.getChildren().remove(seriesList.indexOf(show));
+
+                currentLibrary.removeSeries(show);
+                DataManager.INSTANCE.deleteSeriesData(show);
+            }
+        }
 
         List<String> folders = currentLibrary.folders;
 
@@ -1329,34 +1324,8 @@ public class DesktopViewController {
 
                     List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
 
-                    if (results != null){
-                        downloadMedia(season.getId(), results.get(0).watch_url);
-
-                        try{
-                            Files.createDirectory(Paths.get("resources/downloadedMediaCache/"));
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                        File mediaCahceDir = new File("resources/downloadedMediaCache/" + season.getId() + "/");
-                        File[] filesInMediaCache = mediaCahceDir.listFiles();
-
-                        if (filesInMediaCache != null && filesInMediaCache.length > 0){
-                            File audioFile = filesInMediaCache[0];
-
-                            String extension = audioFile.getName().substring(audioFile.getName().lastIndexOf("."));
-
-                            try{
-                                Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + extension), StandardCopyOption.REPLACE_EXISTING);
-                                season.musicSrc = "resources/music/" + season.getId() + ".mp3";
-
-                                File directory = new File("resources/downloadedMediaCache/" + season.getId() + "/");
-                                FileUtils.deleteDirectory(directory);
-                            } catch (IOException error) {
-                                System.err.println("correctIdentificationShow: Could not copy downloaded audio file");
-                            }
-                        }
-                    }
+                    if (results != null)
+                        downloadMedia(season, results.get(0).watch_url);
                 }
                 return null;
             }
@@ -1421,9 +1390,11 @@ public class DesktopViewController {
 
         //region CREATE/EDIT SERIES
         Series series;
+        boolean exists = false;
 
         if (currentLibrary.analyzedFolders.get(directory.getAbsolutePath()) != null){
             series = currentLibrary.getSeries(currentLibrary.analyzedFolders.get(directory.getAbsolutePath()));
+            exists = true;
         }else{
             series = new Series();
             series.folder = directory.getAbsolutePath();
@@ -1492,7 +1463,11 @@ public class DesktopViewController {
         }
 
         episodesGroup = null;
-        addSeries(series);
+
+        if (exists)
+            updateSeries(series);
+        else
+            addSeries(series);
     }
     private void setSeriesMetadataAndImages(Series series, SeriesMetadata seriesMetadata, boolean downloadImages){
         //Set metadata
@@ -1669,7 +1644,7 @@ public class DesktopViewController {
         videoExtension = videoExtension.toLowerCase();
 
         return videoExtension.equals(".mkv") || videoExtension.equals(".mp4") || videoExtension.equals(".avi") || videoExtension.equals(".mov")
-                || videoExtension.equals(".wmv") || videoExtension.equals(".mpeg") || videoExtension.equals(".m2ts") || videoExtension.equals(".iso");
+                || videoExtension.equals(".wmv") || videoExtension.equals(".mpeg") || videoExtension.equals(".m2ts");
     }
     private void processEpisode(Series series, File file, List<SeasonMetadata> seasonsMetadata, SeasonsGroupMetadata episodesGroup){
         //Name of the file without the extension
@@ -2750,7 +2725,9 @@ public class DesktopViewController {
         return null;
     }
 
-    public void downloadMedia(String seasonID, String url){
+    public boolean downloadMedia(Season season, String url){
+        String seasonID = season.getId();
+
         try {
             Files.createDirectories(Paths.get("resources/downloadedMediaCache/" + seasonID + "/"));
             File directory = new File("resources/downloadedMediaCache/" + seasonID + "/");
@@ -2763,19 +2740,49 @@ public class DesktopViewController {
             pb.redirectErrorStream(true);
             Process process = pb.start();
             process.waitFor();
+
+            File mediaCahceDir = new File("resources/downloadedMediaCache/" + season.getId() + "/");
+            File[] filesInMediaCache = mediaCahceDir.listFiles();
+
+            if (filesInMediaCache != null && filesInMediaCache.length != 0){
+                File audioFile = filesInMediaCache[0];
+
+                try{
+                    Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
+                    season.musicSrc = "resources/music/" + season.getId() + ".mp4";
+
+                    File dir = new File("resources/downloadedMediaCache/" + season.getId() + "/");
+                    FileUtils.deleteDirectory(directory);
+                    FileUtils.deleteDirectory(dir);
+                } catch (IOException error) {
+                    System.err.println("downloadMedia: Could not copy downloaded audio file");
+                    return false;
+                }
+            }
         } catch (IOException | InterruptedException e) {
             System.err.println("downloadMedia: Error downloading media");
+            return false;
         }
+
+        return true;
     }
     //endregion
 
     //region ADD SECTION
+    private void updateSeries(Series series){
+        if (series == selectedSeries){
+            selectedSeries = null;
+            selectSeries(series);
+        }
+    }
     public void addSeries(Series s){
         Platform.runLater(() -> {
             DataManager.INSTANCE.checkEmptySeasons(currentLibrary, s, true);
 
             if (s.getSeasons().isEmpty())
                 return;
+
+            seasonScroll.setVisible(true);
 
             seriesList.add(s);
             addSeriesCard(s);
@@ -2992,19 +2999,24 @@ public class DesktopViewController {
 
             if (acceptRemove){
                 acceptRemove = false;
-                int index = seriesList.indexOf(selectedSeries);
-                seriesList.remove(selectedSeries);
-                seriesButtons.remove(index);
-                seriesContainer.getChildren().remove(index);
-                DataManager.INSTANCE.deleteSeriesData(selectedSeries);
-                selectedSeries = null;
-                if (!seriesList.isEmpty()){
-                    selectSeriesButton(seriesButtons.get(0));
-                }
+                removeCollection(selectedSeries);
             }
         }
 
         hideBackgroundShadow();
+    }
+    private void removeCollection(Series series){
+        int index = seriesList.indexOf(series);
+        seriesList.remove(series);
+        seriesButtons.remove(index);
+        seriesContainer.getChildren().remove(index);
+        DataManager.INSTANCE.deleteSeriesData(series);
+        selectedSeries = null;
+        if (!seriesList.isEmpty()){
+            selectSeriesButton(seriesButtons.get(0));
+        }else{
+            seasonScroll.setVisible(false);
+        }
     }
     @FXML
     void removeSeason(){
@@ -3013,14 +3025,26 @@ public class DesktopViewController {
 
         if (acceptRemove){
             acceptRemove = false;
-            seasonList.remove(selectedSeason);
-            DataManager.INSTANCE.deleteSeasonData(selectedSeason);
-
-            selectedSeason = null;
-            selectSeries(selectedSeries);
+            removeSeason(selectedSeason);
         }
 
         hideBackgroundShadow();
+    }
+    private void removeSeason(Season season){
+        seasonContainer.getChildren().remove(seasonList.indexOf(season));
+        seasonList.remove(season);
+        DataManager.INSTANCE.deleteSeasonData(season);
+        selectedSeason = null;
+
+        if (selectedSeries.getSeasons().isEmpty()) {
+            removeCollection(selectedSeries);
+        }
+
+        Series s = selectedSeries;
+        if (selectedSeries != null) {
+            selectedSeries = null;
+            selectSeries(s);
+        }
     }
     @FXML
     void removeEpisode(){
@@ -3048,8 +3072,13 @@ public class DesktopViewController {
         episodeList.remove(d);
         DataManager.INSTANCE.deleteEpisodeData(d);
 
-        selectSeason(selectedSeason);
-        hideMenu();
+        if (episodeList.isEmpty()){
+            removeSeason(selectedSeason);
+        }else{
+            selectSeason(selectedSeason);
+        }
+
+        hideBackgroundShadow();
     }
     //endregion
 
@@ -3061,10 +3090,10 @@ public class DesktopViewController {
     private void fullScreen(){
         hideMenu();
 
-        if (librarySelector.getItems().isEmpty()) {
+        /*if (librarySelector.getItems().isEmpty()) {
             App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("noLibraries"));
             return;
-        }
+        }*/
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));

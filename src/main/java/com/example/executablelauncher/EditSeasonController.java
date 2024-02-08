@@ -1,6 +1,7 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Season;
+import com.example.executablelauncher.entities.Series;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -192,7 +193,12 @@ public class EditSeasonController {
         else
             musicField.setText("");
 
-        seriesName = s.getName();
+        Series series = DataManager.INSTANCE.currentLibrary.getSeries(s.getSeriesID());
+
+        if (isShow)
+            seriesName = series.getName();
+        else
+            seriesName = s.getName();
 
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));
@@ -648,12 +654,23 @@ public class EditSeasonController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("youtubeSearch.fxml"));
             Parent root = loader.load();
             YoutubeSearchController controller = loader.getController();
-            controller.initValues(parentController, this, seriesName + seasonToEdit.name);
+
+            String searchText;
+            if (DataManager.INSTANCE.currentLibrary.type.equals("Shows"))
+                searchText = seriesName;
+            else
+                searchText = seasonToEdit.name;
+
+            controller.initValues(parentController, this, searchText);
 
             newWindow(root);
         } catch (IOException e) {
             System.err.println("EditSeasonController: downloadMusic error");
         }
+    }
+    public void setMusic(String src){
+        selectedMusic = new File(src);
+        musicField.setText(selectedMusic.getAbsolutePath());
     }
     //endregion
 

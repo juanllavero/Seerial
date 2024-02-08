@@ -144,26 +144,10 @@ public class YoutubeSearchController {
 
     @FXML
     void downloadMedia(){
-        parentController.downloadMedia(seasonParentController.seasonToEdit.getId(), selectedVideo.watch_url);
+        boolean downloaded = parentController.downloadMedia(seasonParentController.seasonToEdit, selectedVideo.watch_url);
 
-        File mediaCahceDir = new File("resources/downloadedMediaCache/" + seasonParentController.seasonToEdit.getId() + "/");
-        File[] filesInMediaCache = mediaCahceDir.listFiles();
-
-        if (filesInMediaCache != null && filesInMediaCache.length != 0){
-            File audioFile = filesInMediaCache[0];
-
-            try{
-                Files.copy(audioFile.toPath(), Paths.get("resources/music/" + seasonParentController.seasonToEdit.getId() + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
-                seasonParentController.seasonToEdit.musicSrc = "resources/music/" + seasonParentController.seasonToEdit.getId() + ".mp4";
-
-                File directory = new File("resources/downloadedMediaCache/" + seasonParentController.seasonToEdit.getId() + "/");
-                FileUtils.deleteDirectory(directory);
-
-                seasonParentController.selectedMusic = new File("resources/music/" + seasonParentController.seasonToEdit.getId() + ".mp4");
-            } catch (IOException e) {
-                System.err.println("processEpisode: Could not copy downloaded audio file");
-            }
-        }
+        if (downloaded)
+            seasonParentController.setMusic("resources/music/" + seasonParentController.seasonToEdit.getId() + ".mp4");
 
         close();
     }
