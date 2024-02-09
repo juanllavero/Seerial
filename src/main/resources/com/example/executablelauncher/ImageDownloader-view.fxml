@@ -42,7 +42,10 @@
                         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                            <children>
                               <Label fx:id="resolutionText" text="Resolution: " textFill="WHITE" />
-                              <TextField fx:id="widthField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1920" />
+                              <TextField fx:id="widthField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1920">
+                                 <HBox.margin>
+                                    <Insets left="5.0" />
+                                 </HBox.margin></TextField>
                               <Label text="X" />
                               <TextField fx:id="heightField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1080" />
                            </children>

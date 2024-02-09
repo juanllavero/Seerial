@@ -220,7 +220,7 @@ public class EditSeasonController {
         logosViewButton.setText(buttonsBundle.getString("logosButton"));
         postersViewButton.setText(buttonsBundle.getString("postersButton"));
         selectImageButton.setText(buttonsBundle.getString("selectImage"));
-        fromURLButton.setText(buttonsBundle.getString("fromURL"));
+        fromURLButton.setText(buttonsBundle.getString("fromURLButton"));
         downloadImagesButton.setText(buttonsBundle.getString("downloadImages"));
     }
     @FXML
