@@ -10,6 +10,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -1062,18 +1063,26 @@ public class SeasonController {
 
     //region BACKGROUND VIDEO/MUSIC
     private void setMediaPlayer(){
-        mp.setVolume(Double.parseDouble(Configuration.loadConfig("volume", "0.2")));
-        mp.setOnEndOfMedia(() -> {
-            mp.seek(Duration.ZERO);
-            mp.play();
-        });
+        Task<Void> mpTask = new Task<>() {
+            @Override
+            protected Void call() {
+                mp.setVolume(Double.parseDouble(Configuration.loadConfig("volume", "0.2")));
+                mp.setOnEndOfMedia(() -> {
+                    mp.seek(Duration.ZERO);
+                    mp.play();
+                });
 
-        timeline = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
-                    playBackgroundMedia();
-                })
-        );
-        timeline.play();
+                timeline = new javafx.animation.Timeline(
+                        new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
+                            playBackgroundMedia();
+                        })
+                );
+                timeline.play();
+                return null;
+            }
+        };
+
+        new Thread(mpTask).start();
     }
     private void playBackgroundMedia(){
         Platform.runLater(() ->{

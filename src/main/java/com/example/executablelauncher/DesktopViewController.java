@@ -791,7 +791,7 @@ public class DesktopViewController {
             originalImage.flush();
             blendedImage.flush();
         } catch (IOException e) {
-            System.err.println("EditSeasonController: error applying transparency effect to background");
+            System.err.println("setTransparencyEffect: error applying transparency effect to background");
         }
     }
     public static void processBlurAndSave(String imagePath, String outputFilePath) {
