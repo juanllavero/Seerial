@@ -9,6 +9,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class MainMenuDesktopController {
+    @FXML
+    private Label title;
 
     @FXML
     private Button applyButton;
@@ -40,6 +42,7 @@ public class MainMenuDesktopController {
         saveButton.setText(App.buttonsBundle.getString("saveButton"));
         generalCatButton.setText(App.buttonsBundle.getString("generalButton"));
         languageText.setText(App.textBundle.getString("languageText"));
+        title.setText(App.buttonsBundle.getString("settings"));
 
         languageChoice.getItems().clear();
         languageChoice.getItems().addAll(App.getLanguages());

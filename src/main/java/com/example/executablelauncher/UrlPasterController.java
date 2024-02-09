@@ -47,10 +47,10 @@ public class UrlPasterController {
 
     public void initValues(boolean isLogo){
         this.isLogo = isLogo;
-        title.setText("Select URL");
-        pasteURLText.setText("Paste a valid URL here");
-        addButton.setText("Add");
-        cancelButton.setText("Cancel");
+        title.setText(App.textBundle.getString("selectURL"));
+        pasteURLText.setText(App.textBundle.getString("pasteURL"));
+        addButton.setText(App.buttonsBundle.getString("addButton"));
+        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
     }
 
     @FXML

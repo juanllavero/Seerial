@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -17,6 +18,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +35,6 @@ public class App extends Application {
     public static ResourceBundle buttonsBundle;
     public static ResourceBundle textBundle;
     //endregion
-    public static Library currentLibrary = null;
     public static Series selectedSeries = null;
     public static Stage primaryStage;
     public static String lastDirectory = null;
@@ -49,8 +50,23 @@ public class App extends Application {
         globalLanguage = Locale.forLanguageTag(Configuration.loadConfig("currentLanguageTag", "en-US"));
 
         //Add languages
-        languages.add(Locale.forLanguageTag("en-US"));
-        languages.add(Locale.forLanguageTag("es-ES"));
+        String languageDir = "resources";
+        File[] filesInDir = new File(languageDir).listFiles();
+
+        if (filesInDir != null){
+            for (File file : filesInDir){
+                if (file.getName().matches("^buttons.*")){
+                    String language = "";
+
+                    language = file.getName().substring(file.getName().indexOf("_") + 1, file.getName().lastIndexOf("."));
+
+                    String tag = language.substring(0, language.indexOf("_"));
+                    String country = language.substring(language.indexOf("_") + 1);
+
+                    languages.add(Locale.of(tag, country));
+                }
+            }
+        }
 
         //Set resource bundles
         buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
@@ -58,33 +74,58 @@ public class App extends Application {
 
         //Set a few of TheMovieDB translations for metadata
         tmdbLanguages = List.of(new Locale[]{
-                Locale.forLanguageTag("es-ES"),
-                Locale.forLanguageTag("en-US"),
-                Locale.forLanguageTag("de-DE"),
-                Locale.forLanguageTag("it-IT"),
-                Locale.forLanguageTag("fr-FR")
+            Locale.forLanguageTag("es-ES"),
+            Locale.forLanguageTag("en-US"),
+            Locale.forLanguageTag("de-DE"),
+            Locale.forLanguageTag("it-IT"),
+            Locale.forLanguageTag("fr-FR")
         });
 
-        //Start the stage
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
-        Parent root = fxmlLoader.load();
-        stage.setTitle(App.textBundle.getString("desktopMode"));
-        //stage.initStyle(StageStyle.UNDECORATED);
-        stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
-        Scene scene = new Scene(root);
-        scene.setFill(Color.BLACK);
-        stage.setScene(scene);
-        stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
-        stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
-        DesktopViewController desktopViewController = fxmlLoader.getController();
-        desktopViewController.initValues();
+        String mode = Configuration.loadConfig("fullscreen", "off");
+
         primaryStage = stage;
-        //FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
-        stage.show();
+
+        if (mode.equals("off"))
+            loadDesktopMode();
+        else
+            loadFullscreenMode();
+
+        primaryStage.show();
 
         primaryStage.setOnCloseRequest(event -> close());
     }
-
+    private void loadDesktopMode() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
+        Parent root = fxmlLoader.load();
+        primaryStage.setTitle(App.textBundle.getString("desktopMode"));
+        //stage.initStyle(StageStyle.UNDECORATED);
+        primaryStage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
+        Scene scene = new Scene(root);
+        scene.setFill(Color.BLACK);
+        primaryStage.setScene(scene);
+        primaryStage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
+        primaryStage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
+        DesktopViewController desktopViewController = fxmlLoader.getController();
+        desktopViewController.initValues();
+        //FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
+    }
+    private void loadFullscreenMode() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
+        Parent root = fxmlLoader.load();
+        //Controller controller = fxmlLoader.getController();
+        //controller.playIntroVideo();
+        primaryStage = new Stage();
+        primaryStage.setTitle(App.textBundle.getString("fullscreenMode"));
+        primaryStage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
+        Scene scene = new Scene(root);
+        scene.setCursor(Cursor.NONE);
+        scene.setFill(Color.BLACK);
+        primaryStage.setScene(scene);
+        primaryStage.setMaximized(true);
+        primaryStage.initStyle(StageStyle.UNDECORATED);
+        primaryStage.setWidth(Screen.getPrimary().getBounds().getWidth());
+        primaryStage.setHeight(Screen.getPrimary().getBounds().getHeight());
+    }
     public static boolean pressedUp(KeyEvent event){
         return event.getCode().equals(KeyCode.UP);
     }
@@ -137,9 +178,9 @@ public class App extends Application {
         new Thread(wakeDirTask).start();
     }
 
-    public static void setPopUpProperties(Stage stage){
+    public static void setPopUpProperties(Stage stage, Stage primaryStage){
         stage.initModality(Modality.WINDOW_MODAL);
-        stage.initOwner(App.primaryStage);
+        stage.initOwner(primaryStage);
     }
 
     public static List<String> getLanguages(){
@@ -178,12 +219,6 @@ public class App extends Application {
         return categoriesNames;
     }
 
-    public static void setCurrentLibrary(Library cat){ currentLibrary = cat; }
-
-    public static Library getCurrentLibrary(){
-        return currentLibrary;
-    }
-
     public static void setSelectedSeries(Series series){ selectedSeries = series; }
 
     public static Series getSelectedSeries(){
@@ -195,6 +230,7 @@ public class App extends Application {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
+        alert.setGraphic(null);
         alert.showAndWait();
     }
 

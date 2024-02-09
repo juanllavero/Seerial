@@ -46,9 +46,6 @@ public class AddLibraryController {
     private VBox folderContainer;
 
     @FXML
-    private Label folderText;
-
-    @FXML
     private VBox generalBox;
 
     @FXML
@@ -105,6 +102,13 @@ public class AddLibraryController {
         saveButton.setText(App.buttonsBundle.getString("next"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
+        addFolderButton.setText(App.buttonsBundle.getString("addFolder"));
+        generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
+        foldersViewButton.setText(App.buttonsBundle.getString("folders"));
+        moviesTypeButton.setText(App.textBundle.getString("movies"));
+        showsTypeButton.setText(App.textBundle.getString("shows"));
+        nameText.setText(App.textBundle.getString("name"));
+        languageText.setText(App.textBundle.getString("languageText"));
 
         List<Locale> languages = App.tmdbLanguages;
         for (Locale locale : languages){

@@ -131,6 +131,10 @@ public class EditCollectionController {
         title.setText(App.textBundle.getString("collectionWindowTitleEdit"));
         selectImageButton.setText(App.buttonsBundle.getString("selectImage"));
         downloadImagesButton.setText(App.buttonsBundle.getString("downloadImages"));
+        generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
+        postersViewButton.setText(App.buttonsBundle.getString("postersButton"));
+        logosViewButton.setText(App.buttonsBundle.getString("logosButton"));
+        playSameMusic.setText(App.textBundle.getString("playSameMusic"));
 
         showGeneralView();
     }
@@ -202,7 +206,7 @@ public class EditCollectionController {
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root1);
             stage.setScene(scene);
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) name.getScene().getWindow());
             stage.show();
             ImageDownloaderController controller = fxmlLoader.getController();
             controller.setSeriesParent(this);
@@ -227,7 +231,7 @@ public class EditCollectionController {
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root1);
             stage.setScene(scene);
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) name.getScene().getWindow());
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -267,7 +271,7 @@ public class EditCollectionController {
                 stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 2);
                 stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 2);
                 stage.setTitle(App.textBundle.getString("imageCropper"));
-                App.setPopUpProperties(stage);
+                App.setPopUpProperties(stage, (Stage) name.getScene().getWindow());
                 stage.setScene(new Scene(root1));
                 stage.show();
             } catch (IOException e) {

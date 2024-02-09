@@ -1,6 +1,7 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Season;
+import com.example.executablelauncher.entities.Series;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -111,9 +112,6 @@ public class EditSeasonController {
     private Button selectPosterButton;
 
     @FXML
-    private CheckBox showName;
-
-    @FXML
     private Label sortingText;
 
     @FXML
@@ -192,12 +190,15 @@ public class EditSeasonController {
         else
             musicField.setText("");
 
-        seriesName = s.getName();
+        Series series = DataManager.INSTANCE.currentLibrary.getSeries(s.getSeriesID());
+
+        if (isShow)
+            seriesName = series.getName();
+        else
+            seriesName = s.getName();
 
         if (s.getOrder() > 0)
             orderField.setText(Integer.toString(s.getOrder()));
-
-        showName.setSelected(s.showName);
 
         initValues();
         showGeneralView();
@@ -215,6 +216,15 @@ public class EditSeasonController {
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         backgroundText.setText(App.textBundle.getString("backgroundImage"));
         musicDownloadButton.setText(buttonsBundle.getString("downloadButton"));
+        generalViewButton.setText(buttonsBundle.getString("generalButton"));
+        logosViewButton.setText(buttonsBundle.getString("logosButton"));
+        postersViewButton.setText(buttonsBundle.getString("postersButton"));
+        selectImageButton.setText(buttonsBundle.getString("selectImage"));
+        fromURLButton.setText(buttonsBundle.getString("fromURLButton"));
+        downloadImagesButton.setText(buttonsBundle.getString("downloadImages"));
+        selectPosterButton.setText(buttonsBundle.getString("selectImage"));
+        fromURLPosterButton.setText(buttonsBundle.getString("fromURLButton"));
+        downloadPostersButton.setText(buttonsBundle.getString("downloadImages"));
     }
     @FXML
     void cancelButton(ActionEvent event) {
@@ -350,7 +360,7 @@ public class EditSeasonController {
                 stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
                 Scene scene = new Scene(root1);
                 stage.setScene(scene);
-                App.setPopUpProperties(stage);
+                App.setPopUpProperties(stage, (Stage) nameField.getScene().getWindow());
                 stage.show();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -379,7 +389,7 @@ public class EditSeasonController {
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root1);
             stage.setScene(scene);
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) nameField.getScene().getWindow());
             stage.show();
             ImageDownloaderController controller = fxmlLoader.getController();
             controller.setSeasonParent(this);
@@ -412,7 +422,7 @@ public class EditSeasonController {
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root1);
             stage.setScene(scene);
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) nameField.getScene().getWindow());
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -648,12 +658,23 @@ public class EditSeasonController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("youtubeSearch.fxml"));
             Parent root = loader.load();
             YoutubeSearchController controller = loader.getController();
-            controller.initValues(parentController, this, seriesName + seasonToEdit.name);
+
+            String searchText;
+            if (DataManager.INSTANCE.currentLibrary.type.equals("Shows"))
+                searchText = seriesName;
+            else
+                searchText = seasonToEdit.name;
+
+            controller.initValues(parentController, this, searchText);
 
             newWindow(root);
         } catch (IOException e) {
             System.err.println("EditSeasonController: downloadMusic error");
         }
+    }
+    public void setMusic(String src){
+        selectedMusic = new File(src);
+        musicField.setText(selectedMusic.getAbsolutePath());
     }
     //endregion
 
@@ -708,7 +729,6 @@ public class EditSeasonController {
 
         seasonToEdit.setName(nameField.getText());
         seasonToEdit.setYear(yearField.getText());
-        seasonToEdit.showName = showName.isSelected();
 
         //Save Background
         String newName = "";

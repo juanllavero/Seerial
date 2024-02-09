@@ -70,6 +70,9 @@ public class ImageDownloaderController {
     @FXML
     private BorderPane downloadingPane;
 
+    @FXML
+    private Label downloadingText;
+
     private final int numberOfImages = 60;
     private boolean isCover = false;
     private boolean isLogo = false;
@@ -98,9 +101,10 @@ public class ImageDownloaderController {
         transparentCheck.setSelected(transparent);
 
         title.setText(App.textBundle.getString("imageDownloaderTitle"));
+        downloadingText.setText(App.textBundle.getString("downloading"));
         transparentCheck.setText(App.textBundle.getString("transparentCheck"));
-        widthField.setText("");
-        heightField.setText("");
+        widthField.setText(width);
+        heightField.setText(height);
         resolutionText.setText(App.textBundle.getString("resolutionText"));
         selectImageButton.setText(App.buttonsBundle.getString("selectButton"));
         loadMoreButton.setText(App.buttonsBundle.getString("loadMoreButton"));

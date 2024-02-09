@@ -344,7 +344,7 @@ public class SeasonController {
 
         detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedDown(event)){
-                if (episodeButtons.size() <= 1)
+                if (episodeButtons.size() <= 1 && !isShow)
                     playButton.requestFocus();
                 else
                     episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
@@ -356,7 +356,7 @@ public class SeasonController {
 
         playButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (App.pressedUp(event)){
-                if (episodeButtons.size() <= 1)
+                if (episodeButtons.size() <= 1 && !isShow)
                     detailsButton.requestFocus();
                 else
                     episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
@@ -368,7 +368,7 @@ public class SeasonController {
 
         watchedButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (App.pressedUp(event)){
-                if (episodeButtons.size() <= 1)
+                if (episodeButtons.size() <= 1 && !isShow)
                     detailsButton.requestFocus();
                 else
                     episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
@@ -380,7 +380,7 @@ public class SeasonController {
 
         optionsButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (App.pressedUp(event)){
-                if (episodeButtons.size() <= 1)
+                if (episodeButtons.size() <= 1 && !isShow)
                     detailsButton.requestFocus();
                 else
                     episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
@@ -432,7 +432,7 @@ public class SeasonController {
         if (timeline != null)
             timeline.stop();
 
-        if (season.getEpisodes().size() > 1){
+        if (season.getEpisodes().size() > 1 || isShow){
             cardContainer.setPrefHeight((Screen.getPrimary().getBounds().getHeight() / 5) + 20);
             cardContainer.setVisible(true);
         }else{
@@ -540,15 +540,15 @@ public class SeasonController {
         if (!episodes.isEmpty())
             selectedEpisode = episodes.get(0);
 
-        if (episodeButtons.size() <= 1){
+        if (episodeButtons.size() <= 1 && !isShow){
             setTimeLeft(episodes.get(0));
         }
 
         Platform.runLater(() -> {
-            buttonCount = getVisibleButtonsCount();
             cardContainer.setTranslateX(0);
+            buttonCount = getVisibleButtonsCount();
 
-            if (episodeButtons.size() > 1)
+            if (episodeButtons.size() > 1 || isShow)
                 episodeButtons.get(season.lastDisc).requestFocus();
             else
                 playButton.requestFocus();
@@ -557,7 +557,7 @@ public class SeasonController {
         overviewField.setText(season.overview);
         yearField.setText(season.getYear());
         durationField.setText(setRuntime(selectedEpisode.runtime));
-        episodeName.setText(season.name);
+        episodeName.setText("");
 
         if (selectedEpisode.imdbScore != 0){
             scoreProviderImg.setImage(new Image("file:resources/img/icons/imdb.png", 30, 30, true, true));
@@ -606,7 +606,7 @@ public class SeasonController {
     public void stopVideo(){
         playingVideo = false;
 
-        if (episodeButtons.size() > 1)
+        if (episodeButtons.size() > 1 || isShow)
             episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
         else
             playButton.requestFocus();
@@ -943,7 +943,7 @@ public class SeasonController {
 
     //region EFFECTS
     public void fadeOutEffect(Pane pane){
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), pane);
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.6), pane);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0);
         fadeOut.play();
@@ -960,7 +960,7 @@ public class SeasonController {
 
     public void fadeInEffect(Pane pane){
         pane.setVisible(true);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), pane);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.6), pane);
         fadeIn.setFromValue(0);
         fadeIn.setToValue(1.0);
         fadeIn.play();
