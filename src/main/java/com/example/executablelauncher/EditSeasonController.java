@@ -222,6 +222,9 @@ public class EditSeasonController {
         selectImageButton.setText(buttonsBundle.getString("selectImage"));
         fromURLButton.setText(buttonsBundle.getString("fromURLButton"));
         downloadImagesButton.setText(buttonsBundle.getString("downloadImages"));
+        selectPosterButton.setText(buttonsBundle.getString("selectImage"));
+        fromURLPosterButton.setText(buttonsBundle.getString("fromURLButton"));
+        downloadPostersButton.setText(buttonsBundle.getString("downloadImages"));
     }
     @FXML
     void cancelButton(ActionEvent event) {
@@ -357,7 +360,7 @@ public class EditSeasonController {
                 stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
                 Scene scene = new Scene(root1);
                 stage.setScene(scene);
-                App.setPopUpProperties(stage);
+                App.setPopUpProperties(stage, (Stage) nameField.getScene().getWindow());
                 stage.show();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -386,7 +389,7 @@ public class EditSeasonController {
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root1);
             stage.setScene(scene);
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) nameField.getScene().getWindow());
             stage.show();
             ImageDownloaderController controller = fxmlLoader.getController();
             controller.setSeasonParent(this);
@@ -419,7 +422,7 @@ public class EditSeasonController {
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root1);
             stage.setScene(scene);
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) nameField.getScene().getWindow());
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -178,9 +178,9 @@ public class App extends Application {
         new Thread(wakeDirTask).start();
     }
 
-    public static void setPopUpProperties(Stage stage){
+    public static void setPopUpProperties(Stage stage, Stage primaryStage){
         stage.initModality(Modality.WINDOW_MODAL);
-        stage.initOwner(App.primaryStage);
+        stage.initOwner(primaryStage);
     }
 
     public static List<String> getLanguages(){

@@ -52,6 +52,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -437,6 +438,11 @@ public class DesktopViewController {
         editSeasonButton.setText(App.buttonsBundle.getString("editButton"));
         editDiscButton.setText(App.buttonsBundle.getString("editButton"));
         editLibraryButton.setText(App.buttonsBundle.getString("editButton"));
+        deleteSelectedButton.setText(App.buttonsBundle.getString("removeButton"));
+        selectAllButton.setText(App.buttonsBundle.getString("selectAllButton"));
+        deselectAllButton.setText(App.buttonsBundle.getString("deselectAllButton"));
+        identificationMovie.setText(App.textBundle.getString("correctIdentification"));
+        identificationShow.setText(App.textBundle.getString("correctIdentification"));
 
         searchFilesButton.setText(App.buttonsBundle.getString("searchFiles"));
     }
@@ -953,7 +959,7 @@ public class DesktopViewController {
             stage.setTitle("Correct Identification");
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setScene(new Scene(root1));
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
             stage.showAndWait();
 
             hideBackgroundShadow();
@@ -979,7 +985,7 @@ public class DesktopViewController {
             stage.setTitle("Correct Identification");
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setScene(new Scene(root1));
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
             stage.showAndWait();
 
             hideBackgroundShadow();
@@ -2826,7 +2832,7 @@ public class DesktopViewController {
             stage.setTitle("Add Library");
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setScene(new Scene(root1));
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -2872,7 +2878,7 @@ public class DesktopViewController {
                 stage.setTitle("Edit Library");
                 stage.initStyle(StageStyle.UNDECORATED);
                 stage.setScene(new Scene(root1));
-                App.setPopUpProperties(stage);
+                App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
                 stage.show();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -2896,7 +2902,7 @@ public class DesktopViewController {
                 Scene scene = new Scene(root1);
                 scene.setFill(Color.BLACK);
                 stage.setScene(scene);
-                App.setPopUpProperties(stage);
+                App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
                 stage.show();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -2919,7 +2925,7 @@ public class DesktopViewController {
             Scene scene = new Scene(root1);
             scene.setFill(Color.BLACK);
             stage.setScene(scene);
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -2943,7 +2949,7 @@ public class DesktopViewController {
             stage.setTitle(App.textBundle.getString("episodeWindowTitleEdit"));
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setScene(new Scene(root1));
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -2970,7 +2976,7 @@ public class DesktopViewController {
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root1);
             stage.setScene(scene);
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
             return stage;
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -3145,7 +3151,7 @@ public class DesktopViewController {
             stage.setTitle("Settings");
             stage.initStyle(StageStyle.UNDECORATED);
             stage.setScene(new Scene(root1));
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);

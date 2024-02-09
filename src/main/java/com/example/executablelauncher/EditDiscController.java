@@ -173,7 +173,7 @@ public class EditDiscController {
             stage.initStyle(StageStyle.UNDECORATED);
             Scene scene = new Scene(root1);
             stage.setScene(scene);
-            App.setPopUpProperties(stage);
+            App.setPopUpProperties(stage, (Stage) nameField.getScene().getWindow());
             stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
