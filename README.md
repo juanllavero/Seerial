@@ -81,11 +81,8 @@ If a folder contains various video files, it will be cataloged as a movie with e
 ## Installation
 Portable versions exist for Windows, Linux and MacOS.
 
-### Windows
-You can download the installer from the last release. This executable will install Java, Python and the required Python libraries, alongside the actual application.
-
 ### Requirements
-This software is required in order for the application to run only if the installation is not from the Windows installer.
+This software is required in order for the application to run.
 
 - Java 8.
 - Python 3.
