@@ -76,6 +76,27 @@ public class VideoPlayer extends MediaView {
         }
 
         startClock();
+
+        //Player base settings
+        mpvSetProperty("profile", "high-quality");
+        mpvSetProperty("vo", "gpu-next");
+        mpvSetProperty("gpu-api", "vulkan");
+        mpvSetProperty("target-colorspace-hint", "yes");
+        mpvSetProperty("target-contrast", "auto");
+        mpvSetProperty("gpu-api", "vulkan");
+
+        //Set smooth video properties
+        mpvSetProperty("video-sync", "display-resample");
+        mpvSetProperty("interpolation", "yes");
+        mpvSetProperty("tscale", "mitchell");
+        mpvSetProperty("interpolation-preserve", "no");
+
+        mpvSetProperty("tscale-window", "sphinx");
+        mpvSetProperty("tscale-blur", "0.6991556596428412");
+        mpvSetProperty("tscale-radius", "1.0");
+        mpvSetProperty("tscale-clamp", "0.0");
+
+        System.out.println(mpvGetProperty("interpolation"));
     }
     public void loadTracks(){
         String tracklist = mpvGetProperty("track-list");

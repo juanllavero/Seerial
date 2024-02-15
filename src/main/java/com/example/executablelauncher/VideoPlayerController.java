@@ -117,6 +117,7 @@ public class VideoPlayerController {
 
     private VideoPlayer videoPlayer;
     boolean controlsShown = false;
+    DesktopViewController parentControllerDesktop = null;
     SeasonController parentController = null;
     Timeline timeline = null;
     Timeline volumeCount = null;
@@ -130,8 +131,13 @@ public class VideoPlayerController {
     int currentDisc = 0;
 
     //region INITIALIZATION
-    public void setVideo(SeasonController parent, Season season, Episode episode, String seriesName, Scene scene){
+    public void setParent(DesktopViewController parent){
+        parentControllerDesktop = parent;
+    }
+    public void setParent(SeasonController parent){
         parentController = parent;
+    }
+    public void setVideo(Season season, Episode episode, String seriesName, Scene scene){
         this.season = season;
         this.episodeList = season.getEpisodes();
         onLoad();
@@ -312,7 +318,11 @@ public class VideoPlayerController {
         episodeTitle.setText(episode.name);
         episodeDate.setText(episode.year);
         seasonEpisode.setText(App.textBundle.getString("seasonLetter") + episode.seasonNumber + " " + App.textBundle.getString("episodeLetter") + episode.episodeNumber);
-        runtime.setText(parentController.setRuntime(episode.runtime));
+
+        if (parentController != null)
+            runtime.setText(parentController.setRuntime(episode.runtime));
+        else
+            runtime.setText(parentControllerDesktop.setRuntime(episode.runtime));
 
         double durationInSeconds = episode.runtime * 60;
         double fiveSecondsPercentage = (5.0 / durationInSeconds) * 100.0;
@@ -402,7 +412,7 @@ public class VideoPlayerController {
     }
     private void addInteractionSound(Button btn){
         btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal)
+            if (newVal && parentController != null)
                 parentController.getParent().playInteractionSound();
         });
     }
@@ -474,7 +484,8 @@ public class VideoPlayerController {
         fadeOut.setOnFinished(e -> {
             videoPlayer.stop();
 
-            parentController.stopVideo();
+            if (parentController != null)
+                parentController.stopVideo();
 
             Stage stage = (Stage) mainPane.getScene().getWindow();
             stage.close();

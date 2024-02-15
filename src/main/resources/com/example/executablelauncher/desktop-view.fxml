@@ -137,9 +137,9 @@
                                           <Insets bottom="10.0" />
                                        </padding>
                                     </VBox>
-                                    <VBox fx:id="detailsBox" minWidth="400.0">
+                                    <VBox fx:id="detailsBox" fillWidth="false">
                                        <children>
-                                          <Label fx:id="detailsText" prefHeight="35.0" prefWidth="107.0" styleClass="seasonButtonActive" stylesheets="@styles.css" text="Details" textFill="WHITE">
+                                          <Label fx:id="detailsText" prefHeight="28.0" prefWidth="140.0" styleClass="seasonButtonActive" stylesheets="@styles.css" text="Details" textFill="WHITE">
                                              <font>
                                                 <Font size="26.0" />
                                              </font>
@@ -147,9 +147,9 @@
                                                 <DropShadow />
                                              </effect>
                                           </Label>
-                                          <HBox prefHeight="133.0" prefWidth="401.0">
+                                          <HBox alignment="TOP_CENTER" fillHeight="false">
                                              <children>
-                                                <VBox prefHeight="133.0" prefWidth="160.0">
+                                                <VBox prefHeight="143.0" prefWidth="190.0">
                                                    <children>
                                                       <Label fx:id="yearText" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="WHITE">
                                                          <font>
@@ -184,7 +184,7 @@
                                                             <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
-                                                      <Label fx:id="seasonNumberText" prefHeight="35.0" prefWidth="144.0" text="Season number" textFill="WHITE">
+                                                      <Label fx:id="seasonNumberText" text="Número de temporada" textFill="WHITE">
                                                          <font>
                                                             <Font size="18.0" />
                                                          </font>
@@ -197,9 +197,9 @@
                                                       </Label>
                                                    </children>
                                                 </VBox>
-                                                <VBox prefHeight="150.0" prefWidth="239.0">
+                                                <VBox alignment="TOP_RIGHT" prefHeight="143.0" prefWidth="84.0">
                                                    <children>
-                                                      <Label fx:id="yearField" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="#aeaeae">
+                                                      <Label fx:id="yearField" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="#aeaeae">
                                                          <font>
                                                             <Font size="18.0" />
                                                          </font>
@@ -210,7 +210,7 @@
                                                             <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
-                                                      <Label fx:id="orderField" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="#aeaeae">
+                                                      <Label fx:id="orderField" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="#aeaeae">
                                                          <font>
                                                             <Font size="18.0" />
                                                          </font>
@@ -221,7 +221,7 @@
                                                             <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
-                                                      <Label fx:id="episodesField" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="#aeaeae">
+                                                      <Label fx:id="episodesField" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="#aeaeae">
                                                          <font>
                                                             <Font size="18.0" />
                                                          </font>
@@ -232,7 +232,7 @@
                                                             <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
-                                                      <Label fx:id="seasonNumberField" prefHeight="27.0" prefWidth="239.0" text="Number" textFill="#aeaeae" wrapText="true">
+                                                      <Label fx:id="seasonNumberField" alignment="CENTER_RIGHT" prefHeight="27.0" prefWidth="239.0" text="Number" textFill="#aeaeae" wrapText="true">
                                                          <font>
                                                             <Font size="18.0" />
                                                          </font>
@@ -250,7 +250,7 @@
                                                 <Insets bottom="10.0" top="10.0" />
                                              </VBox.margin>
                                           </HBox>
-                                          <ImageView fx:id="seriesCover" fitHeight="319.0" fitWidth="308.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fx:id="seriesCover" fitHeight="416.0" fitWidth="401.0" pickOnBounds="true" preserveRatio="true">
                                              <VBox.margin>
                                                 <Insets top="20.0" />
                                              </VBox.margin>

@@ -847,7 +847,7 @@ public class DesktopViewController {
     //region PLAY EPISODE
     public void playEpisode(Episode episode) {
         //Run file in vlc
-        String command = null;
+        /*String command = null;
         String extension = episode.getVideoSrc().substring(episode.getVideoSrc().length() - 3);
 
         if (extension.equals("iso") || extension.equals("ISO"))
@@ -867,7 +867,53 @@ public class DesktopViewController {
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             System.err.println("Error playing episode in DesktopViewController");
+        }*/
+
+
+        //Check if the video file exists before showing the video player
+        File videoFile = new File(episode.getVideoSrc());
+
+        if (!videoFile.isFile()){
+            //videoError.setVisible(true);
+            //errorButton.requestFocus();
+            return;
         }
+
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
+            Parent root1 = fxmlLoader.load();
+
+            Stage thisStage = (Stage) mainBox.getScene().getWindow();
+
+            Stage stage = new Stage();
+            stage.setTitle("VideoPlayer");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(thisStage);
+            Scene scene = new Scene(root1);
+            scene.setFill(Color.BLACK);
+            stage.setScene(scene);
+
+            String name = selectedSeries.name;
+            if (!currentLibrary.type.equals("Shows"))
+                name = selectedSeason.name;
+
+            VideoPlayerController playerController = fxmlLoader.getController();
+            playerController.setParent(this);
+            playerController.setVideo(selectedSeason, episode, name, scene);
+
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public String setRuntime(int runtime){
+        int h = runtime / 60;
+        int m = runtime % 60;
+
+        if (h == 0)
+            return (m + "m");
+
+        return (h + "h " + m + "m");
     }
     //endregion
 

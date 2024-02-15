@@ -18,7 +18,7 @@
    <children>
       <ImageView fx:id="shadowImage" fitHeight="406.0" fitWidth="916.0" opacity="0.6" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../../resources/img/desktopBackgroundShadow.png" />
+            <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
       <VBox fx:id="controlsBox" alignment="BOTTOM_LEFT" maxWidth="2560.0">
@@ -183,7 +183,7 @@
                                  <graphic>
                                     <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
-                                          <Image url="@../../../img/icons/discOptions.png" />
+                                          <Image url="@../../../img/icons/dvdMenu.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
