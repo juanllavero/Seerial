@@ -339,7 +339,10 @@ public class VideoPlayerController {
 
         fade.setOnFinished(event -> {
             //Set video and start
-            videoPlayer.playVideo(episode.videoSrc, episode.getTimeWatched());
+            if (parentControllerDesktop == null)
+                videoPlayer.playVideo(episode.getVideoSrc(), episode.getTimeWatched());
+            else
+                videoPlayer.playVideo(episode.getVideoSrc(), episode.getTimeWatched());
             runtimeSlider.setBlockIncrement(percentageStep);
 
             Series series = App.getSelectedSeries();

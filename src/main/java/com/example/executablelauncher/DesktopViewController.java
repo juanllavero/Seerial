@@ -70,10 +70,7 @@ import org.jsoup.select.Elements;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,6 +79,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -846,17 +845,27 @@ public class DesktopViewController {
 
     //region PLAY EPISODE
     public void playEpisode(Episode episode) {
-        //Run file in vlc
-        /*String command = null;
-        String extension = episode.getVideoSrc().substring(episode.getVideoSrc().length() - 3);
+        //Check if the video file exists before showing the video player
+        File videoFile = new File(episode.getVideoSrc());
 
-        if (extension.equals("iso") || extension.equals("ISO"))
-            command = "bluray:///" + episode.getVideoSrc();
-        else
-            command = episode.getVideoSrc();
+        if (!videoFile.isFile()){
+            //videoError.setVisible(true);
+            //errorButton.requestFocus();
+            return;
+        }
+
+        String osName = System.getProperty("os.name").toLowerCase();
+
+        if (osName.contains("windows")) {
+            System.out.println("El sistema operativo es Windows.");
+        } else if (osName.contains("linux")) {
+            System.out.println("El sistema operativo es Linux.");
+        }
+
+        File player = new File("resources/lib/mpvnet.exe");
 
         try {
-            ProcessBuilder pBuilder = new ProcessBuilder("C:\\Program Files\\VideoLAN\\VLC\\vlc.exe", command);
+            ProcessBuilder pBuilder = new ProcessBuilder(player.getAbsolutePath(),"--save-position-on-quit", episode.getVideoSrc());
 
             // don't forget to handle the error stream, and so
             // either combine error stream with input stream, as shown here
@@ -867,44 +876,12 @@ public class DesktopViewController {
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             System.err.println("Error playing episode in DesktopViewController");
-        }*/
-
-
-        //Check if the video file exists before showing the video player
-        File videoFile = new File(episode.getVideoSrc());
-
-        if (!videoFile.isFile()){
-            //videoError.setVisible(true);
-            //errorButton.requestFocus();
-            return;
         }
-
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
-            Parent root1 = fxmlLoader.load();
-
-            Stage thisStage = (Stage) mainBox.getScene().getWindow();
-
-            Stage stage = new Stage();
-            stage.setTitle("VideoPlayer");
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(thisStage);
-            Scene scene = new Scene(root1);
-            scene.setFill(Color.BLACK);
-            stage.setScene(scene);
-
-            String name = selectedSeries.name;
-            if (!currentLibrary.type.equals("Shows"))
-                name = selectedSeason.name;
-
-            VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setParent(this);
-            playerController.setVideo(selectedSeason, episode, name, scene);
-
-            stage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    }
+    // Método para escribir comandos MPV en el OutputStream
+    private static void writeMPVCommand(OutputStream outputStream, String command) throws IOException {
+        outputStream.write(command.getBytes());
+        outputStream.flush();
     }
     public String setRuntime(int runtime){
         int h = runtime / 60;
