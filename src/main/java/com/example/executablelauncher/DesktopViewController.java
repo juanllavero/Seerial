@@ -442,6 +442,20 @@ public class DesktopViewController {
         deselectAllButton.setText(App.buttonsBundle.getString("deselectAllButton"));
         identificationMovie.setText(App.textBundle.getString("correctIdentification"));
         identificationShow.setText(App.textBundle.getString("correctIdentification"));
+        detailsText.setText(App.textBundle.getString("details"));
+        yearText.setText(App.textBundle.getString("year"));
+        orderText.setText(App.textBundle.getString("order"));
+
+        if (currentLibrary.type.equals("Shows"))
+            episodesText.setText(App.textBundle.getString("episodes"));
+        else
+            episodesText.setText(App.textBundle.getString("videos"));
+
+        if (currentLibrary.type.equals("Shows")){
+            seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
+        }else{
+            seasonNumberText.setText("");
+        }
 
         searchFilesButton.setText(App.buttonsBundle.getString("searchFiles"));
     }
@@ -513,12 +527,23 @@ public class DesktopViewController {
         detailsText.setText(App.textBundle.getString("details"));
         yearText.setText(App.textBundle.getString("year"));
         orderText.setText(App.textBundle.getString("order"));
-        episodesText.setText(App.textBundle.getString("episodes"));
+
+        if (currentLibrary.type.equals("Shows"))
+            episodesText.setText(App.textBundle.getString("episodes"));
+        else
+            episodesText.setText(App.textBundle.getString("videos"));
+
         yearField.setText(selectedSeason.getYear());
         orderField.setText(Integer.toString(selectedSeason.getOrder()));
         episodesField.setText(Integer.toString(selectedSeason.getEpisodes().size()));
-        seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
-        seasonNumberField.setText(String.valueOf(selectedSeason.seasonNumber));
+
+        if (currentLibrary.type.equals("Shows")){
+            seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
+            seasonNumberField.setText(String.valueOf(selectedSeason.seasonNumber));
+        }else{
+            seasonNumberText.setText("");
+            seasonNumberField.setText("");
+        }
 
         if (currentLibrary.type.equals("Shows")){
             if (selectedSeries.logoSrc.isEmpty()){

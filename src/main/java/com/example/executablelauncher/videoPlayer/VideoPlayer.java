@@ -2,6 +2,7 @@ package com.example.executablelauncher.videoPlayer;
 
 import com.example.executablelauncher.App;
 import com.example.executablelauncher.VideoPlayerController;
+import com.example.executablelauncher.utils.Configuration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jna.Pointer;
@@ -87,7 +88,7 @@ public class VideoPlayer extends MediaView {
 
         //Set smooth video properties
         mpvSetProperty("video-sync", "display-resample");
-        mpvSetProperty("interpolation", "yes");
+        mpvSetProperty("interpolation", Configuration.loadConfig("interpolation", "no"));
         mpvSetProperty("tscale", "mitchell");
         mpvSetProperty("interpolation-preserve", "no");
 

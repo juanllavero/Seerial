@@ -264,7 +264,7 @@
                               </HBox>
                            </children>
                            <padding>
-                              <Insets bottom="100.0" left="100.0" right="50.0" top="100.0" />
+                              <Insets bottom="100.0" left="100.0" right="100.0" top="100.0" />
                            </padding>
                         </VBox>
                      </children>

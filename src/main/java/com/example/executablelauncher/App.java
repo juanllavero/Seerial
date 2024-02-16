@@ -22,6 +22,9 @@ import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -69,8 +72,11 @@ public class App extends Application {
         }
 
         //Set resource bundles
-        buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
-        textBundle = ResourceBundle.getBundle("text", globalLanguage);
+        File file = new File("resources/");
+        URL[] urls = {file.toURI().toURL()};
+        ClassLoader loader = new URLClassLoader(urls);
+        buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage, loader);
+        textBundle = ResourceBundle.getBundle("text", globalLanguage, loader);
 
         //Set a few of TheMovieDB translations for metadata
         tmdbLanguages = List.of(new Locale[]{
@@ -201,8 +207,15 @@ public class App extends Application {
             }
         }
 
-        buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage);
-        textBundle = ResourceBundle.getBundle("text", globalLanguage);
+        try{
+            File file = new File("resources/");
+            URL[] urls = {file.toURI().toURL()};
+            ClassLoader loader = new URLClassLoader(urls);
+            buttonsBundle = ResourceBundle.getBundle("buttons", globalLanguage, loader);
+            textBundle = ResourceBundle.getBundle("text", globalLanguage, loader);
+        } catch (MalformedURLException e) {
+            System.err.println("changeLanguage: ResourceBundle files could not be loaded");
+        }
     }
 
     public static List<Library> getCategories(boolean fullscreen){
