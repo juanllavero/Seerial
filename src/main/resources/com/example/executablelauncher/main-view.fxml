@@ -65,7 +65,7 @@
                   <Insets />
                </BorderPane.margin>
                <padding>
-                  <Insets left="25.0" right="10.0" />
+                  <Insets left="100.0" right="100.0" top="8.0" />
                </padding>
             </HBox>
          </top>
@@ -77,16 +77,13 @@
                <content>
                   <FlowPane fx:id="cardContainer" hgap="20.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="40.0">
                      <padding>
-                        <Insets bottom="50.0" left="100.0" right="100.0" top="30.0" />
+                        <Insets bottom="50.0" left="100.0" right="100.0" top="100.0" />
                      </padding>
                   </FlowPane>
                </content>
                <BorderPane.margin>
-                  <Insets top="20.0" />
+                  <Insets bottom="20.0" top="20.0" />
                </BorderPane.margin>
-               <padding>
-                  <Insets top="20.0" />
-               </padding>
             </ScrollPane>
          </center>
       </BorderPane>

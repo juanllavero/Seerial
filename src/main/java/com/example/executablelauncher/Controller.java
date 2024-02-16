@@ -449,6 +449,12 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             restoreSelection();
 
+            if (calculateRowCount(cardContainer) > 1) {
+                cardContainer.setAlignment(Pos.TOP_CENTER);
+            } else {
+                cardContainer.setAlignment(Pos.TOP_LEFT);
+            }
+
             mainBox.setBackground(new Background(myBI));
             //Fade in effect
             FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
@@ -457,6 +463,13 @@ public class Controller implements Initializable {
 
             fadeIn.play();
         });
+    }
+
+    private int calculateRowCount(FlowPane flowPane) {
+        double width = flowPane.getWidth();
+        double prefWrapLength = flowPane.getPrefWrapLength();
+        int columnCount = (int) (width / prefWrapLength);
+        return (int) Math.ceil((double) flowPane.getChildren().size() / columnCount);
     }
 
     private void restoreSelection(){

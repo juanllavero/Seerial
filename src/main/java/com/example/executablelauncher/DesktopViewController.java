@@ -446,12 +446,12 @@ public class DesktopViewController {
         yearText.setText(App.textBundle.getString("year"));
         orderText.setText(App.textBundle.getString("order"));
 
-        if (currentLibrary.type.equals("Shows"))
+        if (currentLibrary != null && currentLibrary.type.equals("Shows"))
             episodesText.setText(App.textBundle.getString("episodes"));
         else
             episodesText.setText(App.textBundle.getString("videos"));
 
-        if (currentLibrary.type.equals("Shows")){
+        if (currentLibrary != null && currentLibrary.type.equals("Shows")){
             seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
         }else{
             seasonNumberText.setText("");
