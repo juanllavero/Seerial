@@ -10,6 +10,8 @@ import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadataBasic;
 import com.example.executablelauncher.tmdbMetadata.series.SeriesMetadata;
 import com.example.executablelauncher.utils.Utils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbTvEpisodes;
@@ -116,6 +118,8 @@ public class DesktopViewController {
     @FXML
     private Button identificationShow;
 
+    @FXML
+    private Button changeEpisodesGroup;
 
     @FXML
     private BorderPane selectionOptions;
@@ -293,9 +297,9 @@ public class DesktopViewController {
 
     //region THEMOVIEDB ATTRIBUTES
     TmdbApi tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
-    SeasonsGroupMetadata episodesGroup = null;
     boolean movieMetadataToCorrect = false;
     boolean seriesMetadataToCorrect = false;
+    boolean changeEpisodeGroup = false;
     //endregion
 
     public void initValues(){
@@ -409,6 +413,7 @@ public class DesktopViewController {
 
         identificationMovie.setDisable(true);
         identificationShow.setDisable(true);
+        changeEpisodesGroup.setDisable(true);
 
         Platform.runLater(() -> {
             updateCategories();
@@ -442,6 +447,7 @@ public class DesktopViewController {
         deselectAllButton.setText(App.buttonsBundle.getString("deselectAllButton"));
         identificationMovie.setText(App.textBundle.getString("correctIdentification"));
         identificationShow.setText(App.textBundle.getString("correctIdentification"));
+        changeEpisodesGroup.setText(App.buttonsBundle.getString("changeEpisodesGroup"));
         detailsText.setText(App.textBundle.getString("details"));
         yearText.setText(App.textBundle.getString("year"));
         orderText.setText(App.textBundle.getString("order"));
@@ -671,9 +677,11 @@ public class DesktopViewController {
         seriesList = currentLibrary.getSeries();
 
         if (currentLibrary.type.equals("Shows")) {
+            changeEpisodesGroup.setDisable(false);
             identificationShow.setDisable(false);
             identificationMovie.setDisable(true);
         }else {
+            changeEpisodesGroup.setDisable(true);
             identificationMovie.setDisable(false);
             identificationShow.setDisable(true);
         }
@@ -1045,70 +1053,24 @@ public class DesktopViewController {
         }
     }
     public void correctIdentificationShow(){
+        showBackgroundShadow();
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
         Task<Void> correctIS = new Task<>() {
             @Override
             protected Void call() {
-                SeriesMetadata metadata = downloadSeriesMetadata(selectedSeries.themdbID);
+                File folder = new File(selectedSeries.getFolder());
+                File[] filesInFolder = folder.listFiles();
 
-                if (metadata == null)
+                if (filesInFolder == null)
                     return null;
-
-                setSeriesMetadataAndImages(selectedSeries, metadata, true);
 
                 //Remove Series Data
                 DataManager.INSTANCE.deleteSeriesData(selectedSeries);
                 selectedSeries.seasons.clear();
 
-                //Series Directory
-                File directory = new File(selectedSeries.folder);
-
-                //Files in directory
-                File[] filesInDir = directory.listFiles();
-                if (filesInDir == null)
-                    return null;
-
-                //All video files in directory (not taking into account two subdirectories ahead, like Series/Folder1/Folder2/File)
-                List<File> videoFiles = new ArrayList<>();
-
-                //Analyze all files in directory except two subdirectories ahead
-                for (File file : filesInDir){
-                    if (file.isDirectory()){
-                        File[] filesInDirectory = file.listFiles();
-
-                        if (filesInDirectory == null)
-                            continue;
-
-                        for (File f : filesInDirectory){
-                            if (f.isFile() && validVideoFile(f))
-                                videoFiles.add(f);
-                        }
-                    }else{
-                        if (validVideoFile(file))
-                            videoFiles.add(file);
-                    }
-                }
-
-                if (videoFiles.isEmpty())
-                    return null;
-
-                //Download metadata for each season of the show
-                List<SeasonMetadata> seasonsMetadata = new ArrayList<>();
-                for (SeasonMetadataBasic seasonMetadataBasicBasic : metadata.seasons){
-                    SeasonMetadata seasonMetadata = downloadSeasonMetadata(selectedSeries.themdbID, seasonMetadataBasicBasic.season_number);
-
-                    if (seasonMetadata != null) {
-                        seasonsMetadata.add(seasonMetadata);
-                    }
-                }
-                //Process each episode
-                for (File video : videoFiles){
-                    if (currentLibrary.analyzedFiles.get(video.getAbsolutePath()) != null)
-                        continue;
-
-                    processEpisode(selectedSeries, video, seasonsMetadata, episodesGroup);
-                }
+                //Scan Series
+                scanTVShow(folder, filesInFolder, true);
 
                 if (selectedSeries.getSeasons().isEmpty()) {
                     return null;
@@ -1145,6 +1107,7 @@ public class DesktopViewController {
         new Thread(correctIS).start();
     }
     public void correctIdentificationMovie(){
+        showBackgroundShadow();
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
         Task<Void> correctIM = new Task<>() {
@@ -1223,8 +1186,12 @@ public class DesktopViewController {
         new Thread(correctIM).start();
     }
     public void setCorrectIdentificationShow(int newID){
+        System.out.println(selectedSeries.themdbID);
+
         seriesMetadataToCorrect = true;
         selectedSeries.themdbID = newID;
+
+        System.out.println(selectedSeries.themdbID);
     }
     public void setCorrectIdentificationMovie(int newID){
         movieMetadataToCorrect = true;
@@ -1232,11 +1199,104 @@ public class DesktopViewController {
     }
     //endregion
 
+    //region CHANGE EPISODES GROUP
+    @FXML
+    void searchEpisodesGroup(){
+        showBackgroundShadow();
+        hideMenu();
+
+        seriesMetadataToCorrect = false;
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("searchEpisodesGroup.fxml"));
+            Parent root1 = fxmlLoader.load();
+            SearchEpisodesGroupController controller = fxmlLoader.getController();
+            controller.initiValues(this, selectedSeries.themdbID);
+            Stage stage = new Stage();
+            stage.setTitle("Change Episodes Group");
+            stage.initStyle(StageStyle.UNDECORATED);
+            stage.setScene(new Scene(root1));
+            App.setPopUpProperties(stage, (Stage) mainBorderPane.getScene().getWindow());
+            stage.showAndWait();
+
+            hideBackgroundShadow();
+
+            if (changeEpisodeGroup)
+                changeEpisodesGroup();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void changeEpisodesGroup(String id){
+        selectedSeries.setEpisodeGroupID(id);
+        changeEpisodeGroup = true;
+    }
+    public void changeEpisodesGroup(){
+        showBackgroundShadow();
+        downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
+        downloadingContentWindowStatic.setVisible(true);
+        Task<Void> changeEG = new Task<>() {
+            @Override
+            protected Void call() {
+                File folder = new File(selectedSeries.getFolder());
+                File[] filesInFolder = folder.listFiles();
+
+                if (filesInFolder == null)
+                    return null;
+
+                //Remove Seasons
+                for (Season season : selectedSeries.getSeasons())
+                    DataManager.INSTANCE.deleteSeasonData(season);
+                selectedSeries.seasons.clear();
+
+                //Scan Series
+                scanTVShow(folder, filesInFolder, false);
+
+                if (selectedSeries.getSeasons().isEmpty()) {
+                    return null;
+                }
+
+                Season season = selectedSeries.getSeasons().get(0);
+
+                //Process background music
+                List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
+
+                if (results != null)
+                    downloadMedia(season, results.get(0).watch_url);
+
+                return null;
+            }
+        };
+
+        changeEG.setOnSucceeded(e -> {
+            downloadingContentWindowStatic.setVisible(false);
+            changeEpisodeGroup = false;
+            hideBackgroundShadow();
+            refreshSeries();
+        });
+        changeEG.setOnCancelled(e -> {
+            downloadingContentWindowStatic.setVisible(false);
+            changeEpisodeGroup = false;
+            hideBackgroundShadow();
+            refreshSeries();
+        });
+        changeEG.setOnFailed(e -> {
+            downloadingContentWindowStatic.setVisible(false);
+            changeEpisodeGroup = false;
+            hideBackgroundShadow();
+            refreshSeries();
+        });
+
+        new Thread(changeEG).start();
+    }
+    //endregion
+
     //region AUTOMATED FILE SEARCH
+    @FXML
     public void searchFiles(){
         if (currentLibrary == null)
             return;
 
+        hideMenu();
         downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindow.setVisible(true);
 
@@ -1503,6 +1563,7 @@ public class DesktopViewController {
         if (updateMetadata)
             setSeriesMetadataAndImages(series, seriesMetadata, updateMetadata);
         //endregion
+
         //Download metadata for each season of the show
         List<SeasonMetadata> seasonsMetadata = new ArrayList<>();
         for (SeasonMetadataBasic seasonMetadataBasicBasic : seriesMetadata.seasons){
@@ -1512,6 +1573,12 @@ public class DesktopViewController {
                 seasonsMetadata.add(seasonMetadata);
             }
         }
+
+        //Download Episode Group Metadata
+        SeasonsGroupMetadata episodesGroup = null;
+        if (!series.getEpisodeGroupID().isEmpty())
+            episodesGroup = getEpisodesGroup(series);
+
         //Process each episode
         for (File video : videoFiles){
             if (currentLibrary.analyzedFiles.get(video.getAbsolutePath()) != null)
@@ -1520,7 +1587,16 @@ public class DesktopViewController {
             processEpisode(series, video, seasonsMetadata, episodesGroup);
         }
 
-        episodesGroup = null;
+        //Change the name of every season to match the Episodes Group
+        if (!series.getEpisodeGroupID().isEmpty() && episodesGroup != null){
+            for (Season season : series.getSeasons()){
+                for (EpisodeGroup episodeGroup : episodesGroup.groups){
+                    if (episodeGroup.order == season.getSeasonNumber()){
+                        season.setName(episodeGroup.name);
+                    }
+                }
+            }
+        }
 
         if (exists)
             updateSeries(series);
@@ -1632,46 +1708,53 @@ public class DesktopViewController {
         }
         //endregion
     }
-    private SeasonsGroupMetadata getEpisodesGroup(int tmdbID){
+    private SeasonsGroupMetadata getEpisodesGroup(Series series){
+        String seasonGroupID = "";
         try{
-            //region GET EPISODE GROUPS
-            OkHttpClient client = new OkHttpClient();
-            Request requestGroups = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "/episode_groups")
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
+            if (series.getEpisodeGroupID().isEmpty()){
+                //region GET EPISODE GROUPS
+                OkHttpClient client = new OkHttpClient();
+                Request requestGroups = new Request.Builder()
+                        .url("https://api.themoviedb.org/3/tv/" + series.getThemdbID() + "/episode_groups")
+                        .get()
+                        .addHeader("accept", "application/json")
+                        .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                        .build();
 
-            Response response = client.newCall(requestGroups).execute();
-
-            String seasonGroupID = "";
-            if (response.isSuccessful()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                assert response.body() != null;
-                SeasonsGroupRoot groups = objectMapper.readValue(response.body().string(), SeasonsGroupRoot.class);
+                Response response = client.newCall(requestGroups).execute();
 
 
-                for (SeasonsGroup seasonsGroup : groups.results) {
-                    if (seasonsGroup.name.equals("Seasons")) {
-                        seasonGroupID = seasonsGroup.id;
-                    }
-                }
+                if (response.isSuccessful()) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    assert response.body() != null;
+                    SeasonsGroupRoot groups = objectMapper.readValue(response.body().string(), SeasonsGroupRoot.class);
 
-                if (seasonGroupID.isEmpty()){
+
                     for (SeasonsGroup seasonsGroup : groups.results) {
-                        if (seasonsGroup.name.equals("All episodes")) {
+                        if (seasonsGroup.type == 6) {                                       //6 == Seasons
                             seasonGroupID = seasonsGroup.id;
+                        }else if (seasonGroupID.isEmpty() && seasonsGroup.type == 5)        //5 == Sagas
+                            seasonGroupID = seasonsGroup.id;
+                    }
+
+                    if (seasonGroupID.isEmpty()){
+                        for (SeasonsGroup seasonsGroup : groups.results) {
+                            if (seasonsGroup.name.equals("All episodes")) {
+                                seasonGroupID = seasonsGroup.id;
+                            }
                         }
                     }
+                } else {
+                    System.out.println("getEpisodeGroup: Response not successful: " + response.code());
                 }
-            } else {
-                System.out.println("getEpisodeGroup: Response not successful: " + response.code());
+                //endregion
+            }else{
+                seasonGroupID = series.getEpisodeGroupID();
             }
-            //endregion
 
             //region GET EPISODE GROUP DETAILS
             if (!seasonGroupID.isEmpty()){
+                OkHttpClient client = new OkHttpClient();
                 Request requestGroup = new Request.Builder()
                         .url("https://api.themoviedb.org/3/tv/episode_group/" + seasonGroupID)
                         .get()
@@ -1679,7 +1762,7 @@ public class DesktopViewController {
                         .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
                         .build();
 
-                response = client.newCall(requestGroup).execute();
+                Response response = client.newCall(requestGroup).execute();
 
                 if (response.isSuccessful()) {
                     ObjectMapper objectMapper = new ObjectMapper();
@@ -1709,8 +1792,8 @@ public class DesktopViewController {
         String fullName = file.getName().substring(0, file.getName().lastIndexOf("."));
 
         //Regular expressions for identifying season and/or episode numbers in the file name
-        final String regexSeasonEpisode = "(?i)(?<season>S[0-9]{1,3}+)(?<episode>E[0-9]{1,4})";
-        final String regexOnlyEpisode = "(?i)(?<episode>[0-9]{1,4})";
+        final String regexSeasonEpisode = "(?i)(?<season>S[0-9]{1,3}+)(?<episode>E[0-9]{1,5})";
+        final String regexOnlyEpisode = "(?i)(?<episode>[0-9]{1,5})";
 
         final Pattern pattern = Pattern.compile(regexSeasonEpisode, Pattern.MULTILINE);
         final Matcher matcher = pattern.matcher(fullName);
@@ -1722,6 +1805,7 @@ public class DesktopViewController {
         int realSeason = 0;
         int realEpisode = -1;
 
+        //If episode name only includes episode number
         if (!matcher.find()){
             Pattern newPattern = Pattern.compile(regexOnlyEpisode, Pattern.MULTILINE);
             Matcher newMatch = newPattern.matcher(fullName);
@@ -1774,9 +1858,9 @@ public class DesktopViewController {
                 }
             }
 
-            if (toFindMetadata){
+            if (toFindMetadata || !series.getEpisodeGroupID().isEmpty()){
                 if (episodesGroup == null)
-                    episodesGroup = getEpisodesGroup(series.themdbID);
+                    episodesGroup = getEpisodesGroup(series);
 
                 boolean found = false;
                 if (episodesGroup != null){
@@ -1875,14 +1959,6 @@ public class DesktopViewController {
 
             if (season.seasonNumber == 0)
                 season.order = 100;
-
-            //Rename seasons if the name is the same
-            for (Season s : series.getSeasons()){
-                if (!s.getId().equals(season.getId()) && (s.getName().equals(season.getName()) || s.getName().equals(App.textBundle.getString("seasonLetter") + s.getSeasonNumber()))){
-                    s.setName(App.textBundle.getString("seasonLetter") + s.getSeasonNumber());
-                    season.setName(App.textBundle.getString("seasonLetter") + season.getSeasonNumber());
-                }
-            }
         }
 
         Episode episode;
@@ -3068,6 +3144,7 @@ public class DesktopViewController {
         seriesList.remove(series);
         seriesButtons.remove(index);
         seriesContainer.getChildren().remove(index);
+        currentLibrary.removeSeries(series);
         DataManager.INSTANCE.deleteSeriesData(series);
         selectedSeries = null;
         if (!seriesList.isEmpty()){
@@ -3148,11 +3225,6 @@ public class DesktopViewController {
     private void fullScreen(){
         hideMenu();
 
-        /*if (librarySelector.getItems().isEmpty()) {
-            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("noLibraries"));
-            return;
-        }*/
-
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
@@ -3217,7 +3289,11 @@ public class DesktopViewController {
     void openSeriesMenu(MouseEvent event) {
         menuParentPane.setVisible(true);
         seriesMenu.setLayoutX(event.getSceneX());
-        seriesMenu.setLayoutY(event.getSceneY() - seriesMenu.getHeight());
+
+        if (seriesList.indexOf(selectedSeries) <= 1)
+            seriesMenu.setLayoutY(event.getSceneY());
+        else
+            seriesMenu.setLayoutY(event.getSceneY() - seriesMenu.getHeight());
         seriesMenu.setVisible(true);
     }
     @FXML
@@ -3227,13 +3303,10 @@ public class DesktopViewController {
         seasonMenu.setLayoutY(event.getSceneY() - seasonMenu.getHeight());
         seasonMenu.setVisible(true);
     }
-    public void openDiscMenu(MouseEvent event, Episode episode) {
+    public void openDiscMenu(MouseEvent event) {
         menuParentPane.setVisible(true);
         discMenu.setLayoutX(event.getSceneX());
-        if (episodeList.indexOf(episode) > 2)
-            discMenu.setLayoutY(event.getSceneY() - discMenu.getHeight());
-        else
-            discMenu.setLayoutY(event.getSceneY());
+        discMenu.setLayoutY(event.getSceneY() - discMenu.getHeight());
         discMenu.setVisible(true);
     }
     private void hideMenu(){

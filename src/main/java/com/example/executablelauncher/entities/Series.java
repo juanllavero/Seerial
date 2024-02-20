@@ -19,6 +19,7 @@ public class Series implements Serializable {
     public String logoSrc = "";
     public String folder = "";
     public float videoZoom = 0;
+    public String episodeGroupID = "";
     public List<Season> seasons = new ArrayList<>();
     public List<String> genres = new ArrayList<>();
     public boolean playSameMusic = false;
@@ -68,6 +69,14 @@ public class Series implements Serializable {
         numberOfSeasons--;
 
         genres = new ArrayList<>();
+    }
+
+    public String getEpisodeGroupID() {
+        return episodeGroupID;
+    }
+
+    public void setEpisodeGroupID(String episodeGroupID) {
+        this.episodeGroupID = episodeGroupID;
     }
 
     public int getOrder() {

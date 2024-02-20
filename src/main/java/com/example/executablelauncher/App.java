@@ -198,7 +198,6 @@ public class App extends Application {
     }
 
     public static void changeLanguage(String lang){
-
         for (Locale language : languages){
             if (language.getDisplayName().equals(lang)){
                 globalLanguage = language;

@@ -467,6 +467,11 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
+                  <Button fx:id="changeEpisodesGroup" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#searchEpisodesGroup" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Change episodes group" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
                   <Button fx:id="removeColButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeCollection" styleClass="closeButton" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />

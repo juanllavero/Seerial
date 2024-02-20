@@ -100,6 +100,7 @@ public class Library implements Serializable {
     }
 
     public void removeSeries(Series s){
+        analyzedFolders.remove(s.folder);
         series.remove(s);
     }
 

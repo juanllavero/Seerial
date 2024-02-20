@@ -125,8 +125,6 @@ public class DataManager {
 
         for (Season season : series.getSeasons())
             deleteSeasonData(season);
-
-        currentLibrary.analyzedFolders.remove(series.folder);
     }
     public void deleteSeasonData(Season season){
         try{
@@ -145,7 +143,6 @@ public class DataManager {
             deleteEpisodeData(episode);
 
         currentLibrary.seasonFolders.remove(season.folder);
-        currentLibrary.analyzedFolders.remove(season.folder);
     }
     public void deleteEpisodeData(Episode episode){
         try{

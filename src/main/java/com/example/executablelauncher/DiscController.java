@@ -170,7 +170,7 @@ public class DiscController {
     @FXML
     void openMenu(MouseEvent event){
         desktopParent.selectedEpisode = episode;
-        desktopParent.openDiscMenu(event, episode);
+        desktopParent.openDiscMenu(event);
     }
 
     public void selectDiscDesktop(){
