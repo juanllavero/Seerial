@@ -3,15 +3,16 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.*;
 import com.example.executablelauncher.tmdbMetadata.common.Genre;
 import com.example.executablelauncher.tmdbMetadata.groups.*;
-import com.example.executablelauncher.tmdbMetadata.images.*;
+import com.example.executablelauncher.tmdbMetadata.images.Backdrop;
+import com.example.executablelauncher.tmdbMetadata.images.Images;
+import com.example.executablelauncher.tmdbMetadata.images.Logo;
+import com.example.executablelauncher.tmdbMetadata.images.Poster;
 import com.example.executablelauncher.tmdbMetadata.movies.MovieMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.EpisodeMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadataBasic;
 import com.example.executablelauncher.tmdbMetadata.series.SeriesMetadata;
 import com.example.executablelauncher.utils.Utils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbTvEpisodes;
@@ -54,7 +55,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
-import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -81,8 +81,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -185,7 +183,7 @@ public class DesktopViewController {
     private Button removeSeasonButton;
 
     @FXML
-    private HBox seasonContainer;
+    private FlowPane seasonContainer;
 
     @FXML
     private HBox seasonLogoBox;
@@ -1333,6 +1331,7 @@ public class DesktopViewController {
                 if (selectedSeries == show)
                     seriesContainer.getChildren().remove(seriesList.indexOf(show));
 
+                seriesList.remove(show);
                 currentLibrary.removeSeries(show);
                 DataManager.INSTANCE.deleteSeriesData(show);
             }
@@ -1400,23 +1399,26 @@ public class DesktopViewController {
 
         loadHalfTask.setOnSucceeded(e -> {
             numFilesToCheck--;
-            if (numFilesToCheck == 0)
+            if (numFilesToCheck == 0) {
                 downloadingContentWindow.setVisible(false);
-            downloadDefaultMusic();
+                downloadDefaultMusic();
+            }
         });
 
         loadHalfTask.setOnCancelled(e -> {
             numFilesToCheck--;
-            if (numFilesToCheck == 0)
+            if (numFilesToCheck == 0) {
                 downloadingContentWindow.setVisible(false);
-            downloadDefaultMusic();
+                downloadDefaultMusic();
+            }
         });
 
         loadHalfTask.setOnFailed(e -> {
             numFilesToCheck--;
-            if (numFilesToCheck == 0)
+            if (numFilesToCheck == 0) {
                 downloadingContentWindow.setVisible(false);
-            downloadDefaultMusic();
+                downloadDefaultMusic();
+            }
         });
 
         new Thread(loadHalfTask).start();
@@ -1428,7 +1430,6 @@ public class DesktopViewController {
                 Platform.runLater(() -> {
                     downloadingContentText.setText(App.textBundle.getString("downloadingMusicMessage"));
                     downloadingContentWindow.setVisible(true);
-                    numFilesToCheck = 1;
                 });
 
                 for (Series series : currentLibrary.getSeries()){
@@ -1450,33 +1451,21 @@ public class DesktopViewController {
         };
 
         musicDownloadTask.setOnSucceeded(e -> {
-            numFilesToCheck--;
-            if (numFilesToCheck == 0){
-                //Enable library and fullscreen buttons
-                topBar.setDisable(false);
-
-                downloadingContentWindow.setVisible(false);
-            }
+            //Enable library and fullscreen buttons
+            topBar.setDisable(false);
+            downloadingContentWindow.setVisible(false);
         });
 
         musicDownloadTask.setOnCancelled(e -> {
-            numFilesToCheck--;
-            if (numFilesToCheck == 0){
-                //Enable library and fullscreen buttons
-                topBar.setDisable(false);
-
-                downloadingContentWindow.setVisible(false);
-            }
+            //Enable library and fullscreen buttons
+            topBar.setDisable(false);
+            downloadingContentWindow.setVisible(false);
         });
 
         musicDownloadTask.setOnFailed(e -> {
-            numFilesToCheck--;
-            if (numFilesToCheck == 0){
-                //Enable library and fullscreen buttons
-                topBar.setDisable(false);
-
-                downloadingContentWindow.setVisible(false);
-            }
+            //Enable library and fullscreen buttons
+            topBar.setDisable(false);
+            downloadingContentWindow.setVisible(false);
         });
 
         new Thread(musicDownloadTask).start();
@@ -2106,7 +2095,7 @@ public class DesktopViewController {
             series.folder = f.getAbsolutePath();
             currentLibrary.analyzedFolders.put(f.getAbsolutePath(), series.getId());
 
-            NameYearContainer result = extractNameAndYear(f.getName());
+            NameYearContainer result = extractNameAndYear(f.getName().substring(0, f.getName().lastIndexOf(".")));
 
             String movieName = result.name;
             String year = result.year;
@@ -2439,11 +2428,8 @@ public class DesktopViewController {
     private static NameYearContainer extractNameAndYear(String source) {
         NameYearContainer container = new NameYearContainer("", "");
 
-        //Remove all "." except for the last one
-        source = source.replaceAll("\\.(?=[^.]*\\.)", " ");
-
-        //Remove extension + "." + parenthesis
-        String cleanSource = source.replaceAll("\\..+$", "").replaceAll("\\.", " ").replaceAll("[()]", "");
+        //Remove parenthesis
+        String cleanSource = source.replaceAll("[()]", "");
 
         //Regex to get name and year
         String regex = "^(.*?)(?:\\s(\\d{4}))?$";

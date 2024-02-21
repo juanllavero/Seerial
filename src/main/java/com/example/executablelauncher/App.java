@@ -3,6 +3,8 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
+import info.movito.themoviedbapi.TmdbApi;
+import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;

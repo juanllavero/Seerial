@@ -273,6 +273,10 @@ public class Controller implements Initializable {
 
         leftOptionsPane.setPrefWidth(screenWidth * 0.5);
 
+        //Scale and center cardContainer
+        cardContainer.setPrefWidth(screenWidth * 0.8);
+        cardContainer.setTranslateX(screenWidth * 0.025);
+
         //Remove horizontal and vertical scroll
         DesktopViewController.scrollModification(scrollPane);
 
@@ -449,11 +453,11 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             restoreSelection();
 
-            if (calculateRowCount(cardContainer) > 1) {
+            /*if (calculateRowCount(cardContainer) > 1) {
                 cardContainer.setAlignment(Pos.TOP_CENTER);
             } else {
                 cardContainer.setAlignment(Pos.TOP_LEFT);
-            }
+            }*/
 
             mainBox.setBackground(new Background(myBI));
             //Fade in effect

@@ -130,7 +130,7 @@
                                  <children>
                                     <VBox fx:id="seasonsEpisodesBox" spacing="20.0" stylesheets="@styles.css">
                                        <children>
-                                          <HBox fx:id="seasonContainer" />
+                                          <FlowPane fx:id="seasonContainer" />
                                           <FlowPane fx:id="discContainer" hgap="20.0" nodeOrientation="LEFT_TO_RIGHT" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS" />
                                        </children>
                                        <padding>

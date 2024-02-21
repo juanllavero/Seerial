@@ -99,16 +99,7 @@ public class AddLibraryController {
         generalBox.setVisible(true);
         folderBox.setVisible(false);
         showOnFullscreen.setSelected(true);
-        saveButton.setText(App.buttonsBundle.getString("next"));
-        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
-        showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
-        addFolderButton.setText(App.buttonsBundle.getString("addFolder"));
-        generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
-        foldersViewButton.setText(App.buttonsBundle.getString("folders"));
-        moviesTypeButton.setText(App.textBundle.getString("movies"));
-        showsTypeButton.setText(App.textBundle.getString("shows"));
-        nameText.setText(App.textBundle.getString("name"));
-        languageText.setText(App.textBundle.getString("languageText"));
+        setButtonsValues();
 
         List<Locale> languages = App.tmdbLanguages;
         for (Locale locale : languages){
@@ -140,9 +131,7 @@ public class AddLibraryController {
         Locale locale = Locale.forLanguageTag(libraryToEdit.language);
         languageChoice.setValue(locale.getDisplayName());
 
-        saveButton.setText(App.buttonsBundle.getString("next"));
-        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
-        showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
+        setButtonsValues();
 
         if (type.equals("Movies")){
             setMoviesType();
@@ -163,6 +152,19 @@ public class AddLibraryController {
         }
 
         showGeneralView();
+    }
+
+    private void setButtonsValues() {
+        saveButton.setText(App.buttonsBundle.getString("next"));
+        cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
+        showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
+        addFolderButton.setText(App.buttonsBundle.getString("addFolder"));
+        generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
+        foldersViewButton.setText(App.buttonsBundle.getString("folders"));
+        moviesTypeButton.setText(App.textBundle.getString("movies"));
+        showsTypeButton.setText(App.textBundle.getString("shows"));
+        nameText.setText(App.textBundle.getString("name"));
+        languageText.setText(App.textBundle.getString("languageText"));
     }
     //endregion
 

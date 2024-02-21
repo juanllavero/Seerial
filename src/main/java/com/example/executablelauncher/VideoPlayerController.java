@@ -583,7 +583,14 @@ public class VideoPlayerController {
             if (track.demux_h == 0)
                 continue;
 
-            addOptionCard(track.demux_h + " (" + track.codec.toUpperCase() + ")");
+            String resolution = track.demux_h + "p";
+
+            if (track.demux_h > 1080 && track.demux_h <= 1440)
+                resolution = "1440p";
+            else if (track.demux_h > 1440)
+                resolution = "4K";
+
+            addOptionCard(resolution + " (" + track.codec.toUpperCase() + ")");
 
             Button btn = (Button) optionsContainer.getChildren().get(videoTracks.indexOf(track));
 
