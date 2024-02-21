@@ -381,6 +381,11 @@ public class EditSeasonController {
         openImagesDownloader(seriesName + " poster", Integer.toString(353), Integer.toString(122), true, false, false);
     }
     private void openImagesDownloader(String searchText, String width, String height, boolean isCover, boolean isLogo, boolean transparent){
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ImageDownloader-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -411,6 +416,11 @@ public class EditSeasonController {
         openURLImageLoader(false);
     }
     private void openURLImageLoader(boolean isLogo){
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("urlPaster-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -654,6 +664,11 @@ public class EditSeasonController {
     }
     @FXML
     void downloadMusic(){
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("youtubeSearch.fxml"));
             Parent root = loader.load();
@@ -681,7 +696,6 @@ public class EditSeasonController {
     //region SAVE DATA
     @FXML
     void save(ActionEvent event) {
-
         //Process name
         if (nameField.getText().isEmpty()){
             App.showErrorMessage("Invalid data", "", textBundle.getString("emptyField"));

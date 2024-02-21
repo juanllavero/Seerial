@@ -195,6 +195,11 @@ public class EditCollectionController {
     }
     @FXML
     void downloadLogo(ActionEvent event) {
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         openImagesDownloader(seriesToEdit.name + " logo", Integer.toString(353), Integer.toString(122), false, true, true);
     }
     private void openImagesDownloader(String searchText, String width, String height, boolean isCover, boolean isLogo, boolean transparent){
@@ -217,6 +222,11 @@ public class EditCollectionController {
     }
     @FXML
     void loadLogoURL(ActionEvent event) {
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         openURLImageLoader(true);
     }
     private void openURLImageLoader(boolean isLogo){
@@ -245,7 +255,10 @@ public class EditCollectionController {
     }
     @FXML
     void downloadCover(ActionEvent event) {
-
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
     }
     @FXML
     void loadImage(ActionEvent event) {

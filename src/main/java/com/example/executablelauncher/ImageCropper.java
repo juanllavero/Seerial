@@ -111,6 +111,11 @@ public class ImageCropper {
 
     @FXML
     void downloadImage(ActionEvent event) {
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         if (!urlText.getText().isEmpty()){
             originalImage = new Image(urlText.getText());
             if (originalImage.isError()) {

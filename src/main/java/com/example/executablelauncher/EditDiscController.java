@@ -121,7 +121,10 @@ public class EditDiscController {
     }
     @FXML
     void downloadThumbnail(ActionEvent event) {
-
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
     }
     @FXML
     void loadImage(ActionEvent event) {
@@ -162,6 +165,11 @@ public class EditDiscController {
     }
     @FXML
     void loadUrlThumbnail(ActionEvent event) {
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("urlPaster-view.fxml"));
             Parent root1 = fxmlLoader.load();

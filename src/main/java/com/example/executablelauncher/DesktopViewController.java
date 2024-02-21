@@ -294,7 +294,7 @@ public class DesktopViewController {
     //endregion
 
     //region THEMOVIEDB ATTRIBUTES
-    TmdbApi tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
+    TmdbApi tmdbApi;
     boolean movieMetadataToCorrect = false;
     boolean seriesMetadataToCorrect = false;
     boolean changeEpisodeGroup = false;
@@ -307,7 +307,8 @@ public class DesktopViewController {
                 .selectedItemProperty()
                 .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectLibrary(newValue));
 
-        //App.setDragWindow(topBar);
+        if (App.isInternetAvailable())
+            tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
 
         selectionOptions.setVisible(false);
 
@@ -1184,12 +1185,8 @@ public class DesktopViewController {
         new Thread(correctIM).start();
     }
     public void setCorrectIdentificationShow(int newID){
-        System.out.println(selectedSeries.themdbID);
-
         seriesMetadataToCorrect = true;
         selectedSeries.themdbID = newID;
-
-        System.out.println(selectedSeries.themdbID);
     }
     public void setCorrectIdentificationMovie(int newID){
         movieMetadataToCorrect = true;
@@ -1293,6 +1290,11 @@ public class DesktopViewController {
     public void searchFiles(){
         if (currentLibrary == null)
             return;
+
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
 
         hideMenu();
         downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
@@ -2931,6 +2933,11 @@ public class DesktopViewController {
     }
     @FXML
     void addLibrary(MouseEvent event) {
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addLibrary-view.fxml"));
@@ -2976,6 +2983,11 @@ public class DesktopViewController {
     //region EDIT SECTION
     @FXML
     void editLibrary(MouseEvent event) {
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         if (currentLibrary != null){
             showBackgroundShadow();
             try{

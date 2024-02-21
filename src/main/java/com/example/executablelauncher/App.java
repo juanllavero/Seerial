@@ -24,6 +24,7 @@ import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -31,6 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class App extends Application {
     //region LOCALIZATION ATTRIBUTES
@@ -45,6 +49,8 @@ public class App extends Application {
     public static String lastDirectory = null;
     public static String lastVideoDirectory = null;
     public static String lastMusicDirectory = null;
+    public static boolean isConnectedToInternet = false;
+    static ScheduledExecutorService executorService;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -72,6 +78,12 @@ public class App extends Application {
                 }
             }
         }
+
+        isConnectedToInternet = isInternetAvailable();
+
+        //Check every minute if there is Internet connection
+        executorService = Executors.newSingleThreadScheduledExecutor();
+        executorService.scheduleAtFixedRate(App::isInternetAvailable, 0, 5, TimeUnit.MINUTES);
 
         //Set resource bundles
         File file = new File("resources/");
@@ -162,8 +174,24 @@ public class App extends Application {
     }
 
     public static void close(){
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         DataManager.INSTANCE.saveData();
         Platform.exit();
+    }
+
+    public static boolean isInternetAvailable() {
+        try {
+            InetAddress address = InetAddress.getByName("www.google.com");
+            return address.isReachable(2000);
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     //Create a simple file in the drive in order to avoid playing video with the drive suspended
