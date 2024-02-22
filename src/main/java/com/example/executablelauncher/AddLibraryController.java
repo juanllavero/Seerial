@@ -95,7 +95,7 @@ public class AddLibraryController {
     }
 
     public void initValues(){
-        title.setText(App.textBundle.getString("categoryWindowTitle"));
+        title.setText(App.textBundle.getString("libraryWindowTitle"));
         generalBox.setVisible(true);
         folderBox.setVisible(false);
         showOnFullscreen.setSelected(true);
@@ -114,7 +114,7 @@ public class AddLibraryController {
 
     public void setValues(Library toEdit){
         libraryToEdit = toEdit;
-        title.setText(App.textBundle.getString("categoryWindowTitleEdit"));
+        title.setText(App.textBundle.getString("libraryWindowTitleEdit"));
         nameField.setText(libraryToEdit.name);
         showOnFullscreen.setSelected(libraryToEdit.showOnFullscreen);
         generalBox.setVisible(true);
@@ -184,11 +184,11 @@ public class AddLibraryController {
             }
 
             if ((!catName.equals(nameField.getText()) && DataManager.INSTANCE.libraryExists(nameField.getText()))){
-                App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("categoryExists"));
+                App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("libraryExists"));
                 return;
             }
 
-            String language = "es";
+            String language = "es-ES";
             List<Locale> languages = App.tmdbLanguages;
             for (Locale locale : languages){
                 if (locale.getDisplayName().equals(languageChoice.getValue())){
@@ -202,6 +202,8 @@ public class AddLibraryController {
                 libraryToEdit.type = type;
                 libraryToEdit.folders = folders;
                 libraryToEdit.showOnFullscreen = showOnFullscreen.isSelected();
+
+                parentController.updateLibraries(libraryToEdit.name);
 
                 parentController.searchFiles();
             }else{

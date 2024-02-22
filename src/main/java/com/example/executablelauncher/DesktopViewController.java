@@ -481,6 +481,23 @@ public class DesktopViewController {
             blankSelection();
         }
     }
+    public void updateLibraries(String newName){
+        libraries = App.getLibraries(false);
+        libraries.sort(new Utils.LibraryComparator());
+
+        librarySelector.getItems().clear();
+        for (Library library : libraries) {
+            librarySelector.getItems().add(library.getName());
+            librariesNames.add(library.getName());
+        }
+
+        if (!libraries.isEmpty()){
+            librarySelector.setValue(newName);
+            selectLibrary(libraries.get(0).getName());
+        }else{
+            blankSelection();
+        }
+    }
     public void showSeries(){
         seriesButtons.clear();
 
@@ -661,6 +678,9 @@ public class DesktopViewController {
     public void blankSelection(){
         seasonScroll.setVisible(false);
         globalBackground.setImage(new Image("file:resources/img/Background.png"));
+        editLibraryButton.setDisable(true);
+        searchFilesButton.setDisable(true);
+        removeLibraryButton.setDisable(true);
     }
     public void selectLibrary(String catName){
         seriesContainer.getChildren().clear();
@@ -880,8 +900,7 @@ public class DesktopViewController {
         File videoFile = new File(episode.getVideoSrc());
 
         if (!videoFile.isFile()){
-            //videoError.setVisible(true);
-            //errorButton.requestFocus();
+            App.showErrorMessage(App.textBundle.getString("playbackError"), "", App.textBundle.getString("videoErrorMessage"));
             return;
         }
 
@@ -909,11 +928,6 @@ public class DesktopViewController {
             System.err.println("Error playing episode in DesktopViewController");
         }
     }
-    // Método para escribir comandos MPV en el OutputStream
-    private static void writeMPVCommand(OutputStream outputStream, String command) throws IOException {
-        outputStream.write(command.getBytes());
-        outputStream.flush();
-    }
     public String setRuntime(int runtime){
         int h = runtime / 60;
         int m = runtime % 60;
@@ -927,15 +941,13 @@ public class DesktopViewController {
 
     //region EPISODE SELECTION
     public void selectDisc(Episode episode){
-        if (!selectAllButton.isVisible() && selectedEpisodes.size() != episodeList.size())
-            selectAllButton.setVisible(true);
-
         if (selectedEpisodes.contains(episode)) {
             selectedEpisodes.remove(episode);
         }else{
             selectedEpisodes.add(episode);
         }
 
+        selectAllButton.setVisible(selectedEpisodes.size() != episodeList.size());
         selectionOptions.setVisible(!selectedEpisodes.isEmpty());
 
         if (selectedEpisodes.size() == 1)
@@ -963,7 +975,6 @@ public class DesktopViewController {
     }
     @FXML
     void selectAll(ActionEvent event) {
-        selectAllButton.setVisible(false);
         for (DiscController d : discControllers){
             if (!d.discSelected)
                 d.selectDiscDesktop();
@@ -1372,6 +1383,11 @@ public class DesktopViewController {
         librarySelector.setValue(library.getName());
 
         currentLibrary = library;
+
+        seasonScroll.setVisible(false);
+        editLibraryButton.setDisable(false);
+        searchFilesButton.setDisable(false);
+        removeLibraryButton.setDisable(false);
 
         searchFiles();
     }
@@ -2903,8 +2919,6 @@ public class DesktopViewController {
 
             if (s.getSeasons().isEmpty())
                 return;
-
-            seasonScroll.setVisible(true);
 
             seriesList.add(s);
             addSeriesCard(s);

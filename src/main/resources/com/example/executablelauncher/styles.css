@@ -406,6 +406,23 @@
     -fx-background-color: rgba(255, 255, 255, 0.1);
 }
 
+.alert {
+    -fx-background-color: #282828;
+}
+
+.alert .header-panel {
+    -fx-background-color: #222222;
+}
+
+.alert .content {
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+    -fx-text-fill: #ffffff;
+}
+
+.alert .button-bar {
+    -fx-background-color: #323232;
+}
 
 .greyGradient{
     -fx-background-color: linear-gradient(to top right, rgba(61,61,66,1) 0%, rgba(50,50,55,1) 19%, rgba(47,47,51,1) 35%, rgba(45,45,48,1) 53%, rgba(41,41,43,1) 70%, rgba(33,33,33,1) 100%);
@@ -533,6 +550,7 @@
 .desktopButton{
     -fx-background-color: #5e5e5e;
     -fx-background-radius: 4 3 2;
+    -fx-text-fill: #ffffff;
 }
 
 .desktopButton:hover{

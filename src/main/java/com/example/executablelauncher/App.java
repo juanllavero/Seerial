@@ -26,10 +26,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -271,6 +268,14 @@ public class App extends Application {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.setGraphic(null);
+
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getScene().getStylesheets().add(Objects.requireNonNull(App.class.getResource("styles.css")).toExternalForm());
+
+        alert.getDialogPane().getButtonTypes().stream()
+                .map(alert.getDialogPane()::lookupButton)
+                .forEach(button -> button.getStyleClass().add("desktopButton"));
+
         alert.showAndWait();
     }
 
