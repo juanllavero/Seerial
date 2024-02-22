@@ -7,7 +7,6 @@ import com.example.executablelauncher.utils.Configuration;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -288,7 +287,7 @@ public class Controller implements Initializable {
         globalShadow.setFitHeight(screenHeight);
         globalShadow.setVisible(false);
 
-        categories = App.getCategories(true);
+        categories = App.getLibraries(true);
 
         for (Library cat : categories){
             Button btn = new Button();

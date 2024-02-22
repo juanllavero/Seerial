@@ -275,8 +275,8 @@ public class DesktopViewController {
     private final ImageViewPane seasonBackgroundNoise = new ImageViewPane();
     private final ImageViewPane seriesBackgroundNoise = new ImageViewPane();
 
-    private List<Library> categories = new ArrayList<>();
-    private List<String> categoriesNames = new ArrayList<>();
+    private List<Library> libraries = new ArrayList<>();
+    private List<String> librariesNames = new ArrayList<>();
     private List<Series> seriesList = new ArrayList<>();
     private List<Season> seasonList = new ArrayList<>();
     private List<Episode> episodeList = new ArrayList<>();
@@ -415,7 +415,7 @@ public class DesktopViewController {
         changeEpisodesGroup.setDisable(true);
 
         Platform.runLater(() -> {
-            updateCategories();
+            updateLibraries();
             updateLanguage();
         });
     }
@@ -464,18 +464,19 @@ public class DesktopViewController {
 
         searchFilesButton.setText(App.buttonsBundle.getString("searchFiles"));
     }
-    public void updateCategories(){
-        categories = App.getCategories(false);
+    public void updateLibraries(){
+        libraries = App.getLibraries(false);
+        libraries.sort(new Utils.LibraryComparator());
 
         librarySelector.getItems().clear();
-        for (Library library : categories) {
+        for (Library library : libraries) {
             librarySelector.getItems().add(library.getName());
-            categoriesNames.add(library.getName());
+            librariesNames.add(library.getName());
         }
 
-        if (!categories.isEmpty()){
-            librarySelector.setValue(categories.get(0).getName());
-            selectLibrary(categories.get(0).getName());
+        if (!libraries.isEmpty()){
+            librarySelector.setValue(libraries.get(0).getName());
+            selectLibrary(libraries.get(0).getName());
         }else{
             blankSelection();
         }
@@ -533,24 +534,11 @@ public class DesktopViewController {
         yearText.setText(App.textBundle.getString("year"));
         orderText.setText(App.textBundle.getString("order"));
 
-        if (currentLibrary.type.equals("Shows"))
+        if (currentLibrary.type.equals("Shows")) {
             episodesText.setText(App.textBundle.getString("episodes"));
-        else
-            episodesText.setText(App.textBundle.getString("videos"));
-
-        yearField.setText(selectedSeason.getYear());
-        orderField.setText(Integer.toString(selectedSeason.getOrder()));
-        episodesField.setText(Integer.toString(selectedSeason.getEpisodes().size()));
-
-        if (currentLibrary.type.equals("Shows")){
             seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
             seasonNumberField.setText(String.valueOf(selectedSeason.seasonNumber));
-        }else{
-            seasonNumberText.setText("");
-            seasonNumberField.setText("");
-        }
 
-        if (currentLibrary.type.equals("Shows")){
             if (selectedSeries.logoSrc.isEmpty()){
                 setTextNoLogo();
             }else{
@@ -559,7 +547,11 @@ public class DesktopViewController {
                 File file = new File(selectedSeries.logoSrc);
                 setLogoNoText(file);
             }
-        }else{
+        }else {
+            episodesText.setText(App.textBundle.getString("videos"));
+            seasonNumberText.setText("");
+            seasonNumberField.setText("");
+
             if (selectedSeason.getLogoSrc().isEmpty()){
                 setTextNoLogo();
             }else{
@@ -569,6 +561,10 @@ public class DesktopViewController {
                 setLogoNoText(file);
             }
         }
+
+        yearField.setText(selectedSeason.getYear());
+        orderField.setText(Integer.toString(selectedSeason.getOrder()));
+        episodesField.setText(Integer.toString(selectedSeason.getEpisodes().size()));
 
         try{
             File file;
@@ -654,8 +650,10 @@ public class DesktopViewController {
         selectSeries(series);
     }
     public void refreshSeason(Season s){
-        selectedSeason = null;
-        selectSeason(s);
+        Platform.runLater(() -> {
+            selectedSeason = null;
+            selectSeason(s);
+        });
     }
     //endregion
 
@@ -674,6 +672,7 @@ public class DesktopViewController {
             return;
 
         seriesList = currentLibrary.getSeries();
+        seriesList.sort(new Utils.SeriesComparator());
 
         if (currentLibrary.type.equals("Shows")) {
             changeEpisodesGroup.setDisable(false);
@@ -1148,20 +1147,21 @@ public class DesktopViewController {
                 if (selectedSeason.getEpisodes().size() == 1){
                     Episode episode = selectedSeason.getEpisodes().get(0);
                     episode.name = selectedSeason.getName();
+                }
+
+                for (Episode episode : selectedSeason.getEpisodes()){
+                    if (episode == null)
+                        continue;
+
                     episode.score = selectedSeason.score;
                     episode.overview = selectedSeason.getOverview();
                     episode.year = selectedSeason.getYear();
                     episode.seasonNumber = selectedSeason.getSeasonNumber();
-                }else{
-                    for (Episode episode : selectedSeason.getEpisodes()){
-                        if (episode == null)
-                            continue;
 
-                        if (!selectedSeason.imdbID.isEmpty())
-                            setIMDBScore(selectedSeason.imdbID, episode);
+                    if (!selectedSeason.imdbID.isEmpty())
+                        setIMDBScore(selectedSeason.imdbID, episode);
 
-                        setMovieThumbnail(episode, selectedSeason.themdbID);
-                    }
+                    setMovieThumbnail(episode, selectedSeason.themdbID);
                 }
 
                 refreshSeason(selectedSeason);
@@ -3115,7 +3115,7 @@ public class DesktopViewController {
         if (acceptRemove){
             acceptRemove = false;
             DataManager.INSTANCE.deleteLibrary(currentLibrary);
-            updateCategories();
+            updateLibraries();
         }
 
         if (librarySelector.getItems().isEmpty())
