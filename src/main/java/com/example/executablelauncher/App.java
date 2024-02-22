@@ -246,14 +246,14 @@ public class App extends Application {
         return DataManager.INSTANCE.getCategories(fullscreen);
     }
 
-    public static List<String> getCategoriesNames(){
+    public static List<String> getLibrariesNames(){
         List<Library> catList = DataManager.INSTANCE.getCategories(false);
-        List<String> categoriesNames = new ArrayList<>();
+        List<String> librariesNames = new ArrayList<>();
 
-        for (Library cat : catList)
-            categoriesNames.add(cat.name);
+        for (Library l : catList)
+            librariesNames.add(l.name);
 
-        return categoriesNames;
+        return librariesNames;
     }
 
     public static void setSelectedSeries(Series series){ selectedSeries = series; }

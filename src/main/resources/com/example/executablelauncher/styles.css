@@ -97,6 +97,37 @@
     -fx-text-fill: #8EDCE6;
 }
 
+.libraryButton{
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+
+.libraryButton:hover{
+    -fx-text-fill: #9a9a9a;
+}
+
+.libraryMenuButton{
+    -fx-text-fill: #989898;
+    -fx-font-weight: bold;
+    -fx-background-color: transparent;
+}
+
+.libraryMenuButton:hover{
+    -fx-text-fill: white;
+    -fx-background-color: #484848;
+}
+
+.libraryMenuButtonSelected{
+    -fx-text-fill: #8EDCE6;
+    -fx-font-weight: bold;
+    -fx-background-color: transparent;
+}
+
+.libraryMenuButtonSelected:hover{
+    -fx-text-fill: white;
+    -fx-background-color: #484848;
+}
+
 .playerButton{
     -fx-background-color: transparent;
     -fx-background-radius: 50px;

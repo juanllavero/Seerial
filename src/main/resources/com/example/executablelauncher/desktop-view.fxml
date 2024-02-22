@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ScrollPane?>
@@ -58,11 +57,21 @@
                               </ImageView>
                            </graphic>
                         </Button>
-                        <ChoiceBox fx:id="librarySelector" prefWidth="163.0">
+                        <Button fx:id="librarySelector" contentDisplay="RIGHT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#showLibraries" styleClass="libraryButton" stylesheets="@styles.css" text="Library Name" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="15.0" />
+                           </font>
+                           <graphic>
+                              <ImageView fitHeight="10.0" fitWidth="10.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../../../../resources/img/icons/triangle.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
                            <HBox.margin>
                               <Insets left="10.0" />
                            </HBox.margin>
-                        </ChoiceBox>
+                        </Button>
                         <Button contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#addLibrary" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
                               <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
@@ -100,7 +109,7 @@
                   <Insets top="5.0" />
                </padding>
                <BorderPane.margin>
-                  <Insets left="20.0" />
+                  <Insets left="15.0" />
                </BorderPane.margin>
             </BorderPane>
          </top>
@@ -532,6 +541,11 @@
                      </font>
                   </Button>
                </children>
+               <padding>
+                  <Insets bottom="2.0" top="2.0" />
+               </padding>
+            </VBox>
+            <VBox fx:id="libraryContainer" layoutX="329.0" layoutY="105.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <padding>
                   <Insets bottom="2.0" top="2.0" />
                </padding>

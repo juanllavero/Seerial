@@ -25,7 +25,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -34,10 +33,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
@@ -55,6 +54,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -93,6 +93,9 @@ public class DesktopViewController {
     private VBox libraryMenu;
 
     @FXML
+    private VBox libraryContainer;
+
+    @FXML
     private Button editLibraryButton;
 
     @FXML
@@ -126,7 +129,7 @@ public class DesktopViewController {
     private ImageView backgroundShadow;
 
     @FXML
-    private ChoiceBox<String> librarySelector;
+    private Button librarySelector;
 
     @FXML
     private VBox seasonsEpisodesBox;
@@ -276,7 +279,6 @@ public class DesktopViewController {
     private final ImageViewPane seriesBackgroundNoise = new ImageViewPane();
 
     private List<Library> libraries = new ArrayList<>();
-    private List<String> librariesNames = new ArrayList<>();
     private List<Series> seriesList = new ArrayList<>();
     private List<Season> seasonList = new ArrayList<>();
     private List<Episode> episodeList = new ArrayList<>();
@@ -302,10 +304,6 @@ public class DesktopViewController {
 
     public void initValues(){
         Stage stage = (Stage) mainBox.getScene().getWindow();
-
-        librarySelector.getSelectionModel()
-                .selectedItemProperty()
-                .addListener( (ObservableValue<? extends String> observable, String oldValue, String newValue) -> selectLibrary(newValue));
 
         if (App.isInternetAvailable())
             tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
@@ -367,6 +365,7 @@ public class DesktopViewController {
         seriesMenu.setVisible(false);
         seasonMenu.setVisible(false);
         discMenu.setVisible(false);
+        libraryContainer.setVisible(false);
 
         //Elements size
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -422,14 +421,6 @@ public class DesktopViewController {
 
     //region CONTENT
     public void updateLanguage(){
-        librarySelector.getItems().clear();
-        librarySelector.getItems().addAll(App.getCategoriesNames());
-
-        if (!librarySelector.getItems().isEmpty()) {
-            librarySelector.setValue(librarySelector.getItems().get(0));
-            selectLibrary(librarySelector.getValue());
-        }
-
         settingsButton.setText(App.buttonsBundle.getString("settings"));
         exitButton.setText(App.buttonsBundle.getString("eixtButton"));
         switchFSButton.setText(App.buttonsBundle.getString("switchToFullscreen"));
@@ -466,37 +457,62 @@ public class DesktopViewController {
     }
     public void updateLibraries(){
         libraries = App.getLibraries(false);
-        libraries.sort(new Utils.LibraryComparator());
 
-        librarySelector.getItems().clear();
-        for (Library library : libraries) {
-            librarySelector.getItems().add(library.getName());
-            librariesNames.add(library.getName());
+        if (libraries.isEmpty()) {
+            blankSelection();
+            return;
         }
 
-        if (!libraries.isEmpty()){
-            librarySelector.setValue(libraries.get(0).getName());
-            selectLibrary(libraries.get(0).getName());
-        }else{
-            blankSelection();
+        currentLibrary = libraries.get(0);
+
+        libraries.sort(new Utils.LibraryComparator());
+
+        librarySelector.setText(libraries.get(0).name);
+        for (Library library : libraries) {
+            Button btn = new Button(library.getName());
+            btn.setPadding(new Insets(10));
+            btn.setTextAlignment(TextAlignment.LEFT);
+            btn.setMaxWidth(Integer.MAX_VALUE);
+            btn.getStyleClass().clear();
+            btn.getStyleClass().add("libraryMenuButton");
+
+            btn.setOnMouseClicked(event -> {
+                for (Node node : libraryContainer.getChildren()) {
+                    Button button = (Button) node;
+                    button.getStyleClass().clear();
+                    button.getStyleClass().add("libraryMenuButton");
+                }
+
+                btn.getStyleClass().clear();
+                btn.getStyleClass().add("libraryMenuButtonSelected");
+
+                selectLibrary(btn.getText());
+                hideMenu();
+            });
+
+            libraryContainer.getChildren().add(btn);
+        }
+
+        for (Node node : libraryContainer.getChildren()) {
+            Button btn = (Button) node;
+
+            if (btn.getText().equals(currentLibrary.getName())) {
+                btn.getStyleClass().clear();
+                btn.getStyleClass().add("libraryMenuButtonSelected");
+
+                selectLibrary(btn.getText());
+            }
         }
     }
-    public void updateLibraries(String newName){
-        libraries = App.getLibraries(false);
-        libraries.sort(new Utils.LibraryComparator());
+    public void updateLibraries(String oldName, String newName){
+        for (Node node : libraryContainer.getChildren()) {
+            Button btn = (Button) node;
 
-        librarySelector.getItems().clear();
-        for (Library library : libraries) {
-            librarySelector.getItems().add(library.getName());
-            librariesNames.add(library.getName());
+            if (btn.getText().equals(oldName))
+                btn.setText(newName);
         }
 
-        if (!libraries.isEmpty()){
-            librarySelector.setValue(newName);
-            selectLibrary(libraries.get(0).getName());
-        }else{
-            blankSelection();
-        }
+        librarySelector.setText(newName);
     }
     public void showSeries(){
         seriesButtons.clear();
@@ -676,15 +692,18 @@ public class DesktopViewController {
 
     //region SELECTION
     public void blankSelection(){
+        librarySelector.setText("");
         seasonScroll.setVisible(false);
         globalBackground.setImage(new Image("file:resources/img/Background.png"));
         editLibraryButton.setDisable(true);
         searchFilesButton.setDisable(true);
         removeLibraryButton.setDisable(true);
     }
-    public void selectLibrary(String catName){
+    public void selectLibrary(String libraryName){
         seriesContainer.getChildren().clear();
-        currentLibrary = DataManager.INSTANCE.getLibrary(catName);
+        currentLibrary = DataManager.INSTANCE.getLibrary(libraryName);
+
+        librarySelector.setText(libraryName);
 
         DataManager.INSTANCE.currentLibrary = currentLibrary;
 
@@ -881,6 +900,20 @@ public class DesktopViewController {
         fadeIn.setFromValue(0.1);
         fadeIn.setToValue(1.0);
         fadeIn.play();
+    }
+    private void fadeInTransition(Pane pane){
+        //Fade In Transition
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.2), pane);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+    }
+    private void fadeOutTransition(Pane pane){
+        //Fade In Transition
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.2), pane);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0);
+        fadeOut.play();
     }
     public static void scrollModification(ScrollPane scroll) {
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -1379,8 +1412,7 @@ public class DesktopViewController {
         }
     }
     public void loadLibrary(Library library){
-        librarySelector.getItems().add(library.getName());
-        librarySelector.setValue(library.getName());
+        librarySelector.setText(library.getName());
 
         currentLibrary = library;
 
@@ -3132,7 +3164,7 @@ public class DesktopViewController {
             updateLibraries();
         }
 
-        if (librarySelector.getItems().isEmpty())
+        if (libraryContainer.getChildren().isEmpty())
             blankSelection();
 
         hideBackgroundShadow();
@@ -3269,7 +3301,9 @@ public class DesktopViewController {
         menuParentPane.setVisible(true);
         mainMenu.setLayoutX(event.getSceneX());
         mainMenu.setLayoutY(event.getSceneY());
+
         mainMenu.setVisible(true);
+        fadeInTransition(mainMenu);
     }
     @FXML
     void openSettings(MouseEvent event) {
@@ -3295,7 +3329,23 @@ public class DesktopViewController {
         menuParentPane.setVisible(true);
         libraryMenu.setLayoutX(event.getSceneX());
         libraryMenu.setLayoutY(event.getSceneY());
+
         libraryMenu.setVisible(true);
+        fadeInTransition(libraryMenu);
+    }
+    @FXML
+    void showLibraries(MouseEvent event){
+        menuParentPane.setVisible(true);
+        libraryContainer.setLayoutY(librarySelector.getLayoutY() + 40);
+        libraryContainer.setLayoutX(librarySelector.getLayoutX() + 15);
+
+        //Change libraries button icon
+        ImageView icon = (ImageView) librarySelector.getGraphic();
+        icon.setImage(new Image("file:resources/img/icons/triangleInverted.png", 10, 10, true, true));
+        librarySelector.setGraphic(icon);
+
+        libraryContainer.setVisible(true);
+        fadeInTransition(libraryContainer);
     }
     @FXML
     void openSeriesMenu(MouseEvent event) {
@@ -3306,28 +3356,47 @@ public class DesktopViewController {
             seriesMenu.setLayoutY(event.getSceneY());
         else
             seriesMenu.setLayoutY(event.getSceneY() - seriesMenu.getHeight());
+
         seriesMenu.setVisible(true);
+        fadeInTransition(seriesMenu);
     }
     @FXML
     void openSeasonMenu(MouseEvent event) {
         menuParentPane.setVisible(true);
         seasonMenu.setLayoutX(event.getSceneX());
         seasonMenu.setLayoutY(event.getSceneY() - seasonMenu.getHeight());
+
         seasonMenu.setVisible(true);
+        fadeInTransition(seasonMenu);
     }
     public void openDiscMenu(MouseEvent event) {
         menuParentPane.setVisible(true);
         discMenu.setLayoutX(event.getSceneX());
         discMenu.setLayoutY(event.getSceneY() - discMenu.getHeight());
+
         discMenu.setVisible(true);
+        fadeInTransition(discMenu);
     }
     private void hideMenu(){
-        discMenu.setVisible(false);
-        seasonMenu.setVisible(false);
-        libraryMenu.setVisible(false);
-        seriesMenu.setVisible(false);
-        mainMenu.setVisible(false);
+        if (discMenu.isVisible())
+            fadeOutTransition(discMenu);
+        if (seasonMenu.isVisible())
+            fadeOutTransition(seasonMenu);
+        if (libraryMenu.isVisible())
+            fadeOutTransition(libraryMenu);
+        if (seriesMenu.isVisible())
+            fadeOutTransition(seriesMenu);
+        if (mainMenu.isVisible())
+            fadeOutTransition(mainMenu);
+        if (libraryContainer.isVisible())
+            fadeOutTransition(libraryContainer);
+
         menuParentPane.setVisible(false);
+
+        //Change libraries button icon
+        ImageView icon = (ImageView) librarySelector.getGraphic();
+        icon.setImage(new Image("file:resources/img/icons/triangle.png", 10, 10, true, true));
+        librarySelector.setGraphic(icon);
     }
     //endregion
 

@@ -791,6 +791,8 @@ public class EditSeasonController {
                     System.err.println("Music not deleted");
                 }
             }
+        }else{
+            seasonToEdit.setMusicSrc("");
         }
 
         if (!orderField.getText().isEmpty() && !orderField.getText().equals("0")){

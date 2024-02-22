@@ -135,12 +135,11 @@ public class Controller implements Initializable {
     @FXML
     private ImageView globalShadow;
 
-    private List<Library> categories = null;
+    private List<Library> libraries = null;
     private Library currentLibrary = null;
     private Series seriesToEdit;
     private List<Series> series = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
-
     private MediaPlayer backgroundMusicPlayer;
     private String libraryType = null;
     private FadeTransition fadeTransition = null;
@@ -174,7 +173,7 @@ public class Controller implements Initializable {
 
         categoriesBox.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
-                int index = categories.indexOf(currentLibrary);
+                int index = libraries.indexOf(currentLibrary);
                 categoriesBox.getChildren().get(index).requestFocus();
             }
         });
@@ -287,9 +286,9 @@ public class Controller implements Initializable {
         globalShadow.setFitHeight(screenHeight);
         globalShadow.setVisible(false);
 
-        categories = App.getLibraries(true);
+        libraries = App.getLibraries(true);
 
-        for (Library cat : categories){
+        for (Library cat : libraries){
             Button btn = new Button();
             btn.setText(cat.name);
             btn.getStyleClass().add("CatButton");
@@ -298,7 +297,7 @@ public class Controller implements Initializable {
 
             btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
                 playCategoriesSound();
-                showSeriesFrom(categories.get(categoriesBox.getChildren().indexOf(btn)));
+                showSeriesFrom(libraries.get(categoriesBox.getChildren().indexOf(btn)));
             });
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
@@ -306,7 +305,7 @@ public class Controller implements Initializable {
                     selectLibraryButton(btn);
 
                     playCategoriesSound();
-                    showSeriesFrom(categories.get(categoriesBox.getChildren().indexOf(btn)));
+                    showSeriesFrom(libraries.get(categoriesBox.getChildren().indexOf(btn)));
                 }
             });
 
@@ -329,8 +328,8 @@ public class Controller implements Initializable {
 
         currentLibrary = DataManager.INSTANCE.currentLibrary;
 
-        if (currentLibrary == null && !categories.isEmpty())
-            currentLibrary = categories.get(0);
+        if (currentLibrary == null && !libraries.isEmpty())
+            currentLibrary = libraries.get(0);
 
         if (currentLibrary != null){
             mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
@@ -344,7 +343,7 @@ public class Controller implements Initializable {
                 }
             });
 
-            selectLibraryButton((Button) categoriesBox.getChildren().get(categories.indexOf(currentLibrary)));
+            selectLibraryButton((Button) categoriesBox.getChildren().get(libraries.indexOf(currentLibrary)));
             showSeriesFrom(currentLibrary);
         }else{
             showMenu();
@@ -439,7 +438,7 @@ public class Controller implements Initializable {
             seriesToEdit = series.get(0);
             src = "file:resources/img/backgrounds/" + series.get(0).getSeasons().get(0).getId() + "/fullBlur.png";
         }else{
-            src = "file:resources/img/backgroundDefault.jpeg";
+            src = "file:resources/img/backgroundDefault.png";
         }
 
         Image image = new Image(src);

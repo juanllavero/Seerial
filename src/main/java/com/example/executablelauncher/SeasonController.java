@@ -373,7 +373,9 @@ public class SeasonController {
                     detailsButton.requestFocus();
                 else
                     episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
-            }else if (App.pressedRight(event))
+            }else if (App.pressedRight(event) && !optionsButton.isVisible())
+                nextSeasonButton.requestFocus();
+            else if (App.pressedRight(event) && optionsButton.isVisible())
                 optionsButton.requestFocus();
             else if (App.pressedLeft(event))
                 playButton.requestFocus();
@@ -425,7 +427,7 @@ public class SeasonController {
     }
     private void updateInfo(Season season){
         if (mp != null){
-            if (isVideo && !playSameMusic) {
+            if (isVideo || !playSameMusic) {
                 mp.stop();
             }
         }
@@ -1069,12 +1071,11 @@ public class SeasonController {
             protected Void call() {
                 mp.setVolume(Double.parseDouble(Configuration.loadConfig("volume", "0.2")));
                 mp.setOnEndOfMedia(() -> {
-                    mp.seek(Duration.ZERO);
-                    mp.play();
+                    mp.stop();
                 });
 
                 timeline = new javafx.animation.Timeline(
-                        new javafx.animation.KeyFrame(Duration.seconds(4), event -> {
+                        new javafx.animation.KeyFrame(Duration.seconds(0.5), event -> {
                             playBackgroundMedia();
                         })
                 );

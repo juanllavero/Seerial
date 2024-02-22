@@ -197,13 +197,15 @@ public class AddLibraryController {
             }
 
             if (libraryToEdit != null){
+                String oldName = libraryToEdit.getName();
+
                 libraryToEdit.name = nameField.getText();
                 libraryToEdit.language = language;
                 libraryToEdit.type = type;
                 libraryToEdit.folders = folders;
                 libraryToEdit.showOnFullscreen = showOnFullscreen.isSelected();
 
-                parentController.updateLibraries(libraryToEdit.name);
+                parentController.updateLibraries(oldName, libraryToEdit.name);
 
                 parentController.searchFiles();
             }else{

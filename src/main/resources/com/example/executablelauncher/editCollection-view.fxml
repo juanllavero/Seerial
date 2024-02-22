@@ -198,7 +198,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </TextField>
-                  <CheckBox fx:id="playSameMusic" mnemonicParsing="false" text="Play same music in all seasons" textFill="WHITE">
+                  <CheckBox fx:id="playSameMusic" mnemonicParsing="false" text="Play same music in all seasons" textFill="WHITE" wrapText="true">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>
