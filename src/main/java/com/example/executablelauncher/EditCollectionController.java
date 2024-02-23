@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.example.executablelauncher.App.buttonsBundle;
+
 public class EditCollectionController {
     //region FXML ATTRIBUTES
     @FXML
@@ -44,6 +46,9 @@ public class EditCollectionController {
 
     @FXML
     private Button fromURLButton;
+
+    @FXML
+    private Button fromURLButton2;
 
     @FXML
     private Button downloadLogosButton;
@@ -135,6 +140,10 @@ public class EditCollectionController {
         postersViewButton.setText(App.buttonsBundle.getString("postersButton"));
         logosViewButton.setText(App.buttonsBundle.getString("logosButton"));
         playSameMusic.setText(App.textBundle.getString("playSameMusic"));
+        selectLogoButton.setText(buttonsBundle.getString("selectImage"));
+        fromURLButton.setText(buttonsBundle.getString("fromURLButton"));
+        fromURLButton2.setText(buttonsBundle.getString("fromURLButton"));
+        downloadLogosButton.setText(buttonsBundle.getString("downloadImages"));
 
         showGeneralView();
     }
@@ -168,7 +177,7 @@ public class EditCollectionController {
             try{
                 Files.copy(selectedLogo.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
-                System.err.println("Thumbnail not copied");
+                System.err.println("Logo not copied");
             }
 
             logoFiles.add(file);
@@ -235,11 +244,6 @@ public class EditCollectionController {
         openURLImageLoader(true);
     }
     private void openURLImageLoader(boolean isLogo){
-        if (!App.isConnectedToInternet) {
-            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
-            return;
-        }
-
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("urlPaster-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -298,12 +302,21 @@ public class EditCollectionController {
             try{
                 Files.copy(selectedImage.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
-                System.err.println("Thumbnail not copied");
+                System.err.println("Poster not copied");
             }
 
             imagesFiles.add(file);
-            addImage(file);
+            addPoster(file);
         }
+    }
+    @FXML
+    void loadPosterURL(ActionEvent event) {
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
+        openURLImageLoader(false);
     }
     //endregion
 
@@ -371,7 +384,7 @@ public class EditCollectionController {
             imagesFiles.addAll(Arrays.asList(files));
 
             for (File f : imagesFiles) {
-                addImage(f);
+                addPoster(f);
 
                 if (selectedImage != null && selectedImage.getAbsolutePath().equals(f.getAbsolutePath())){
                     selectButton((Button) posterContainer.getChildren().get(imagesFiles.indexOf(f)));
@@ -381,7 +394,27 @@ public class EditCollectionController {
     }
     private void addImage(File file){
         try {
-            Image img = new Image(file.toURI().toURL().toExternalForm(), 125, 200, true, true);
+            Image img = new Image(file.toURI().toURL().toExternalForm(), 150, 84, true, true);
+            ImageView image = new ImageView(img);
+
+            Button btn = new Button();
+            btn.setGraphic(image);
+            btn.setText("");
+            btn.getStyleClass().add("downloadedImageButton");
+            btn.setPadding(new Insets(2));
+
+            btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+                selectLogoButton(btn);
+            });
+
+            logosContainer.getChildren().add(btn);
+        } catch (MalformedURLException e) {
+            System.err.println("EditCollectionController: Error loading image thumbnail");
+        }
+    }
+    private void addPoster(File file){
+        try{
+            Image img = new Image(file.toURI().toURL().toExternalForm(), 150, 225, true, true);
             ImageView image = new ImageView(img);
 
             Button btn = new Button();
@@ -396,7 +429,7 @@ public class EditCollectionController {
 
             posterContainer.getChildren().add(btn);
         } catch (MalformedURLException e) {
-            System.err.println("EditCollectionController: Error loading image thumbnail");
+            System.err.println("EditDiscController: Error loading image thumbnail");
         }
     }
     private void selectButton(Button btn){
@@ -500,9 +533,10 @@ public class EditCollectionController {
             seriesToEdit.setCoverSrc("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + selectedImage.getName());
 
         if (selectedLogo != null)
-            seriesToEdit.logoSrc = "resources/img/logos/" + seriesToEdit.getId() + "/" + selectedLogo.getName();
+            seriesToEdit.setLogoSrc("resources/img/logos/" + seriesToEdit.getId() + "/" + selectedLogo.getName());
 
         //Refresh Series Data in DesktopView
+        controllerParent.updateSeries();
         controllerParent.hideBackgroundShadow();
 
         Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();

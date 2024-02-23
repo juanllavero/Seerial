@@ -306,11 +306,11 @@ public class ImageDownloaderController {
                 seasonParent.loadLogo(selectedFile.getAbsolutePath());
             else
                 seasonParent.loadBackground(selectedFile.getAbsolutePath());
-
-            seasonParent.enablePane();
         }else{
-            seriesParent.loadLogo(selectedFile.getAbsolutePath());
-            seriesParent.enablePane();
+            if (isLogo)
+                seriesParent.loadLogo(selectedFile.getAbsolutePath());
+            else
+                seriesParent.loadImage(selectedFile.getAbsolutePath());
         }
         cancel(event);
     }

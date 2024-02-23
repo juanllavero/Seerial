@@ -289,7 +289,7 @@ public class EditSeasonController {
             try{
                 Files.copy(selectedPoster.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
-                System.err.println("Thumbnail not copied");
+                System.err.println("Poster not copied");
             }
 
             posterFiles.add(file);

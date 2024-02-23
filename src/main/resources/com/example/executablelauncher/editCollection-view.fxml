@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="479.0" prefWidth="600.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.EditCollectionController">
+<BorderPane prefHeight="520.0" prefWidth="711.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.EditCollectionController">
    <top>
       <BorderPane prefHeight="55.0" prefWidth="600.0" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
@@ -111,6 +111,9 @@
                            <padding>
                               <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                            </padding>
+                           <VBox.margin>
+                              <Insets left="10.0" />
+                           </VBox.margin>
                         </FlowPane>
                      </children>
                   </VBox>
@@ -130,9 +133,17 @@
                                     <Font size="14.0" />
                                  </font>
                               </Button>
-                              <Button fx:id="downloadImagesButton" mnemonicParsing="false" onAction="#downloadCover" styleClass="desktopButton" stylesheets="@styles.css" text="Download images" textFill="WHITE">
+                              <Button fx:id="fromURLButton2" mnemonicParsing="false" onAction="#loadPosterURL" styleClass="desktopButton" stylesheets="@styles.css" text="From URL" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
                                  <HBox.margin>
                                     <Insets left="2.0" top="5.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="downloadImagesButton" mnemonicParsing="false" onAction="#downloadCover" styleClass="desktopButton" stylesheets="@styles.css" text="Download images" textFill="WHITE">
+                                 <HBox.margin>
+                                    <Insets />
                                  </HBox.margin>
                                  <font>
                                     <Font size="14.0" />
@@ -150,6 +161,9 @@
                            <padding>
                               <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                            </padding>
+                           <VBox.margin>
+                              <Insets left="10.0" />
+                           </VBox.margin>
                         </FlowPane>
                      </children>
                   </VBox>

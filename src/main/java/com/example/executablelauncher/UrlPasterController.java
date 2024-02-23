@@ -79,14 +79,13 @@ public class UrlPasterController {
                 editSeasonController.loadLogo(imageURL);
             else
                 editSeasonController.loadBackground(imageURL);
-
-            editSeasonController.enablePane();
         }else if (editDiscController != null){
             editDiscController.loadImage(imageURL);
-            editDiscController.enablePane();
         }else{
-            editSeriesController.loadLogo(imageURL);
-            editSeriesController.enablePane();
+            if (isLogo)
+                editSeriesController.loadLogo(imageURL);
+            else
+                editSeriesController.loadImage(imageURL);
         }
 
         cancelButton(event);

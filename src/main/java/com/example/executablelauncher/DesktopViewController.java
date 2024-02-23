@@ -599,6 +599,9 @@ public class DesktopViewController {
         orderField.setText(Integer.toString(selectedSeason.getOrder()));
         episodesField.setText(Integer.toString(selectedSeason.getEpisodes().size()));
 
+        setCoverImage();
+    }
+    private void setCoverImage(){
         try{
             File file;
             if (!selectedSeries.getCoverSrc().isEmpty()){
@@ -614,6 +617,7 @@ public class DesktopViewController {
         }
     }
     private void setLogoNoText(File file) {
+        seasonLogoBox.getChildren().clear();
         try{
             seasonLogo.setImage(new Image(file.toURI().toURL().toExternalForm()));
             seasonLogo.setFitHeight(300);
@@ -2939,6 +2943,15 @@ public class DesktopViewController {
     //endregion
 
     //region ADD SECTION
+    public void updateSeries(){
+        Button btn = seriesButtons.get(seriesList.indexOf(selectedSeries));
+        btn.setText(selectedSeries.getName());
+
+        setCoverImage();
+
+        if (currentLibrary.type.equals("Shows") && !selectedSeries.getLogoSrc().isEmpty())
+            setLogoNoText(new File(selectedSeries.getLogoSrc()));
+    }
     private void updateSeries(Series series){
         if (series == selectedSeries){
             selectedSeries = null;
@@ -3380,16 +3393,27 @@ public class DesktopViewController {
     private void hideMenu(){
         if (discMenu.isVisible())
             fadeOutTransition(discMenu);
+        discMenu.setVisible(false);
+
         if (seasonMenu.isVisible())
             fadeOutTransition(seasonMenu);
+        seasonMenu.setVisible(false);
+
         if (libraryMenu.isVisible())
             fadeOutTransition(libraryMenu);
+        libraryMenu.setVisible(false);
+
         if (seriesMenu.isVisible())
             fadeOutTransition(seriesMenu);
+        seriesMenu.setVisible(false);
+
         if (mainMenu.isVisible())
             fadeOutTransition(mainMenu);
+        mainMenu.setVisible(false);
+
         if (libraryContainer.isVisible())
             fadeOutTransition(libraryContainer);
+        libraryContainer.setVisible(false);
 
         menuParentPane.setVisible(false);
 
