@@ -103,8 +103,12 @@ public class ImageDownloaderController {
         title.setText(App.textBundle.getString("imageDownloaderTitle"));
         downloadingText.setText(App.textBundle.getString("downloading"));
         transparentCheck.setText(App.textBundle.getString("transparentCheck"));
-        widthField.setText(width);
-        heightField.setText(height);
+
+        if (!width.isEmpty() && !height.isEmpty()){
+            widthField.setText(width);
+            heightField.setText(height);
+        }
+
         resolutionText.setText(App.textBundle.getString("resolutionText"));
         selectImageButton.setText(App.buttonsBundle.getString("selectButton"));
         loadMoreButton.setText(App.buttonsBundle.getString("loadMoreButton"));
@@ -302,8 +306,11 @@ public class ImageDownloaderController {
                 seasonParent.loadLogo(selectedFile.getAbsolutePath());
             else
                 seasonParent.loadBackground(selectedFile.getAbsolutePath());
+
+            seasonParent.enablePane();
         }else{
             seriesParent.loadLogo(selectedFile.getAbsolutePath());
+            seriesParent.enablePane();
         }
         cancel(event);
     }

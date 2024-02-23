@@ -203,6 +203,11 @@ public class EditCollectionController {
         openImagesDownloader(seriesToEdit.name + " logo", Integer.toString(353), Integer.toString(122), false, true, true);
     }
     private void openImagesDownloader(String searchText, String width, String height, boolean isCover, boolean isLogo, boolean transparent){
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ImageDownloader-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -230,6 +235,11 @@ public class EditCollectionController {
         openURLImageLoader(true);
     }
     private void openURLImageLoader(boolean isLogo){
+        if (!App.isConnectedToInternet) {
+            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
+            return;
+        }
+
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("urlPaster-view.fxml"));
             Parent root1 = fxmlLoader.load();
@@ -259,45 +269,38 @@ public class EditCollectionController {
             App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
             return;
         }
+
+        openImagesDownloader(seriesToEdit.name + " poster", "", "", true, false, false);
     }
     @FXML
     void loadImage(ActionEvent event) {
-        if (!nameField.getText().isEmpty()){
-            try{
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("image-cropper-view.fxml"));
-                Parent root1 = fxmlLoader.load();
-                ImageCropper cropperController = fxmlLoader.getController();
-                cropperController.setCollectionParent(this);
-
-                int number = -1;
-
-                for (File file : imagesFiles){
-                    if (Integer.parseInt(file.getName().substring(0, file.getName().lastIndexOf("."))) > number){
-                        number = Integer.parseInt(file.getName().substring(0, file.getName().lastIndexOf(".")));
-                    }
-                }
-
-                cropperController.initValues("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + (number + 1) + ".png", false);
-                Stage stage = new Stage();
-                stage.setResizable(true);
-                stage.setMaximized(false);
-                stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 2);
-                stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 2);
-                stage.setTitle(App.textBundle.getString("imageCropper"));
-                App.setPopUpProperties(stage, (Stage) name.getScene().getWindow());
-                stage.setScene(new Scene(root1));
-                stage.show();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }else{
-            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("emptyField"));
+        selectedImage = getImageFile();
+        if (selectedImage != null){
+            loadImage(selectedImage.getPath());
+            App.lastDirectory = selectedImage.getPath().substring(0, (selectedImage.getPath().length() - selectedImage.getName().length()));
         }
     }
     public void loadImage(String src){
         File file = new File(src);
         if (file.exists()) {
             selectedImage = file;
+
+            int number = 0;
+
+            for (File f : imagesFiles){
+                if (Integer.parseInt(f.getName().substring(0, f.getName().lastIndexOf("."))) > number){
+                    number = Integer.parseInt(f.getName().substring(0, f.getName().lastIndexOf(".")));
+                }
+            }
+
+            File newFile = new File("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + (number + 1) + ".png");
+
+            try{
+                Files.copy(selectedImage.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }catch (IOException e){
+                System.err.println("Thumbnail not copied");
+            }
+
             imagesFiles.add(file);
             addImage(file);
         }

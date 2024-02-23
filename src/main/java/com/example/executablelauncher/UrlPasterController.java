@@ -31,12 +31,12 @@ public class UrlPasterController {
     private TextField urlField;
 
     private boolean isLogo = false;
-    private EditSeasonController addSeasonController = null;
+    private EditSeasonController editSeasonController = null;
     private EditCollectionController editSeriesController = null;
     private EditDiscController editDiscController = null;
 
     public void setParent(EditSeasonController controller){
-        addSeasonController = controller;
+        editSeasonController = controller;
     }
     public void setParent(EditCollectionController controller){
         editSeriesController = controller;
@@ -74,15 +74,19 @@ public class UrlPasterController {
             System.err.println("Image not saved");
         }
 
-        if (addSeasonController != null){
+        if (editSeasonController != null){
             if (isLogo)
-                addSeasonController.loadLogo(imageURL);
+                editSeasonController.loadLogo(imageURL);
             else
-                addSeasonController.loadBackground(imageURL);
+                editSeasonController.loadBackground(imageURL);
+
+            editSeasonController.enablePane();
         }else if (editDiscController != null){
             editDiscController.loadImage(imageURL);
+            editDiscController.enablePane();
         }else{
             editSeriesController.loadLogo(imageURL);
+            editSeriesController.enablePane();
         }
 
         cancelButton(event);

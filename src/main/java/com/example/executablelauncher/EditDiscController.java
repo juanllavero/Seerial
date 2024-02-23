@@ -116,16 +116,6 @@ public class EditDiscController {
     //endregion
 
     //region THUMBNAILS
-    public void setImageFile(String path){
-        selectedImage = new File(path);
-    }
-    @FXML
-    void downloadThumbnail(ActionEvent event) {
-        if (!App.isConnectedToInternet) {
-            App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
-            return;
-        }
-    }
     @FXML
     void loadImage(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();

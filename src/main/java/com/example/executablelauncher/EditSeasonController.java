@@ -10,11 +10,13 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.commons.io.FileUtils;
 
@@ -344,30 +346,6 @@ public class EditSeasonController {
         }
     }
     @FXML
-    void cropBackground(ActionEvent event){
-        if (selectedBackground != null){
-            try{
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("image-cropper-view.fxml"));
-                Parent root1 = fxmlLoader.load();
-                ImageCropper controller = fxmlLoader.getController();
-                controller.setSeasonParent(this);
-                controller.initValues(selectedBackground.getAbsolutePath(), true);
-                controller.loadImageToCrop(selectedBackground);
-                Stage stage = new Stage();
-                stage.setTitle("ImageDownloader");
-                stage.setResizable(true);
-                stage.setMaximized(false);
-                stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.5);
-                Scene scene = new Scene(root1);
-                stage.setScene(scene);
-                App.setPopUpProperties(stage, (Stage) nameField.getScene().getWindow());
-                stage.show();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-    @FXML
     void downloadBackground(ActionEvent event) {
         openImagesDownloader(seriesName + " wallpaper", String.valueOf((int)Screen.getPrimary().getBounds().getWidth())
                 , String.valueOf((int)Screen.getPrimary().getBounds().getHeight()), false, false, false);
@@ -437,15 +415,6 @@ public class EditSeasonController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-    @FXML
-    void removeBackground(ActionEvent event) {
-        selectedBackground = null;
-        backgroundImageView.setImage(null);
-        if (seasonToEdit != null){
-            seasonToEdit.setBackgroundSrc("");
-        }
-        oldBackgroundPath = "";
     }
     //endregion
 
@@ -753,7 +722,7 @@ public class EditSeasonController {
             oldName = oldBackgroundPath.substring(oldBackgroundPath.lastIndexOf("/")+1);
         if (oldBackgroundPath.isEmpty() || !newName.equals(oldName) || croppedImage){
             if (selectedBackground != null){
-                //parentController.saveBackground(seasonToEdit, seasonToEdit != null, selectedBackground.getAbsolutePath(), croppedImage);              FIX EDIT AND CROP
+                parentController.saveBackground(seasonToEdit, selectedBackground.getAbsolutePath());
             }
         }
 
