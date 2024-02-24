@@ -282,7 +282,7 @@
             </ScrollPane>
          </center>
          <left>
-            <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="350.0" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="250.0" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
                </BorderPane.margin>

@@ -178,12 +178,12 @@
 }
 
 .overviewButton:hover{
-    -fx-background-color: rgba(255, 255, 255, 0.39);
+    -fx-background-color: rgba(255, 255, 255, 0.4);
     -fx-background-radius: 15px;
 }
 
 .overviewButton:focused{
-    -fx-background-color: rgba(51, 51, 51, 0.37);
+    -fx-background-color: rgba(51, 51, 51, 0.66);
     -fx-background-radius: 15px;
 }
 

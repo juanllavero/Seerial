@@ -557,7 +557,11 @@ public class SeasonController {
                 playButton.requestFocus();
         });
 
-        overviewField.setText(season.overview);
+        if (!season.overview.isEmpty())
+            overviewField.setText(season.overview);
+        else
+            overviewField.setText(App.textBundle.getString("defaultOverview"));
+
         yearField.setText(season.getYear());
         durationField.setText(setRuntime(selectedEpisode.runtime));
         episodeName.setText("");
@@ -1024,7 +1028,12 @@ public class SeasonController {
     private void updateDiscInfo(Episode episode) {
         selectedEpisode = episode;
         episodeName.setText(episode.name);
-        overviewField.setText(episode.overview);
+
+        if (!episode.overview.isEmpty())
+            overviewField.setText(episode.overview);
+        else
+            overviewField.setText(App.textBundle.getString("defaultOverview"));
+
         seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).seasonNumber + " " + App.textBundle.getString("episodeLetter") + episode.episodeNumber);
         yearField.setText(episode.year);
         durationField.setText(setRuntime(episode.runtime));

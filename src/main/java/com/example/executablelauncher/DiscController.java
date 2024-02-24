@@ -1,6 +1,7 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -12,6 +13,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import net.coobird.thumbnailator.Thumbnails;
 
@@ -73,13 +75,10 @@ public class DiscController {
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
 
-        /*if (screenWidth < 1920){
-            name.setFont(new Font("System", 20));
-            number.setFont(new Font("System", 14));
-        }else if (screenWidth >= 2048){
-            name.setFont(new Font("System", 23));
-            number.setFont(new Font("System", 18));
-        }*/
+        if (screenWidth < 2000){
+            name.setFont(new Font("System", 18));
+            number.setFont(new Font("System", 16));
+        }
 
         thumbnailStackPane.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (playButton.isVisible()){
@@ -88,9 +87,7 @@ public class DiscController {
                         desktopParent.playEpisode(episode);
                     else
                         parentController.playEpisode(episode);
-                }/*else if (event.getCode().equals(KeyCode.X) || event.getCode().equals(KeyCode.GAME_C)){
-                //showSeriesMenu();
-            }*/
+                }
             }
         });
 
@@ -145,13 +142,9 @@ public class DiscController {
     }
 
     private void setHoverButtons(ImageView img){
-        img.setOnMouseEntered(e -> {
-            img.setOpacity(1);
-        });
+        img.setOnMouseEntered(e -> img.setOpacity(1));
 
-        img.setOnMouseExited(e -> {
-            img.setOpacity(0.7);
-        });
+        img.setOnMouseExited(e -> img.setOpacity(0.7));
     }
 
     public void setParent(SeasonController c){
@@ -263,7 +256,7 @@ public class DiscController {
             BufferedImage resizedImage = Thumbnails.of(bufferedImage)
                     .size((int) targetWidth, (int) targetHeight)
                     .outputFormat("jpg")
-                    .outputQuality(0.9)
+                    .outputQuality(0.7)
                     .asBufferedImage();
 
             originalImage = SwingFXUtils.toFXImage(resizedImage, null);
