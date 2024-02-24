@@ -14,7 +14,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -101,8 +100,8 @@ public class EditCollectionController {
 
     private DesktopViewController controllerParent;
     public Series seriesToEdit = null;
-    private List<File> imagesFiles = new ArrayList<>();
-    private File selectedImage = null;
+    private List<File> coverFiles = new ArrayList<>();
+    private File selectedCover = null;
     private List<File> logoFiles = new ArrayList<>();
     private File selectedLogo = null;
 
@@ -162,8 +161,6 @@ public class EditCollectionController {
     public void loadLogo(String src){
         File file = new File(src);
         if (file.exists()) {
-            selectedLogo = file;
-
             int number = 0;
 
             for (File f : logoFiles){
@@ -175,7 +172,7 @@ public class EditCollectionController {
             File newFile = new File("resources/img/logos/" + seriesToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
-                Files.copy(selectedLogo.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
                 System.err.println("Logo not copied");
             }
@@ -196,10 +193,10 @@ public class EditCollectionController {
     }
     @FXML
     void loadLogoFile(ActionEvent event) {
-        selectedLogo = getImageFile();
-        if (selectedLogo != null){
-            loadLogo(selectedLogo.getPath());
-            App.lastDirectory = selectedLogo.getPath().substring(0, (selectedLogo.getPath().length() - selectedLogo.getName().length()));
+        File file = getImageFile();
+        if (file != null){
+            loadLogo(file.getPath());
+            App.lastDirectory = file.getPath().substring(0, (file.getPath().length() - file.getName().length()));
         }
     }
     @FXML
@@ -265,7 +262,7 @@ public class EditCollectionController {
 
     //region POSTERS
     public void setImageFile(String path){
-        selectedImage = new File(path);
+        selectedCover = new File(path);
     }
     @FXML
     void downloadCover(ActionEvent event) {
@@ -278,20 +275,18 @@ public class EditCollectionController {
     }
     @FXML
     void loadImage(ActionEvent event) {
-        selectedImage = getImageFile();
-        if (selectedImage != null){
-            loadImage(selectedImage.getPath());
-            App.lastDirectory = selectedImage.getPath().substring(0, (selectedImage.getPath().length() - selectedImage.getName().length()));
+        File file = getImageFile();
+        if (file != null){
+            loadImage(file.getPath());
+            App.lastDirectory = file.getPath().substring(0, (file.getPath().length() - file.getName().length()));
         }
     }
     public void loadImage(String src){
         File file = new File(src);
         if (file.exists()) {
-            selectedImage = file;
-
             int number = 0;
 
-            for (File f : imagesFiles){
+            for (File f : coverFiles){
                 if (Integer.parseInt(f.getName().substring(0, f.getName().lastIndexOf("."))) > number){
                     number = Integer.parseInt(f.getName().substring(0, f.getName().lastIndexOf(".")));
                 }
@@ -300,12 +295,12 @@ public class EditCollectionController {
             File newFile = new File("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
-                Files.copy(selectedImage.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
                 System.err.println("Poster not copied");
             }
 
-            imagesFiles.add(file);
+            coverFiles.add(file);
             addPoster(file);
         }
     }
@@ -371,7 +366,7 @@ public class EditCollectionController {
         showLogos();
     }
     private void showImages() {
-        if (imagesFiles.isEmpty())
+        if (coverFiles.isEmpty())
             loadImages();
     }
     private void loadImages(){
@@ -381,13 +376,13 @@ public class EditCollectionController {
         if (dir.exists()) {
             File[] files = dir.listFiles();
             assert files != null;
-            imagesFiles.addAll(Arrays.asList(files));
+            coverFiles.addAll(Arrays.asList(files));
 
-            for (File f : imagesFiles) {
+            for (File f : coverFiles) {
                 addPoster(f);
 
-                if (selectedImage != null && selectedImage.getAbsolutePath().equals(f.getAbsolutePath())){
-                    selectButton((Button) posterContainer.getChildren().get(imagesFiles.indexOf(f)));
+                if (selectedCover != null && selectedCover.getAbsolutePath().equals(f.getAbsolutePath())){
+                    selectButton((Button) posterContainer.getChildren().get(coverFiles.indexOf(f)));
                 }
             }
         }
@@ -447,7 +442,7 @@ public class EditCollectionController {
         btn.getStyleClass().clear();
         btn.getStyleClass().add("downloadedImageButtonSelected");
 
-        selectedImage = imagesFiles.get(index);
+        selectedCover = coverFiles.get(index);
     }
     private void showLogos() {
         if (logoFiles.isEmpty())
@@ -529,8 +524,8 @@ public class EditCollectionController {
         if (!orderField.getText().isEmpty() && !orderField.getText().equals("0"))
             seriesToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
-        if (selectedImage != null)
-            seriesToEdit.setCoverSrc("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + selectedImage.getName());
+        if (selectedCover != null)
+            seriesToEdit.setCoverSrc("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + selectedCover.getName());
 
         if (selectedLogo != null)
             seriesToEdit.setLogoSrc("resources/img/logos/" + seriesToEdit.getId() + "/" + selectedLogo.getName());

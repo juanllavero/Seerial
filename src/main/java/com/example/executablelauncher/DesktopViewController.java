@@ -1024,25 +1024,6 @@ public class DesktopViewController {
     private void closeWindow(){
         App.close();
     }
-    /*@FXML
-    void close(MouseEvent event) {
-        closeWindow();
-    }
-    @FXML
-    void maximizeWindow(MouseEvent event) {
-        Stage stage = (Stage)((Button) event.getSource()).getScene().getWindow();
-
-        if (stage.isMaximized())
-            maximizeRestoreImage.setImage(new Image("file:resources/img/icons/windowMaximize.png"));
-        else
-            maximizeRestoreImage.setImage(new Image("file:resources/img/icons/windowRestore.png"));
-
-        stage.setMaximized(!stage.isMaximized());
-    }
-    @FXML
-    void minimizeWindow(MouseEvent event) {
-        ((Stage)((Button) event.getSource()).getScene().getWindow()).setIconified(true);
-    }*/
     //endregion
 
     //region IDENTIFICATION
@@ -1082,7 +1063,7 @@ public class DesktopViewController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("searchSeries.fxml"));
             Parent root1 = fxmlLoader.load();
             SearchSeriesController controller = fxmlLoader.getController();
-            controller.initiValues(this, selectedSeries.name, false, tmdbApi, currentLibrary.language);
+            controller.initiValues(this, selectedSeason.name, false, tmdbApi, currentLibrary.language);
             Stage stage = new Stage();
             stage.setTitle("Correct Identification");
             stage.initStyle(StageStyle.UNDECORATED);

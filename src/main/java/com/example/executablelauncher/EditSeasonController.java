@@ -153,7 +153,6 @@ public class EditSeasonController {
     private String oldBackgroundPath = "";
     private String oldVideoPath = "";
     private String oldMusicPath = "";
-    private boolean croppedImage = false;
     //endregion
 
     //region INITIALIZATION
@@ -242,15 +241,10 @@ public class EditSeasonController {
     //endregion
 
     //region IMAGES
-    public void setCroppedImage(boolean croppedImage) {
-        this.croppedImage = croppedImage;
-    }
 
     public void loadLogo(String src){
         File file = new File(src);
         if (file.exists()) {
-            selectedLogo = file;
-
             int number = 0;
 
             for (File f : logoFiles){
@@ -262,7 +256,7 @@ public class EditSeasonController {
             File newFile = new File("resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
-                Files.copy(selectedLogo.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
                 System.err.println("Thumbnail not copied");
             }
@@ -274,8 +268,6 @@ public class EditSeasonController {
     public void loadPoster(String src){
         File file = new File(src);
         if (file.exists()) {
-            selectedPoster = file;
-
             int number = 0;
 
             for (File f : posterFiles){
@@ -287,7 +279,7 @@ public class EditSeasonController {
             File newFile = new File("resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
-                Files.copy(selectedPoster.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
                 System.err.println("Poster not copied");
             }
@@ -352,7 +344,7 @@ public class EditSeasonController {
     }
     @FXML
     void downloadLogo(ActionEvent event) {
-        openImagesDownloader(seriesName + " logo", Integer.toString(353), Integer.toString(122), false, true, true);
+        openImagesDownloader(seriesName + " logo", "", "", false, true, true);
     }
     @FXML
     void downloadPoster(ActionEvent event) {
@@ -720,7 +712,7 @@ public class EditSeasonController {
         String oldName = "";
         if (!oldBackgroundPath.isEmpty())
             oldName = oldBackgroundPath.substring(oldBackgroundPath.lastIndexOf("/")+1);
-        if (oldBackgroundPath.isEmpty() || !newName.equals(oldName) || croppedImage){
+        if (oldBackgroundPath.isEmpty() || !newName.equals(oldName)){
             if (selectedBackground != null){
                 parentController.saveBackground(seasonToEdit, selectedBackground.getAbsolutePath());
             }
