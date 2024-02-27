@@ -90,7 +90,7 @@
    <center>
       <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <VBox fx:id="generalContainer" styleClass="midSectionLightColor" stylesheets="@styles.css" visible="false">
+            <VBox fx:id="generalContainer" styleClass="midSectionLightColor" stylesheets="@styles.css">
                <children>
                   <HBox alignment="CENTER_LEFT">
                      <children>
@@ -111,12 +111,22 @@
                         <Insets top="20.0" />
                      </VBox.margin>
                   </CheckBox>
+                  <CheckBox fx:id="interpolation" mnemonicParsing="false" text="Habilitar interpolación de fotogramas" textFill="WHITE">
+                     <VBox.margin>
+                        <Insets top="20.0" />
+                     </VBox.margin>
+                  </CheckBox>
+                  <Label fx:id="interpolationText" text="La interpolación permite generar fotogramas para obtener una imagen más fluida." textFill="#8a8a8a">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Label>
                </children>
                <padding>
                   <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />
                </padding>
             </VBox>
-            <VBox fx:id="fullscreenContainer" styleClass="midSectionLightColor" stylesheets="@styles.css">
+            <VBox fx:id="fullscreenContainer" styleClass="midSectionLightColor" stylesheets="@styles.css" visible="false">
                <children>
                   <Label fx:id="secondsBeforeVideoText" contentDisplay="CENTER" text="Background video delay (seconds)" textFill="WHITE">
                      <font>
@@ -126,7 +136,7 @@
                         <Insets />
                      </VBox.margin>
                   </Label>
-                  <JFXSlider fx:id="secondsBeforeVideo" blockIncrement="1.0" max="10.0" value="3.0">
+                  <JFXSlider fx:id="secondsBeforeVideo" blockIncrement="0.5" max="10.0" min="2.0" value="3.0">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>

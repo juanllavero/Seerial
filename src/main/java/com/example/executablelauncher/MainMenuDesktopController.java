@@ -20,6 +20,11 @@ public class MainMenuDesktopController {
     private ChoiceBox<Locale> audioLanguage;
 
     @FXML
+    private CheckBox interpolation;
+
+    @FXML Label interpolationText;
+
+    @FXML
     private CheckBox autoScan;
 
     @FXML
@@ -101,12 +106,18 @@ public class MainMenuDesktopController {
         title.setText(App.buttonsBundle.getString("settings"));
         fullscreenButton.setText(App.buttonsBundle.getString("fullscreenButton"));
         languagesButton.setText(App.buttonsBundle.getString("languagesButton"));
+        interpolationText.setText(App.textBundle.getString("interpolationMeaning"));
+        interpolation.setText(App.textBundle.getString("interpolationCheck"));
+        interpolation.setSelected(Boolean.parseBoolean(Configuration.loadConfig("interpolation", "false")));
         autoScan.setText(App.textBundle.getString("autoScan"));
         autoScan.setSelected(Boolean.parseBoolean(Configuration.loadConfig("autoScan", "true")));
         secondsBeforeVideoText.setText(App.textBundle.getString("backgroundDelay"));
         secondsBeforeVideo.setValue(Float.parseFloat(Configuration.loadConfig("backgroundDelay", "3")));
         backgroundVolumeText.setText(App.textBundle.getString("backgroundVolume"));
-        backgroundVolume.setValue(Integer.parseInt(Configuration.loadConfig("backgroundVolume", "3")));
+
+        double volume = Double.parseDouble(Configuration.loadConfig("backgroundVolume", "3"));
+        backgroundVolume.setValue((int) volume);
+
         showClock.setText(App.textBundle.getString("showClock"));
         showClock.setSelected(Boolean.parseBoolean(Configuration.loadConfig("showClock", "true")));
         preferAudioText.setText(App.textBundle.getString("preferAudio"));
@@ -153,8 +164,9 @@ public class MainMenuDesktopController {
 
         Configuration.saveConfig("autoScan", String.valueOf(autoScan.isSelected()));
         Configuration.saveConfig("backgroundDelay", String.valueOf(secondsBeforeVideo.getValue()));
-        Configuration.saveConfig("backgroundVolume", String.valueOf(backgroundVolume.getValue()));
+        Configuration.saveConfig("backgroundVolume", String.valueOf((int) backgroundVolume.getValue()));
         Configuration.saveConfig("showClock", String.valueOf(showClock.isSelected()));
+        Configuration.saveConfig("interpolation", String.valueOf(interpolation.isSelected()));
 
         Configuration.saveConfig("preferAudioLan", audioLanguage.getValue().toLanguageTag());
         Configuration.saveConfig("preferSubsLan", subsLanguage.getValue().toLanguageTag());

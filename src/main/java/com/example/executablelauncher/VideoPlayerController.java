@@ -27,9 +27,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import com.jfoenix.controls.JFXSlider;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -129,6 +127,22 @@ public class VideoPlayerController {
     private List<Track> subtitleTracks = new ArrayList<>();
     private boolean subsActivated = true;
     int currentDisc = 0;
+
+    //Mappings for tracks languages
+    private static final Map<String, String> languageCodeMap = new HashMap<>();
+    static {
+
+        languageCodeMap.put("es", "spa");
+        languageCodeMap.put("en", "eng");
+        languageCodeMap.put("fr", "fre");
+        languageCodeMap.put("de", "ger");
+        languageCodeMap.put("it", "ita");
+        languageCodeMap.put("ja", "jpn");
+        languageCodeMap.put("zh", "chi");
+        languageCodeMap.put("ko", "kor");
+        languageCodeMap.put("hi", "hin");
+        languageCodeMap.put("ar", "ara");
+    }
 
     //region INITIALIZATION
     public void setParent(DesktopViewController parent){
@@ -373,9 +387,10 @@ public class VideoPlayerController {
 
             String selectedAudioTrackLanguage = "";
             String audioTrackLanguage = season.getAudioTrackLanguage();
+            String defaultAudioTrackLanguage = languageCodeMap.getOrDefault(Locale.forLanguageTag(Configuration.loadConfig("preferAudioLan", "es-ES")).getLanguage(), "spa");
 
             if (audioTrackLanguage.isEmpty())
-                audioTrackLanguage = Locale.forLanguageTag(Configuration.loadConfig("preferAudioLan", "es-ES")).getLanguage();
+                audioTrackLanguage = defaultAudioTrackLanguage;
 
             if (audioTracks.size() > 1) {
                 for (Track track : audioTracks) {
@@ -392,35 +407,38 @@ public class VideoPlayerController {
                 }
             }
 
+            int subsMode = Integer.parseInt(Configuration.loadConfig("subsMode", "2"));
             String subtitleTrackLanguage = season.getSubtitleTrackLanguage();
+            boolean foreignAudio = false;
 
             if (subtitleTrackLanguage.isEmpty())
-                subtitleTrackLanguage = Locale.forLanguageTag(Configuration.loadConfig("preferSubsLan", "es-ES")).getLanguage();
+                subtitleTrackLanguage = languageCodeMap.getOrDefault(Locale.forLanguageTag(Configuration.loadConfig("preferSubsLan", "es-ES")).getLanguage(), "spa");
 
-            if (subtitleTracks.size() > 1){
-                for (Track track : subtitleTracks) {
-                    if (track.lang.equals(subtitleTrackLanguage)) {
-                        for (Track sTrack : subtitleTracks)
-                            sTrack.selected = false;
+            if (!defaultAudioTrackLanguage.equals(selectedAudioTrackLanguage))
+                foreignAudio = true;
 
-                        track.selected = true;
+            if ((subsMode == 2 && foreignAudio) || subsMode == 3){
+                if (!subtitleTrackLanguage.isEmpty() && !subtitleTracks.isEmpty()){
+                    if (subtitleTracks.size() > 1){
+                        for (Track track : subtitleTracks) {
+                            if (track.lang.equals(subtitleTrackLanguage)) {
+                                for (Track sTrack : subtitleTracks)
+                                    sTrack.selected = false;
 
-                        videoPlayer.setSubtitleTrack(track.id);
-                    }
-                }
-            }else{
-                if (!Configuration.loadConfig("subsMode", "2").equals("1") && !subtitleTracks.isEmpty()){
-                    videoPlayer.setSubtitleTrack(subtitleTracks.get(0).id);
+                                track.selected = true;
+
+                                videoPlayer.setSubtitleTrack(track.id);
+                            }
+                        }
+                    }else
+                        videoPlayer.setSubtitleTrack(subtitleTracks.get(0).id);
                 }else{
                     videoPlayer.disableSubtitles();
 
                     for (Track sTrack : subtitleTracks)
                         sTrack.selected = false;
                 }
-            }
-
-            boolean onlyForForeignAudio = Configuration.loadConfig("subsMode", "2").equals("2");
-            if (audioTrackLanguage.equals(selectedAudioTrackLanguage) && onlyForForeignAudio){
+            }else{
                 videoPlayer.disableSubtitles();
 
                 for (Track sTrack : subtitleTracks)

@@ -407,19 +407,7 @@ public class SeasonController {
         setEpisodesOutOfFocusButton(optionsButton);
 
         if (playSameMusic){
-            for (Season season : seasons){
-                if (!season.getMusicSrc().isEmpty()){
-                    Platform.runLater(() -> {
-                        File file = new File(season.getMusicSrc());
-                        Media media = new Media(file.toURI().toString());
-                        mp = new MediaPlayer(media);
-                        isVideo = false;
-
-                        setMediaPlayer();
-                    });
-                    break;
-                }
-            }
+            findAndPlaySong();
         }
 
         currentSeason = 0;
@@ -451,42 +439,36 @@ public class SeasonController {
         backgroundImage.setSmooth(true);
         backgroundImage.setCache(true);
 
+        //region BACKGROUND CROP
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
         double targetAspectRatio = screenWidth / screenHeight;
 
-        // Calcular las dimensiones del recorte
         double originalWidth = backgroundImage.getImage().getWidth();
         double originalHeight = backgroundImage.getImage().getHeight();
         double originalAspectRatio = originalWidth / originalHeight;
 
         double newWidth, newHeight;
         if (originalAspectRatio > targetAspectRatio) {
-            // Recortar en la altura
             newWidth = originalHeight * targetAspectRatio;
             newHeight = originalHeight;
         } else {
-            // Recortar en el ancho
             newWidth = originalWidth;
             newHeight = originalWidth / targetAspectRatio;
         }
 
-        // Calcular la posición de inicio del recorte
         int xOffset = 0;
         int yOffset = (int) ((originalHeight - newHeight) / 2);
 
-        // Obtener el lector de píxeles de la imagen original
         PixelReader pixelReader = backgroundImage.getImage().getPixelReader();
-
-        // Crear una nueva imagen recortada utilizando WritableImage
         WritableImage croppedImage = new WritableImage(pixelReader, xOffset, 0, (int) newWidth, (int) newHeight);
 
-        // Crear el nuevo ImageView con la imagen recortada
         backgroundImage.setImage(croppedImage);
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.8), backgroundImage);
         fadeIn.setFromValue(0);
         fadeIn.setToValue(1);
         fadeIn.play();
+        //endregion
 
         String logoSrc;
         if (isShow)
@@ -511,10 +493,10 @@ public class SeasonController {
             logo.setFitHeight(screenHeight * 0.25);
         }
 
-        /*if (!isShow)
-            infoBox.getChildren().remove(episodeName);*/
-
         if (!season.getVideoSrc().isEmpty()){
+            if (mp != null)
+                mp.stop();
+
             File file = new File(season.getVideoSrc());
             Media media = new Media(file.toURI().toString());
             mp = new MediaPlayer(media);
@@ -607,9 +589,6 @@ public class SeasonController {
     private void updateButtons(){
         lastSeasonButton.setVisible(currentSeason != 0);
         nextSeasonButton.setVisible(currentSeason != seasons.size() - 1);
-    }
-    public void hideMenuShadow(){
-        menuShadow.setVisible(false);
     }
     public void stopVideo(){
         playingVideo = false;
@@ -1137,12 +1116,27 @@ public class SeasonController {
 
         double increment = mp.getVolume() * 0.05;
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.1), event -> mp.setVolume(mp.getVolume() - increment))
+                new KeyFrame(Duration.seconds(0.05), event -> mp.setVolume(mp.getVolume() - increment))
         );
         timeline.setCycleCount(20);
         timeline.play();
 
         timeline.setOnFinished(event -> mp.stop());
+    }
+    private void findAndPlaySong(){
+        for (Season season : seasons){
+            if (!season.getMusicSrc().isEmpty()){
+                Platform.runLater(() -> {
+                    File file = new File(season.getMusicSrc());
+                    Media media = new Media(file.toURI().toString());
+                    mp = new MediaPlayer(media);
+                    isVideo = false;
+
+                    setMediaPlayer();
+                });
+                break;
+            }
+        }
     }
     //endregion
 }

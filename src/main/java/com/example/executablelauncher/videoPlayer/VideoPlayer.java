@@ -88,16 +88,19 @@ public class VideoPlayer extends MediaView {
 
         //Set smooth video properties
         mpvSetProperty("video-sync", "display-resample");
-        mpvSetProperty("interpolation", Configuration.loadConfig("interpolation", "no"));
-        mpvSetProperty("tscale", "mitchell");
-        mpvSetProperty("interpolation-preserve", "no");
 
-        mpvSetProperty("tscale-window", "sphinx");
-        mpvSetProperty("tscale-blur", "0.6991556596428412");
-        mpvSetProperty("tscale-radius", "1.0");
-        mpvSetProperty("tscale-clamp", "0.0");
+        boolean interpolation = Boolean.parseBoolean(Configuration.loadConfig("interpolation", "false"));
 
-        System.out.println(mpvGetProperty("interpolation"));
+        if (interpolation){
+            mpvSetProperty("interpolation", "yes");
+            mpvSetProperty("tscale", "mitchell");
+            mpvSetProperty("interpolation-preserve", "no");
+
+            mpvSetProperty("tscale-window", "sphinx");
+            mpvSetProperty("tscale-blur", "0.6991556596428412");
+            mpvSetProperty("tscale-radius", "1.0");
+            mpvSetProperty("tscale-clamp", "0.0");
+        }
     }
     public void loadTracks(){
         String tracklist = mpvGetProperty("track-list");
