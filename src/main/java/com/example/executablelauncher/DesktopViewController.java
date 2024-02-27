@@ -1683,7 +1683,7 @@ public class DesktopViewController {
                 protected Void call() {
                     int processedFiles = 1;
                     for (int i = processedFiles; i < posterList.size(); i++){
-                        if (processedFiles == 19)
+                        if (processedFiles == 60)
                             break;
 
                         Image originalImage = new Image(imageBaseURL + posterList.get(i).file_path);
@@ -2715,7 +2715,6 @@ public class DesktopViewController {
         return null;
     }
     private Images downloadImages(int tmdbID){
-        String imageBaseURL = "https://image.tmdb.org/t/p/original";
         String type = "tv";
         String languages = "null%2C" + currentLibrary.language;
 
