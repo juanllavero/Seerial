@@ -7,6 +7,7 @@ import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -428,7 +429,7 @@ public class SeasonController {
     private void updateInfo(Season season){
         if (mp != null){
             if (isVideo || !playSameMusic) {
-                mp.stop();
+                stopPlayer();
             }
         }
 
@@ -909,8 +910,9 @@ public class SeasonController {
     //region MOVEMENT
     @FXML
     void goBack(){
-        if (mp != null)
-            mp.stop();
+        if (mp != null) {
+            stopPlayer();
+        }
 
         if (timeline != null)
             timeline.stop();
@@ -1078,15 +1080,16 @@ public class SeasonController {
         Task<Void> mpTask = new Task<>() {
             @Override
             protected Void call() {
-                mp.setVolume(Double.parseDouble(Configuration.loadConfig("volume", "0.2")));
-                mp.setOnEndOfMedia(() -> {
-                    mp.stop();
-                });
+                int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
+                mp.setVolume((double) volume / 100);
+                mp.setOnEndOfMedia(() -> stopPlayer());
+
+                double delay = 0.5;
+                if (isVideo)
+                    delay = Double.parseDouble(Configuration.loadConfig("backgroundDelay", "3"));
 
                 timeline = new javafx.animation.Timeline(
-                        new javafx.animation.KeyFrame(Duration.seconds(0.5), event -> {
-                            playBackgroundMedia();
-                        })
+                        new javafx.animation.KeyFrame(Duration.seconds(delay), event -> playBackgroundMedia())
                 );
                 timeline.play();
                 return null;
@@ -1125,6 +1128,21 @@ public class SeasonController {
                 }
             }
         });
+    }
+    private void stopPlayer() {
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), backgroundVideo);
+        fadeIn.setFromValue(1.0);
+        fadeIn.setToValue(0);
+        fadeIn.play();
+
+        double increment = mp.getVolume() * 0.05;
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0.1), event -> mp.setVolume(mp.getVolume() - increment))
+        );
+        timeline.setCycleCount(20);
+        timeline.play();
+
+        timeline.setOnFinished(event -> mp.stop());
     }
     //endregion
 }

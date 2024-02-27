@@ -374,6 +374,9 @@ public class DesktopViewController {
         seriesScrollPane.setPrefHeight(screenHeight);
         seriesContainer.setPrefHeight(screenHeight);
 
+        if (screenWidth > 1920)
+            seriesScrollPane.setPrefWidth(350);
+
         seasonsEpisodesBox.setPrefWidth(Integer.MAX_VALUE);
 
         seasonInfoPane.getChildren().add(0, seasonBackground);
@@ -553,7 +556,8 @@ public class DesktopViewController {
         selectedEpisodes.clear();
         selectionOptions.setVisible(false);
 
-        Image i = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.png");
+        Image i = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.png",
+                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), true, true);
         ASPECT_RATIO = i.getWidth() / i.getHeight();
         globalBackground.setImage(i);
         ImageView img = new ImageView(new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "transparencyEffect.png"));
@@ -610,7 +614,7 @@ public class DesktopViewController {
                 file = new File("resources/img/DefaultPoster.png");
             }
 
-            Image image = new Image(file.toURI().toURL().toExternalForm());
+            Image image = new Image(file.toURI().toURL().toExternalForm(), 400, 500, true, true);
             seriesCover.setImage(image);
         } catch (MalformedURLException e) {
             System.err.println("Series cover not found");
@@ -619,10 +623,7 @@ public class DesktopViewController {
     private void setLogoNoText(File file) {
         seasonLogoBox.getChildren().clear();
         try{
-            seasonLogo.setImage(new Image(file.toURI().toURL().toExternalForm()));
-            seasonLogo.setFitHeight(300);
-            seasonLogo.setFitWidth(600);
-            seasonLogo.setPreserveRatio(true);
+            seasonLogo.setImage(new Image(file.toURI().toURL().toExternalForm(), 600, 300, true, true));
             seasonLogoBox.getChildren().add(seasonLogo);
         } catch (MalformedURLException e) {
             System.err.println("DesktopViewController: Logo not loaded");

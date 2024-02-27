@@ -85,7 +85,7 @@ public class Controller implements Initializable {
     private StackPane mainBox;
 
     @FXML
-    private HBox categoriesBox;
+    private HBox librariesBox;
 
     @FXML
     private Button switchToDesktopButton;
@@ -171,10 +171,10 @@ public class Controller implements Initializable {
         //Open/Close Menu
         mainMenu.setVisible(false);
 
-        categoriesBox.focusedProperty().addListener((obs, oldVal, newVal) -> {
+        librariesBox.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
                 int index = libraries.indexOf(currentLibrary);
-                categoriesBox.getChildren().get(index).requestFocus();
+                librariesBox.getChildren().get(index).requestFocus();
             }
         });
 
@@ -297,15 +297,12 @@ public class Controller implements Initializable {
 
             btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
                 playCategoriesSound();
-                showSeriesFrom(libraries.get(categoriesBox.getChildren().indexOf(btn)));
+                showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)));
             });
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
                 if (App.pressedSelect(event)) {
                     selectLibraryButton(btn);
-
-                    playCategoriesSound();
-                    showSeriesFrom(libraries.get(categoriesBox.getChildren().indexOf(btn)));
                 }
             });
 
@@ -313,17 +310,22 @@ public class Controller implements Initializable {
                 playInteractionSound();
             });
 
-            categoriesBox.getChildren().add(btn);
+            librariesBox.getChildren().add(btn);
         }
 
         //region CLOCK TIMELINE
-        updateHour();
-        Timeline timeline = new Timeline(new KeyFrame(
-                Duration.minutes(1),
-                event -> updateHour()
-        ));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
+        if (Boolean.parseBoolean(Configuration.loadConfig("showClock", "true"))){
+            clock.setVisible(true);
+            updateHour();
+            Timeline timeline = new Timeline(new KeyFrame(
+                    Duration.minutes(1),
+                    event -> updateHour()
+            ));
+            timeline.setCycleCount(Timeline.INDEFINITE);
+            timeline.play();
+        }else{
+            clock.setVisible(false);
+        }
         //endregion
 
         currentLibrary = DataManager.INSTANCE.currentLibrary;
@@ -340,11 +342,14 @@ public class Controller implements Initializable {
                         playInteractionSound();
                         showMenu();
                     }
+                }else if (App.pressedLB(event) && libraries.indexOf(currentLibrary) > 0){
+                    selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) - 1));
+                }else if (App.pressedRB(event) && libraries.indexOf(currentLibrary) < libraries.size() - 1){
+                    selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) + 1));
                 }
             });
 
-            selectLibraryButton((Button) categoriesBox.getChildren().get(libraries.indexOf(currentLibrary)));
-            showSeriesFrom(currentLibrary);
+            selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary)));
         }else{
             showMenu();
             settingsButton.setDisable(true);
@@ -383,7 +388,7 @@ public class Controller implements Initializable {
     }
 
     private void selectLibraryButton(Button btn){
-        for (Node node : categoriesBox.getChildren()) {
+        for (Node node : librariesBox.getChildren()) {
             Button catButton = (Button) node;
             catButton.getStyleClass().clear();
             catButton.getStyleClass().add("CatButton");
@@ -391,6 +396,9 @@ public class Controller implements Initializable {
 
         btn.getStyleClass().clear();
         btn.getStyleClass().add("CatButtonSelected");
+
+        playCategoriesSound();
+        showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)));
     }
 
     private void addInteractionSound(Button btn){

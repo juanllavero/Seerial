@@ -214,22 +214,9 @@ public class App extends Application {
         stage.initOwner(primaryStage);
     }
 
-    public static List<String> getLanguages(){
-        List<String> langs = new ArrayList<>();
-        for (Locale locale : languages){
-            langs.add(locale.getDisplayName());
-        }
-        return langs;
-    }
-
-    public static void changeLanguage(String lang){
-        for (Locale language : languages){
-            if (language.getDisplayName().equals(lang)){
-                globalLanguage = language;
-                Configuration.saveConfig("currentLanguageTag", globalLanguage.toLanguageTag());
-                break;
-            }
-        }
+    public static void changeLanguage(Locale language){
+        globalLanguage = language;
+        Configuration.saveConfig("currentLanguageTag", globalLanguage.toLanguageTag());
 
         try{
             File file = new File("resources/");

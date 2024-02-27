@@ -62,6 +62,9 @@ public class Season implements Serializable {
     }
 
     public String getAudioTrackLanguage() {
+        if (audioTrackLanguage == null)
+            return "";
+
         return audioTrackLanguage;
     }
 
@@ -70,6 +73,9 @@ public class Season implements Serializable {
     }
 
     public String getSubtitleTrackLanguage() {
+        if (subtitleTrackLanguage == null)
+            return "";
+
         return subtitleTrackLanguage;
     }
 

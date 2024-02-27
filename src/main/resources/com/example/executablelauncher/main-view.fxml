@@ -51,7 +51,7 @@
                      <left>
                         <ScrollPane hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
                            <content>
-                              <HBox fx:id="categoriesBox" alignment="BOTTOM_LEFT">
+                              <HBox fx:id="librariesBox" alignment="BOTTOM_LEFT">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding>

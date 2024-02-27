@@ -371,25 +371,34 @@ public class VideoPlayerController {
             audioTracks = videoPlayer.getAudioTracks();
             subtitleTracks = videoPlayer.getSubtitleTracks();
 
+            String selectedAudioTrackLanguage = "";
             String audioTrackLanguage = season.getAudioTrackLanguage();
 
-            if (audioTrackLanguage != null && !audioTrackLanguage.isEmpty() && audioTracks.size() > 1) {
-                for (Track track : audioTracks)
+            if (audioTrackLanguage.isEmpty())
+                audioTrackLanguage = Locale.forLanguageTag(Configuration.loadConfig("preferAudioLan", "es-ES")).getLanguage();
+
+            if (audioTracks.size() > 1) {
+                for (Track track : audioTracks) {
                     if (track.lang.equals(audioTrackLanguage)) {
                         for (Track aTrack : audioTracks)
                             aTrack.selected = false;
 
                         track.selected = true;
+                        selectedAudioTrackLanguage = track.lang;
 
                         videoPlayer.setAudioTrack(track.id);
                         break;
                     }
+                }
             }
 
             String subtitleTrackLanguage = season.getSubtitleTrackLanguage();
 
-            if (subtitleTrackLanguage != null && !subtitleTrackLanguage.isEmpty() && subtitleTracks.size() > 1){
-                for (Track track : subtitleTracks)
+            if (subtitleTrackLanguage.isEmpty())
+                subtitleTrackLanguage = Locale.forLanguageTag(Configuration.loadConfig("preferSubsLan", "es-ES")).getLanguage();
+
+            if (subtitleTracks.size() > 1){
+                for (Track track : subtitleTracks) {
                     if (track.lang.equals(subtitleTrackLanguage)) {
                         for (Track sTrack : subtitleTracks)
                             sTrack.selected = false;
@@ -398,7 +407,20 @@ public class VideoPlayerController {
 
                         videoPlayer.setSubtitleTrack(track.id);
                     }
+                }
             }else{
+                if (!Configuration.loadConfig("subsMode", "2").equals("1") && !subtitleTracks.isEmpty()){
+                    videoPlayer.setSubtitleTrack(subtitleTracks.get(0).id);
+                }else{
+                    videoPlayer.disableSubtitles();
+
+                    for (Track sTrack : subtitleTracks)
+                        sTrack.selected = false;
+                }
+            }
+
+            boolean onlyForForeignAudio = Configuration.loadConfig("subsMode", "2").equals("2");
+            if (audioTrackLanguage.equals(selectedAudioTrackLanguage) && onlyForForeignAudio){
                 videoPlayer.disableSubtitles();
 
                 for (Track sTrack : subtitleTracks)

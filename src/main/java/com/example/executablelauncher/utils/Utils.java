@@ -84,4 +84,19 @@ public class Utils {
         }
     }
 
+    public static class LocaleStringConverter extends javafx.util.StringConverter<Locale> {
+        @Override
+        public String toString(Locale object) {
+            if (object != null)
+                return object.getDisplayName();
+
+            return null;
+        }
+
+        @Override
+        public Locale fromString(String string) {
+            return Locale.forLanguageTag(string);
+        }
+    }
+
 }
