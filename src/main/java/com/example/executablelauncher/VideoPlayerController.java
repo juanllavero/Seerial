@@ -1,14 +1,19 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Episode;
-import com.example.executablelauncher.entities.Season;
-import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.entities.*;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.videoPlayer.Track;
 import com.example.executablelauncher.videoPlayer.VideoPlayer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -27,13 +32,28 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import com.jfoenix.controls.JFXSlider;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class VideoPlayerController {
     //region FXML ATTRIBUTES
+    @FXML
+    private HBox chapterContainer;
+
+    @FXML
+    private ScrollPane chapterScroll;
+
     @FXML
     private StackPane mainPane;
 
@@ -122,11 +142,13 @@ public class VideoPlayerController {
     double percentageStep = 0;
     Season season = null;
     List<Episode> episodeList = new ArrayList<>();
+    Episode episode = null;
     private List<Track> videoTracks = new ArrayList<>();
     private List<Track> audioTracks = new ArrayList<>();
     private List<Track> subtitleTracks = new ArrayList<>();
     private boolean subsActivated = true;
     int currentDisc = 0;
+    private int buttonCount = 0;
 
     //Mappings for tracks languages
     private static final Map<String, String> languageCodeMap = new HashMap<>();
@@ -178,7 +200,7 @@ public class VideoPlayerController {
         rightOptions.setPrefWidth(screenWidth * 0.5);
 
         timeline = new javafx.animation.Timeline(
-            new javafx.animation.KeyFrame(Duration.seconds(5), event -> {
+            new javafx.animation.KeyFrame(Duration.seconds(6), event -> {
                 hideControls();
             })
         );
@@ -254,7 +276,8 @@ public class VideoPlayerController {
                     pause();
                 else
                     resume();
-            }
+            }else if (App.pressedDown(e) && !chapterContainer.getChildren().isEmpty())
+                chapterContainer.getChildren().get(0).requestFocus();
         });
 
         nextButton.setOnKeyPressed(e -> {
@@ -329,6 +352,7 @@ public class VideoPlayerController {
         //endregion
     }
     private void setDiscValues(Episode episode){
+        this.episode = episode;
         episodeTitle.setText(episode.name);
         episodeDate.setText(episode.year);
         seasonEpisode.setText(App.textBundle.getString("seasonLetter") + episode.seasonNumber + " " + App.textBundle.getString("episodeLetter") + episode.episodeNumber);
@@ -445,6 +469,40 @@ public class VideoPlayerController {
                     sTrack.selected = false;
             }
 
+            //region CHAPTERS
+            String chaptersJson = videoPlayer.getChapters();
+
+            if (chaptersJson != null) {
+                try {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    JsonNode chaptersNode = objectMapper.readTree(chaptersJson);
+
+                    episode.getChapters().clear();
+                    for (JsonNode chapterNode : chaptersNode) {
+                        Chapter chapter = new Chapter();
+
+                        chapter.setTitle(chapterNode.get("title").asText());
+                        chapter.setTime(chapterNode.get("time").asDouble());
+                        chapter.setDisplayTime(convertTime(chapter.getTime()));
+
+                        episode.addChapter(chapter);
+                    }
+                } catch (JsonProcessingException e) {
+                    System.err.println("loadTracks: Error getting chapters" + e.getMessage());
+                }
+            }
+
+            for (Chapter chapter : episode.getChapters()){
+                Platform.runLater(() -> addChapterCard(chapter));
+                generateThumbnail(chapter);
+            }
+
+            Platform.runLater(() -> buttonCount = getVisibleButtonsCount());
+
+            if (episode.getChapters().isEmpty())
+                chapterScroll.setVisible(false);
+            //endregion
+
             //Initialize Buttons
             videoButton.setDisable(videoTracks == null || videoTracks.isEmpty());
             audiosButton.setDisable(audioTracks == null || audioTracks.isEmpty());
@@ -453,11 +511,186 @@ public class VideoPlayerController {
             scheduler.shutdown();
         }, 1, TimeUnit.SECONDS);
     }
+    private String convertTime(double seconds) {
+        int h = (int) (seconds / 3600);
+        int m = (int) ((seconds % 3600) / 60);
+        int s = (int) (seconds % 60);
+
+        return String.format("%02d:%02d:%02d", h, m, s);
+    }
+    private void generateThumbnail(Chapter chapter){
+        try{
+            Files.createDirectories(Paths.get("resources/img/chaptersCovers/" + episode.getId() + "/"));
+        } catch (IOException e) {
+            System.err.println("generateThumbnail: Error creating directory");
+        }
+
+        File thumbnail = new File("resources/img/chaptersCovers/" + episode.getId() + "/" + chapter.getTime() + ".jpg");
+
+        chapter.setThumbnailSrc("resources/img/chaptersCovers/" + episode.getId() + "/" + chapter.getTime() + ".jpg");
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg",
+                    "-ss",
+                    chapter.getDisplayTime(),
+                    "-i",
+                    episode.getVideoSrc(),
+                    "-vframes",
+                    "1",
+                    thumbnail.getAbsolutePath());
+            processBuilder.start();
+        } catch (IOException e) {
+            chapter.setThumbnailSrc("");
+            System.err.println("Error generating thumbnail for chapter " + episode.getId() + "/" + chapter.getTime());
+        }
+    }
     private void addInteractionSound(Button btn){
         btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal && parentController != null)
                 parentController.getParent().playInteractionSound();
         });
+    }
+    //endregion
+
+    //region CHAPTERS
+    public void addChapterCard(Chapter chapter){
+        if (episode != null){
+            Button btn = createChapterCard(chapter);
+
+            btn.setFocusTraversable(false);
+
+            btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    //Move ScrollPane
+                    handleButtonFocus(btn);
+
+                    btn.setScaleX(1.1);
+                    btn.setScaleY(1.1);
+                    parentController.getParent().playInteractionSound();
+                }else{
+                    btn.setScaleX(1);
+                    btn.setScaleY(1);
+                }
+            });
+
+            btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+                if (App.pressedSelect(event)){
+                    videoPlayer.seekToTime((long) (chapter.getTime() * 1000));
+                }
+            });
+
+            btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
+                if (App.pressedUp(event))
+                    playButton.requestFocus();
+
+                int index = chapterContainer.getChildren().indexOf(btn);
+                if (App.pressedLeft(event)){
+                    if (index > 0)
+                        chapterContainer.getChildren().get(index - 1).requestFocus();
+                }else if (App.pressedRight(event)){
+                    if (index < chapterContainer.getChildren().size() - 1)
+                        chapterContainer.getChildren().get(index + 1).requestFocus();
+                }
+            });
+
+            chapterContainer.getChildren().add(btn);
+        }
+    }
+    private Button createChapterCard(Chapter chapter){
+        Button btn = new Button();
+        btn.setPadding(new Insets(0));
+        btn.getStyleClass().add("episodeButton");
+
+        ImageView thumbnail = new ImageView();
+
+        double targetHeight = Screen.getPrimary().getBounds().getHeight() / 6.5;
+        double targetWidth = ((double) 16 /9) * targetHeight;
+
+        thumbnail.setFitWidth(targetWidth);
+        thumbnail.setFitHeight(targetHeight);
+
+        File newFile = new File(chapter.getThumbnailSrc());
+        if (!newFile.exists())
+            newFile = new File("resources/img/Default_video_thumbnail.jpg");
+
+        Image originalImage;
+        try{
+            originalImage = new Image(newFile.toURI().toURL().toExternalForm(), targetWidth, targetHeight, true, true);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+
+        thumbnail.setImage(originalImage);
+        thumbnail.setPreserveRatio(false);
+        thumbnail.setSmooth(true);
+
+        VBox buttonContent = new VBox();
+        buttonContent.setAlignment(Pos.TOP_CENTER);
+
+        buttonContent.getChildren().add(thumbnail);
+
+        Label title = new Label(chapter.getTitle());
+        title.setFont(new Font(18));
+        Label time = new Label(chapter.getDisplayTime());
+        time.setFont(new Font(16));
+
+        buttonContent.getChildren().add(title);
+        buttonContent.getChildren().add(time);
+
+        btn.setGraphic(buttonContent);
+        btn.setText("");
+
+        return btn;
+    }
+    private void handleButtonFocus(Button focusedButton) {
+        double screenCenter, buttonCenterX, offset, finalPos;
+
+        if (chapterContainer.getChildren().indexOf(focusedButton) <= buttonCount / 2 || chapterContainer.getChildren().size() <= 3){
+            finalPos = 0;
+        }else{
+            //Get center of screen
+            screenCenter = Screen.getPrimary().getBounds().getWidth() / 2;
+
+            //Check aspect ratio to limit the right end of the button list
+            double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+            int maxButtons = (chapterContainer.getChildren().size() - (buttonCount / 2));
+            if (aspectRatio > 1.8)
+                maxButtons--;
+
+            if (chapterContainer.getChildren().indexOf(focusedButton) >= (chapterContainer.getChildren().size() - (buttonCount / 2)))
+                focusedButton = (Button) chapterContainer.getChildren().get(Math.max(2, maxButtons));
+
+            //Get center of button in the screen
+            Bounds buttonBounds = focusedButton.localToScene(focusedButton.getBoundsInLocal());
+            buttonCenterX = buttonBounds.getMinX() + buttonBounds.getWidth() / 2;
+
+            //Calculate offset
+            offset = screenCenter - buttonCenterX;
+
+            //Calculate position
+            finalPos = chapterContainer.getTranslateX() + offset;
+        }
+
+        //Translation with animation
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.2), chapterContainer);
+        transition.setToX(finalPos);
+        transition.play();
+    }
+    private int getVisibleButtonsCount() {
+        double scrollPaneWidth = chapterScroll.getWidth();
+        double scrollPaneX = chapterScroll.getLayoutX();
+
+        int visibleButtons = 0;
+
+        for (Node button : chapterContainer.getChildren()) {
+            Bounds buttonBounds = button.localToScene(button.getBoundsInLocal());
+            double buttonX = buttonBounds.getMinX();
+
+            if (buttonX >= scrollPaneX && buttonX + buttonBounds.getWidth() <= scrollPaneX + scrollPaneWidth) {
+                visibleButtons++;
+            }
+        }
+
+        return visibleButtons;
     }
     //endregion
 

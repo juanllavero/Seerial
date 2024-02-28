@@ -121,26 +121,26 @@
                            <children>
                               <Button fx:id="subtitlesButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showSubtitleOptions" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/subs.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                  </padding>
                               </Button>
                               <Button fx:id="audiosButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showAudioOptions" prefHeight="36.0" prefWidth="35.0" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/audio.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                  </padding>
                               </Button>
                            </children>
@@ -169,26 +169,26 @@
                            <children>
                               <Button fx:id="optionsButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css" visible="false">
                                  <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../../../../resources/img/icons/discOptions.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                  </padding>
                               </Button>
                               <Button fx:id="videoButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showVideoOptions" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/dvdMenu.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                  </padding>
                               </Button>
                            </children>
@@ -206,38 +206,38 @@
                            <children>
                               <Button fx:id="prevButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/prevTrack.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                  </padding>
                               </Button>
                               <Button fx:id="playButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/pause.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                  </padding>
                               </Button>
                               <Button fx:id="nextButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/nextTrack.png" />
                                        </image>
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                  </padding>
                               </Button>
                            </children>
@@ -249,9 +249,28 @@
                   </VBox>
                </center>
             </BorderPane>
+            <Label text="Chapters" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="28.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin>
+            </Label>
+            <ScrollPane fx:id="chapterScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
+               <content>
+                  <HBox fx:id="chapterContainer" spacing="20.0" stylesheets="@styles.css" />
+               </content>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </ScrollPane>
          </children>
          <StackPane.margin>
-            <Insets bottom="50.0" left="50.0" right="50.0" />
+            <Insets left="50.0" right="50.0" />
          </StackPane.margin>
          <padding>
             <Insets bottom="20.0" />
@@ -259,7 +278,7 @@
       </VBox>
       <HBox fx:id="volumeBox" alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="volumeSliderBox" stylesheets="@styles.css" StackPane.alignment="CENTER">
          <children>
-            <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../../../img/icons/minVolume.png" />
                </image></ImageView>
@@ -267,7 +286,7 @@
                <HBox.margin>
                   <Insets bottom="10.0" right="20.0" top="10.0" />
                </HBox.margin></JFXSlider>
-            <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../../../img/icons/maxVolume.png" />
                </image></ImageView>

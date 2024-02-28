@@ -195,6 +195,9 @@ public class VideoPlayer extends MediaView {
 
         return (long) (Double.parseDouble(durationString) * 1000);
     }
+    public String getChapters(){
+        return mpvGetProperty("chapter-list");
+    }
     public List<Track> getVideoTracks() {
         return videoTracks;
     }

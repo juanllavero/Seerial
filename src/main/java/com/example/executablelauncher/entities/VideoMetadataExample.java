@@ -1,14 +1,19 @@
 package com.example.executablelauncher.entities;
 
+import com.example.executablelauncher.VideoPlayerController;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class VideoMetadataExample {
 
     public static void main(String[] args) {
         // Ruta del archivo de vídeo
-        String pathToVideo = "F:\\The Middle-Earth Collection\\La Comunidad Del Anillo\\El Señor de los Anillos - La Comunidad del Anillo (2001).mkv";
+        /*String pathToVideo = "F:\\The Middle-Earth Collection\\La Comunidad Del Anillo\\El Señor de los Anillos - La Comunidad del Anillo (2001).mkv";
         String pathToVideo2 = "F:\\ANIME\\[BDMV] FullMetal Alchemist Brotherhood\\S1\\Fullmetal Alchemist Brotherhood S01E01-E02.m2ts";
 
         // Obtener metadatos del vídeo
@@ -18,7 +23,52 @@ public class VideoMetadataExample {
         getAudioMetadata(pathToVideo);
 
         // Obtener metadatos de los subtítulos
-        getSubtitleMetadata(pathToVideo);
+        getSubtitleMetadata(pathToVideo);*/
+
+        Chapter chapter = new Chapter();
+        chapter.time = 1500;
+        //chapter.displayTime = convertTime(chapter.time);
+        chapter.displayTime = "00:05:00";
+
+        generateThumbnail(chapter);
+    }
+
+    private static String convertTime(double seconds) {
+        int h = (int) (seconds / 3600);
+        int m = (int) ((seconds % 3600) / 60);
+        int s = (int) (seconds % 60);
+
+        return String.format("%02d:%02d:%02d", h, m, s);
+    }
+
+    private static void generateThumbnail(Chapter chapter){
+        System.out.println("AA");
+        try{
+            Files.createDirectories(Paths.get("resources/img/chaptersCovers/" + "test" + "/"));
+        } catch (IOException e) {
+            System.err.println("generateThumbnail: Error creating directory");
+        }
+
+        File thumbnail = new File("resources/img/chaptersCovers/" + "test" + "/" + chapter.getTime() + ".jpg");
+
+        chapter.setThumbnailSrc("resources/img/chaptersCovers/" + "test" + "/" + chapter.getTime() + ".jpg");
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg",
+                    "-ss",
+                    chapter.getDisplayTime(),
+                    "-i",
+                    "F:\\[TEST]\\Dune\\Dune (2021).mkv",
+                    "-vframes",
+                    "1",
+                    thumbnail.getAbsolutePath());
+
+            processBuilder.start();
+
+            System.out.println("Finished");
+        } catch (IOException e) {
+            chapter.setThumbnailSrc("");
+            System.err.println("Error generating thumbnail for chapter " + "test" + "/" + chapter.getTime());
+        }
     }
 
     private static void getVideoMetadata(String videoFilePath) {

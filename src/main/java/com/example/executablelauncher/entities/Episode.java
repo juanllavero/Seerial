@@ -1,6 +1,8 @@
 package com.example.executablelauncher.entities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Episode implements Serializable {
@@ -19,6 +21,7 @@ public class Episode implements Serializable {
     public String seasonID = "";
     public boolean watched = false;
     public long lastMilisecond = 0;
+    public List<Chapter> chapters = new ArrayList<>();
 
     public Episode() {
         id = UUID.randomUUID().toString();
@@ -157,4 +160,6 @@ public class Episode implements Serializable {
     }
 
     public long getTimeWatched(){ return lastMilisecond; }
+    public List<Chapter> getChapters() { return chapters; }
+    public void addChapter(Chapter chapter) { chapters.add(chapter); }
 }
