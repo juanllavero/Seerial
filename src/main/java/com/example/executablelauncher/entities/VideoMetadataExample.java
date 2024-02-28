@@ -26,9 +26,8 @@ public class VideoMetadataExample {
         getSubtitleMetadata(pathToVideo);*/
 
         Chapter chapter = new Chapter();
-        chapter.time = 1500;
-        //chapter.displayTime = convertTime(chapter.time);
-        chapter.displayTime = "00:05:00";
+        chapter.time = 7600;
+        chapter.displayTime = convertTime(chapter.time);
 
         generateThumbnail(chapter);
     }
@@ -54,6 +53,7 @@ public class VideoMetadataExample {
         chapter.setThumbnailSrc("resources/img/chaptersCovers/" + "test" + "/" + chapter.getTime() + ".jpg");
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg",
+                    "-y",
                     "-ss",
                     chapter.getDisplayTime(),
                     "-i",

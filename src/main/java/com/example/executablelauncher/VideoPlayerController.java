@@ -183,6 +183,8 @@ public class VideoPlayerController {
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
 
+        chapterScroll.setPrefWidth(screenWidth);
+
         videoPlayer = new VideoPlayer();
         videoPlayer.setParent(this);
         mainPane.getChildren().add(0, videoPlayer);
@@ -200,7 +202,7 @@ public class VideoPlayerController {
         rightOptions.setPrefWidth(screenWidth * 0.5);
 
         timeline = new javafx.animation.Timeline(
-            new javafx.animation.KeyFrame(Duration.seconds(6), event -> {
+            new javafx.animation.KeyFrame(Duration.seconds(20), event -> {
                 hideControls();
             })
         );
@@ -258,6 +260,7 @@ public class VideoPlayerController {
     }
     private void onLoad(){
         runtimeSlider.setOnKeyPressed(e -> {
+            timeline.playFromStart();
             if (runtimeSlider.isFocused() && App.pressedUp(e))
                 hideControls();
             else{
@@ -268,26 +271,104 @@ public class VideoPlayerController {
                 videoPlayer.seekBackward();
             else if (App.pressedRight(e))
                 videoPlayer.seekForward();
+            else if (App.pressedDown(e))
+                playButton.requestFocus();
         });
 
         playButton.setOnKeyPressed(e -> {
+            timeline.playFromStart();
             if (App.pressedSelect(e)){
                 if (!videoPlayer.isPaused())
                     pause();
                 else
                     resume();
-            }else if (App.pressedDown(e) && !chapterContainer.getChildren().isEmpty())
-                chapterContainer.getChildren().get(0).requestFocus();
+            }else if (App.pressedRight(e)){
+                if (!nextButton.isDisabled())
+                    nextButton.requestFocus();
+                else
+                    videoButton.requestFocus();
+            }else if (App.pressedLeft(e))
+                if (!prevButton.isDisabled())
+                    prevButton.requestFocus();
+            else if (App.pressedDown(e))
+                selectCurrentChapter();
+            else if (App.pressedUp(e))
+                runtimeSlider.requestFocus();
         });
 
         nextButton.setOnKeyPressed(e -> {
+            timeline.playFromStart();
             if (App.pressedSelect(e))
                 nextEpisode();
+            else if (App.pressedRight(e)){
+                videoButton.requestFocus();
+            }else if (App.pressedLeft(e))
+                playButton.requestFocus();
+            else if (App.pressedDown(e))
+                selectCurrentChapter();
+            else if (App.pressedUp(e))
+                runtimeSlider.requestFocus();
         });
 
         prevButton.setOnKeyPressed(e -> {
+            timeline.playFromStart();
             if (App.pressedSelect(e))
                 prevEpisode();
+            else if (App.pressedLeft(e)){
+                if (!audiosButton.isDisabled())
+                    audiosButton.requestFocus();
+                else if (!subtitlesButton.isDisabled())
+                    subtitlesButton.requestFocus();
+            }else if (App.pressedRight(e))
+                playButton.requestFocus();
+            else if (App.pressedDown(e))
+                selectCurrentChapter();
+            else if (App.pressedUp(e))
+                runtimeSlider.requestFocus();
+        });
+
+        videoButton.setOnKeyPressed(e -> {
+            timeline.playFromStart();
+            if (App.pressedLeft(e)){
+                if (!nextButton.isDisabled())
+                    nextButton.requestFocus();
+                else
+                    playButton.requestFocus();
+            }else if (App.pressedDown(e))
+                selectCurrentChapter();
+            else if (App.pressedUp(e))
+                runtimeSlider.requestFocus();
+        });
+
+        audiosButton.setOnKeyPressed(e -> {
+            timeline.playFromStart();
+            if (App.pressedLeft(e)){
+                if (!subtitlesButton.isDisabled())
+                    subtitlesButton.requestFocus();
+            }else if (App.pressedRight(e)){
+                if (!prevButton.isDisabled())
+                    prevButton.requestFocus();
+                else
+                    playButton.requestFocus();
+            }else if (App.pressedDown(e))
+                selectCurrentChapter();
+            else if (App.pressedUp(e))
+                runtimeSlider.requestFocus();
+        });
+
+        subtitlesButton.setOnKeyPressed(e -> {
+            timeline.playFromStart();
+            if (App.pressedRight(e)){
+                if (!audiosButton.isDisabled())
+                    audiosButton.requestFocus();
+                else if (!prevButton.isDisabled())
+                    prevButton.requestFocus();
+                else
+                    playButton.requestFocus();
+            }else if (App.pressedDown(e))
+                selectCurrentChapter();
+            else if (App.pressedUp(e))
+                runtimeSlider.requestFocus();
         });
 
         //region BUTTON ICONS
@@ -486,18 +567,20 @@ public class VideoPlayerController {
                         chapter.setDisplayTime(convertTime(chapter.getTime()));
 
                         episode.addChapter(chapter);
+                        generateThumbnail(chapter);
                     }
                 } catch (JsonProcessingException e) {
                     System.err.println("loadTracks: Error getting chapters" + e.getMessage());
                 }
             }
 
-            for (Chapter chapter : episode.getChapters()){
-                Platform.runLater(() -> addChapterCard(chapter));
-                generateThumbnail(chapter);
-            }
+            Platform.runLater(() -> {
+                for (Chapter chapter : episode.getChapters()){
+                    addChapterCard(chapter);
+                }
+            });
 
-            Platform.runLater(() -> buttonCount = getVisibleButtonsCount());
+            buttonCount = 7;
 
             if (episode.getChapters().isEmpty())
                 chapterScroll.setVisible(false);
@@ -530,6 +613,7 @@ public class VideoPlayerController {
         chapter.setThumbnailSrc("resources/img/chaptersCovers/" + episode.getId() + "/" + chapter.getTime() + ".jpg");
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg",
+                    "-y",
                     "-ss",
                     chapter.getDisplayTime(),
                     "-i",
@@ -574,11 +658,13 @@ public class VideoPlayerController {
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
                 if (App.pressedSelect(event)){
-                    videoPlayer.seekToTime((long) (chapter.getTime() * 1000));
+                    videoPlayer.seekToTime((long) (episode.getChapters().get(chapterContainer.getChildren().indexOf(btn)).getTime() * 1000.0));
                 }
             });
 
             btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
+                timeline.playFromStart();
+
                 if (App.pressedUp(event))
                     playButton.requestFocus();
 
@@ -598,11 +684,12 @@ public class VideoPlayerController {
     private Button createChapterCard(Chapter chapter){
         Button btn = new Button();
         btn.setPadding(new Insets(0));
+        btn.getStyleClass().clear();
         btn.getStyleClass().add("episodeButton");
 
         ImageView thumbnail = new ImageView();
 
-        double targetHeight = Screen.getPrimary().getBounds().getHeight() / 6.5;
+        double targetHeight = Screen.getPrimary().getBounds().getHeight() / 8;
         double targetWidth = ((double) 16 /9) * targetHeight;
 
         thumbnail.setFitWidth(targetWidth);
@@ -625,13 +712,19 @@ public class VideoPlayerController {
 
         VBox buttonContent = new VBox();
         buttonContent.setAlignment(Pos.TOP_CENTER);
+        buttonContent.setPrefWidth(Region.USE_PREF_SIZE);
+        buttonContent.setPrefHeight(Region.USE_PREF_SIZE);
+        buttonContent.getStyleClass().clear();
+        buttonContent.getStyleClass().add("transparent");
 
         buttonContent.getChildren().add(thumbnail);
 
         Label title = new Label(chapter.getTitle());
         title.setFont(new Font(18));
+        title.setTextFill(Color.WHITE);
         Label time = new Label(chapter.getDisplayTime());
         time.setFont(new Font(16));
+        time.setTextFill(Color.WHITE);
 
         buttonContent.getChildren().add(title);
         buttonContent.getChildren().add(time);
@@ -675,22 +768,15 @@ public class VideoPlayerController {
         transition.setToX(finalPos);
         transition.play();
     }
-    private int getVisibleButtonsCount() {
-        double scrollPaneWidth = chapterScroll.getWidth();
-        double scrollPaneX = chapterScroll.getLayoutX();
+    private void selectCurrentChapter(){
+        long currentTime = videoPlayer.getCurrentTime();
 
-        int visibleButtons = 0;
-
-        for (Node button : chapterContainer.getChildren()) {
-            Bounds buttonBounds = button.localToScene(button.getBoundsInLocal());
-            double buttonX = buttonBounds.getMinX();
-
-            if (buttonX >= scrollPaneX && buttonX + buttonBounds.getWidth() <= scrollPaneX + scrollPaneWidth) {
-                visibleButtons++;
+        for (Chapter chapter : episode.getChapters()){
+            if (currentTime >= (chapter.time * 1000.0)){
+                chapterContainer.getChildren().get(episode.getChapters().indexOf(chapter)).requestFocus();
+                break;
             }
         }
-
-        return visibleButtons;
     }
     //endregion
 
