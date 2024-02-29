@@ -248,6 +248,9 @@
                      </children>
                   </VBox>
                </center>
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </VBox.margin>
             </BorderPane>
             <Label text="Chapters" textFill="WHITE">
                <font>
@@ -262,7 +265,7 @@
             </Label>
             <ScrollPane fx:id="chapterScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
                <content>
-                  <HBox fx:id="chapterContainer" fillHeight="false" spacing="50.0" styleClass="transparent" stylesheets="@styles.css" />
+                  <HBox fx:id="chapterContainer" fillHeight="false" spacing="50.0" />
                </content>
                <VBox.margin>
                   <Insets bottom="10.0" top="10.0" />
@@ -273,7 +276,7 @@
             <Insets left="50.0" right="50.0" />
          </StackPane.margin>
          <padding>
-            <Insets bottom="20.0" />
+            <Insets bottom="40.0" />
          </padding>
       </VBox>
       <HBox fx:id="volumeBox" alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="volumeSliderBox" stylesheets="@styles.css" StackPane.alignment="CENTER">

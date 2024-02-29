@@ -11,7 +11,6 @@ import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -32,10 +31,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import com.jfoenix.controls.JFXSlider;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -43,8 +40,6 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class VideoPlayerController {
     //region FXML ATTRIBUTES
@@ -146,6 +141,7 @@ public class VideoPlayerController {
     private List<Track> videoTracks = new ArrayList<>();
     private List<Track> audioTracks = new ArrayList<>();
     private List<Track> subtitleTracks = new ArrayList<>();
+    private List<Button> chapterButtons = new ArrayList<>();
     private boolean subsActivated = true;
     int currentDisc = 0;
     private int buttonCount = 0;
@@ -153,7 +149,6 @@ public class VideoPlayerController {
     //Mappings for tracks languages
     private static final Map<String, String> languageCodeMap = new HashMap<>();
     static {
-
         languageCodeMap.put("es", "spa");
         languageCodeMap.put("en", "eng");
         languageCodeMap.put("fr", "fre");
@@ -567,7 +562,6 @@ public class VideoPlayerController {
                         chapter.setDisplayTime(convertTime(chapter.getTime()));
 
                         episode.addChapter(chapter);
-                        generateThumbnail(chapter);
                     }
                 } catch (JsonProcessingException e) {
                     System.err.println("loadTracks: Error getting chapters" + e.getMessage());
@@ -577,6 +571,7 @@ public class VideoPlayerController {
             Platform.runLater(() -> {
                 for (Chapter chapter : episode.getChapters()){
                     addChapterCard(chapter);
+                    generateThumbnail(chapter);
                 }
             });
 
@@ -622,6 +617,8 @@ public class VideoPlayerController {
                     "1",
                     thumbnail.getAbsolutePath());
             processBuilder.start();
+
+            Platform.runLater(() -> reloadEpisodeCard(chapter));
         } catch (IOException e) {
             chapter.setThumbnailSrc("");
             System.err.println("Error generating thumbnail for chapter " + episode.getId() + "/" + chapter.getTime());
@@ -638,7 +635,8 @@ public class VideoPlayerController {
     //region CHAPTERS
     public void addChapterCard(Chapter chapter){
         if (episode != null){
-            Button btn = createChapterCard(chapter);
+            Button btn = new Button();
+            btn.setPadding(new Insets(0));
 
             btn.setFocusTraversable(false);
 
@@ -658,15 +656,20 @@ public class VideoPlayerController {
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
                 if (App.pressedSelect(event)){
-                    videoPlayer.seekToTime((long) (episode.getChapters().get(chapterContainer.getChildren().indexOf(btn)).getTime() * 1000.0));
+                    long pos = (long) (episode.getChapters().get(chapterButtons.indexOf(btn)).getTime() * 1000.0);
+                    long currentPos = videoPlayer.getCurrentTime();
+
+                    videoPlayer.seekToTime(pos - currentPos);
                 }
             });
 
             btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
                 timeline.playFromStart();
 
-                if (App.pressedUp(event))
+                if (App.pressedUp(event)) {
                     playButton.requestFocus();
+                    hideChapterSection();
+                }
 
                 int index = chapterContainer.getChildren().indexOf(btn);
                 if (App.pressedLeft(event)){
@@ -678,15 +681,19 @@ public class VideoPlayerController {
                 }
             });
 
+            setChapterCardValues(btn, chapter);
+
             chapterContainer.getChildren().add(btn);
+            chapterButtons.add(btn);
         }
     }
-    private Button createChapterCard(Chapter chapter){
-        Button btn = new Button();
-        btn.setPadding(new Insets(0));
-        btn.getStyleClass().clear();
-        btn.getStyleClass().add("episodeButton");
+    private void reloadEpisodeCard(Chapter chapter){
+        Button btn = chapterButtons.get(episode.getChapters().indexOf(chapter));
+        btn.setGraphic(null);
 
+        setChapterCardValues(btn, chapter);
+    }
+    private void setChapterCardValues(Button btn, Chapter chapter){
         ImageView thumbnail = new ImageView();
 
         double targetHeight = Screen.getPrimary().getBounds().getHeight() / 8;
@@ -710,12 +717,12 @@ public class VideoPlayerController {
         thumbnail.setPreserveRatio(false);
         thumbnail.setSmooth(true);
 
+        btn.getStyleClass().add("episodeButton");
+
         VBox buttonContent = new VBox();
         buttonContent.setAlignment(Pos.TOP_CENTER);
         buttonContent.setPrefWidth(Region.USE_PREF_SIZE);
         buttonContent.setPrefHeight(Region.USE_PREF_SIZE);
-        buttonContent.getStyleClass().clear();
-        buttonContent.getStyleClass().add("transparent");
 
         buttonContent.getChildren().add(thumbnail);
 
@@ -730,9 +737,6 @@ public class VideoPlayerController {
         buttonContent.getChildren().add(time);
 
         btn.setGraphic(buttonContent);
-        btn.setText("");
-
-        return btn;
     }
     private void handleButtonFocus(Button focusedButton) {
         double screenCenter, buttonCenterX, offset, finalPos;
@@ -769,6 +773,7 @@ public class VideoPlayerController {
         transition.play();
     }
     private void selectCurrentChapter(){
+        showChapterSection();
         long currentTime = videoPlayer.getCurrentTime();
 
         for (Chapter chapter : episode.getChapters()){
@@ -777,6 +782,18 @@ public class VideoPlayerController {
                 break;
             }
         }
+    }
+    private void showChapterSection(){
+        //Translation with animation
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.2), controlsBox);
+        transition.setToY(0);
+        transition.play();
+    }
+    private void hideChapterSection(){
+        //Translation with animation
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.2), controlsBox);
+        transition.setToY(chapterContainer.getHeight());
+        transition.play();
     }
     //endregion
 
@@ -787,6 +804,8 @@ public class VideoPlayerController {
         fadeInEffect(controlsBox);
         fadeInEffect(shadowImage);
         playButton.requestFocus();
+
+        hideChapterSection();
     }
     private void hideControls(){
         timeline.stop();
