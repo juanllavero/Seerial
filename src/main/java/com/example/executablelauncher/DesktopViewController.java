@@ -12,6 +12,7 @@ import com.example.executablelauncher.tmdbMetadata.series.EpisodeMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadataBasic;
 import com.example.executablelauncher.tmdbMetadata.series.SeriesMetadata;
+import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.movito.themoviedbapi.TmdbApi;
@@ -729,6 +730,9 @@ public class DesktopViewController {
         }
 
         showSeries();
+
+        if (Configuration.loadConfig("autoScan", "true").equals("true"))
+            searchFiles();
     }
     public void selectSeries(Series selectedSeries) {
         if (this.selectedSeries == selectedSeries) {
