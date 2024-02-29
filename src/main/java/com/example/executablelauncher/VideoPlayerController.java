@@ -11,6 +11,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -562,6 +563,7 @@ public class VideoPlayerController {
                         chapter.setDisplayTime(convertTime(chapter.getTime()));
 
                         episode.addChapter(chapter);
+                        generateThumbnail(chapter);
                     }
                 } catch (JsonProcessingException e) {
                     System.err.println("loadTracks: Error getting chapters" + e.getMessage());
@@ -569,10 +571,8 @@ public class VideoPlayerController {
             }
 
             Platform.runLater(() -> {
-                for (Chapter chapter : episode.getChapters()){
+                for (Chapter chapter : episode.getChapters())
                     addChapterCard(chapter);
-                    generateThumbnail(chapter);
-                }
             });
 
             buttonCount = 7;
@@ -585,6 +585,28 @@ public class VideoPlayerController {
             videoButton.setDisable(videoTracks == null || videoTracks.isEmpty());
             audiosButton.setDisable(audioTracks == null || audioTracks.isEmpty());
             subtitlesButton.setDisable(subtitleTracks == null || subtitleTracks.isEmpty());
+
+            Task<Void> searchForThumbnails = new Task<>() {
+                @Override
+                protected Void call() {
+                    boolean found;
+                    for (Chapter chapter : episode.getChapters()) {
+                        found = false;
+                        while (!found) {
+                            File thumbnail = new File(chapter.getThumbnailSrc());
+
+                            if (thumbnail.exists())
+                                found = true;
+                        }
+
+                        reloadChapterCard(chapter);
+                    }
+
+                    return null;
+                }
+            };
+
+            new Thread(searchForThumbnails).start();
 
             scheduler.shutdown();
         }, 1, TimeUnit.SECONDS);
@@ -617,10 +639,8 @@ public class VideoPlayerController {
                     "1",
                     thumbnail.getAbsolutePath());
             processBuilder.start();
-
-            Platform.runLater(() -> reloadEpisodeCard(chapter));
         } catch (IOException e) {
-            chapter.setThumbnailSrc("");
+            chapter.setThumbnailSrc("resources/img/Default_video_thumbnail.jpg");
             System.err.println("Error generating thumbnail for chapter " + episode.getId() + "/" + chapter.getTime());
         }
     }
@@ -660,6 +680,7 @@ public class VideoPlayerController {
                     long currentPos = videoPlayer.getCurrentTime();
 
                     videoPlayer.seekToTime(pos - currentPos);
+                    hideControls();
                 }
             });
 
@@ -687,11 +708,13 @@ public class VideoPlayerController {
             chapterButtons.add(btn);
         }
     }
-    private void reloadEpisodeCard(Chapter chapter){
-        Button btn = chapterButtons.get(episode.getChapters().indexOf(chapter));
-        btn.setGraphic(null);
+    private void reloadChapterCard(Chapter chapter){
+        Platform.runLater(() -> {
+            Button btn = chapterButtons.get(episode.getChapters().indexOf(chapter));
+            btn.setGraphic(null);
 
-        setChapterCardValues(btn, chapter);
+            setChapterCardValues(btn, chapter);
+        });
     }
     private void setChapterCardValues(Button btn, Chapter chapter){
         ImageView thumbnail = new ImageView();
@@ -703,8 +726,6 @@ public class VideoPlayerController {
         thumbnail.setFitHeight(targetHeight);
 
         File newFile = new File(chapter.getThumbnailSrc());
-        if (!newFile.exists())
-            newFile = new File("resources/img/Default_video_thumbnail.jpg");
 
         Image originalImage;
         try{

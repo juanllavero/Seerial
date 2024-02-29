@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 public class VideoMetadataExample {
 
@@ -25,11 +26,13 @@ public class VideoMetadataExample {
         // Obtener metadatos de los subtítulos
         getSubtitleMetadata(pathToVideo);*/
 
-        Chapter chapter = new Chapter();
-        chapter.time = 7600;
-        chapter.displayTime = convertTime(chapter.time);
+        for (int i = 0; i < 10; i++){
+            Chapter chapter = new Chapter();
+            chapter.time = 6600 + (i * 2);
+            chapter.displayTime = convertTime(chapter.time);
 
-        generateThumbnail(chapter);
+            generateThumbnail(chapter);
+        }
     }
 
     private static String convertTime(double seconds) {
@@ -41,7 +44,6 @@ public class VideoMetadataExample {
     }
 
     private static void generateThumbnail(Chapter chapter){
-        System.out.println("AA");
         try{
             Files.createDirectories(Paths.get("resources/img/chaptersCovers/" + "test" + "/"));
         } catch (IOException e) {
@@ -53,6 +55,7 @@ public class VideoMetadataExample {
         chapter.setThumbnailSrc("resources/img/chaptersCovers/" + "test" + "/" + chapter.getTime() + ".jpg");
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg",
+                    "-nostdin",
                     "-y",
                     "-ss",
                     chapter.getDisplayTime(),
@@ -63,7 +66,6 @@ public class VideoMetadataExample {
                     thumbnail.getAbsolutePath());
 
             processBuilder.start();
-
             System.out.println("Finished");
         } catch (IOException e) {
             chapter.setThumbnailSrc("");
