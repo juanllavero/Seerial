@@ -1,11 +1,16 @@
 package com.example.executablelauncher.entities;
 
 import com.example.executablelauncher.VideoPlayerController;
+import com.example.executablelauncher.fileMetadata.ChaptersContainer;
+import com.example.executablelauncher.tmdbMetadata.images.Images;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
@@ -26,21 +31,44 @@ public class VideoMetadataExample {
         // Obtener metadatos de los subtítulos
         getSubtitleMetadata(pathToVideo);*/
 
-        for (int i = 0; i < 10; i++){
-            Chapter chapter = new Chapter();
-            chapter.time = 6600 + (i * 2);
-            chapter.displayTime = convertTime(chapter.time);
+        Episode episode = new Episode();
+        episode.setVideoSrc("F:\\[TEST]\\Dune\\Dune (2021).mkv");
+        episode.setName("Dune (2021)");
 
-            generateThumbnail(chapter);
-        }
+        getChapters(episode);
     }
 
-    private static String convertTime(double seconds) {
-        int h = (int) (seconds / 3600);
-        int m = (int) ((seconds % 3600) / 60);
-        int s = (int) (seconds % 60);
+    private static void getChapters(Episode episode){
+        try {
+            ProcessBuilder processBuilder;
+            processBuilder = new ProcessBuilder("ffprobe"
+                    , "-v", "quiet", "-print_format", "json", "-show_chapters", episode.getVideoSrc());
 
-        return String.format("%02d:%02d:%02d", h, m, s);
+            Process process = processBuilder.start();
+
+            String stdout = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
+            System.out.println(stdout);
+
+            if (stdout != null){
+                ObjectMapper objectMapper = new ObjectMapper();
+                ChaptersContainer chaptersContainer = objectMapper.readValue(stdout, ChaptersContainer.class);
+
+
+                for (com.example.executablelauncher.fileMetadata.Chapter c : chaptersContainer.chapters){
+                    if (c.tags != null){
+                        double milliseconds = c.start / 1_000_000.0;
+                        Chapter chapter = new Chapter(c.tags.title, milliseconds);
+                        System.out.println(chapter.title);
+                        System.out.println(chapter.time);
+                        System.out.println(chapter.displayTime);
+                    }
+                }
+            }
+
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            System.err.println("getChapters: Error getting chapters");
+        }
     }
 
     private static void generateThumbnail(Chapter chapter){

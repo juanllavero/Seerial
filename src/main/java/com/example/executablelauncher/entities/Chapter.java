@@ -6,6 +6,11 @@ public class Chapter {
     public String displayTime = "";
     public String thumbnailSrc = "";
 
+    public Chapter(String title, double time){
+        this.title = title;
+        this.time = time;
+        displayTime = convertTime(time);
+    }
     public String getTitle() {
         return title;
     }
@@ -20,6 +25,7 @@ public class Chapter {
 
     public void setTime(double time) {
         this.time = time;
+        displayTime = convertTime(time);
     }
 
     public String getDisplayTime() {
@@ -36,5 +42,14 @@ public class Chapter {
 
     public void setThumbnailSrc(String thumbnailSrc) {
         this.thumbnailSrc = thumbnailSrc;
+    }
+
+    private String convertTime(double milliseconds) {
+        double seconds = milliseconds / 1000;
+        int h = (int) (seconds / 3600);
+        int m = (int) ((seconds % 3600) / 60);
+        int s = (int) (seconds % 60);
+
+        return String.format("%02d:%02d:%02d", h, m, s);
     }
 }

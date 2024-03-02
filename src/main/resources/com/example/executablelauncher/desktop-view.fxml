@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.effect.GaussianBlur?>
@@ -64,7 +65,7 @@
                            <graphic>
                               <ImageView fitHeight="10.0" fitWidth="10.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
-                                    <Image url="@../../../../../../resources/img/icons/triangle.png" />
+                                    <Image url="@../../../img/icons/triangle.png" />
                                  </image>
                               </ImageView>
                            </graphic>
@@ -371,6 +372,7 @@
                   <Insets />
                </HBox.margin>
             </Label>
+            <ProgressIndicator />
          </children>
          <StackPane.margin>
             <Insets bottom="40.0" right="80.0" />

@@ -1,11 +1,18 @@
 package com.example.executablelauncher.fileMetadata;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Chapter {
-    public Object id;
+    @JsonIgnore
+    public long id;
+    @JsonIgnore
     public String time_base;
-    public Object start;
+    public long start;
+    @JsonIgnore
     public String start_time;
-    public Object end;
+    @JsonIgnore
+    public long end;
+    @JsonIgnore
     public String end_time;
     public Tags tags;
 }

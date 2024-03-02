@@ -45,6 +45,9 @@ import java.util.concurrent.TimeUnit;
 public class VideoPlayerController {
     //region FXML ATTRIBUTES
     @FXML
+    private Label chaptersTitle;
+
+    @FXML
     private HBox chapterContainer;
 
     @FXML
@@ -471,6 +474,22 @@ public class VideoPlayerController {
 
             videoPlayer.setSubtitleSize(Float.parseFloat(Configuration.loadConfig("subtitleSize", "0.8")));
 
+            //region CHAPTERS
+            chaptersTitle.setText(App.textBundle.getString("chapters"));
+
+            buttonCount = 7;
+
+            if (episode.getChapters().isEmpty()) {
+                chaptersTitle.setVisible(false);
+                chapterScroll.setVisible(false);
+            }else{
+                Platform.runLater(() -> {
+                    for (Chapter chapter : episode.getChapters())
+                        addChapterCard(chapter);
+                });
+            }
+            //endregion
+
             loadTracks();
         });
 
@@ -546,103 +565,13 @@ public class VideoPlayerController {
                     sTrack.selected = false;
             }
 
-            //region CHAPTERS
-            String chaptersJson = videoPlayer.getChapters();
-
-            if (chaptersJson != null) {
-                try {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    JsonNode chaptersNode = objectMapper.readTree(chaptersJson);
-
-                    episode.getChapters().clear();
-                    for (JsonNode chapterNode : chaptersNode) {
-                        Chapter chapter = new Chapter();
-
-                        chapter.setTitle(chapterNode.get("title").asText());
-                        chapter.setTime(chapterNode.get("time").asDouble());
-                        chapter.setDisplayTime(convertTime(chapter.getTime()));
-
-                        episode.addChapter(chapter);
-                        generateThumbnail(chapter);
-                    }
-                } catch (JsonProcessingException e) {
-                    System.err.println("loadTracks: Error getting chapters" + e.getMessage());
-                }
-            }
-
-            Platform.runLater(() -> {
-                for (Chapter chapter : episode.getChapters())
-                    addChapterCard(chapter);
-            });
-
-            buttonCount = 7;
-
-            if (episode.getChapters().isEmpty())
-                chapterScroll.setVisible(false);
-            //endregion
-
             //Initialize Buttons
             videoButton.setDisable(videoTracks == null || videoTracks.isEmpty());
             audiosButton.setDisable(audioTracks == null || audioTracks.isEmpty());
             subtitlesButton.setDisable(subtitleTracks == null || subtitleTracks.isEmpty());
 
-            Task<Void> searchForThumbnails = new Task<>() {
-                @Override
-                protected Void call() {
-                    boolean found;
-                    for (Chapter chapter : episode.getChapters()) {
-                        found = false;
-                        while (!found) {
-                            File thumbnail = new File(chapter.getThumbnailSrc());
-
-                            if (thumbnail.exists())
-                                found = true;
-                        }
-
-                        reloadChapterCard(chapter);
-                    }
-
-                    return null;
-                }
-            };
-
-            new Thread(searchForThumbnails).start();
-
             scheduler.shutdown();
         }, 1, TimeUnit.SECONDS);
-    }
-    private String convertTime(double seconds) {
-        int h = (int) (seconds / 3600);
-        int m = (int) ((seconds % 3600) / 60);
-        int s = (int) (seconds % 60);
-
-        return String.format("%02d:%02d:%02d", h, m, s);
-    }
-    private void generateThumbnail(Chapter chapter){
-        try{
-            Files.createDirectories(Paths.get("resources/img/chaptersCovers/" + episode.getId() + "/"));
-        } catch (IOException e) {
-            System.err.println("generateThumbnail: Error creating directory");
-        }
-
-        File thumbnail = new File("resources/img/chaptersCovers/" + episode.getId() + "/" + chapter.getTime() + ".jpg");
-
-        chapter.setThumbnailSrc("resources/img/chaptersCovers/" + episode.getId() + "/" + chapter.getTime() + ".jpg");
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg",
-                    "-y",
-                    "-ss",
-                    chapter.getDisplayTime(),
-                    "-i",
-                    episode.getVideoSrc(),
-                    "-vframes",
-                    "1",
-                    thumbnail.getAbsolutePath());
-            processBuilder.start();
-        } catch (IOException e) {
-            chapter.setThumbnailSrc("resources/img/Default_video_thumbnail.jpg");
-            System.err.println("Error generating thumbnail for chapter " + episode.getId() + "/" + chapter.getTime());
-        }
     }
     private void addInteractionSound(Button btn){
         btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
@@ -665,8 +594,8 @@ public class VideoPlayerController {
                     //Move ScrollPane
                     handleButtonFocus(btn);
 
-                    btn.setScaleX(1.1);
-                    btn.setScaleY(1.1);
+                    btn.setScaleX(1.15);
+                    btn.setScaleY(1.15);
                     parentController.getParent().playInteractionSound();
                 }else{
                     btn.setScaleX(1);
@@ -676,10 +605,13 @@ public class VideoPlayerController {
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
                 if (App.pressedSelect(event)){
-                    long pos = (long) (episode.getChapters().get(chapterButtons.indexOf(btn)).getTime() * 1000.0);
+                    long pos = (long) (episode.getChapters().get(chapterButtons.indexOf(btn)).getTime());
                     long currentPos = videoPlayer.getCurrentTime();
 
                     videoPlayer.seekToTime(pos - currentPos);
+
+                    if (videoPlayer.isPaused())
+                        resume();
                     hideControls();
                 }
             });
@@ -708,14 +640,6 @@ public class VideoPlayerController {
             chapterButtons.add(btn);
         }
     }
-    private void reloadChapterCard(Chapter chapter){
-        Platform.runLater(() -> {
-            Button btn = chapterButtons.get(episode.getChapters().indexOf(chapter));
-            btn.setGraphic(null);
-
-            setChapterCardValues(btn, chapter);
-        });
-    }
     private void setChapterCardValues(Button btn, Chapter chapter){
         ImageView thumbnail = new ImageView();
 
@@ -738,7 +662,7 @@ public class VideoPlayerController {
         thumbnail.setPreserveRatio(false);
         thumbnail.setSmooth(true);
 
-        btn.getStyleClass().add("episodeButton");
+        btn.getStyleClass().add("transparent");
 
         VBox buttonContent = new VBox();
         buttonContent.setAlignment(Pos.TOP_CENTER);
@@ -797,12 +721,15 @@ public class VideoPlayerController {
         showChapterSection();
         long currentTime = videoPlayer.getCurrentTime();
 
-        for (Chapter chapter : episode.getChapters()){
-            if (currentTime >= (chapter.time * 1000.0)){
-                chapterContainer.getChildren().get(episode.getChapters().indexOf(chapter)).requestFocus();
-                break;
+        List<Chapter> chapters = episode.getChapters();
+        for (int i = 1; i < chapters.size(); i++){
+            if (chapters.get(i).getTime() > currentTime){
+                chapterContainer.getChildren().get(episode.getChapters().indexOf(chapters.get(i - 1))).requestFocus();
+                return;
             }
         }
+
+        chapterContainer.getChildren().get(0).requestFocus();
     }
     private void showChapterSection(){
         //Translation with animation
