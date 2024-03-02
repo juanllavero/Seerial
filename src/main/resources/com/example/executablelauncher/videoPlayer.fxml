@@ -36,55 +36,7 @@
             </Label>
             <HBox spacing="5.0">
                <children>
-                  <Label fx:id="episodeTitle" text="Se acerca el invierno" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="30.0" />
-                     </font>
-                     <effect>
-                        <DropShadow />
-                     </effect>
-                  </Label>
-                  <Label text=" - " textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="30.0" />
-                     </font>
-                     <effect>
-                        <DropShadow />
-                     </effect>
-                  </Label>
-                  <Label fx:id="seasonEpisode" text="S1 E1" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="30.0" />
-                     </font>
-                     <effect>
-                        <DropShadow />
-                     </effect>
-                  </Label>
-                  <Label text=" - " textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="30.0" />
-                     </font>
-                     <effect>
-                        <DropShadow />
-                     </effect>
-                  </Label>
-                  <Label fx:id="episodeDate" text="Apr 16, 2011" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="30.0" />
-                     </font>
-                     <effect>
-                        <DropShadow />
-                     </effect>
-                  </Label>
-                  <Label text=" - " textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="30.0" />
-                     </font>
-                     <effect>
-                        <DropShadow />
-                     </effect>
-                  </Label>
-                  <Label fx:id="runtime" text="1h 1m" textFill="WHITE">
+                  <Label fx:id="episodeInfo" text="Se acerca el invierno" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="30.0" />
                      </font>
@@ -121,7 +73,7 @@
                            <children>
                               <Button fx:id="subtitlesButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showSubtitleOptions" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/subs.png" />
                                        </image>
@@ -131,9 +83,9 @@
                                     <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                  </padding>
                               </Button>
-                              <Button fx:id="audiosButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showAudioOptions" prefHeight="36.0" prefWidth="35.0" styleClass="playerButton" stylesheets="@styles.css">
+                              <Button fx:id="audiosButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showAudioOptions" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/audio.png" />
                                        </image>
@@ -169,7 +121,7 @@
                            <children>
                               <Button fx:id="optionsButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css" visible="false">
                                  <graphic>
-                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../../../../resources/img/icons/discOptions.png" />
                                        </image>
@@ -181,7 +133,7 @@
                               </Button>
                               <Button fx:id="videoButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showVideoOptions" styleClass="playerButton" stylesheets="@styles.css">
                                  <graphic>
-                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../../img/icons/dvdMenu.png" />
                                        </image>
@@ -213,7 +165,7 @@
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                  </padding>
                               </Button>
                               <Button fx:id="playButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
@@ -222,10 +174,13 @@
                                        <image>
                                           <Image url="@../../../img/icons/pause.png" />
                                        </image>
+                                       <effect>
+                                          <DropShadow height="10.0" radius="4.5" width="10.0" />
+                                       </effect>
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                  </padding>
                               </Button>
                               <Button fx:id="nextButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
@@ -237,7 +192,7 @@
                                     </ImageView>
                                  </graphic>
                                  <padding>
-                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                  </padding>
                               </Button>
                            </children>
@@ -270,7 +225,7 @@
                <content>
                   <HBox fx:id="chapterContainer" fillHeight="false" spacing="50.0">
                      <padding>
-                        <Insets bottom="20.0" left="10.0" right="10.0" top="20.0" />
+                        <Insets bottom="50.0" left="10.0" right="10.0" top="20.0" />
                      </padding></HBox>
                </content>
                <VBox.margin>

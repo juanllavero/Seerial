@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -21,6 +22,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
@@ -63,10 +65,7 @@ public class VideoPlayerController {
     private Label currentTime;
 
     @FXML
-    private Label episodeDate;
-
-    @FXML
-    private Label episodeTitle;
+    private Label episodeInfo;
 
     @FXML
     private Button audiosButton;
@@ -96,16 +95,10 @@ public class VideoPlayerController {
     private Button button2;
 
     @FXML
-    private Label runtime;
-
-    @FXML
     private JFXSlider runtimeSlider;
 
     @FXML
     private JFXSlider volumeSlider;
-
-    @FXML
-    private Label seasonEpisode;
 
     @FXML
     private Label seriesTitle;
@@ -374,29 +367,29 @@ public class VideoPlayerController {
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
                 if (videoPlayer.isPaused())
-                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playSelected.png", 35, 35, true, true)));
+                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playSelected.png", 30, 30, true, true)));
                 else
-                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/pauseSelected.png", 35, 35, true, true)));
+                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/pauseSelected.png", 30, 30, true, true)));
             }else{
                 if (videoPlayer.isPaused())
-                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/play.png", 35, 35, true, true)));
+                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/play.png", 30, 30, true, true)));
                 else
-                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/pause.png", 35, 35, true, true)));
+                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/pause.png", 30, 30, true, true)));
             }
         });
 
         nextButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                nextButton.setGraphic(new ImageView(new Image("file:resources/img/icons/nextTrackSelected.png", 35, 35, true, true)));
+                nextButton.setGraphic(new ImageView(new Image("file:resources/img/icons/nextTrackSelected.png", 30, 30, true, true)));
             else
-                nextButton.setGraphic(new ImageView(new Image("file:resources/img/icons/nextTrack.png", 35, 35, true, true)));
+                nextButton.setGraphic(new ImageView(new Image("file:resources/img/icons/nextTrack.png", 30, 30, true, true)));
         });
 
         prevButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                prevButton.setGraphic(new ImageView(new Image("file:resources/img/icons/prevTrackSelected.png", 35, 35, true, true)));
+                prevButton.setGraphic(new ImageView(new Image("file:resources/img/icons/prevTrackSelected.png", 30, 30, true, true)));
             else
-                prevButton.setGraphic(new ImageView(new Image("file:resources/img/icons/prevTrack.png", 35, 35, true, true)));
+                prevButton.setGraphic(new ImageView(new Image("file:resources/img/icons/prevTrack.png", 30, 30, true, true)));
         });
 
         optionsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
@@ -433,14 +426,22 @@ public class VideoPlayerController {
     }
     private void setDiscValues(Episode episode){
         this.episode = episode;
-        episodeTitle.setText(episode.name);
-        episodeDate.setText(episode.year);
-        seasonEpisode.setText(App.textBundle.getString("seasonLetter") + episode.seasonNumber + " " + App.textBundle.getString("episodeLetter") + episode.episodeNumber);
+
+        String episodeRuntime;
 
         if (parentController != null)
-            runtime.setText(parentController.setRuntime(episode.runtime));
+            episodeRuntime = parentController.setRuntime(episode.runtime);
         else
-            runtime.setText(parentControllerDesktop.setRuntime(episode.runtime));
+            episodeRuntime = parentControllerDesktop.setRuntime(episode.runtime);
+
+        if (DataManager.INSTANCE.currentLibrary.type.equals("Shows")){
+            episodeInfo.setText(episode.getName() + " - " +
+                    App.textBundle.getString("seasonLetter") + episode.getSeasonNumber() + " " + App.textBundle.getString("episodeLetter") + episode.getEpisodeNumber() +
+                    " - " + episode.getYear() + " - " + episodeRuntime);
+        }else{
+            episodeInfo.setText(episode.getName() + " - " +
+                    App.textBundle.getString("seasonLetter") + episode.getSeasonNumber() + " " + episodeRuntime);
+        }
 
         double durationInSeconds = episode.runtime * 60;
         double fiveSecondsPercentage = (5.0 / durationInSeconds) * 100.0;
@@ -589,20 +590,6 @@ public class VideoPlayerController {
 
             btn.setFocusTraversable(false);
 
-            btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal) {
-                    //Move ScrollPane
-                    handleButtonFocus(btn);
-
-                    btn.setScaleX(1.15);
-                    btn.setScaleY(1.15);
-                    parentController.getParent().playInteractionSound();
-                }else{
-                    btn.setScaleX(1);
-                    btn.setScaleY(1);
-                }
-            });
-
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
                 if (App.pressedSelect(event)){
                     long pos = (long) (episode.getChapters().get(chapterButtons.indexOf(btn)).getTime());
@@ -673,15 +660,44 @@ public class VideoPlayerController {
 
         Label title = new Label(chapter.getTitle());
         title.setFont(new Font(18));
+        title.setStyle("-fx-font-weight: bold;");
         title.setTextFill(Color.WHITE);
+        title.setEffect(new DropShadow());
         Label time = new Label(chapter.getDisplayTime());
         time.setFont(new Font(16));
+        time.setStyle("-fx-font-weight: bold;");
         time.setTextFill(Color.WHITE);
+        time.setEffect(new DropShadow());
 
         buttonContent.getChildren().add(title);
         buttonContent.getChildren().add(time);
 
         btn.setGraphic(buttonContent);
+
+        btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                //Move ScrollPane
+                handleButtonFocus(btn);
+
+                ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.1), btn);
+                scaleTransition.setToX(1.15);
+                scaleTransition.setToY(1.15);
+                scaleTransition.play();
+
+                title.setFont(new Font(20));
+                time.setFont(new Font(18));
+
+                parentController.getParent().playInteractionSound();
+            }else{
+                ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.1), btn);
+                scaleTransition.setToX(1);
+                scaleTransition.setToY(1);
+                scaleTransition.play();
+
+                title.setFont(new Font(18));
+                time.setFont(new Font(16));
+            }
+        });
     }
     private void handleButtonFocus(Button focusedButton) {
         double screenCenter, buttonCenterX, offset, finalPos;
@@ -830,7 +846,7 @@ public class VideoPlayerController {
         videoPlayer.togglePause();
 
         if (controlsShown)
-            playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playSelected.png", 35, 35, true, true)));
+            playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playSelected.png", 30, 30, true, true)));
     }
     public void volumeUp(){
         volumeCount.playFromStart();

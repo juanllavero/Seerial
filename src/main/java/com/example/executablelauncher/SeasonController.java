@@ -6,10 +6,7 @@ import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
-import javafx.animation.FadeTransition;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -624,14 +621,19 @@ public class SeasonController {
                     //Move ScrollPane
                     handleButtonFocus(btn);
 
-                    btn.setScaleX(1.1);
-                    btn.setScaleY(1.1);
+                    ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.1), btn);
+                    scaleTransition.setToX(1.1);
+                    scaleTransition.setToY(1.1);
+                    scaleTransition.play();
+
                     controllerParent.playInteractionSound();
 
                     updateDiscInfo(episodes.get(episodeButtons.indexOf(btn)));
                 }else{
-                    btn.setScaleX(1);
-                    btn.setScaleY(1);
+                    ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.1), btn);
+                    scaleTransition.setToX(1);
+                    scaleTransition.setToY(1);
+                    scaleTransition.play();
                 }
             });
 
@@ -639,14 +641,6 @@ public class SeasonController {
                 if (App.pressedSelect(event)){
                     playEpisode(episodes.get(episodeButtons.indexOf(btn)));
                 }
-            });
-
-            btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
-                if (App.pressedDown(event))
-                    playButton.requestFocus();
-
-                if (App.pressedUp(event))
-                    detailsButton.requestFocus();
 
                 if (episodeButtons.indexOf(btn) == 0
                         && App.pressedLeft(event) && lastSeasonButton.isVisible())
@@ -655,6 +649,14 @@ public class SeasonController {
                 if (episodeButtons.indexOf(btn) == (episodeButtons.size() - 1)
                         && App.pressedRight(event) && nextSeasonButton.isVisible())
                     nextSeasonButton.requestFocus();
+            });
+
+            btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
+                if (App.pressedDown(event))
+                    playButton.requestFocus();
+
+                if (App.pressedUp(event))
+                    detailsButton.requestFocus();
 
                 int index = episodeButtons.indexOf(btn);
                 if (App.pressedLeft(event)){
