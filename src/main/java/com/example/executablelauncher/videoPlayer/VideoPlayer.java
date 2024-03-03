@@ -23,12 +23,11 @@ public class VideoPlayer extends MediaView {
     long handle;
     private boolean paused = false;
     private ScheduledExecutorService clockExecutor;
-    private final int UPDATE_INTERVAL = 100;
     private volatile long currentTimeMillis = 0;
     private VideoPlayerController parentController;
-    private List<Track> videoTracks = new ArrayList<>();
-    private List<Track> audioTracks = new ArrayList<>();
-    private List<Track> subtitleTracks = new ArrayList<>();
+    private final List<Track> videoTracks = new ArrayList<>();
+    private final List<Track> audioTracks = new ArrayList<>();
+    private final List<Track> subtitleTracks = new ArrayList<>();
 
     public void setParent(VideoPlayerController parent){
         parentController = parent;
@@ -85,6 +84,7 @@ public class VideoPlayer extends MediaView {
         mpvSetProperty("target-colorspace-hint", "yes");
         mpvSetProperty("target-contrast", "auto");
         mpvSetProperty("gpu-api", "vulkan");
+        mpvSetProperty("input-cursor", "no");
 
         //Set smooth video properties
         mpvSetProperty("video-sync", "display-resample");
@@ -138,6 +138,7 @@ public class VideoPlayer extends MediaView {
     public void startClock() {
         if (clockExecutor == null || clockExecutor.isShutdown()) {
             clockExecutor = Executors.newSingleThreadScheduledExecutor();
+            int UPDATE_INTERVAL = 100;
             clockExecutor.scheduleAtFixedRate(() -> Platform.runLater(this::updateCurrentTime), 0, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
         }
     }

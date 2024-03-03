@@ -32,6 +32,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -741,7 +742,7 @@ public class SeasonController {
             Stage stage = new Stage();
             stage.setTitle("VideoPlayer");
             stage.initStyle(StageStyle.TRANSPARENT);
-            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initModality(Modality.APPLICATION_MODAL);
             stage.initOwner(thisStage);
             Scene scene = new Scene(root1);
             scene.setFill(Color.TRANSPARENT);
@@ -759,6 +760,7 @@ public class SeasonController {
             stage.setMaximized(true);
             stage.show();
 
+            new Robot().mouseMove(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
             fadeInEffect((Pane) root1);
         } catch (IOException e) {
             throw new RuntimeException(e);

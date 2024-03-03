@@ -32,9 +32,6 @@ public interface MPV extends StdCallLibrary {
     void mpv_request_event(long handle, int event_id, int enable);
 
     mpv_event mpv_wait_event(long handle, double timeOut);
-
-    // ... (resto de la interfaz)
-
     class mpv_event extends Structure {
         public int event_id;
         public int error;

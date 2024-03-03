@@ -1,22 +1,23 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.*;
+import com.example.executablelauncher.entities.Chapter;
+import com.example.executablelauncher.entities.Episode;
+import com.example.executablelauncher.entities.Season;
+import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.videoPlayer.Track;
 import com.example.executablelauncher.videoPlayer.VideoPlayer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jfoenix.controls.JFXSlider;
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -32,13 +33,9 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import com.jfoenix.controls.JFXSlider;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -436,11 +433,10 @@ public class VideoPlayerController {
 
         if (DataManager.INSTANCE.currentLibrary.type.equals("Shows")){
             episodeInfo.setText(episode.getName() + " - " +
-                    App.textBundle.getString("seasonLetter") + episode.getSeasonNumber() + " " + App.textBundle.getString("episodeLetter") + episode.getEpisodeNumber() +
+                    App.textBundle.getString("seasonLetter") + season.getSeasonNumber() + " " + App.textBundle.getString("episodeLetter") + episode.getEpisodeNumber() +
                     " - " + episode.getYear() + " - " + episodeRuntime);
         }else{
-            episodeInfo.setText(episode.getName() + " - " +
-                    App.textBundle.getString("seasonLetter") + episode.getSeasonNumber() + " " + episodeRuntime);
+            episodeInfo.setText(episode.getName() + " - " + episodeRuntime);
         }
 
         double durationInSeconds = episode.runtime * 60;

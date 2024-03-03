@@ -113,7 +113,6 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
         primaryStage.setTitle(App.textBundle.getString("desktopMode"));
-        //stage.initStyle(StageStyle.UNDECORATED);
         primaryStage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
@@ -122,7 +121,6 @@ public class App extends Application {
         primaryStage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
         DesktopViewController desktopViewController = fxmlLoader.getController();
         desktopViewController.initValues();
-        //FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
     }
     private void loadFullscreenMode() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
