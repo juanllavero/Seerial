@@ -4,20 +4,32 @@ import com.example.executablelauncher.VideoPlayerController;
 import com.example.executablelauncher.fileMetadata.ChaptersContainer;
 import com.example.executablelauncher.tmdbMetadata.images.Images;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Scene;
+import javafx.scene.effect.BoxBlur;
+import javafx.scene.effect.GaussianBlur;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import org.apache.commons.io.IOUtils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import javax.imageio.ImageIO;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-public class VideoMetadataExample {
+public class VideoMetadataExample extends Application {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Ruta del archivo de vídeo
         /*String pathToVideo = "F:\\The Middle-Earth Collection\\La Comunidad Del Anillo\\El Señor de los Anillos - La Comunidad del Anillo (2001).mkv";
         String pathToVideo2 = "F:\\ANIME\\[BDMV] FullMetal Alchemist Brotherhood\\S1\\Fullmetal Alchemist Brotherhood S01E01-E02.m2ts";
@@ -36,6 +48,10 @@ public class VideoMetadataExample {
         episode.setName("Dune (2021)");
 
         getChapters(episode);
+
+        for (Chapter chapter : episode.getChapters()){
+            generateThumbnail(chapter);
+        }
     }
 
     private static void getChapters(Episode episode){
@@ -47,7 +63,6 @@ public class VideoMetadataExample {
             Process process = processBuilder.start();
 
             String stdout = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
-            System.out.println(stdout);
 
             if (stdout != null){
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -61,6 +76,8 @@ public class VideoMetadataExample {
                         System.out.println(chapter.title);
                         System.out.println(chapter.time);
                         System.out.println(chapter.displayTime);
+
+                        episode.addChapter(chapter);
                     }
                 }
             }
@@ -93,11 +110,18 @@ public class VideoMetadataExample {
                     "1",
                     thumbnail.getAbsolutePath());
 
-            processBuilder.start();
-            System.out.println("Finished");
+            Process process = processBuilder.start();
+            InputStream stderr = process.getErrorStream();
+            InputStreamReader isr = new InputStreamReader(stderr);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while ((line = br.readLine()) != null);
+            process.waitFor();
         } catch (IOException e) {
             chapter.setThumbnailSrc("");
             System.err.println("Error generating thumbnail for chapter " + "test" + "/" + chapter.getTime());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -151,5 +175,14 @@ public class VideoMetadataExample {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        Pane root = new Pane();
+        Scene scene = new Scene(root, 400, 400);
+
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 }

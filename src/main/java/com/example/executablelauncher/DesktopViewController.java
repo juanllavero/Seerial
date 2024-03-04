@@ -85,6 +85,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -475,7 +476,7 @@ public class DesktopViewController {
 
         libraries.sort(new Utils.LibraryComparator());
 
-        librarySelector.setText(libraries.get(0).name);
+        librarySelector.setText(currentLibrary.name);
         libraryContainer.getChildren().clear();
         for (Library library : libraries) {
             Button btn = new Button(library.getName());
@@ -529,6 +530,10 @@ public class DesktopViewController {
         if (seriesList == null || seriesList.isEmpty()) {
             blankSelection();
             return;
+        }else{
+            editLibraryButton.setDisable(false);
+            searchFilesButton.setDisable(false);
+            removeLibraryButton.setDisable(false);
         }
 
         for (Series series : seriesList)
@@ -1498,17 +1503,65 @@ public class DesktopViewController {
 
         musicDownloadTask.setOnSucceeded(e -> {
             downloadingContentWindow.setVisible(false);
+            generateThumbnails();
         });
 
         musicDownloadTask.setOnCancelled(e -> {
             downloadingContentWindow.setVisible(false);
+            generateThumbnails();
         });
 
         musicDownloadTask.setOnFailed(e -> {
             downloadingContentWindow.setVisible(false);
+            generateThumbnails();
         });
 
         new Thread(musicDownloadTask).start();
+    }
+    public void generateThumbnails(){
+        Task<Void> generateThumbnails = new Task<>() {
+            @Override
+            protected Void call() {
+                Platform.runLater(() -> {
+                    downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
+                    downloadingContentWindow.setVisible(true);
+                });
+
+                for (Library library : DataManager.INSTANCE.libraries){
+                    if (library.getType().equals("Shows"))
+                        continue;
+
+                    for (Series series : library.getSeries()){
+                        for (Season season : series.getSeasons()){
+                            for (Episode episode : season.getEpisodes()){
+                                if (episode.getChapters().isEmpty())
+                                    continue;
+
+                                for (Chapter chapter : episode.getChapters())
+                                    if (chapter.getThumbnailSrc().isEmpty())
+                                        generateThumbnail(episode, chapter);
+                            }
+                        }
+                    }
+                }
+
+                return null;
+            }
+        };
+
+        generateThumbnails.setOnSucceeded(e -> {
+            downloadingContentWindow.setVisible(false);
+        });
+
+        generateThumbnails.setOnCancelled(e -> {
+            downloadingContentWindow.setVisible(false);
+        });
+
+        generateThumbnails.setOnFailed(e -> {
+            downloadingContentWindow.setVisible(false);
+        });
+
+        new Thread(generateThumbnails).start();
     }
     private void scanTVShow(Library library, File directory, File[] filesInDir, boolean updateMetadata){
         //All video files in directory (not taking into account two subdirectories ahead, like Series/Folder1/Folder2/File)
@@ -2022,9 +2075,14 @@ public class DesktopViewController {
             Process process = processBuilder.start();
             String stdout = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
 
+            process.waitFor();
+
             if (stdout != null){
                 ObjectMapper objectMapper = new ObjectMapper();
                 ChaptersContainer chaptersContainer = objectMapper.readValue(stdout, ChaptersContainer.class);
+
+                if (chaptersContainer.chapters.isEmpty() || chaptersContainer.chapters.size() == 1)
+                    return;
 
                 for (com.example.executablelauncher.fileMetadata.Chapter c : chaptersContainer.chapters){
                     if (c.tags != null){
@@ -2033,22 +2091,20 @@ public class DesktopViewController {
                     }
                 }
 
-                for (Chapter chapter : episode.getChapters())
-                    generateThumbnail(episode, chapter);
+                File directory = new File("resources/img/chaptersCovers/" + episode.getId() + "/");
+                if (!directory.exists()){
+                    try{
+                        Files.createDirectories(directory.toPath());
+                    } catch (IOException e) {
+                        System.err.println("generateThumbnail: Error creating directory");
+                    }
+                }
             }
-
-            process.waitFor();
         } catch (IOException | InterruptedException e) {
             System.err.println("getChapters: Error getting chapters");
         }
     }
     private void generateThumbnail(Episode episode, Chapter chapter){
-        try{
-            Files.createDirectories(Paths.get("resources/img/chaptersCovers/" + episode.getId() + "/"));
-        } catch (IOException e) {
-            System.err.println("generateThumbnail: Error creating directory");
-        }
-
         File thumbnail = new File("resources/img/chaptersCovers/" + episode.getId() + "/" + chapter.getTime() + ".jpg");
 
         chapter.setThumbnailSrc("resources/img/chaptersCovers/" + episode.getId() + "/" + chapter.getTime() + ".jpg");
@@ -2062,9 +2118,19 @@ public class DesktopViewController {
                     "-vframes",
                     "1",
                     thumbnail.getAbsolutePath());
-            processBuilder.start();
-        } catch (IOException e) {
-            chapter.setThumbnailSrc("resources/img/Default_video_thumbnail.jpg");
+
+            Process process = processBuilder.start();
+
+            //Read input and error streams to avoid process blocked
+            InputStream stderr = process.getErrorStream();
+            InputStreamReader isr = new InputStreamReader(stderr);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while ((line = br.readLine()) != null);
+
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            chapter.setThumbnailSrc("");
             System.err.println("Error generating thumbnail for chapter " + episode.getId() + "/" + chapter.getTime());
         }
     }
