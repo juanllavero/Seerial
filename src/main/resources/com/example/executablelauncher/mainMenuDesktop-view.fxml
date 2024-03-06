@@ -121,6 +121,16 @@
                         <Insets top="10.0" />
                      </VBox.margin>
                   </Label>
+                  <CheckBox fx:id="thumbnailCheck" mnemonicParsing="false" text="Generar miniaturas de capítulos" textFill="WHITE">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </CheckBox>
+                  <Label fx:id="thumbnailText" text="Sólo aplica a los vídeos de las librerías de tipo &quot;Películas&quot;" textFill="#8a8a8a">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Label>
                </children>
                <padding>
                   <Insets bottom="20.0" left="40.0" right="40.0" top="20.0" />

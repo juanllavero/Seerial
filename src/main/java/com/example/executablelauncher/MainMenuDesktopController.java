@@ -25,6 +25,11 @@ public class MainMenuDesktopController {
     @FXML Label interpolationText;
 
     @FXML
+    private CheckBox thumbnailCheck;
+
+    @FXML Label thumbnailText;
+
+    @FXML
     private CheckBox autoScan;
 
     @FXML
@@ -109,6 +114,9 @@ public class MainMenuDesktopController {
         interpolationText.setText(App.textBundle.getString("interpolationMeaning"));
         interpolation.setText(App.textBundle.getString("interpolationCheck"));
         interpolation.setSelected(Boolean.parseBoolean(Configuration.loadConfig("interpolation", "false")));
+        thumbnailText.setText(App.textBundle.getString("generateThumbnailsText"));
+        thumbnailCheck.setText(App.textBundle.getString("generateThumbnailsCheck"));
+        thumbnailCheck.setSelected(Boolean.parseBoolean(Configuration.loadConfig("generateThumbnails", "false")));
         autoScan.setText(App.textBundle.getString("autoScan"));
         autoScan.setSelected(Boolean.parseBoolean(Configuration.loadConfig("autoScan", "true")));
         secondsBeforeVideoText.setText(App.textBundle.getString("backgroundDelay"));
@@ -167,6 +175,7 @@ public class MainMenuDesktopController {
         Configuration.saveConfig("backgroundVolume", String.valueOf((int) backgroundVolume.getValue()));
         Configuration.saveConfig("showClock", String.valueOf(showClock.isSelected()));
         Configuration.saveConfig("interpolation", String.valueOf(interpolation.isSelected()));
+        Configuration.saveConfig("generateThumbnails", String.valueOf(thumbnailCheck.isSelected()));
 
         Configuration.saveConfig("preferAudioLan", audioLanguage.getValue().toLanguageTag());
         Configuration.saveConfig("preferSubsLan", subsLanguage.getValue().toLanguageTag());

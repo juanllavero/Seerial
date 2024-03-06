@@ -227,20 +227,6 @@ public class App extends Application {
         }
     }
 
-    public static List<Library> getLibraries(boolean fullscreen){
-        return DataManager.INSTANCE.getCategories(fullscreen);
-    }
-
-    public static List<String> getLibrariesNames(){
-        List<Library> catList = DataManager.INSTANCE.getCategories(false);
-        List<String> librariesNames = new ArrayList<>();
-
-        for (Library l : catList)
-            librariesNames.add(l.name);
-
-        return librariesNames;
-    }
-
     public static void setSelectedSeries(Series series){ selectedSeries = series; }
 
     public static Series getSelectedSeries(){

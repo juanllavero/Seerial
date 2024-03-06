@@ -20,8 +20,6 @@ module com.example.executablelauncher {
     requires imgscalr.lib;
     requires TarsosDSP.core;
     requires TarsosDSP.jvm;
-    requires uk.co.caprica.vlcj;
-    requires uk.co.caprica.vlcj.javafx;
     requires com.jfoenix;
     requires com.google.api.services.youtube;
     requires google.api.client;

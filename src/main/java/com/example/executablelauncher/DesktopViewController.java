@@ -298,6 +298,8 @@ public class DesktopViewController {
     private double ASPECT_RATIO = 16.0 / 9.0;
     private boolean acceptRemove = false;
     private static int numFilesToCheck = 0;
+    private boolean doingProcessing = false;
+    private boolean generatingThumbnails = false;
     //endregion
 
     //region THEMOVIEDB ATTRIBUTES
@@ -424,6 +426,9 @@ public class DesktopViewController {
         Platform.runLater(() -> {
             updateLibraries();
             updateLanguage();
+
+            if (!libraries.isEmpty())
+                generateThumbnails();
         });
     }
 
@@ -464,7 +469,7 @@ public class DesktopViewController {
         searchFilesButton.setText(App.buttonsBundle.getString("searchFiles"));
     }
     public void updateLibraries(){
-        libraries = App.getLibraries(false);
+        libraries = DataManager.INSTANCE.getLibraries(false);
 
         if (libraries.isEmpty()) {
             blankSelection();
@@ -476,7 +481,7 @@ public class DesktopViewController {
 
         libraries.sort(new Utils.LibraryComparator());
 
-        librarySelector.setText(currentLibrary.name);
+        librarySelector.setText(currentLibrary.getName());
         libraryContainer.getChildren().clear();
         for (Library library : libraries) {
             Button btn = new Button(library.getName());
@@ -714,6 +719,8 @@ public class DesktopViewController {
         editLibraryButton.setDisable(true);
         searchFilesButton.setDisable(true);
         removeLibraryButton.setDisable(true);
+
+        seriesContainer.getChildren().clear();
     }
     public void selectLibrary(String libraryName){
         seriesContainer.getChildren().clear();
@@ -1343,7 +1350,6 @@ public class DesktopViewController {
         searchFiles(currentLibrary);
     }
     public void loadLibrary(Library library){
-        librarySelector.setText(library.getName());
         currentLibrary = library;
 
         updateLibraries();
@@ -1359,6 +1365,7 @@ public class DesktopViewController {
         hideMenu();
         downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindow.setVisible(true);
+        doingProcessing = true;
 
         List<Series> series = List.copyOf(library.getSeries());
         for (Series show : series){
@@ -1503,28 +1510,53 @@ public class DesktopViewController {
 
         musicDownloadTask.setOnSucceeded(e -> {
             downloadingContentWindow.setVisible(false);
-            generateThumbnails();
+            doingProcessing = false;
+
+            if (generatingThumbnails){
+                downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
+                downloadingContentWindow.setVisible(true);
+            }else{
+                generateThumbnails();
+            }
         });
 
         musicDownloadTask.setOnCancelled(e -> {
             downloadingContentWindow.setVisible(false);
-            generateThumbnails();
+            doingProcessing = false;
+
+            if (generatingThumbnails){
+                downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
+                downloadingContentWindow.setVisible(true);
+            }else{
+                generateThumbnails();
+            }
         });
 
         musicDownloadTask.setOnFailed(e -> {
             downloadingContentWindow.setVisible(false);
-            generateThumbnails();
+            doingProcessing = false;
+
+            if (generatingThumbnails){
+                downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
+                downloadingContentWindow.setVisible(true);
+            }else{
+                generateThumbnails();
+            }
         });
 
         new Thread(musicDownloadTask).start();
     }
     public void generateThumbnails(){
+        if (Configuration.loadConfig("generateThumbnails", "true").equals("false"))
+            return;
+
         Task<Void> generateThumbnails = new Task<>() {
             @Override
             protected Void call() {
                 Platform.runLater(() -> {
                     downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
                     downloadingContentWindow.setVisible(true);
+                    generatingThumbnails = true;
                 });
 
                 for (Library library : DataManager.INSTANCE.libraries){
@@ -1550,15 +1582,24 @@ public class DesktopViewController {
         };
 
         generateThumbnails.setOnSucceeded(e -> {
-            downloadingContentWindow.setVisible(false);
+            if (!doingProcessing)
+                downloadingContentWindow.setVisible(false);
+
+            generatingThumbnails = false;
         });
 
         generateThumbnails.setOnCancelled(e -> {
-            downloadingContentWindow.setVisible(false);
+            if (!doingProcessing)
+                downloadingContentWindow.setVisible(false);
+
+            generatingThumbnails = false;
         });
 
         generateThumbnails.setOnFailed(e -> {
-            downloadingContentWindow.setVisible(false);
+            if (!doingProcessing)
+                downloadingContentWindow.setVisible(false);
+
+            generatingThumbnails = false;
         });
 
         new Thread(generateThumbnails).start();
@@ -2075,8 +2116,6 @@ public class DesktopViewController {
             Process process = processBuilder.start();
             String stdout = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
 
-            process.waitFor();
-
             if (stdout != null){
                 ObjectMapper objectMapper = new ObjectMapper();
                 ChaptersContainer chaptersContainer = objectMapper.readValue(stdout, ChaptersContainer.class);
@@ -2100,6 +2139,8 @@ public class DesktopViewController {
                     }
                 }
             }
+
+            process.waitFor();
         } catch (IOException | InterruptedException e) {
             System.err.println("getChapters: Error getting chapters");
         }

@@ -210,7 +210,7 @@ public class AddLibraryController {
                 parentController.searchFiles();
             }else{
                 Library library = new Library(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
-                DataManager.INSTANCE.createCategory(library);
+                DataManager.INSTANCE.createLibrary(library);
                 parentController.loadLibrary(library);
             }
 

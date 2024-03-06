@@ -286,7 +286,7 @@ public class Controller implements Initializable {
         globalShadow.setFitHeight(screenHeight);
         globalShadow.setVisible(false);
 
-        libraries = App.getLibraries(true);
+        libraries = DataManager.INSTANCE.getLibraries(true);
 
         for (Library cat : libraries){
             Button btn = new Button();

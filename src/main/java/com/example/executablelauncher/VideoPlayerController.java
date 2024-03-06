@@ -632,7 +632,11 @@ public class VideoPlayerController {
         thumbnail.setFitWidth(targetWidth);
         thumbnail.setFitHeight(targetHeight);
 
-        File newFile = new File(chapter.getThumbnailSrc());
+        File newFile;
+        if (chapter.getThumbnailSrc().isEmpty())
+            newFile = new File("resources/img/Default_video_thumbnail.jpg");
+        else
+            newFile = new File(chapter.getThumbnailSrc());
 
         Image originalImage;
         try{
@@ -730,6 +734,9 @@ public class VideoPlayerController {
         transition.play();
     }
     private void selectCurrentChapter(){
+        if (chapterContainer.getChildren().isEmpty())
+            return;
+
         showChapterSection();
         long currentTime = videoPlayer.getCurrentTime();
 
@@ -1290,9 +1297,9 @@ public class VideoPlayerController {
         long s = totalSec % 60;
 
         if (h > 0)
-            return String.format("%d:%2d:%02d", h, m, s);
+            return String.format("%02d:%02d:%02d", h, m, s);
 
-        return String.format("%2d:%02d", m, s);
+        return String.format("%02d:%02d", m, s);
     }
 
     public void notifyChanges(long timeMillis){

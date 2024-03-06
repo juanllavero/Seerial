@@ -44,7 +44,7 @@ public class VideoMetadataExample extends Application {
         getSubtitleMetadata(pathToVideo);*/
 
         Episode episode = new Episode();
-        episode.setVideoSrc("F:\\[TEST]\\Dune\\Dune (2021).mkv");
+        episode.setVideoSrc("F:\\UHD\\Dune\\Dune (2021).mkv");
         episode.setName("Dune (2021)");
 
         getChapters(episode);
@@ -100,12 +100,11 @@ public class VideoMetadataExample extends Application {
         chapter.setThumbnailSrc("resources/img/chaptersCovers/" + "test" + "/" + chapter.getTime() + ".jpg");
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg",
-                    "-nostdin",
                     "-y",
                     "-ss",
                     chapter.getDisplayTime(),
                     "-i",
-                    "F:\\[TEST]\\Dune\\Dune (2021).mkv",
+                    "F:\\UHD\\Dune\\Dune (2021).mkv",
                     "-vframes",
                     "1",
                     thumbnail.getAbsolutePath());

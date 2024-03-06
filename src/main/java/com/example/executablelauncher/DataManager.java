@@ -56,10 +56,10 @@ public class DataManager {
     }
     //endregion
 
-    public void createCategory(Library library){
+    public void createLibrary(Library library){
         libraries.add(library);
     }
-    public List<Library> getCategories(boolean fullscreen){
+    public List<Library> getLibraries(boolean fullscreen){
         if (!fullscreen)
             return libraries;
 
