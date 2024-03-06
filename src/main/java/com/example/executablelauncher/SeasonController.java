@@ -683,7 +683,7 @@ public class SeasonController {
     private void handleButtonFocus(Button focusedButton) {
         double screenCenter, buttonCenterX, offset, finalPos;
 
-        if (episodeButtons.indexOf(focusedButton) <= buttonCount / 2 || episodeButtons.size() <= 3){
+        if (episodeButtons.indexOf(focusedButton) <= buttonCount / 2 || episodeButtons.size() <= 3 || episodeButtons.size() == buttonCount){
             finalPos = 0;
         }else{
             //Get center of screen

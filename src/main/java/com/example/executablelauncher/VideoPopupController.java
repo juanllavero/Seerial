@@ -19,7 +19,6 @@ public class VideoPopupController {
     }
 
     private void stopVideo() {
-        // Detener la reproducción del video
         webView.getEngine().load(null);
     }
 }

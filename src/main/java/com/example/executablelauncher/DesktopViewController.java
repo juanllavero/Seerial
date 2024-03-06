@@ -705,6 +705,7 @@ public class DesktopViewController {
     }
     public void refreshSeason(Season s){
         Platform.runLater(() -> {
+            seasonsButtons.get(seasonList.indexOf(selectedSeason)).setText(selectedSeason.getName());
             selectedSeason = null;
             selectSeason(s);
         });
@@ -1367,6 +1368,11 @@ public class DesktopViewController {
         downloadingContentWindow.setVisible(true);
         doingProcessing = true;
 
+        //Disable library buttons in order to prevent the user from starting another process
+        editLibraryButton.setDisable(true);
+        removeLibraryButton.setDisable(true);
+        searchFilesButton.setDisable(true);
+
         List<Series> series = List.copyOf(library.getSeries());
         for (Series show : series){
             List<Season> seasons = List.copyOf(show.getSeasons());
@@ -1455,31 +1461,23 @@ public class DesktopViewController {
             }
         };
 
-        loadHalfTask.setOnSucceeded(e -> {
-            numFilesToCheck--;
-            if (numFilesToCheck == 0) {
-                downloadingContentWindow.setVisible(false);
-                downloadDefaultMusic(library);
-            }
-        });
-
-        loadHalfTask.setOnCancelled(e -> {
-            numFilesToCheck--;
-            if (numFilesToCheck == 0) {
-                downloadingContentWindow.setVisible(false);
-                downloadDefaultMusic(library);
-            }
-        });
-
-        loadHalfTask.setOnFailed(e -> {
-            numFilesToCheck--;
-            if (numFilesToCheck == 0) {
-                downloadingContentWindow.setVisible(false);
-                downloadDefaultMusic(library);
-            }
-        });
+        loadHalfTask.setOnSucceeded(e -> postFileSearch(library));
+        loadHalfTask.setOnCancelled(e -> postFileSearch(library));
+        loadHalfTask.setOnFailed(e -> postFileSearch(library));
 
         new Thread(loadHalfTask).start();
+    }
+    private void postFileSearch(Library library){
+        numFilesToCheck--;
+        if (numFilesToCheck == 0) {
+            //Restore library buttons
+            editLibraryButton.setDisable(false);
+            removeLibraryButton.setDisable(false);
+            searchFilesButton.setDisable(false);
+
+            downloadingContentWindow.setVisible(false);
+            downloadDefaultMusic(library);
+        }
     }
     public void downloadDefaultMusic(Library library){
         Task<Void> musicDownloadTask = new Task<>() {
@@ -1494,57 +1492,48 @@ public class DesktopViewController {
                     if (series == null)
                         continue;
 
-                    Season season = series.getSeasons().get(0);
+                    if (library.getType().equals("Shows")){
+                        Season season = series.getSeasons().get(0);
 
-                    if (!season.musicSrc.isEmpty())
-                        continue;
+                        if (!season.getMusicSrc().isEmpty())
+                            continue;
 
-                    List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
+                        List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
 
-                    if (results != null)
-                        downloadMedia(season, results.get(0).watch_url);
+                        if (results != null)
+                            downloadMedia(season, results.get(0).watch_url);
+                    }else{
+                        for (Season season : series.getSeasons()){
+                            if (!season.getMusicSrc().isEmpty())
+                                continue;
+
+                            List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
+
+                            if (results != null)
+                                downloadMedia(season, results.get(0).watch_url);
+                        }
+                    }
                 }
                 return null;
             }
         };
 
-        musicDownloadTask.setOnSucceeded(e -> {
-            downloadingContentWindow.setVisible(false);
-            doingProcessing = false;
-
-            if (generatingThumbnails){
-                downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
-                downloadingContentWindow.setVisible(true);
-            }else{
-                generateThumbnails();
-            }
-        });
-
-        musicDownloadTask.setOnCancelled(e -> {
-            downloadingContentWindow.setVisible(false);
-            doingProcessing = false;
-
-            if (generatingThumbnails){
-                downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
-                downloadingContentWindow.setVisible(true);
-            }else{
-                generateThumbnails();
-            }
-        });
-
-        musicDownloadTask.setOnFailed(e -> {
-            downloadingContentWindow.setVisible(false);
-            doingProcessing = false;
-
-            if (generatingThumbnails){
-                downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
-                downloadingContentWindow.setVisible(true);
-            }else{
-                generateThumbnails();
-            }
-        });
+        musicDownloadTask.setOnSucceeded(e -> postMusicDownload());
+        musicDownloadTask.setOnCancelled(e -> postMusicDownload());
+        musicDownloadTask.setOnFailed(e -> postMusicDownload());
 
         new Thread(musicDownloadTask).start();
+    }
+    private void postMusicDownload(){
+        downloadingContentWindow.setVisible(false);
+        doingProcessing = false;
+
+        if (generatingThumbnails){
+            downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
+            downloadingContentWindow.setVisible(true);
+        }else{
+            generateThumbnails();
+        }
     }
     public void generateThumbnails(){
         if (Configuration.loadConfig("generateThumbnails", "true").equals("false"))
@@ -1581,28 +1570,17 @@ public class DesktopViewController {
             }
         };
 
-        generateThumbnails.setOnSucceeded(e -> {
-            if (!doingProcessing)
-                downloadingContentWindow.setVisible(false);
-
-            generatingThumbnails = false;
-        });
-
-        generateThumbnails.setOnCancelled(e -> {
-            if (!doingProcessing)
-                downloadingContentWindow.setVisible(false);
-
-            generatingThumbnails = false;
-        });
-
-        generateThumbnails.setOnFailed(e -> {
-            if (!doingProcessing)
-                downloadingContentWindow.setVisible(false);
-
-            generatingThumbnails = false;
-        });
+        generateThumbnails.setOnSucceeded(e -> postThumbnailGeneration());
+        generateThumbnails.setOnCancelled(e -> postThumbnailGeneration());
+        generateThumbnails.setOnFailed(e -> postThumbnailGeneration());
 
         new Thread(generateThumbnails).start();
+    }
+    private void postThumbnailGeneration(){
+        if (!doingProcessing)
+            downloadingContentWindow.setVisible(false);
+
+        generatingThumbnails = false;
     }
     private void scanTVShow(Library library, File directory, File[] filesInDir, boolean updateMetadata){
         //All video files in directory (not taking into account two subdirectories ahead, like Series/Folder1/Folder2/File)
