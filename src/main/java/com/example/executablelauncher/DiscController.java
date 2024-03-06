@@ -1,7 +1,6 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
-import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -127,7 +126,7 @@ public class DiscController {
         thumbnailStackPane.getStyleClass().add("discButton");
 
         thumbnailShadow.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
-            if (event.getButton() == MouseButton.PRIMARY && desktopParent.isDiscSelected()) {
+            if (event.getButton() == MouseButton.PRIMARY && desktopParent.isEpisodeSelected()) {
                 selectDiscDesktop();
             }
         });
@@ -167,7 +166,7 @@ public class DiscController {
     }
 
     public void selectDiscDesktop(){
-        desktopParent.selectDisc(episode);
+        desktopParent.selectEpisode(episode);
         if (discSelected){
             clearSelection();
         }else{
@@ -185,7 +184,7 @@ public class DiscController {
         thumbnailShadow.setVisible(true);
         selectDiscButton.setVisible(true);
 
-        if (!desktopParent.isDiscSelected()){
+        if (!desktopParent.isEpisodeSelected()){
             playButton.setVisible(true);
             discMenu.setVisible(true);
         }else{

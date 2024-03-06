@@ -141,7 +141,7 @@
                                     <VBox fx:id="seasonsEpisodesBox" spacing="20.0" stylesheets="@styles.css">
                                        <children>
                                           <FlowPane fx:id="seasonContainer" />
-                                          <FlowPane fx:id="discContainer" hgap="20.0" nodeOrientation="LEFT_TO_RIGHT" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS" />
+                                          <FlowPane fx:id="episodesContainer" hgap="20.0" nodeOrientation="LEFT_TO_RIGHT" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS" />
                                        </children>
                                        <padding>
                                           <Insets bottom="10.0" />
@@ -465,7 +465,7 @@
             </VBox>
             <VBox fx:id="seriesMenu" layoutX="61.0" layoutY="434.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
-                  <Button fx:id="editColButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeries" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
+                  <Button fx:id="editSeriesButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editSeries" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
@@ -483,7 +483,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button fx:id="removeColButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeCollection" styleClass="closeButton" stylesheets="@styles.css" text="Remove" textFill="WHITE">
+                  <Button fx:id="removeSeriesButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeCollection" styleClass="closeButton" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
@@ -524,9 +524,9 @@
                   <Insets bottom="2.0" top="2.0" />
                </padding>
             </VBox>
-            <VBox fx:id="discMenu" layoutX="960.0" layoutY="332.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
+            <VBox fx:id="episodeMenu" layoutX="960.0" layoutY="332.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
-                  <Button fx:id="editDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
+                  <Button fx:id="editEpisodeButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#editDisc" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Edit" textFill="WHITE">
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
@@ -534,7 +534,7 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
-                  <Button fx:id="removeDiscButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeEpisode" styleClass="closeButton" stylesheets="@styles.css" text="Remove" textFill="WHITE">
+                  <Button fx:id="removeEpisodeButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#removeEpisode" styleClass="closeButton" stylesheets="@styles.css" text="Remove" textFill="WHITE">
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>

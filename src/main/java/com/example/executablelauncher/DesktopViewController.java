@@ -85,7 +85,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -140,16 +139,16 @@ public class DesktopViewController {
     private VBox seasonsEpisodesBox;
 
     @FXML
-    private FlowPane discContainer;
+    private FlowPane episodesContainer;
 
     @FXML
-    private VBox discMenu;
+    private VBox episodeMenu;
 
     @FXML
-    private Button editColButton;
+    private Button editSeriesButton;
 
     @FXML
-    private Button editDiscButton;
+    private Button editEpisodeButton;
 
     @FXML
     private Button editSeasonButton;
@@ -182,10 +181,10 @@ public class DesktopViewController {
     private Pane menuParentPane;
 
     @FXML
-    private Button removeColButton;
+    private Button removeSeriesButton;
 
     @FXML
-    private Button removeDiscButton;
+    private Button removeEpisodeButton;
 
     @FXML
     private Button removeSeasonButton;
@@ -294,7 +293,7 @@ public class DesktopViewController {
     private Season selectedSeason = null;
     public Episode selectedEpisode = null;
     private List<Episode> selectedEpisodes = new ArrayList<>();
-    private List<DiscController> discControllers = new ArrayList<>();
+    private List<DiscController> episodesControllers = new ArrayList<>();
     private double ASPECT_RATIO = 16.0 / 9.0;
     private boolean acceptRemove = false;
     private static int numFilesToCheck = 0;
@@ -371,7 +370,7 @@ public class DesktopViewController {
         libraryMenu.setVisible(false);
         seriesMenu.setVisible(false);
         seasonMenu.setVisible(false);
-        discMenu.setVisible(false);
+        episodeMenu.setVisible(false);
         libraryContainer.setVisible(false);
 
         //Elements size
@@ -437,13 +436,13 @@ public class DesktopViewController {
         settingsButton.setText(App.buttonsBundle.getString("settings"));
         exitButton.setText(App.buttonsBundle.getString("eixtButton"));
         switchFSButton.setText(App.buttonsBundle.getString("switchToFullscreen"));
-        removeColButton.setText(App.buttonsBundle.getString("removeButton"));
+        removeSeriesButton.setText(App.buttonsBundle.getString("removeButton"));
         removeSeasonButton.setText(App.buttonsBundle.getString("removeButton"));
-        removeDiscButton.setText(App.buttonsBundle.getString("removeButton"));
+        removeEpisodeButton.setText(App.buttonsBundle.getString("removeButton"));
         removeLibraryButton.setText(App.buttonsBundle.getString("removeButton"));
-        editColButton.setText(App.buttonsBundle.getString("editButton"));
+        editSeriesButton.setText(App.buttonsBundle.getString("editButton"));
         editSeasonButton.setText(App.buttonsBundle.getString("editButton"));
-        editDiscButton.setText(App.buttonsBundle.getString("editButton"));
+        editEpisodeButton.setText(App.buttonsBundle.getString("editButton"));
         editLibraryButton.setText(App.buttonsBundle.getString("editButton"));
         deleteSelectedButton.setText(App.buttonsBundle.getString("removeButton"));
         selectAllButton.setText(App.buttonsBundle.getString("selectAllButton"));
@@ -559,8 +558,8 @@ public class DesktopViewController {
         }
     }
     private void showEpisodes(Season s) {
-        discContainer.getChildren().clear();
-        discControllers.clear();
+        episodesContainer.getChildren().clear();
+        episodesControllers.clear();
         episodeList = s.getEpisodes();
 
         if (!episodeList.isEmpty()) {
@@ -774,7 +773,7 @@ public class DesktopViewController {
             if (!selectedSeason.getEpisodes().isEmpty())
                 showEpisodes(selectedSeason);
             else
-                discContainer.getChildren().clear();
+                episodesContainer.getChildren().clear();
         } else {
             seasonScroll.setVisible(false);
         }
@@ -788,7 +787,7 @@ public class DesktopViewController {
             if (!selectedSeason.getEpisodes().isEmpty()){
                 showEpisodes(selectedSeason);
             }else{
-                discContainer.getChildren().clear();
+                episodesContainer.getChildren().clear();
             }
         }
     }
@@ -817,7 +816,7 @@ public class DesktopViewController {
 
         selectSeason(seasonList.get(seasonsButtons.indexOf(btn)));
     }
-    public boolean isDiscSelected(){
+    public boolean isEpisodeSelected(){
         return !selectedEpisodes.isEmpty();
     }
     //endregion
@@ -1000,7 +999,7 @@ public class DesktopViewController {
     //endregion
 
     //region EPISODE SELECTION
-    public void selectDisc(Episode episode){
+    public void selectEpisode(Episode episode){
         if (selectedEpisodes.contains(episode)) {
             selectedEpisodes.remove(episode);
         }else{
@@ -1027,7 +1026,7 @@ public class DesktopViewController {
 
     @FXML
     void deselectAll(ActionEvent event) {
-        for (DiscController d : discControllers){
+        for (DiscController d : episodesControllers){
             d.clearSelection();
         }
         selectionOptions.setVisible(false);
@@ -1035,7 +1034,7 @@ public class DesktopViewController {
     }
     @FXML
     void selectAll(ActionEvent event) {
-        for (DiscController d : discControllers){
+        for (DiscController d : episodesControllers){
             if (!d.discSelected)
                 d.selectDiscDesktop();
         }
@@ -1383,7 +1382,11 @@ public class DesktopViewController {
 
                     if (!file.exists()) {
                         if (selectedSeason == s)
-                            discContainer.getChildren().remove(episodeList.indexOf(episode));
+                            episodesContainer.getChildren().remove(episodeList.indexOf(episode));
+
+                        if (currentLibrary == library){
+                            episodesContainer.getChildren().remove(episodeList.indexOf(episode));
+                        }
 
                         s.removeEpisode(episode);
                         DataManager.INSTANCE.deleteEpisodeData(episode);
@@ -1394,6 +1397,10 @@ public class DesktopViewController {
                     if (selectedSeries == show)
                         seasonContainer.getChildren().remove(seasonList.indexOf(s));
 
+                    if (currentLibrary == library){
+                        seasonsButtons.remove(seasonList.indexOf(s));
+                    }
+
                     show.removeSeason(s);
                     DataManager.INSTANCE.deleteSeasonData(s);
                 }
@@ -1402,6 +1409,10 @@ public class DesktopViewController {
             if (show.getSeasons().isEmpty()){
                 if (selectedSeries == show)
                     seriesContainer.getChildren().remove(seriesList.indexOf(show));
+
+                if (currentLibrary == library){
+                    seriesButtons.remove(seriesList.indexOf(show));
+                }
 
                 seriesList.remove(show);
                 library.removeSeries(show);
@@ -3156,14 +3167,14 @@ public class DesktopViewController {
             discController.setDesktopParentParent(this);
             discController.setData(episode);
 
-            discContainer.getChildren().add(cardBox);
-            discControllers.add(discController);
+            episodesContainer.getChildren().add(cardBox);
+            episodesControllers.add(discController);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
     public void updateDisc(Episode d){
-        for (DiscController discController : discControllers) {
+        for (DiscController discController : episodesControllers) {
             if (discController.episode.getId().equals(d.getId())){
                 discController.setData(d);
                 return;
@@ -3392,8 +3403,8 @@ public class DesktopViewController {
         int index = episodeList.indexOf(d);
 
         if (index != -1) {
-            discContainer.getChildren().remove(index);
-            discControllers.remove(index);
+            episodesContainer.getChildren().remove(index);
+            episodesControllers.remove(index);
         }
 
         episodeList.remove(d);
@@ -3519,16 +3530,16 @@ public class DesktopViewController {
     }
     public void openDiscMenu(MouseEvent event) {
         menuParentPane.setVisible(true);
-        discMenu.setLayoutX(event.getSceneX());
-        discMenu.setLayoutY(event.getSceneY() - discMenu.getHeight());
+        episodeMenu.setLayoutX(event.getSceneX());
+        episodeMenu.setLayoutY(event.getSceneY() - episodeMenu.getHeight());
 
-        discMenu.setVisible(true);
-        fadeInTransition(discMenu);
+        episodeMenu.setVisible(true);
+        fadeInTransition(episodeMenu);
     }
     private void hideMenu(){
-        if (discMenu.isVisible())
-            fadeOutTransition(discMenu);
-        discMenu.setVisible(false);
+        if (episodeMenu.isVisible())
+            fadeOutTransition(episodeMenu);
+        episodeMenu.setVisible(false);
 
         if (seasonMenu.isVisible())
             fadeOutTransition(seasonMenu);
