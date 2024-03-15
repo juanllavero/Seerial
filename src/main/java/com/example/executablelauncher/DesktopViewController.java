@@ -1142,18 +1142,15 @@ public class DesktopViewController {
             hideBackgroundShadow();
             refreshSeries();
         });
-        correctIS.setOnCancelled(e -> {
-            downloadingContentWindowStatic.setVisible(false);
-            hideBackgroundShadow();
-            refreshSeries();
-        });
         correctIS.setOnFailed(e -> {
             downloadingContentWindowStatic.setVisible(false);
             hideBackgroundShadow();
             refreshSeries();
         });
 
-        new Thread(correctIS).start();
+        Thread thread = new Thread(correctIS);
+        thread.setDaemon(true);
+        thread.start();
     }
     public void correctIdentificationMovie(){
         showBackgroundShadow();
@@ -1224,16 +1221,14 @@ public class DesktopViewController {
             downloadingContentWindowStatic.setVisible(false);
             hideBackgroundShadow();
         });
-        correctIM.setOnCancelled(e -> {
-            downloadingContentWindowStatic.setVisible(false);
-            hideBackgroundShadow();
-        });
         correctIM.setOnFailed(e -> {
             downloadingContentWindowStatic.setVisible(false);
             hideBackgroundShadow();
         });
 
-        new Thread(correctIM).start();
+        Thread thread = new Thread(correctIM);
+        thread.setDaemon(true);
+        thread.start();
     }
     public void setCorrectIdentificationShow(int newID){
         seriesMetadataToCorrect = true;
@@ -1319,12 +1314,6 @@ public class DesktopViewController {
             hideBackgroundShadow();
             refreshSeries();
         });
-        changeEG.setOnCancelled(e -> {
-            downloadingContentWindowStatic.setVisible(false);
-            changeEpisodeGroup = false;
-            hideBackgroundShadow();
-            refreshSeries();
-        });
         changeEG.setOnFailed(e -> {
             downloadingContentWindowStatic.setVisible(false);
             changeEpisodeGroup = false;
@@ -1332,7 +1321,9 @@ public class DesktopViewController {
             refreshSeries();
         });
 
-        new Thread(changeEG).start();
+        Thread thread = new Thread(changeEG);
+        thread.setDaemon(true);
+        thread.start();
     }
     //endregion
 
@@ -1453,6 +1444,9 @@ public class DesktopViewController {
             @Override
             protected Void call() {
                 for (int i = start; i < end; i++){
+                    if (isCancelled())
+                        break;
+
                     File file = files.get(i);
 
                     if (library.type.equals("Shows")) {
@@ -1473,10 +1467,13 @@ public class DesktopViewController {
         };
 
         loadHalfTask.setOnSucceeded(e -> postFileSearch(library));
-        loadHalfTask.setOnCancelled(e -> postFileSearch(library));
         loadHalfTask.setOnFailed(e -> postFileSearch(library));
 
-        new Thread(loadHalfTask).start();
+        Thread thread = new Thread(loadHalfTask);
+        thread.setDaemon(true);
+        thread.start();
+
+        App.tasks.add(loadHalfTask);
     }
     private void postFileSearch(Library library){
         numFilesToCheck--;
@@ -1500,6 +1497,9 @@ public class DesktopViewController {
                 });
 
                 for (Series series : library.getSeries()){
+                    if (isCancelled())
+                        break;
+
                     if (series == null)
                         continue;
 
@@ -1530,10 +1530,13 @@ public class DesktopViewController {
         };
 
         musicDownloadTask.setOnSucceeded(e -> postMusicDownload());
-        musicDownloadTask.setOnCancelled(e -> postMusicDownload());
         musicDownloadTask.setOnFailed(e -> postMusicDownload());
 
-        new Thread(musicDownloadTask).start();
+        Thread thread = new Thread(musicDownloadTask);
+        thread.setDaemon(true);
+        thread.start();
+
+        App.tasks.add(musicDownloadTask);
     }
     private void postMusicDownload(){
         downloadingContentWindow.setVisible(false);
@@ -1566,6 +1569,9 @@ public class DesktopViewController {
                     for (Series series : library.getSeries()){
                         for (Season season : series.getSeasons()){
                             for (Episode episode : season.getEpisodes()){
+                                if (isCancelled())
+                                    return null;
+
                                 if (episode.getChapters().isEmpty())
                                     continue;
 
@@ -1582,10 +1588,13 @@ public class DesktopViewController {
         };
 
         generateThumbnails.setOnSucceeded(e -> postThumbnailGeneration());
-        generateThumbnails.setOnCancelled(e -> postThumbnailGeneration());
         generateThumbnails.setOnFailed(e -> postThumbnailGeneration());
 
-        new Thread(generateThumbnails).start();
+        Thread thread = new Thread(generateThumbnails);
+        thread.setDaemon(true);
+        thread.start();
+
+        App.tasks.add(generateThumbnails);
     }
     private void postThumbnailGeneration(){
         if (!doingProcessing)
@@ -1783,7 +1792,9 @@ public class DesktopViewController {
                 }
             };
 
-            new Thread(posterTask).start();
+            Thread thread = new Thread(posterTask);
+            thread.setDaemon(true);
+            thread.start();
         }
         //endregion
 
@@ -2208,7 +2219,9 @@ public class DesktopViewController {
                 }
             };
 
-            new Thread(thumbnailTask).start();
+            Thread thread = new Thread(thumbnailTask);
+            thread.setDaemon(true);
+            thread.start();
         }
         //endregion
 
@@ -2746,7 +2759,9 @@ public class DesktopViewController {
                 }
             };
 
-            new Thread(thumbnailTask).start();
+            Thread thread = new Thread(thumbnailTask);
+            thread.setDaemon(true);
+            thread.start();
         }
         //endregion
 
@@ -2979,7 +2994,9 @@ public class DesktopViewController {
                         }
                     };
 
-                    new Thread(logosTask).start();
+                    Thread thread = new Thread(logosTask);
+                    thread.setDaemon(true);
+                    thread.start();
                 }
 
                 File posterDir = new File("resources/img/logos/" + id + "/0.png");

@@ -96,7 +96,9 @@ public class YoutubeSearchController {
             }
         });
 
-        new Thread(searchVideosTask).start();
+        Thread thread = new Thread(searchVideosTask);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void addResultsCard(YoutubeVideo video){

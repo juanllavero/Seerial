@@ -46,6 +46,7 @@ public class App extends Application {
     public static String lastMusicDirectory = null;
     public static boolean isConnectedToInternet = false;
     static ScheduledExecutorService executorService;
+    public static List<Task<Void>> tasks = new ArrayList<>();
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -173,6 +174,10 @@ public class App extends Application {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        for (Task<Void> task : tasks)
+            if (task.isRunning())
+                task.cancel();
 
         DataManager.INSTANCE.saveData();
         Platform.exit();

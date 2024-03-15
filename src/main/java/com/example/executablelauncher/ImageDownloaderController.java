@@ -170,7 +170,9 @@ public class ImageDownloaderController {
         task.setOnSucceeded(e -> postDownload());
 
         //Start the process in a new thread
-        new Thread(task).start();
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void preDownload(){

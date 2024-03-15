@@ -121,10 +121,14 @@ public class SearchSeriesController {
             }
         });
 
+        Thread thread;
         if (isShow)
-            new Thread(searchShowsTask).start();
+            thread = new Thread(searchShowsTask);
         else
-            new Thread(searchMoviesTask).start();
+            thread = new Thread(searchMoviesTask);
+
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void addResultsCard(String title, String year, String resume, String posterPath){
