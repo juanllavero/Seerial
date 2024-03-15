@@ -2547,6 +2547,8 @@ public class DesktopViewController {
 
                 season.themdbID = themdbID;
 
+                series.name = movieName;
+
                 if (movieMetadata == null){
                     season.name = movieName;
 
