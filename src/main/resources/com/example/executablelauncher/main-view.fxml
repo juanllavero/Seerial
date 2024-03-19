@@ -75,7 +75,7 @@
                   <Insets />
                </opaqueInsets>
                <content>
-                  <FlowPane fx:id="cardContainer" hgap="20.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="40.0">
+                  <FlowPane fx:id="cardContainer" hgap="30.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="40.0">
                      <padding>
                         <Insets bottom="50.0" top="100.0" />
                      </padding>

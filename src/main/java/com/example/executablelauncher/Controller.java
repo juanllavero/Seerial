@@ -137,13 +137,14 @@ public class Controller implements Initializable {
 
     private List<Library> libraries = null;
     private Library currentLibrary = null;
-    private Series seriesToEdit;
+    private Series selectedSeries;
     private List<Series> series = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
     private MediaPlayer backgroundMusicPlayer;
     private String libraryType = null;
     private FadeTransition fadeTransition = null;
     private PauseTransition delay = null;
+    private int rowSize = 5;
 
     @FXML
     private void close() {
@@ -186,24 +187,26 @@ public class Controller implements Initializable {
                 cardSizeOptions.setVisible(true);
         });
 
-        switch (Configuration.loadConfig("cardSize", "1")){
-            case "1":
+        rowSize = Integer.parseInt(Configuration.loadConfig("cardSize", "5"));
+        switch (rowSize){
+            case 5:
                 largeCardButton.getStyleClass().clear();
                 largeCardButton.getStyleClass().add("playerOptionsSelected");
                 break;
-            case "0.8":
+            case 7:
                 normalCardButton.getStyleClass().clear();
                 normalCardButton.getStyleClass().add("playerOptionsSelected");
                 break;
-            case "0.6":
+            case 9:
                 smallCardButton.getStyleClass().clear();
                 smallCardButton.getStyleClass().add("playerOptionsSelected");
                 break;
-            case "0.4":
+            case 11:
                 tinyCardButton.getStyleClass().clear();
                 tinyCardButton.getStyleClass().add("playerOptionsSelected");
                 break;
         }
+        updateRowSize(rowSize);
 
         tinyCardButton.setOnKeyPressed(e -> {
             if (App.pressedSelect(e)){
@@ -214,7 +217,8 @@ public class Controller implements Initializable {
 
                 tinyCardButton.getStyleClass().add("playerOptionsSelected");
 
-                Configuration.saveConfig("cardSize", "0.4");
+                Configuration.saveConfig("cardSize", "11");
+                updateRowSize(11);
                 showSeriesFrom(currentLibrary);
             }
         });
@@ -228,7 +232,8 @@ public class Controller implements Initializable {
 
                 smallCardButton.getStyleClass().add("playerOptionsSelected");
 
-                Configuration.saveConfig("cardSize", "0.6");
+                Configuration.saveConfig("cardSize", "9");
+                updateRowSize(9);
                 showSeriesFrom(currentLibrary);
             }
         });
@@ -242,7 +247,8 @@ public class Controller implements Initializable {
 
                 normalCardButton.getStyleClass().add("playerOptionsSelected");
 
-                Configuration.saveConfig("cardSize", "0.8");
+                Configuration.saveConfig("cardSize", "7");
+                updateRowSize(7);
                 showSeriesFrom(currentLibrary);
             }
         });
@@ -256,7 +262,8 @@ public class Controller implements Initializable {
 
                 largeCardButton.getStyleClass().add("playerOptionsSelected");
 
-                Configuration.saveConfig("cardSize", "1");
+                Configuration.saveConfig("cardSize", "5");
+                updateRowSize(5);
                 showSeriesFrom(currentLibrary);
             }
         });
@@ -271,9 +278,12 @@ public class Controller implements Initializable {
 
         leftOptionsPane.setPrefWidth(screenWidth * 0.5);
 
-        //Scale and center cardContainer
-        cardContainer.setPrefWidth(screenWidth * 0.8);
-        cardContainer.setTranslateX(screenWidth * 0.025);
+        //Set padding for the series container
+        cardContainer.setPrefWidth(screenWidth);
+        int padding = 50;
+        if (screenWidth / screenHeight > 1.8)
+            padding = 100;
+        cardContainer.setPadding(new Insets(100, padding, 50, padding + ((double) padding / 2)));
 
         //Remove horizontal and vertical scroll
         DesktopViewController.scrollModification(scrollPane);
@@ -295,14 +305,23 @@ public class Controller implements Initializable {
             btn.setPadding(new Insets(12));
             HBox.setMargin(btn, new Insets(0, 5, 0, 0));
 
+            btn.setFocusTraversable(false);
+
             btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
                 playCategoriesSound();
                 showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)));
             });
 
-            btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
                 if (App.pressedSelect(event)) {
                     selectLibraryButton(btn);
+                }else if (App.pressedLeft(event)){
+                    librariesBox.getChildren().get(Math.max(0, librariesBox.getChildren().indexOf(btn) - 1)).requestFocus();
+                }else if (App.pressedRight(event)){
+                    librariesBox.getChildren().get(Math.min(librariesBox.getChildren().indexOf(btn) + 1, librariesBox.getChildren().size() - 1)).requestFocus();
+                }else if (App.pressedDown(event)){
+                    if (selectedSeries != null)
+                        seriesButtons.get(series.indexOf(selectedSeries)).requestFocus();
                 }
             });
 
@@ -357,6 +376,14 @@ public class Controller implements Initializable {
 
             switchToDesktopButton.requestFocus();
         }
+    }
+
+    private void updateRowSize(int newSize){
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+
+        if (screenWidth / screenHeight > 1.8)
+            rowSize = newSize + 2;
     }
 
     public void playIntroVideo(){
@@ -439,11 +466,11 @@ public class Controller implements Initializable {
             addCard(col);
         }
 
-        seriesToEdit = null;
+        selectedSeries = null;
 
         String src;
         if (!series.isEmpty() && !series.get(0).getSeasons().isEmpty()){
-            seriesToEdit = series.get(0);
+            selectedSeries = series.get(0);
             src = "file:resources/img/backgrounds/" + series.get(0).getSeasons().get(0).getId() + "/fullBlur.png";
         }else{
             src = "file:resources/img/backgroundDefault.png";
@@ -475,13 +502,6 @@ public class Controller implements Initializable {
         });
     }
 
-    private int calculateRowCount(FlowPane flowPane) {
-        double width = flowPane.getWidth();
-        double prefWrapLength = flowPane.getPrefWrapLength();
-        int columnCount = (int) (width / prefWrapLength);
-        return (int) Math.ceil((double) flowPane.getChildren().size() / columnCount);
-    }
-
     private void restoreSelection(){
         Series seriesToSelect = App.getSelectedSeries();
 
@@ -492,16 +512,16 @@ public class Controller implements Initializable {
         if (index == -1)
             index = 0;
 
-        App.setSelectedSeries(series.get(0));
+        App.setSelectedSeries(series.get(index));
 
         cardContainer.getChildren().get(index).requestFocus();
     }
 
     public void selectSeries(Series s){
-        if (seriesToEdit != s){
-            seriesToEdit = s;
+        if (selectedSeries != s){
+            selectedSeries = s;
 
-            App.setSelectedSeries(seriesToEdit);
+            App.setSelectedSeries(selectedSeries);
 
             delay = new PauseTransition(Duration.millis(150));
             delay.setOnFinished(event -> Platform.runLater(() -> {
@@ -584,10 +604,21 @@ public class Controller implements Initializable {
     }
 
     private void addCard(Series s){
-        double originalWidth = 320;
-        double originalHeight = 410;
+        double screenAspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+        double originalWidth, originalHeight;
+        int innerSpace;
+        double aspectRatio = 1.28125;
 
-        float scaleTo = Float.parseFloat(Configuration.loadConfig("cardSize", "1"));
+        //If screen aspect ratio is greater than 16:90
+        if (screenAspectRatio > 1.8){
+            innerSpace = 250;
+        }else{
+            innerSpace = 125;
+        }
+
+        //Calculate the size of the card
+        originalWidth = (Screen.getPrimary().getBounds().getWidth() - innerSpace - ((30 * (rowSize - 1)) * 2)) / rowSize;
+        originalHeight = originalWidth * aspectRatio;
 
         String coverSrc = "resources/img/DefaultPoster.png";
 
@@ -595,7 +626,7 @@ public class Controller implements Initializable {
             coverSrc = s.getCoverSrc();
 
         Button btn = new Button();
-        btn.setGraphic(setRoundedBorders(coverSrc, originalWidth * scaleTo, originalHeight * scaleTo));
+        btn.setGraphic(setRoundedBorders(coverSrc, originalWidth, originalHeight));
         btn.setAlignment(Pos.CENTER);
         btn.setContentDisplay(ContentDisplay.CENTER);
 
@@ -603,9 +634,13 @@ public class Controller implements Initializable {
         btn.getStyleClass().add("seriesCoverButton");
         seriesButtons.add(btn);
 
+        btn.setFocusTraversable(false);
+
         btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
                 playInteractionSound();
+
+                selectedSeries = series.get(seriesButtons.indexOf(btn));
 
                 ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.15), btn);
                 scaleTransition.setToX(1.1);
@@ -625,12 +660,30 @@ public class Controller implements Initializable {
             }
         });
 
-        btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+        btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
             if (App.pressedSelect(event)){
-                if (seriesToEdit != null) {
+                if (selectedSeries != null) {
                     playCategoriesSound();
-                    showSeason(seriesToEdit);
+                    showSeason(selectedSeries);
                 }
+            }
+
+            int index = seriesButtons.indexOf(btn);
+
+            if (App.pressedUp(event)){
+                if (index < rowSize)
+                    librariesBox.getChildren().get(libraries.indexOf(currentLibrary)).requestFocus();
+                else
+                    seriesButtons.get(seriesButtons.indexOf(btn) - rowSize).requestFocus();
+            }else if (App.pressedDown(event)){
+                if (index + rowSize < seriesButtons.size())
+                    seriesButtons.get(seriesButtons.indexOf(btn) + rowSize).requestFocus();
+            }else if (App.pressedLeft(event)){
+                if (index > 0)
+                    seriesButtons.get(seriesButtons.indexOf(btn) - 1).requestFocus();
+            }else if (App.pressedRight(event)){
+                if (index < seriesButtons.size() - 1)
+                    seriesButtons.get(seriesButtons.indexOf(btn) + 1).requestFocus();
             }
         });
 
@@ -662,7 +715,7 @@ public class Controller implements Initializable {
     @FXML
     void hideContextMenu(){
         playInteractionSound();
-        seriesToEdit = null;
+        selectedSeries = null;
         mainMenu.setVisible(false);
         globalShadow.setVisible(false);
         mainPane.setDisable(false);
@@ -672,7 +725,6 @@ public class Controller implements Initializable {
     private void showMenu(){
         globalShadow.setVisible(true);
         mainMenu.setVisible(true);
-        mainPane.setDisable(true);
         menuOptions.setVisible(true);
         settingsWindow.setVisible(false);
         settingsButton.requestFocus();
