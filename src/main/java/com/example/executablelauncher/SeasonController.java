@@ -329,17 +329,13 @@ public class SeasonController {
         });
 
         lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal){
+            if (newVal)
                 controllerParent.playInteractionSound();
-                lastSeason();
-            }
         });
 
         nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal){
+            if (newVal)
                 controllerParent.playInteractionSound();
-                nextSeason();
-            }
         });
 
         detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
@@ -390,6 +386,36 @@ public class SeasonController {
                 watchedButton.requestFocus();
             else if (App.pressedLeft(event) && nextSeasonButton.isVisible())
                 nextSeasonButton.requestFocus();
+        });
+
+        lastSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (App.pressedSelect(event)){
+                controllerParent.playCategoriesSound();
+                lastSeason();
+            }else if (App.pressedRight(event)) {
+                if (episodeButtons.size() > 1)
+                    episodeButtons.getFirst().requestFocus();
+                else
+                    playButton.requestFocus();
+            }else if (App.pressedLeft(event)) {
+                controllerParent.playCategoriesSound();
+                lastSeason();
+            }
+        });
+
+        nextSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (App.pressedSelect(event)){
+                controllerParent.playCategoriesSound();
+                nextSeason();
+            }else if (App.pressedRight(event)) {
+                controllerParent.playCategoriesSound();
+                nextSeason();
+            }else if (App.pressedLeft(event)) {
+                if (episodeButtons.size() > 1)
+                    episodeButtons.getLast().requestFocus();
+                else
+                    playButton.requestFocus();
+            }
         });
 
         detailsButton.setFocusTraversable(false);
@@ -639,17 +665,8 @@ public class SeasonController {
             });
 
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-                if (App.pressedSelect(event)){
+                if (App.pressedSelect(event))
                     playEpisode(episodes.get(episodeButtons.indexOf(btn)));
-                }
-
-                if (episodeButtons.indexOf(btn) == 0
-                        && App.pressedLeft(event) && lastSeasonButton.isVisible())
-                    lastSeasonButton.requestFocus();
-
-                if (episodeButtons.indexOf(btn) == (episodeButtons.size() - 1)
-                        && App.pressedRight(event) && nextSeasonButton.isVisible())
-                    nextSeasonButton.requestFocus();
             });
 
             btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{

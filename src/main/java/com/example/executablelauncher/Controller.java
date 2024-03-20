@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -144,7 +145,8 @@ public class Controller implements Initializable {
     private String libraryType = null;
     private FadeTransition fadeTransition = null;
     private PauseTransition delay = null;
-    private int rowSize = 5;
+    private int rowSize = 0;
+    private int rowCount = 0;
 
     @FXML
     private void close() {
@@ -187,8 +189,8 @@ public class Controller implements Initializable {
                 cardSizeOptions.setVisible(true);
         });
 
-        rowSize = Integer.parseInt(Configuration.loadConfig("cardSize", "5"));
-        switch (rowSize){
+        int columnCount = Integer.parseInt(Configuration.loadConfig("cardSize", "5"));
+        switch (columnCount){
             case 5:
                 largeCardButton.getStyleClass().clear();
                 largeCardButton.getStyleClass().add("playerOptionsSelected");
@@ -206,7 +208,7 @@ public class Controller implements Initializable {
                 tinyCardButton.getStyleClass().add("playerOptionsSelected");
                 break;
         }
-        updateRowSize(rowSize);
+        updateRowSize(columnCount);
 
         tinyCardButton.setOnKeyPressed(e -> {
             if (App.pressedSelect(e)){
@@ -382,8 +384,17 @@ public class Controller implements Initializable {
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
 
-        if (screenWidth / screenHeight > 1.8)
-            rowSize = newSize + 2;
+        if (newSize != rowSize){
+            rowSize = newSize;
+
+            if (screenWidth / screenHeight > 1.8)
+                rowSize += 2;
+        }
+
+        Platform.runLater(() -> {
+            rowCount = (int) Math.ceil((double) seriesButtons.size() / rowSize);
+            scrollPane.setVmax(rowCount - 1);
+        });
     }
 
     public void playIntroVideo(){
@@ -484,6 +495,7 @@ public class Controller implements Initializable {
                 BackgroundSize.DEFAULT);
 
         Platform.runLater(() -> {
+            updateRowSize(rowSize);
             restoreSelection();
 
             /*if (calculateRowCount(cardContainer) > 1) {
@@ -640,8 +652,6 @@ public class Controller implements Initializable {
             if (newVal) {
                 playInteractionSound();
 
-                selectedSeries = series.get(seriesButtons.indexOf(btn));
-
                 ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.15), btn);
                 scaleTransition.setToX(1.1);
                 scaleTransition.setToY(1.1);
@@ -651,6 +661,24 @@ public class Controller implements Initializable {
                 });
 
                 scaleTransition.play();
+
+                //Update scroll vertical value
+                int index = (seriesButtons.indexOf(btn) / rowSize);
+
+                if (index != scrollPane.getVvalue()) {
+                    Bounds cardBounds = btn.localToScene(btn.getBoundsInLocal());
+                    Bounds scrollBounds = scrollPane.localToScene(scrollPane.getBoundsInLocal());
+
+                    //Check if the button is outside the view
+                    if (cardBounds.getMinY() < scrollBounds.getMinY() || cardBounds.getMaxY() > scrollBounds.getMaxY()){
+                        //Animate transition
+                        Timeline timeline = new Timeline();
+                        KeyValue keyValue = new KeyValue(scrollPane.vvalueProperty(), index);
+                        KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.1), keyValue);
+                        timeline.getKeyFrames().add(keyFrame);
+                        timeline.play();
+                    }
+                }
             }else{
                 ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.15), btn);
                 scaleTransition.setToX(1);

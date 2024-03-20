@@ -70,7 +70,7 @@
             </HBox>
          </top>
          <center>
-            <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
