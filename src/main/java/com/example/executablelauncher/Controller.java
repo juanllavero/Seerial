@@ -220,6 +220,7 @@ public class Controller implements Initializable {
                 tinyCardButton.getStyleClass().add("playerOptionsSelected");
 
                 Configuration.saveConfig("cardSize", "11");
+                rowSize = 0;
                 updateRowSize(11);
                 showSeriesFrom(currentLibrary);
             }
@@ -235,6 +236,7 @@ public class Controller implements Initializable {
                 smallCardButton.getStyleClass().add("playerOptionsSelected");
 
                 Configuration.saveConfig("cardSize", "9");
+                rowSize = 0;
                 updateRowSize(9);
                 showSeriesFrom(currentLibrary);
             }
@@ -250,6 +252,7 @@ public class Controller implements Initializable {
                 normalCardButton.getStyleClass().add("playerOptionsSelected");
 
                 Configuration.saveConfig("cardSize", "7");
+                rowSize = 0;
                 updateRowSize(7);
                 showSeriesFrom(currentLibrary);
             }
@@ -265,6 +268,7 @@ public class Controller implements Initializable {
                 largeCardButton.getStyleClass().add("playerOptionsSelected");
 
                 Configuration.saveConfig("cardSize", "5");
+                rowSize = 0;
                 updateRowSize(5);
                 showSeriesFrom(currentLibrary);
             }
