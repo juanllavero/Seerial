@@ -393,7 +393,7 @@ public class SeasonController {
                 controllerParent.playCategoriesSound();
                 lastSeason();
             }else if (App.pressedRight(event)) {
-                if (episodeButtons.size() > 1)
+                if (episodeButtons.size() > 1 && episodesFocussed)
                     episodeButtons.getFirst().requestFocus();
                 else
                     playButton.requestFocus();
@@ -411,7 +411,7 @@ public class SeasonController {
                 controllerParent.playCategoriesSound();
                 nextSeason();
             }else if (App.pressedLeft(event)) {
-                if (episodeButtons.size() > 1)
+                if (episodeButtons.size() > 1 && episodesFocussed)
                     episodeButtons.getLast().requestFocus();
                 else
                     playButton.requestFocus();
