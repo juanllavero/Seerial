@@ -52,12 +52,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
 public class Controller implements Initializable {
-    @FXML
-    private BorderPane introVideoPane;
-
-    @FXML
-    private MediaView introVideo;
-
+    //region FXML ATTRIBUTES
     @FXML
     private FlowPane cardContainer;
 
@@ -135,13 +130,13 @@ public class Controller implements Initializable {
 
     @FXML
     private ImageView globalShadow;
+    //endregion
 
     private List<Library> libraries = null;
     private Library currentLibrary = null;
     private Series selectedSeries;
     private List<Series> series = new ArrayList<>();
     private List<Button> seriesButtons = new ArrayList<>();
-    private MediaPlayer backgroundMusicPlayer;
     private String libraryType = null;
     private FadeTransition fadeTransition = null;
     private PauseTransition delay = null;
@@ -157,9 +152,6 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        introVideoPane.setVisible(false);
-        mainMenu.setVisible(false);
-
         settingsButton.setText(App.buttonsBundle.getString("settings"));
         exitButton.setText(App.buttonsBundle.getString("exitFullscreen"));
         switchToDesktopButton.setText(App.buttonsBundle.getString("switchToDesktop"));
@@ -168,8 +160,6 @@ public class Controller implements Initializable {
 
         addInteractionSound(exitButton);
         addInteractionSound(switchToDesktopButton);
-
-        playBackgroundSound();
 
         //Open/Close Menu
         mainMenu.setVisible(false);
@@ -401,34 +391,6 @@ public class Controller implements Initializable {
         });
     }
 
-    public void playIntroVideo(){
-        Platform.runLater(() -> {
-            mainPane.setDisable(true);
-            introVideoPane.setVisible(true);
-
-            introVideo.setFitWidth(Screen.getPrimary().getBounds().getWidth());
-            introVideo.setFitHeight(Screen.getPrimary().getBounds().getHeight());
-
-            File videoFile = new File("resources/video/Intro.mp4");
-            Media media = new Media(videoFile.toURI().toString());
-            MediaPlayer mp = new MediaPlayer(media);
-
-            introVideo.setMediaPlayer(mp);
-
-            mp.seek(Duration.millis(0));
-
-            mp.setOnEndOfMedia(() -> {
-                mainPane.setDisable(false);
-                FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.6), introVideoPane);
-                fadeOut.setFromValue(1);
-                fadeOut.setToValue(0);
-                fadeOut.play();
-            });
-
-            mp.play();
-        });
-    }
-
     private void selectLibraryButton(Button btn){
         for (Node node : librariesBox.getChildren()) {
             Button catButton = (Button) node;
@@ -641,6 +603,11 @@ public class Controller implements Initializable {
         if (!s.coverSrc.isEmpty())
             coverSrc = s.getCoverSrc();
 
+        File imgFile = new File(coverSrc);
+
+        if (!imgFile.isFile())
+            coverSrc = "resources/img/DefaultPoster.png";
+
         Button btn = new Button();
         btn.setGraphic(setRoundedBorders(coverSrc, originalWidth, originalHeight));
         btn.setAlignment(Pos.CENTER);
@@ -772,7 +739,6 @@ public class Controller implements Initializable {
 
     public void showSeason(Series s){
         if (s != null && !s.getSeasons().isEmpty()) {
-            stopBackground();
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
                 Parent root = fxmlLoader.load();
@@ -813,23 +779,9 @@ public class Controller implements Initializable {
         player.play();
     }
 
-    public void playBackgroundSound() {
-        File file = new File("resources/audio/background.mp3");
-        Media media = new Media(file.toURI().toString());
-        backgroundMusicPlayer = new MediaPlayer(media);
-        backgroundMusicPlayer.setVolume(0.05);
-        backgroundMusicPlayer.seek(backgroundMusicPlayer.getStartTime());
-        backgroundMusicPlayer.play();
-    }
-
-    public void stopBackground(){
-        backgroundMusicPlayer.stop();
-    }
-
     @FXML
     void switchToDesktop(ActionEvent event){
         playInteractionSound();
-        stopBackground();
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
             Parent root = fxmlLoader.load();
@@ -852,9 +804,5 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public void hideMenuShadow(){
-        menuShadow.setVisible(false);
     }
 }

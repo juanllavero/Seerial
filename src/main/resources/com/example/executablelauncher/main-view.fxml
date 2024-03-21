@@ -14,7 +14,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
 <StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1030.0" prefWidth="1719.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.Controller">
@@ -241,10 +240,5 @@
             </BorderPane>
          </children>
       </StackPane>
-      <BorderPane fx:id="introVideoPane" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: black;" visible="false">
-         <center>
-            <MediaView fx:id="introVideo" fitHeight="200.0" fitWidth="200.0" BorderPane.alignment="CENTER" />
-         </center>
-      </BorderPane>
    </children>
 </StackPane>

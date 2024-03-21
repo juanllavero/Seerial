@@ -1375,9 +1375,8 @@ public class DesktopViewController {
                         if (selectedSeason == s)
                             episodesContainer.getChildren().remove(episodeList.indexOf(episode));
 
-                        if (currentLibrary == library){
+                        if (currentLibrary == library)
                             episodesContainer.getChildren().remove(episodeList.indexOf(episode));
-                        }
 
                         s.removeEpisode(episode);
                         DataManager.INSTANCE.deleteEpisodeData(episode);
