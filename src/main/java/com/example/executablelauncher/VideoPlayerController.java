@@ -632,11 +632,7 @@ public class VideoPlayerController {
         thumbnail.setFitWidth(targetWidth);
         thumbnail.setFitHeight(targetHeight);
 
-        File newFile;
-        if (chapter.getThumbnailSrc().isEmpty())
-            newFile = new File("resources/img/Default_video_thumbnail.jpg");
-        else
-            newFile = new File(chapter.getThumbnailSrc());
+        File newFile = new File("resources/img/Default_chapter_thumbnail.jpg");
 
         Image originalImage;
         try{

@@ -91,6 +91,9 @@ import java.util.regex.Pattern;
 public class DesktopViewController {
     //region FXML ATTRIBUTES
     @FXML
+    private Button addLibraryButton;
+
+    @FXML
     private Label elementsSelectedText;
 
     @FXML
@@ -297,8 +300,7 @@ public class DesktopViewController {
     private double ASPECT_RATIO = 16.0 / 9.0;
     private boolean acceptRemove = false;
     private static int numFilesToCheck = 0;
-    private boolean doingProcessing = false;
-    private boolean generatingThumbnails = false;
+    private boolean searchingForFiles = false;
     //endregion
 
     //region THEMOVIEDB ATTRIBUTES
@@ -425,9 +427,6 @@ public class DesktopViewController {
         Platform.runLater(() -> {
             updateLibraries();
             updateLanguage();
-
-            if (!libraries.isEmpty())
-                generateThumbnails();
         });
     }
 
@@ -748,7 +747,7 @@ public class DesktopViewController {
 
         showSeries();
 
-        if (Configuration.loadConfig("autoScan", "true").equals("true"))
+        if (Configuration.loadConfig("autoScan", "true").equals("true") && !searchingForFiles)
             searchFiles();
     }
     public void selectSeries(Series selectedSeries) {
@@ -1356,12 +1355,14 @@ public class DesktopViewController {
         hideMenu();
         downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindow.setVisible(true);
-        doingProcessing = true;
+
+        searchingForFiles = true;
 
         //Disable library buttons in order to prevent the user from starting another process
         editLibraryButton.setDisable(true);
         removeLibraryButton.setDisable(true);
         searchFilesButton.setDisable(true);
+        addLibraryButton.setDisable(true);
 
         List<Series> series = List.copyOf(library.getSeries());
         for (Series show : series){
@@ -1490,21 +1491,30 @@ public class DesktopViewController {
         Task<Void> musicDownloadTask = new Task<>() {
             @Override
             protected Void call() {
-                Platform.runLater(() -> {
-                    downloadingContentText.setText(App.textBundle.getString("downloadingMusicMessage"));
-                    downloadingContentWindow.setVisible(true);
-                });
+            Platform.runLater(() -> {
+                downloadingContentText.setText(App.textBundle.getString("downloadingMusicMessage"));
+                downloadingContentWindow.setVisible(true);
+            });
 
-                for (Series series : library.getSeries()){
-                    if (isCancelled())
-                        break;
+            for (Series series : library.getSeries()){
+                if (isCancelled())
+                    break;
 
-                    if (series == null)
+                if (series == null)
+                    continue;
+
+                if (library.getType().equals("Shows")){
+                    Season season = series.getSeasons().get(0);
+
+                    if (!season.getMusicSrc().isEmpty())
                         continue;
 
-                    if (library.getType().equals("Shows")){
-                        Season season = series.getSeasons().get(0);
+                    List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
 
+                    if (results != null)
+                        downloadMedia(season, results.get(0).watch_url);
+                }else{
+                    for (Season season : series.getSeasons()){
                         if (!season.getMusicSrc().isEmpty())
                             continue;
 
@@ -1512,24 +1522,15 @@ public class DesktopViewController {
 
                         if (results != null)
                             downloadMedia(season, results.get(0).watch_url);
-                    }else{
-                        for (Season season : series.getSeasons()){
-                            if (!season.getMusicSrc().isEmpty())
-                                continue;
-
-                            List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
-
-                            if (results != null)
-                                downloadMedia(season, results.get(0).watch_url);
-                        }
                     }
                 }
-                return null;
+            }
+            return null;
             }
         };
 
-        musicDownloadTask.setOnSucceeded(e -> postMusicDownload());
-        musicDownloadTask.setOnFailed(e -> postMusicDownload());
+        musicDownloadTask.setOnSucceeded(e -> postDownloadDefaultMusic());
+        musicDownloadTask.setOnFailed(e -> postDownloadDefaultMusic());
 
         Thread thread = new Thread(musicDownloadTask);
         thread.setDaemon(true);
@@ -1537,69 +1538,11 @@ public class DesktopViewController {
 
         App.tasks.add(musicDownloadTask);
     }
-    private void postMusicDownload(){
+    public void postDownloadDefaultMusic(){
         downloadingContentWindow.setVisible(false);
-        doingProcessing = false;
+        addLibraryButton.setDisable(false);
 
-        if (generatingThumbnails){
-            downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
-            downloadingContentWindow.setVisible(true);
-        }else{
-            generateThumbnails();
-        }
-    }
-    public void generateThumbnails(){
-        if (Configuration.loadConfig("generateThumbnails", "true").equals("false"))
-            return;
-
-        Task<Void> generateThumbnails = new Task<>() {
-            @Override
-            protected Void call() {
-                Platform.runLater(() -> {
-                    downloadingContentText.setText(App.textBundle.getString("generatingThumbnails"));
-                    downloadingContentWindow.setVisible(true);
-                    generatingThumbnails = true;
-                });
-
-                for (Library library : DataManager.INSTANCE.libraries){
-                    if (library.getType().equals("Shows"))
-                        continue;
-
-                    for (Series series : library.getSeries()){
-                        for (Season season : series.getSeasons()){
-                            for (Episode episode : season.getEpisodes()){
-                                if (isCancelled())
-                                    return null;
-
-                                if (episode.getChapters().isEmpty())
-                                    continue;
-
-                                for (Chapter chapter : episode.getChapters())
-                                    if (chapter.getThumbnailSrc().isEmpty())
-                                        generateThumbnail(episode, chapter);
-                            }
-                        }
-                    }
-                }
-
-                return null;
-            }
-        };
-
-        generateThumbnails.setOnSucceeded(e -> postThumbnailGeneration());
-        generateThumbnails.setOnFailed(e -> postThumbnailGeneration());
-
-        Thread thread = new Thread(generateThumbnails);
-        thread.setDaemon(true);
-        thread.start();
-
-        App.tasks.add(generateThumbnails);
-    }
-    private void postThumbnailGeneration(){
-        if (!doingProcessing)
-            downloadingContentWindow.setVisible(false);
-
-        generatingThumbnails = false;
+        searchingForFiles = false;
     }
     private void scanTVShow(Library library, File directory, File[] filesInDir, boolean updateMetadata){
         //All video files in directory (not taking into account two subdirectories ahead, like Series/Folder1/Folder2/File)
@@ -2142,36 +2085,6 @@ public class DesktopViewController {
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             System.err.println("getChapters: Error getting chapters");
-        }
-    }
-    private void generateThumbnail(Episode episode, Chapter chapter){
-        File thumbnail = new File("resources/img/chaptersCovers/" + episode.getId() + "/" + chapter.getTime() + ".jpg");
-
-        chapter.setThumbnailSrc("resources/img/chaptersCovers/" + episode.getId() + "/" + chapter.getTime() + ".jpg");
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder("ffmpeg",
-                    "-y",
-                    "-ss",
-                    chapter.getDisplayTime(),
-                    "-i",
-                    episode.getVideoSrc(),
-                    "-vframes",
-                    "1",
-                    thumbnail.getAbsolutePath());
-
-            Process process = processBuilder.start();
-
-            //Read input and error streams to avoid process blocked
-            InputStream stderr = process.getErrorStream();
-            InputStreamReader isr = new InputStreamReader(stderr);
-            BufferedReader br = new BufferedReader(isr);
-            String line;
-            while ((line = br.readLine()) != null);
-
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            chapter.setThumbnailSrc("");
-            System.err.println("Error generating thumbnail for chapter " + episode.getId() + "/" + chapter.getTime());
         }
     }
     private void setEpisodeData(Library library, Episode episode, EpisodeMetadata episodeMetadata, Series show, int realEpisode){
