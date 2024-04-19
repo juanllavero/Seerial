@@ -31,7 +31,17 @@ public class DataManager {
             Type type = new TypeToken<List<Library>>() {}.getType();
             libraries = new Gson().fromJson(reader, type);
         } catch (FileNotFoundException e) {
-            System.err.println("loadData: Json files not found");
+            createEmptyJson();
+        }
+
+        //If data.json is empty a [] has to be added to avoid an exception in the next loop
+        if (libraries == null){
+            try (Writer writer = new FileWriter("data.json")) {
+                Gson gson = new GsonBuilder().create();
+                gson.toJson("[]", writer);
+            } catch (IOException e) {
+                System.err.println("loadData: Error writing in data.json");
+            }
         }
 
         for (Library library : libraries){
@@ -52,6 +62,17 @@ public class DataManager {
             gson.toJson(libraries, writer);
         } catch (IOException e) {
             System.err.println("saveData: Error saving data");
+        }
+    }
+    public void createEmptyJson(){
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        String jsonContent = "[]";
+
+        try (FileWriter fileWriter = new FileWriter("data.json")) {
+            gson.toJson(jsonContent, fileWriter);
+        } catch (IOException e) {
+            System.err.println("createEmptyJson: data.json could not be created");
         }
     }
     //endregion

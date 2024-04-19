@@ -78,20 +78,14 @@ public class VideoPlayer extends MediaView {
         startClock();
 
         //Player base settings
-        mpvSetProperty("profile", "high-quality");
+        mpvSetProperty("profile", "fast");
         mpvSetProperty("vo", "gpu-next");
-        mpvSetProperty("gpu-api", "vulkan");
         mpvSetProperty("target-colorspace-hint", "yes");
-        mpvSetProperty("target-contrast", "auto");
-        mpvSetProperty("gpu-api", "vulkan");
-        mpvSetProperty("input-cursor", "no");
-
-        //Set smooth video properties
-        mpvSetProperty("video-sync", "display-resample");
 
         boolean interpolation = Boolean.parseBoolean(Configuration.loadConfig("interpolation", "false"));
 
         if (interpolation){
+            mpvSetProperty("video-sync", "display-resample");
             mpvSetProperty("interpolation", "yes");
             mpvSetProperty("tscale", "mitchell");
             mpvSetProperty("interpolation-preserve", "no");

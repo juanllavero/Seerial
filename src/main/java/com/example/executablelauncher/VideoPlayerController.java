@@ -602,10 +602,8 @@ public class VideoPlayerController {
             btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
                 timeline.playFromStart();
 
-                if (App.pressedUp(event)) {
+                if (App.pressedUp(event))
                     playButton.requestFocus();
-                    hideChapterSection();
-                }
 
                 int index = chapterContainer.getChildren().indexOf(btn);
                 if (App.pressedLeft(event)){
@@ -624,46 +622,27 @@ public class VideoPlayerController {
         }
     }
     private void setChapterCardValues(Button btn, Chapter chapter){
-        ImageView thumbnail = new ImageView();
-
         double targetHeight = Screen.getPrimary().getBounds().getHeight() / 8;
         double targetWidth = ((double) 16 /9) * targetHeight;
-
-        thumbnail.setFitWidth(targetWidth);
-        thumbnail.setFitHeight(targetHeight);
-
-        File newFile = new File("resources/img/Default_chapter_thumbnail.jpg");
-
-        Image originalImage;
-        try{
-            originalImage = new Image(newFile.toURI().toURL().toExternalForm(), targetWidth, targetHeight, true, true);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-
-        thumbnail.setImage(originalImage);
-        thumbnail.setPreserveRatio(false);
-        thumbnail.setSmooth(true);
 
         btn.getStyleClass().add("transparent");
 
         VBox buttonContent = new VBox();
         buttonContent.setAlignment(Pos.TOP_CENTER);
-        buttonContent.setPrefWidth(Region.USE_PREF_SIZE);
-        buttonContent.setPrefHeight(Region.USE_PREF_SIZE);
-
-        buttonContent.getChildren().add(thumbnail);
+        buttonContent.setMinWidth(targetWidth);
 
         Label title = new Label(chapter.getTitle());
         title.setFont(new Font(18));
         title.setStyle("-fx-font-weight: bold;");
         title.setTextFill(Color.WHITE);
         title.setEffect(new DropShadow());
+        title.setWrapText(true);
         Label time = new Label(chapter.getDisplayTime());
         time.setFont(new Font(16));
         time.setStyle("-fx-font-weight: bold;");
         time.setTextFill(Color.WHITE);
         time.setEffect(new DropShadow());
+        time.setWrapText(true);
 
         buttonContent.getChildren().add(title);
         buttonContent.getChildren().add(time);
@@ -675,20 +654,20 @@ public class VideoPlayerController {
                 //Move ScrollPane
                 handleButtonFocus(btn);
 
-                ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.1), btn);
+                /*ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.1), btn);
                 scaleTransition.setToX(1.15);
                 scaleTransition.setToY(1.15);
-                scaleTransition.play();
+                scaleTransition.play();*/
 
                 title.setFont(new Font(20));
                 time.setFont(new Font(18));
 
                 parentController.getParent().playInteractionSound();
             }else{
-                ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.1), btn);
+                /*ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.1), btn);
                 scaleTransition.setToX(1);
                 scaleTransition.setToY(1);
-                scaleTransition.play();
+                scaleTransition.play();*/
 
                 title.setFont(new Font(18));
                 time.setFont(new Font(16));
@@ -733,7 +712,6 @@ public class VideoPlayerController {
         if (chapterContainer.getChildren().isEmpty())
             return;
 
-        showChapterSection();
         long currentTime = videoPlayer.getCurrentTime();
 
         List<Chapter> chapters = episode.getChapters();
@@ -746,18 +724,6 @@ public class VideoPlayerController {
 
         chapterContainer.getChildren().get(0).requestFocus();
     }
-    private void showChapterSection(){
-        //Translation with animation
-        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.2), controlsBox);
-        transition.setToY(0);
-        transition.play();
-    }
-    private void hideChapterSection(){
-        //Translation with animation
-        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.2), controlsBox);
-        transition.setToY(chapterContainer.getHeight());
-        transition.play();
-    }
     //endregion
 
     //region BEHAVIOR AND EFFECTS
@@ -767,8 +733,6 @@ public class VideoPlayerController {
         fadeInEffect(controlsBox);
         fadeInEffect(shadowImage);
         playButton.requestFocus();
-
-        hideChapterSection();
     }
     private void hideControls(){
         timeline.stop();
