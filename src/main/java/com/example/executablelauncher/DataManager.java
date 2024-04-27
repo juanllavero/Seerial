@@ -55,11 +55,16 @@ public class DataManager {
 
             seriesToRemove.clear();
         }
+
+        if (!libraries.isEmpty()){
+            currentLibrary = libraries.getFirst();
+        }
     }
     public void saveData(){
         try (Writer writer = new FileWriter(LOCAL_FILE)) {
             Gson gson = new GsonBuilder().create();
             gson.toJson(libraries, writer);
+            writer.flush();                     //To make sure all data is saved in the file before it is closed
         } catch (IOException e) {
             System.err.println("saveData: Error saving data");
         }

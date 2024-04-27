@@ -517,26 +517,7 @@ public class SeasonController {
             logo.setFitHeight(screenHeight * 0.25);
         }
 
-        if (!season.getVideoSrc().isEmpty()){
-            if (mp != null)
-                mp.stop();
-
-            File file = new File(season.getVideoSrc());
-            Media media = new Media(file.toURI().toString());
-            mp = new MediaPlayer(media);
-            backgroundVideo.setMediaPlayer(mp);
-            backgroundVideo.setVisible(false);
-            isVideo = true;
-
-            setMediaPlayer();
-        }else if (!playSameMusic && !season.getMusicSrc().isEmpty()){
-            File file = new File(season.getMusicSrc());
-            Media media = new Media(file.toURI().toString());
-            mp = new MediaPlayer(media);
-            isVideo = false;
-
-            setMediaPlayer();
-        }
+        processBackgroundMedia();
 
         cardContainer.getChildren().clear();
         episodeButtons.clear();
@@ -625,6 +606,8 @@ public class SeasonController {
         setTimeLeft(selectedEpisode);
         reloadEpisodeCard();
         updateWatchedButton();
+
+        mp.play();
     }
     //endregion
 
@@ -1076,6 +1059,28 @@ public class SeasonController {
     //endregion
 
     //region BACKGROUND VIDEO/MUSIC
+    private void processBackgroundMedia(){
+        if (!seasons.get(currentSeason).getVideoSrc().isEmpty()){
+            if (mp != null)
+                mp.stop();
+
+            File file = new File(seasons.get(currentSeason).getVideoSrc());
+            Media media = new Media(file.toURI().toString());
+            mp = new MediaPlayer(media);
+            backgroundVideo.setMediaPlayer(mp);
+            backgroundVideo.setVisible(false);
+            isVideo = true;
+
+            setMediaPlayer();
+        }else if (!playSameMusic && !seasons.get(currentSeason).getMusicSrc().isEmpty()){
+            File file = new File(seasons.get(currentSeason).getMusicSrc());
+            Media media = new Media(file.toURI().toString());
+            mp = new MediaPlayer(media);
+            isVideo = false;
+
+            setMediaPlayer();
+        }
+    }
     private void setMediaPlayer(){
         Task<Void> mpTask = new Task<>() {
             @Override

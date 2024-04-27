@@ -1343,6 +1343,7 @@ public class DesktopViewController {
         currentLibrary = library;
 
         updateLibraries();
+        librarySelector.setText(library.getName());
 
         seasonScroll.setVisible(false);
         editLibraryButton.setDisable(false);
@@ -1364,6 +1365,7 @@ public class DesktopViewController {
         searchFilesButton.setDisable(true);
         addLibraryButton.setDisable(true);
 
+        //region REMOVE MISSING SERIES
         List<Series> series = List.copyOf(library.getSeries());
         for (Series show : series){
             List<Season> seasons = List.copyOf(show.getSeasons());
@@ -1372,7 +1374,8 @@ public class DesktopViewController {
                 for (Episode episode : episodes){
                     File file = new File(episode.getVideoSrc());
 
-                    if (!file.exists()) {
+                    //Check if drive is connected and the file is missing
+                    if (App.checkIfDriveIsConnected(file.getAbsolutePath()) && !file.exists()) {
                         if (selectedSeason == s)
                             episodesContainer.getChildren().remove(episodeList.indexOf(episode));
 
@@ -1405,12 +1408,18 @@ public class DesktopViewController {
                     seriesButtons.remove(seriesList.indexOf(show));
                 }
 
+                //Remove series button
+                if (!seriesButtons.isEmpty())
+                    seriesButtons.remove(seriesList.indexOf(show));
+
                 seriesList.remove(show);
                 library.removeSeries(show);
                 DataManager.INSTANCE.deleteSeriesData(show);
             }
         }
+        //endregion
 
+        //region SEARCH FILES
         List<String> folders = library.folders;
 
         for (String folderSrc : folders){
@@ -1438,6 +1447,7 @@ public class DesktopViewController {
                 loadHalfTask(library, filesList, midElement, totalSize);
             }
         }
+        //endregion
     }
     private void loadHalfTask(Library library, List<File> files, int start, int end){
         Task<Void> loadHalfTask = new Task<>() {
@@ -1482,6 +1492,7 @@ public class DesktopViewController {
             editLibraryButton.setDisable(false);
             removeLibraryButton.setDisable(false);
             searchFilesButton.setDisable(false);
+            addLibraryButton.setDisable(false);
 
             downloadingContentWindow.setVisible(false);
             downloadDefaultMusic(library);
@@ -1540,8 +1551,6 @@ public class DesktopViewController {
     }
     public void postDownloadDefaultMusic(){
         downloadingContentWindow.setVisible(false);
-        addLibraryButton.setDisable(false);
-
         searchingForFiles = false;
     }
     private void scanTVShow(Library library, File directory, File[] filesInDir, boolean updateMetadata){

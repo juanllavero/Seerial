@@ -212,6 +212,19 @@ public class App extends Application {
         new Thread(wakeDirTask).start();
     }
 
+    public static boolean checkIfDriveIsConnected(String path){
+        //Get connected drives
+        File[] roots = File.listRoots();
+
+        for (File root : roots) {
+            if (path.startsWith(root.getPath())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static void setPopUpProperties(Stage stage, Stage primaryStage){
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(primaryStage);
