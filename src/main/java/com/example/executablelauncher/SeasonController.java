@@ -1102,7 +1102,11 @@ public class SeasonController {
             }
         };
 
-        new Thread(mpTask).start();
+        Thread thread = new Thread(mpTask);
+        thread.setDaemon(true);
+        thread.start();
+
+        App.tasks.add(mpTask);
     }
     private void playBackgroundMedia(){
         Platform.runLater(() ->{
