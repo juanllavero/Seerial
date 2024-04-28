@@ -607,7 +607,8 @@ public class SeasonController {
         reloadEpisodeCard();
         updateWatchedButton();
 
-        mp.play();
+        if (mp != null)
+            mp.play();
     }
     //endregion
 

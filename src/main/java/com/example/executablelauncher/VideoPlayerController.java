@@ -276,13 +276,18 @@ public class VideoPlayerController {
                     nextButton.requestFocus();
                 else
                     videoButton.requestFocus();
-            }else if (App.pressedLeft(e))
+            }else if (App.pressedLeft(e)) {
                 if (!prevButton.isDisabled())
                     prevButton.requestFocus();
-            else if (App.pressedDown(e))
+                else if (!audiosButton.isDisabled())
+                    audiosButton.requestFocus();
+                else if (!subtitlesButton.isDisabled())
+                    subtitlesButton.requestFocus();
+            }else if (App.pressedDown(e))
                 selectCurrentChapter();
-            else if (App.pressedUp(e))
+            else if (App.pressedUp(e)) {
                 runtimeSlider.requestFocus();
+            }
         });
 
         nextButton.setOnKeyPressed(e -> {
