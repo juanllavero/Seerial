@@ -84,6 +84,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1354,7 +1355,7 @@ public class DesktopViewController {
     }
     private void searchFiles(Library library){
         hideMenu();
-        downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
+        downloadingContentText.setText(App.textBundle.getString("analyzingLocalFiles"));
         downloadingContentWindow.setVisible(true);
 
         searchingForFiles = true;
@@ -1365,61 +1366,53 @@ public class DesktopViewController {
         searchFilesButton.setDisable(true);
         addLibraryButton.setDisable(true);
 
-        //region REMOVE MISSING SERIES
-        List<Series> series = List.copyOf(library.getSeries());
-        for (Series show : series){
-            List<Season> seasons = List.copyOf(show.getSeasons());
-            for (Season s : seasons){
-                List<Episode> episodes = List.copyOf(s.getEpisodes());
-                for (Episode episode : episodes){
+        //region REMOVE MISSING EPISODES
+        Iterator<Series> seriesIterator = library.getSeries().iterator();
+        while (seriesIterator.hasNext()) {
+            Series show = seriesIterator.next();
+
+            Iterator<Season> temporadaIterator = show.getSeasons().iterator();
+            while (temporadaIterator.hasNext()) {
+                Season season = temporadaIterator.next();
+
+                Iterator<Episode> episodioIterator = season.getEpisodes().iterator();
+                while (episodioIterator.hasNext()) {
+                    Episode episode = episodioIterator.next();
                     File file = new File(episode.getVideoSrc());
 
                     //Check if drive is connected and the file is missing
-                    if (App.checkIfDriveIsConnected(file.getAbsolutePath()) && !file.exists()) {
-                        if (selectedSeason == s)
+                    if (App.checkIfDriveIsConnected(episode.getVideoSrc()) && !file.exists()) {
+                        if (selectedSeason == season)
                             episodesContainer.getChildren().remove(episodeList.indexOf(episode));
 
-                        if (currentLibrary == library)
-                            episodesContainer.getChildren().remove(episodeList.indexOf(episode));
-
-                        s.removeEpisode(episode);
+                        episodioIterator.remove();
                         DataManager.INSTANCE.deleteEpisodeData(episode);
                     }
                 }
 
-                if (s.getEpisodes().isEmpty()){
+                //Remove season if it has no episodes
+                if (season.getEpisodes().isEmpty()){
                     if (selectedSeries == show)
-                        seasonContainer.getChildren().remove(seasonList.indexOf(s));
+                        seasonContainer.getChildren().remove(seasonList.indexOf(season));
 
-                    if (currentLibrary == library){
-                        seasonsButtons.remove(seasonList.indexOf(s));
-                    }
-
-                    show.removeSeason(s);
-                    DataManager.INSTANCE.deleteSeasonData(s);
+                    temporadaIterator.remove();
+                    DataManager.INSTANCE.deleteSeasonData(season);
                 }
             }
 
+            //Remove show if it has no seasons
             if (show.getSeasons().isEmpty()){
-                if (selectedSeries == show)
-                    seriesContainer.getChildren().remove(seriesList.indexOf(show));
-
-                if (currentLibrary == library){
-                    seriesButtons.remove(seriesList.indexOf(show));
-                }
-
-                //Remove series button
-                if (!seriesButtons.isEmpty())
+                if (currentLibrary == library)
                     seriesButtons.remove(seriesList.indexOf(show));
 
-                seriesList.remove(show);
-                library.removeSeries(show);
+                seriesIterator.remove();
                 DataManager.INSTANCE.deleteSeriesData(show);
             }
         }
         //endregion
 
         //region SEARCH FILES
+        downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
         List<String> folders = library.folders;
 
         for (String folderSrc : folders){
@@ -3041,7 +3034,8 @@ public class DesktopViewController {
         }
     }
     public void addSeries(Library library, Series s){
-        Platform.runLater(() -> {
+        Platform.runLater(() ->
+        {
             DataManager.INSTANCE.checkEmptySeasons(currentLibrary, s, true);
 
             if (s.getSeasons().isEmpty())
