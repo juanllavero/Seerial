@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class DataManager {
@@ -44,16 +45,9 @@ public class DataManager {
             }
         }
 
-        for (Library library : libraries){
-            for (Series series : library.getSeries())
-                checkEmptySeasons(library, series, false);
-
-            for (Series series : seriesToRemove) {
-                deleteSeriesData(series);
-                library.removeSeries(series);
-            }
-
-            seriesToRemove.clear();
+        for (Library library : libraries) {
+            currentLibrary = library;
+            scanForMissingFiles(library);
         }
 
         if (!libraries.isEmpty()){
@@ -82,6 +76,41 @@ public class DataManager {
     }
     //endregion
 
+    private void scanForMissingFiles(Library library){
+        Iterator<Series> seriesIterator = library.getSeries().iterator();
+        while (seriesIterator.hasNext()) {
+            Series show = seriesIterator.next();
+
+            Iterator<Season> temporadaIterator = show.getSeasons().iterator();
+            while (temporadaIterator.hasNext()) {
+                Season season = temporadaIterator.next();
+
+                Iterator<Episode> episodioIterator = season.getEpisodes().iterator();
+                while (episodioIterator.hasNext()) {
+                    Episode episode = episodioIterator.next();
+                    File file = new File(episode.getVideoSrc());
+
+                    //Check if drive is connected and the file is missing
+                    if (App.checkIfDriveIsConnected(episode.getVideoSrc()) && !file.exists()) {
+                        episodioIterator.remove();
+                        deleteEpisodeData(episode);
+                    }
+                }
+
+                //Remove season if it has no episodes
+                if (season.getEpisodes().isEmpty()) {
+                    temporadaIterator.remove();
+                    deleteSeasonData(season);
+                }
+            }
+
+            //Remove show if it has no seasons
+            if (show.getSeasons().isEmpty()) {
+                seriesIterator.remove();
+                deleteSeriesData(show);
+            }
+        }
+    }
     public void createLibrary(Library library){
         libraries.add(library);
     }

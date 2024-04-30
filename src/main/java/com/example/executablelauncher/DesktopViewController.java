@@ -1366,53 +1366,12 @@ public class DesktopViewController {
         searchFilesButton.setDisable(true);
         addLibraryButton.setDisable(true);
 
-        //region REMOVE MISSING EPISODES
-        Iterator<Series> seriesIterator = library.getSeries().iterator();
-        while (seriesIterator.hasNext()) {
-            Series show = seriesIterator.next();
-
-            Iterator<Season> temporadaIterator = show.getSeasons().iterator();
-            while (temporadaIterator.hasNext()) {
-                Season season = temporadaIterator.next();
-
-                Iterator<Episode> episodioIterator = season.getEpisodes().iterator();
-                while (episodioIterator.hasNext()) {
-                    Episode episode = episodioIterator.next();
-                    File file = new File(episode.getVideoSrc());
-
-                    //Check if drive is connected and the file is missing
-                    if (App.checkIfDriveIsConnected(episode.getVideoSrc()) && !file.exists()) {
-                        if (selectedSeason == season)
-                            episodesContainer.getChildren().remove(episodeList.indexOf(episode));
-
-                        episodioIterator.remove();
-                        DataManager.INSTANCE.deleteEpisodeData(episode);
-                    }
-                }
-
-                //Remove season if it has no episodes
-                if (season.getEpisodes().isEmpty()){
-                    if (selectedSeries == show)
-                        seasonContainer.getChildren().remove(seasonList.indexOf(season));
-
-                    temporadaIterator.remove();
-                    DataManager.INSTANCE.deleteSeasonData(season);
-                }
-            }
-
-            //Remove show if it has no seasons
-            if (show.getSeasons().isEmpty()){
-                if (currentLibrary == library)
-                    seriesButtons.remove(seriesList.indexOf(show));
-
-                seriesIterator.remove();
-                DataManager.INSTANCE.deleteSeriesData(show);
-            }
-        }
-        //endregion
-
-        //region SEARCH FILES
+        //Search for new shows/episodes
+        searchFilesTask(library);
+    }
+    private void searchFilesTask(Library library){
         downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
+
         List<String> folders = library.folders;
 
         for (String folderSrc : folders){
@@ -1440,7 +1399,6 @@ public class DesktopViewController {
                 loadHalfTask(library, filesList, midElement, totalSize);
             }
         }
-        //endregion
     }
     private void loadHalfTask(Library library, List<File> files, int start, int end){
         Task<Void> loadHalfTask = new Task<>() {
