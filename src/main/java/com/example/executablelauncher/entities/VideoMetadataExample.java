@@ -16,15 +16,23 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.IOUtils;
 
-import javax.imageio.ImageIO;
+import javax.imageio.*;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -46,7 +54,7 @@ public class VideoMetadataExample extends Application {
         // Obtener metadatos de los subtítulos
         getSubtitleMetadata(pathToVideo);*/
 
-        Episode episode = new Episode();
+        /*Episode episode = new Episode();
         episode.setVideoSrc("F:\\UHD\\Dune\\Dune (2021).mkv");
         episode.setName("Dune (2021)");
 
@@ -54,6 +62,54 @@ public class VideoMetadataExample extends Application {
 
         for (Chapter chapter : episode.getChapters()){
             generateThumbnail(chapter);
+        }*/
+
+        // Ruta del archivo PNG original y comprimido
+        String inputImagePath = "out/artifacts/Seerial/resources/img/DownloadCache/1315631.png";
+        String outputImagePath = "out/artifacts/Seerial/resources/img/DownloadCache/COMPRESSED.png";
+
+        setTransparencyEffect(inputImagePath, outputImagePath);
+    }
+
+    private static void setTransparencyEffect(String src, String outputPath) {
+        try {
+            BufferedImage originalImage = ImageIO.read(new File(src));
+            int width = originalImage.getWidth();
+            int height = originalImage.getHeight();
+
+            // Calcular el ancho escalado manteniendo la relación de aspecto original
+            int scaledWidth = (int) ((double) width / height * 720);
+
+            // Redimensionar la imagen original con una altura de 1080 píxeles y el ancho calculado
+            BufferedImage scaledImage = new BufferedImage(scaledWidth, 720, BufferedImage.TYPE_INT_ARGB); // Cambiar a BufferedImage.TYPE_INT_ARGB
+            Graphics2D graphics2D = scaledImage.createGraphics();
+            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            graphics2D.drawImage(originalImage, 0, 0, scaledWidth, 720, null);
+            graphics2D.dispose();
+
+            BufferedImage blendedImage = new BufferedImage(scaledWidth, 720, BufferedImage.TYPE_INT_ARGB); // Cambiar a BufferedImage.TYPE_INT_ARGB
+
+            for (int y = 0; y < 720; y++) {
+                float opacity = 1.0f - ((float) y / (720 / 1.15f));
+                opacity = Math.min(1.0f, Math.max(0.0f, opacity));
+
+                for (int x = 0; x < scaledWidth; x++) {
+                    java.awt.Color originalColor = new java.awt.Color(scaledImage.getRGB(x, y), true);
+                    int blendedAlpha = (int) (originalColor.getAlpha() * opacity);
+                    java.awt.Color blendedColor = new java.awt.Color(originalColor.getRGB() & 0xFFFFFF | blendedAlpha << 24, true);
+
+                    blendedImage.setRGB(x, y, blendedColor.getRGB());
+                }
+            }
+
+            File outputFilePath = new File(outputPath);
+            ImageIO.write(blendedImage, "png", outputFilePath);
+
+            originalImage.flush();
+            scaledImage.flush();
+            blendedImage.flush();
+        } catch (IOException e) {
+            System.err.println("setTransparencyEffect: error applying transparency effect to background");
         }
     }
 

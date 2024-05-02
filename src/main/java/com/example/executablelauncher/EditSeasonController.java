@@ -253,7 +253,7 @@ public class EditSeasonController {
                 }
             }
 
-            File newFile = new File("resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
+            File newFile = new File("resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".jpg");
 
             try{
                 Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -276,7 +276,7 @@ public class EditSeasonController {
                 }
             }
 
-            File newFile = new File("resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
+            File newFile = new File("resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + (number + 1) + ".jpg");
 
             try{
                 Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

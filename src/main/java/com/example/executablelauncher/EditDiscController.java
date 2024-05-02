@@ -141,7 +141,7 @@ public class EditDiscController {
                 }
             }
 
-            File newFile = new File("resources/img/discCovers/" + episodeToEdit.getId() + "/" + (number + 1) + ".png");
+            File newFile = new File("resources/img/discCovers/" + episodeToEdit.getId() + "/" + (number + 1) + ".jpg");
 
             try{
                 Files.copy(selectedImage.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -190,7 +190,7 @@ public class EditDiscController {
                 }
             }
 
-            File newFile = new File("resources/img/discCovers/" + episodeToEdit.getId() + "/" + (number + 1) + ".png");
+            File newFile = new File("resources/img/discCovers/" + episodeToEdit.getId() + "/" + (number + 1) + ".jpg");
 
             try{
                 Files.copy(selectedImage.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

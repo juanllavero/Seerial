@@ -448,7 +448,7 @@ public class Controller implements Initializable {
         String src;
         if (!series.isEmpty() && !series.get(0).getSeasons().isEmpty()){
             selectedSeries = series.get(0);
-            src = "file:resources/img/backgrounds/" + series.get(0).getSeasons().get(0).getId() + "/fullBlur.png";
+            src = "file:resources/img/backgrounds/" + series.get(0).getSeasons().get(0).getId() + "/fullBlur.jpg";
         }else{
             src = "file:resources/img/backgroundDefault.png";
         }
@@ -507,8 +507,8 @@ public class Controller implements Initializable {
                     Season season = s.getSeasons().get(0);
                     if (season != null) {
                         String imagePath = "resources/img/backgrounds/" + season.getId();
-                        File fullBlur = new File(imagePath + "/fullBlur.png");
-                        String backgroundPath = fullBlur.exists() ? "fullBlur.png" : "background.png";
+                        File fullBlur = new File(imagePath + "/fullBlur.jpg");
+                        String backgroundPath = fullBlur.exists() ? "fullBlur.jpg" : "background.jpg";
 
                         Image currentImage = backgroundImage.getImage();
 

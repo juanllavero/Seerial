@@ -73,10 +73,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
+import java.awt.*;
+import java.awt.image.*;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -571,7 +574,7 @@ public class DesktopViewController {
         selectedEpisodes.clear();
         selectionOptions.setVisible(false);
 
-        Image i = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.png",
+        Image i = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.jpg",
                 Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), true, true);
         ASPECT_RATIO = i.getWidth() / i.getHeight();
         globalBackground.setImage(i);
@@ -834,24 +837,28 @@ public class DesktopViewController {
         if (dir.exists()){
             try {
                 deleteFile(s.getBackgroundSrc());
-                deleteFile("resources/img/backgrounds/" + s.getId() + "/fullBlur.png");
+                deleteFile("resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg");
                 deleteFile("resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
             } catch (IOException e) {
                 System.err.println("EditSeasonController: Error removing old images");
             }
         }
 
-        File destination = new File("resources/img/backgrounds/" + s.getId() + "/background.png");
-        try {
-            Files.copy(Paths.get(imageToCopy), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        //Compress and save image file
+        File destination = new File("resources/img/backgrounds/" + s.getId() + "/background.jpg");
+        try{
+            Thumbnails.of(imageToCopy)
+                    .scale(1)
+                    .outputQuality(0.9)
+                    .toFile(destination);
         } catch (IOException e) {
-            System.err.println("Background not copied");
+            System.err.println("saveBackground: error compressing background image");
         }
 
-        s.backgroundSrc = "resources/img/backgrounds/" + s.getId() + "/background.png";
+        s.backgroundSrc = "resources/img/backgrounds/" + s.getId() + "/background.jpg";
 
         setTransparencyEffect(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
-        processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.png");
+        processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg", "resources/img/DownloadCache/" + s.getId() + ".png");
     }
     private void deleteFile(String filePath) throws IOException {
         Path path = Paths.get(filePath);
@@ -859,20 +866,34 @@ public class DesktopViewController {
             Files.delete(path);
         }
     }
-    private void setTransparencyEffect(String src, String outputPath) {
+    private static void setTransparencyEffect(String src, String outputPath) {
         try {
             BufferedImage originalImage = ImageIO.read(new File(src));
             int width = originalImage.getWidth();
             int height = originalImage.getHeight();
 
-            BufferedImage blendedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            //Scale output image to match this height (it makes the PNG image A LOT smaller
+            int resolutionHeight = 1080;
 
-            for (int y = 0; y < height; y++) {
-                float opacity = 1.0f - ((float) y / (height / 1.15f));
+            if (resolutionHeight > height)
+                resolutionHeight = height;
+
+            int scaledWidth = (int) ((double) width / height * resolutionHeight);
+
+            BufferedImage scaledImage = new BufferedImage(scaledWidth, resolutionHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics2D = scaledImage.createGraphics();
+            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            graphics2D.drawImage(originalImage, 0, 0, scaledWidth, resolutionHeight, null);
+            graphics2D.dispose();
+
+            BufferedImage blendedImage = new BufferedImage(scaledWidth, resolutionHeight, BufferedImage.TYPE_INT_ARGB);
+
+            for (int y = 0; y < resolutionHeight; y++) {
+                float opacity = 1.0f - ((float) y / (resolutionHeight / 1.15f));
                 opacity = Math.min(1.0f, Math.max(0.0f, opacity));
 
-                for (int x = 0; x < width; x++) {
-                    java.awt.Color originalColor = new java.awt.Color(originalImage.getRGB(x, y), true);
+                for (int x = 0; x < scaledWidth; x++) {
+                    java.awt.Color originalColor = new java.awt.Color(scaledImage.getRGB(x, y), true);
                     int blendedAlpha = (int) (originalColor.getAlpha() * opacity);
                     java.awt.Color blendedColor = new java.awt.Color(originalColor.getRGB() & 0xFFFFFF | blendedAlpha << 24, true);
 
@@ -884,41 +905,53 @@ public class DesktopViewController {
             ImageIO.write(blendedImage, "png", outputFilePath);
 
             originalImage.flush();
+            scaledImage.flush();
             blendedImage.flush();
         } catch (IOException e) {
             System.err.println("setTransparencyEffect: error applying transparency effect to background");
         }
     }
-    public static void processBlurAndSave(String imagePath, String outputFilePath) {
-        Platform.runLater(() -> {
-            try {
-                Image originalImage = new Image(new File(imagePath).toURI().toURL().toExternalForm());
+    public static void processBlurAndSave(String imagePath, String outputFilePath, String cacheOutput) {
+        try {
+            BufferedImage originalImage = ImageIO.read(new File(imagePath));
 
-                // Apply GaussianBlur effect
-                ImageView backgroundBlur = new ImageView(originalImage);
-                GaussianBlur blur = new GaussianBlur();
-                blur.setRadius(27);
-                backgroundBlur.setEffect(blur);
+            // Apply GaussianBlur effect
+            BufferedImage blurredImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            Graphics2D graphics = blurredImage.createGraphics();
+            graphics.drawImage(originalImage, 0, 0, null);
+            graphics.dispose();
 
-                Image imageWithBlur = backgroundBlur.snapshot(null, null);
-
-                // Crop and save a portion of the blurred image
-                int cropX = (int) (imageWithBlur.getWidth() * 0.03);
-                int cropY = (int) (imageWithBlur.getHeight() * 0.05);
-                int cropWidth = (int) (imageWithBlur.getWidth() * 0.93);
-                int cropHeight = (int) (imageWithBlur.getHeight() * 0.9);
-
-                PixelReader reader = imageWithBlur.getPixelReader();
-                WritableImage newImage = new WritableImage(reader, cropX, cropY, cropWidth, cropHeight);
-
-                File outputFile = new File(outputFilePath);
-                ImageIO.write(SwingFXUtils.fromFXImage(newImage, null), "png", outputFile);
-            } catch (MalformedURLException e) {
-                System.err.println("Image loading error");
-            } catch (IOException e) {
-                System.err.println("Image processing error");
+            // Apply GaussianBlur effect
+            float[] blurKernel = new float[400];
+            for (int i = 0; i < 400; i++) {
+                blurKernel[i] = 1.0f / 400.0f;
             }
-        });
+            BufferedImageOp blur = new ConvolveOp(new Kernel(20, 20, blurKernel));
+            blurredImage = blur.filter(blurredImage, null);
+
+            // Crop and save a portion of the blurred image
+            int cropX = (int) (blurredImage.getWidth() * 0.03);
+            int cropY = (int) (blurredImage.getHeight() * 0.05);
+            int cropWidth = (int) (blurredImage.getWidth() * 0.93);
+            int cropHeight = (int) (blurredImage.getHeight() * 0.9);
+
+            BufferedImage croppedImage = blurredImage.getSubimage(cropX, cropY, cropWidth, cropHeight);
+
+            File outputFile = new File(cacheOutput);
+            ImageIO.write(croppedImage, "png", outputFile);
+        } catch (IOException e) {
+            System.err.println("Image processing error");
+        }
+
+        //Compress and save image file
+        try {
+            Thumbnails.of(cacheOutput)
+                    .scale(1)
+                    .outputQuality(0.9)
+                    .toFile(outputFilePath);
+        } catch (IOException e) {
+            System.err.println("saveBackground: error compressing background image");
+        }
     }
     private void fadeInTransition(ImageView imageV){
         //Fade In Transition
@@ -1178,13 +1211,13 @@ public class DesktopViewController {
                 if (images != null)
                     loadImages(currentLibrary, selectedSeason.getId(), images, selectedSeason.themdbID, false);
 
-                File posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.png");
+                File posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
                 if (posterDir.exists()){
-                    selectedSeason.coverSrc = "resources/img/seriesCovers/" + selectedSeason.getId() + "/0.png";
+                    selectedSeason.coverSrc = "resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg";
                 }
 
                 downloadLogos(currentLibrary, selectedSeries, selectedSeason, selectedSeason.themdbID);
-                saveBackground(selectedSeason, "resources/img/DownloadCache/" + selectedSeason.themdbID + ".png");
+                saveBackground(selectedSeason, "resources/img/DownloadCache/" + selectedSeason.themdbID + ".jpg");
 
                 //Process background music
                 List<YoutubeVideo> results = searchYoutube(selectedSeason.name + " main theme");
@@ -1673,8 +1706,7 @@ public class DesktopViewController {
         //region Process Posters
         List<Poster> posterList = images.posters;
         if (!posterList.isEmpty()){
-            Image originalImage = new Image(imageBaseURL + posterList.get(0).file_path);
-            saveCover(id, 0, originalImage);
+            saveCover(id, 0, imageBaseURL + posterList.get(0).file_path);
 
             Task<Void> posterTask = new Task<>() {
                 @Override
@@ -1684,9 +1716,7 @@ public class DesktopViewController {
                         if (processedFiles == 60)
                             break;
 
-                        Image originalImage = new Image(imageBaseURL + posterList.get(i).file_path);
-
-                        saveCover(id, processedFiles, originalImage);
+                        saveCover(id, processedFiles, imageBaseURL + posterList.get(i).file_path);
 
                         processedFiles++;
                     }
@@ -1710,24 +1740,17 @@ public class DesktopViewController {
                 else
                     path = backdropList.get(backdropList.size() - 1).file_path;
 
-                Image originalImage = new Image(imageBaseURL + path);
+                try  {
+                    URI uri = new URI(imageBaseURL + path);
+                    URL url = uri.toURL();
 
-                try{
-                    Files.createDirectory(Path.of("resources/img/DownloadCache/"));
+                    BufferedImage image = ImageIO.read(url);
+                    ImageIO.write(image, "jpg", new File("resources/img/DownloadCache/" + tmdbID + ".jpg"));
+                    image.flush();
                 } catch (IOException e) {
-                    System.err.println("loadImages: Error creating directory");
-                }
-
-                if (!originalImage.isError()){
-                    File file;
-                    file = new File("resources/img/DownloadCache/" + tmdbID + ".png");
-
-                    try{
-                        RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
-                        ImageIO.write(renderedImage,"png", file);
-                    } catch (IOException e) {
-                        System.err.println("DesktopViewController: Downloaded background not saved");
-                    }
+                    System.err.println("DesktopViewController: Downloaded background not saved");
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -1967,7 +1990,7 @@ public class DesktopViewController {
             season.seriesID = series.getId();
 
             if (season.backgroundSrc.isEmpty() || season.backgroundSrc.equals("resources/img/DefaultBackground.png")) {
-                File f = new File("resources/img/DownloadCache/" + series.themdbID + ".png");
+                File f = new File("resources/img/DownloadCache/" + series.themdbID + ".jpg");
                 if (!f.exists() && series.getSeasons().size() > 1){
                     Season s = series.getSeasons().get(0);
 
@@ -1975,7 +1998,7 @@ public class DesktopViewController {
                         saveBackground(season, s.backgroundSrc);
                     }
                 }else if (f.exists()){
-                    saveBackground(season, "resources/img/DownloadCache/" + series.themdbID + ".png");
+                    saveBackground(season, "resources/img/DownloadCache/" + series.themdbID + ".jpg");
                 }
             }
 
@@ -2097,62 +2120,58 @@ public class DesktopViewController {
         }
         //endregion
 
-        File img = new File("resources/img/discCovers/" + episode.getId() + "/0.png");
+        File img = new File("resources/img/discCovers/" + episode.getId() + "/0.jpg");
         if (!img.exists()){
             episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
         }else{
-            episode.imgSrc = "resources/img/discCovers/" + episode.getId() + "/0.png";
+            episode.imgSrc = "resources/img/discCovers/" + episode.getId() + "/0.jpg";
         }
     }
-    private void saveCover(String id, int i, Image originalImage) {
+    private void saveCover(String id, int i, String originalImage) {
         try{
             Files.createDirectories(Paths.get("resources/img/seriesCovers/" + id + "/"));
         } catch (IOException e) {
             System.err.println("Directory could not be created");
         }
 
-        if (!originalImage.isError()){
-            try{
-                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(originalImage, null);
+        try{
+            URI uri = new URI(originalImage);
+            URL url = uri.toURL();
 
-                //Compress image
-                BufferedImage resizedImage = Thumbnails.of(bufferedImage)
-                        .size(376, 540)
-                        .outputFormat("jpg")
-                        .outputQuality(1)
-                        .asBufferedImage();
+            BufferedImage bufferedImage = ImageIO.read(url);
 
-                originalImage = SwingFXUtils.toFXImage(resizedImage, null);
-                bufferedImage.flush();
-                resizedImage.flush();
-            } catch (IOException e) {
-                System.err.println("DesktopViewController: Error compressing image");
-            }
+            //Compress image
+            Thumbnails.of(bufferedImage)
+                    .size(376, 540)
+                    .outputFormat("jpg")
+                    .outputQuality(1)
+                    .toFile("resources/img/seriesCovers/" + id + "/" + i + ".jpg");
 
-            File file = new File("resources/img/seriesCovers/" + id + "/" + i + ".png");
-            try{
-                RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
-                ImageIO.write(renderedImage,"png", file);
-            } catch (IOException e) {
-                System.err.println("DesktopViewController: Downloaded cover not saved");
-            }
+            bufferedImage.flush();
+        } catch (IOException e) {
+            System.err.println("DesktopViewController: Error compressing image");
+        } catch (URISyntaxException e) {
+            System.err.println("DesktopViewController: Downloaded cover not saved");
         }
     }
-    private void saveLogo(String id, int i, Image originalImage) {
+    private void saveLogo(String id, int i, String urlImage) {
         try{
             Files.createDirectories(Paths.get("resources/img/logos/" + id + "/"));
         } catch (IOException e) {
             System.err.println("Directory could not be created");
         }
 
-        if (!originalImage.isError()){
-            File file = new File("resources/img/logos/" + id + "/" + i + ".png");
-            try{
-                RenderedImage renderedImage = SwingFXUtils.fromFXImage(originalImage, null);
-                ImageIO.write(renderedImage,"png", file);
-            } catch (IOException e) {
-                System.err.println("DesktopViewController: Downloaded logo not saved");
-            }
+        try  {
+            URI uri = new URI(urlImage);
+            URL url = uri.toURL();
+
+            BufferedImage image = ImageIO.read(url);
+            ImageIO.write(image, "png", new File("resources/img/logos/" + id + "/" + i + ".png"));
+            image.flush();
+        } catch (IOException e) {
+            System.err.println("DesktopViewController: Downloaded logo not saved");
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
     private void scanMovie(Library library, File f){
@@ -2239,18 +2258,18 @@ public class DesktopViewController {
                 loadImages(library, series.getId(), images, season.themdbID, true);
             }
 
-            File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.png");
+            File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
             if (posterDir.exists()){
-                season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
+                season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
             }
 
-            posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.png");
+            posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.jpg");
             if (posterDir.exists()){
-                series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
+                series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
             }
 
             downloadLogos(library, series, season, season.themdbID);
-            saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".png");
+            saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".jpg");
 
             processMovie(library, f, season, movieMetadata.runtime);
 
@@ -2370,18 +2389,18 @@ public class DesktopViewController {
                             loadImages(library, series.getId(), images, season.themdbID, true);
                         }
 
-                        File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.png");
+                        File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
                         if (posterDir.exists()){
-                            season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
+                            season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
                         }
 
-                        posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.png");
+                        posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.jpg");
                         if (posterDir.exists()){
-                            series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
+                            series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
                         }
 
                         downloadLogos(library, series, season, season.themdbID);
-                        saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".png");
+                        saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".jpg");
                     }
 
                     for (File file : filesInFolder){
@@ -2480,18 +2499,18 @@ public class DesktopViewController {
                         loadImages(library, series.getId(), images, season.themdbID, true);
                     }
 
-                    File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.png");
+                    File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
                     if (posterDir.exists()){
-                        season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
+                        season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
                     }
 
-                    posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.png");
+                    posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.jpg");
                     if (posterDir.exists()){
-                        series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.png";
+                        series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
                     }
 
                     downloadLogos(library, series, season, season.themdbID);
-                    saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".png");
+                    saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".jpg");
                 }
 
                 for (File file : filesInRoot){
@@ -2637,15 +2656,33 @@ public class DesktopViewController {
         }
         //endregion
 
-        File img = new File("resources/img/discCovers/" + episode.getId() + "/0.png");
+        File img = new File("resources/img/discCovers/" + episode.getId() + "/0.jpg");
         if (!img.exists()){
             episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
         }else{
-            episode.imgSrc = "resources/img/discCovers/" + episode.getId() + "/0.png";
+            episode.imgSrc = "resources/img/discCovers/" + episode.getId() + "/0.jpg";
         }
     }
-    private void saveThumbnail(Episode episode, String url, int number){
+    private void saveThumbnail(Episode episode, String urlImage, int number){
         try{
+            URI uri = new URI(urlImage);
+            URL url = uri.toURL();
+
+            BufferedImage bufferedImage = ImageIO.read(url);
+
+            //Compress image
+            Thumbnails.of(bufferedImage)
+                    .size(480, 270)
+                    .outputFormat("jpg")
+                    .outputQuality(0.8)
+                    .toFile("resources/img/discCovers/" + episode.getId() + "/" + number + ".jpg");
+
+            bufferedImage.flush();
+        } catch (IOException | URISyntaxException e) {
+            System.err.println("DesktopViewController: Error compressing image");
+        }
+
+        /*try{
             Image originalImage = new Image(url, 480, 270, true, true);
 
             double maxWidth = 480;
@@ -2680,7 +2717,7 @@ public class DesktopViewController {
             }
         } catch (IOException e) {
             System.err.println("DesktopViewController: Error compressing image");
-        }
+        }*/
     }
     public MovieMetadata downloadMovieMetadata(Library library, int tmdbID){
         try{
@@ -2846,8 +2883,8 @@ public class DesktopViewController {
                 //region Process Logos
                 List<Logo> logosList = images.logos;
                 if (!logosList.isEmpty()){
-                    Image originalImage = new Image(imageBaseURL + logosList.get(0).file_path);
-                    saveLogo(id, 0, originalImage);
+                    System.out.println(imageBaseURL + logosList.get(0).file_path);
+                    saveLogo(id, 0, imageBaseURL + logosList.get(0).file_path);
 
                     Task<Void> logosTask = new Task<>() {
                         @Override
@@ -2857,9 +2894,7 @@ public class DesktopViewController {
                                 if (processedFiles == 16)
                                     break;
 
-                                Image originalImage = new Image(imageBaseURL + logosList.get(i).file_path);
-                                saveLogo(id, processedFiles, originalImage);
-
+                                saveLogo(id, processedFiles, imageBaseURL + logosList.get(i).file_path);
                                 processedFiles++;
                             }
                             return null;
