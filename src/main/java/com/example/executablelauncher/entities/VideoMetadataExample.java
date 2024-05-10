@@ -3,6 +3,7 @@ package com.example.executablelauncher.entities;
 import com.example.executablelauncher.VideoPlayerController;
 import com.example.executablelauncher.fileMetadata.ChaptersContainer;
 import com.example.executablelauncher.tmdbMetadata.images.Images;
+import com.example.executablelauncher.tmdbMetadata.movies.MovieMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -17,6 +18,9 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import net.coobird.thumbnailator.Thumbnails;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
 
 import javax.imageio.*;
@@ -65,10 +69,44 @@ public class VideoMetadataExample extends Application {
         }*/
 
         // Ruta del archivo PNG original y comprimido
-        String inputImagePath = "out/artifacts/Seerial/resources/img/DownloadCache/1315631.png";
+        /*String inputImagePath = "out/artifacts/Seerial/resources/img/DownloadCache/1315631.png";
         String outputImagePath = "out/artifacts/Seerial/resources/img/DownloadCache/COMPRESSED.png";
 
-        setTransparencyEffect(inputImagePath, outputImagePath);
+        setTransparencyEffect(inputImagePath, outputImagePath);*/
+
+        MovieMetadata movieMetadata = downloadMovieMetadata(525);
+
+        if (movieMetadata != null)
+            System.out.println(movieMetadata.title);
+    }
+
+    public static MovieMetadata downloadMovieMetadata(int tmdbID){
+        try{
+            OkHttpClient client = new OkHttpClient();
+
+            Request request = new Request.Builder()
+                    .url("https://api.themoviedb.org/3/movie/" + tmdbID + "?language=es-ES")
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                    .build();
+
+            Response response = client.newCall(request).execute();
+
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                if (response.body() != null)
+                    return objectMapper.readValue(response.body().string(), MovieMetadata.class);
+            } else {
+                System.out.println("Response not successful: " + response.code());
+            }
+        } catch (IOException e) {
+            //System.err.println("downloadMovieMetadata: movie metadata could not be downloaded");
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private static void setTransparencyEffect(String src, String outputPath) {

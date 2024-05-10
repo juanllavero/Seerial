@@ -834,14 +834,10 @@ public class DesktopViewController {
 
         //Clear old images
         File dir = new File("resources/img/backgrounds/" + s.getId());
-        if (dir.exists()){
-            try {
-                deleteFile(s.getBackgroundSrc());
-                deleteFile("resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg");
-                deleteFile("resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
-            } catch (IOException e) {
-                System.err.println("EditSeasonController: Error removing old images");
-            }
+        if (dir.exists()) {
+            deleteFile(s.getBackgroundSrc());
+            deleteFile("resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg");
+            deleteFile("resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
         }
 
         //Compress and save image file
@@ -860,10 +856,14 @@ public class DesktopViewController {
         setTransparencyEffect(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
         processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg", "resources/img/DownloadCache/" + s.getId() + ".png");
     }
-    private void deleteFile(String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-        if (Files.exists(path)) {
-            Files.delete(path);
+    private void deleteFile(String filePath) {
+        try {
+            Path path = Paths.get(filePath);
+            if (Files.exists(path)) {
+                Files.delete(path);
+            }
+        } catch (IOException e) {
+            System.err.println("deleteFile: Error removing file: " + e.getMessage());
         }
     }
     private static void setTransparencyEffect(String src, String outputPath) {
@@ -1214,6 +1214,28 @@ public class DesktopViewController {
                 File posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
                 if (posterDir.exists()){
                     selectedSeason.coverSrc = "resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg";
+
+                    if (selectedSeries.getSeasons().size() == 1 || selectedSeries.getCoverSrc().equals("resources/img/DefaultPoster.png") || selectedSeries.getCoverSrc().isEmpty()){
+                        posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
+                        if (posterDir.exists()){
+                            Path sourcePath = Paths.get(posterDir.toURI());
+                            Path destinationPath = Paths.get("resources/img/seriesCovers/" + selectedSeries.getId() + "/0.jpg");
+
+                            try{
+                                Files.createDirectories(Paths.get("resources/img/seriesCovers/" + selectedSeries.getId() + "/"));
+                            } catch (IOException e) {
+                                System.err.println("correctIdentificationMovie: series covers folder could not be created");
+                            }
+
+                            try {
+                                Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+                            } catch (IOException e) {
+                                System.err.println("correctIdentificationMovie: error copying season cover image");
+                            }
+
+                            selectedSeries.coverSrc = "resources/img/seriesCovers/" + selectedSeries.getId() + "/0.jpg";
+                        }
+                    }
                 }
 
                 downloadLogos(currentLibrary, selectedSeries, selectedSeason, selectedSeason.themdbID);
@@ -1238,6 +1260,7 @@ public class DesktopViewController {
                     episode.overview = selectedSeason.getOverview();
                     episode.year = selectedSeason.getYear();
                     episode.seasonNumber = selectedSeason.getSeasonNumber();
+                    episode.runtime = metadata.runtime;
 
                     if (!selectedSeason.imdbID.isEmpty())
                         setIMDBScore(selectedSeason.imdbID, episode);
@@ -2681,43 +2704,6 @@ public class DesktopViewController {
         } catch (IOException | URISyntaxException e) {
             System.err.println("DesktopViewController: Error compressing image");
         }
-
-        /*try{
-            Image originalImage = new Image(url, 480, 270, true, true);
-
-            double maxWidth = 480;
-            double maxHeight = 270;
-            double originalWidth = originalImage.getWidth();
-            double originalHeight = originalImage.getHeight();
-
-            Image compressedImage;
-            if (originalWidth > maxWidth || originalHeight > maxHeight) {
-                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(originalImage, null);
-
-                BufferedImage resizedImage = Thumbnails.of(bufferedImage)
-                        .size((int) maxWidth, (int) maxHeight)
-                        .outputFormat("jpg")
-                        .asBufferedImage();
-
-                compressedImage = SwingFXUtils.toFXImage(resizedImage, null);
-                bufferedImage.flush();
-                resizedImage.flush();
-            }else{
-                compressedImage = originalImage;
-            }
-
-            if (!originalImage.isError()){
-                File file = new File("resources/img/discCovers/" + episode.getId() + "/" + number + ".png");
-                try{
-                    RenderedImage renderedImage = SwingFXUtils.fromFXImage(compressedImage, null);
-                    ImageIO.write(renderedImage,"jpg", file);
-                } catch (IOException e) {
-                    System.err.println("DesktopViewController: Disc downloaded thumbnail not saved");
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("DesktopViewController: Error compressing image");
-        }*/
     }
     public MovieMetadata downloadMovieMetadata(Library library, int tmdbID){
         try{
@@ -2741,7 +2727,7 @@ public class DesktopViewController {
                 System.out.println("Response not successful: " + response.code());
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("downloadMovieMetadata: movie metadata could not be downloaded");
         }
 
         return null;
@@ -2768,7 +2754,7 @@ public class DesktopViewController {
                 System.out.println("downloadSeriesMetadata: Response not successful: " + response.code());
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("downloadSeriesMetadata: show metadata could not be downloaded");
         }
 
         return null;
@@ -2883,7 +2869,6 @@ public class DesktopViewController {
                 //region Process Logos
                 List<Logo> logosList = images.logos;
                 if (!logosList.isEmpty()){
-                    System.out.println(imageBaseURL + logosList.get(0).file_path);
                     saveLogo(id, 0, imageBaseURL + logosList.get(0).file_path);
 
                     Task<Void> logosTask = new Task<>() {
