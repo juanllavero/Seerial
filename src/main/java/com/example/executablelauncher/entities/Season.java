@@ -7,27 +7,27 @@ import java.util.UUID;
 
 public class Season implements Serializable {
     final String id;
-    public String name = "";
-    public String overview = "";
-    public String year = "";
-    public int order = 0;
-    public float score = 0;
-    public int seasonNumber = 0;
-    public String logoSrc = "";
-    public String coverSrc = "";
-    public String backgroundSrc = "";
-    public String videoSrc = "";
-    public String musicSrc = "";
-    public String seriesID = "";
-    public int themdbID = -1;
-    public String imdbID = "";
-    public int lastDisc = 0;
-    public String folder = "";
-    public boolean showName = true;
-    public String audioTrackLanguage = "";
-    public String subtitleTrackLanguage = "";
-    public List<Episode> episodes = new ArrayList<>();
-    public List<String> genres = new ArrayList<>();
+    String name = "";
+    String overview = "";
+    String year = "";
+    int order = 0;
+    float score = 0;
+    int seasonNumber = 0;
+    String logoSrc = "";
+    String coverSrc = "";
+    String backgroundSrc = "";
+    String videoSrc = "";
+    String musicSrc = "";
+    String seriesID = "";
+    int themdbID = -1;
+    String imdbID = "";
+    int lastDisc = 0;
+    String folder = "";
+    boolean showName = true;
+    String audioTrackLanguage = "";
+    String subtitleTrackLanguage = "";
+    List<Episode> episodes = new ArrayList<>();
+    List<String> genres = new ArrayList<>();
 
     public Season() {
         id = UUID.randomUUID().toString();

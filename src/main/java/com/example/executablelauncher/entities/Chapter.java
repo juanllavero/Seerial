@@ -1,10 +1,10 @@
 package com.example.executablelauncher.entities;
 
 public class Chapter {
-    public String title = "";
-    public double time = 0;
-    public String displayTime = "";
-    public String thumbnailSrc = "";
+    String title = "";
+    double time = 0;
+    String displayTime = "";
+    String thumbnailSrc = "";
 
     public Chapter(String title, double time){
         this.title = title;

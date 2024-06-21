@@ -31,7 +31,7 @@ public class Utils {
                 return Integer.compare(s1.getOrder(), s2.getOrder());
             }
 
-            if (DataManager.INSTANCE.currentLibrary.type.equals("Shows")){
+            if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
                 if (s1.getSeasonNumber() == 0 || s2.getSeasonNumber() == 0) {
                     //Check if there is a season with seasonNumber == 0, for it has to be at the end of the seasons list
                     if (s1.getSeasonNumber() == 0 && s2.getSeasonNumber() != 0) {
@@ -67,7 +67,7 @@ public class Utils {
     public static class LibraryComparator implements Comparator<Library> {
         @Override
         public int compare(Library a, Library b) {
-            return a.name.compareTo(b.name);
+            return a.getName().compareTo(b.getName());
         }
     }
 

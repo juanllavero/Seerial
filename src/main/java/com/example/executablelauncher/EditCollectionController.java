@@ -110,10 +110,10 @@ public class EditCollectionController {
         seriesToEdit = s;
 
         nameField.setText(s.getName());
-        playSameMusic.setSelected(s.playSameMusic);
+        playSameMusic.setSelected(s.isPlaySameMusic());
 
         if (isShow){
-            selectedLogo = new File(s.logoSrc);
+            selectedLogo = new File(s.getLogoSrc());
             logosViewButton.setVisible(true);
         }else{
             logosViewButton.setVisible(false);
@@ -206,7 +206,7 @@ public class EditCollectionController {
             return;
         }
 
-        openImagesDownloader(seriesToEdit.name + " logo", Integer.toString(353), Integer.toString(122), false, true, true);
+        openImagesDownloader(seriesToEdit.getName() + " logo", Integer.toString(353), Integer.toString(122), false, true, true);
     }
     private void openImagesDownloader(String searchText, String width, String height, boolean isCover, boolean isLogo, boolean transparent){
         if (!App.isConnectedToInternet) {
@@ -271,7 +271,7 @@ public class EditCollectionController {
             return;
         }
 
-        openImagesDownloader(seriesToEdit.name + " poster", "", "", true, false, false);
+        openImagesDownloader(seriesToEdit.getName() + " poster", "", "", true, false, false);
     }
     @FXML
     void loadImage(ActionEvent event) {
@@ -519,7 +519,7 @@ public class EditCollectionController {
         }
 
         seriesToEdit.setName(nameField.getText());
-        seriesToEdit.playSameMusic = playSameMusic.isSelected();
+        seriesToEdit.setPlaySameMusic(playSameMusic.isSelected());
 
         if (!orderField.getText().isEmpty() && !orderField.getText().equals("0"))
             seriesToEdit.setOrder(Integer.parseInt(orderField.getText()));

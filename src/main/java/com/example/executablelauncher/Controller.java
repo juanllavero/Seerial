@@ -296,7 +296,7 @@ public class Controller implements Initializable {
 
         for (Library cat : libraries){
             Button btn = new Button();
-            btn.setText(cat.name);
+            btn.setText(cat.getName());
             btn.getStyleClass().add("CatButton");
             btn.setPadding(new Insets(12));
             HBox.setMargin(btn, new Insets(0, 5, 0, 0));
@@ -429,11 +429,11 @@ public class Controller implements Initializable {
         currentLibrary = cat;
 
         //Create temp files to keep drives on
-        for (String folder : currentLibrary.folders){
+        for (String folder : currentLibrary.getFolders()){
             App.wakeUpDrive(folder);
         }
 
-        libraryType = currentLibrary.type;
+        libraryType = currentLibrary.getType();
         cardContainer.getChildren().clear();
         seriesButtons.clear();
 
@@ -600,7 +600,7 @@ public class Controller implements Initializable {
 
         String coverSrc = "resources/img/DefaultPoster.png";
 
-        if (!s.coverSrc.isEmpty())
+        if (!s.getCoverSrc().isEmpty())
             coverSrc = s.getCoverSrc();
 
         File imgFile = new File(coverSrc);
@@ -744,7 +744,7 @@ public class Controller implements Initializable {
                 Parent root = fxmlLoader.load();
                 SeasonController seasonController = fxmlLoader.getController();
                 seasonController.setParent(this);
-                seasonController.setSeasons(s, s.playSameMusic, libraryType.equals("Shows"));
+                seasonController.setSeasons(s, s.isPlaySameMusic(), libraryType.equals("Shows"));
                 Stage stage = (Stage) mainPane.getScene().getWindow();
                 stage.setTitle(App.textBundle.getString("season"));
                 Scene scene = new Scene(root);

@@ -115,20 +115,20 @@ public class AddLibraryController {
     public void setValues(Library toEdit){
         libraryToEdit = toEdit;
         title.setText(App.textBundle.getString("libraryWindowTitleEdit"));
-        nameField.setText(libraryToEdit.name);
-        showOnFullscreen.setSelected(libraryToEdit.showOnFullscreen);
+        nameField.setText(libraryToEdit.getName());
+        showOnFullscreen.setSelected(libraryToEdit.isShowOnFullscreen());
         generalBox.setVisible(true);
         folderBox.setVisible(false);
-        this.type = libraryToEdit.type;
-        this.catName = libraryToEdit.name;
-        this.folders = libraryToEdit.folders;
+        this.type = libraryToEdit.getType();
+        this.catName = libraryToEdit.getName();
+        this.folders = libraryToEdit.getFolders();
 
         List<Locale> languages = App.tmdbLanguages;
         for (Locale locale : languages){
             languageChoice.getItems().add(locale.getDisplayName());
         }
 
-        Locale locale = Locale.forLanguageTag(libraryToEdit.language);
+        Locale locale = Locale.forLanguageTag(libraryToEdit.getLanguage());
         languageChoice.setValue(locale.getDisplayName());
 
         setButtonsValues();
@@ -199,13 +199,13 @@ public class AddLibraryController {
             if (libraryToEdit != null){
                 String oldName = libraryToEdit.getName();
 
-                libraryToEdit.name = nameField.getText();
-                libraryToEdit.language = language;
-                libraryToEdit.type = type;
-                libraryToEdit.folders = folders;
-                libraryToEdit.showOnFullscreen = showOnFullscreen.isSelected();
+                libraryToEdit.setName(nameField.getText());
+                libraryToEdit.setLanguage(language);
+                libraryToEdit.setType(type);
+                libraryToEdit.setFolders(folders);
+                libraryToEdit.setShowOnFullscreen(showOnFullscreen.isSelected());
 
-                parentController.updateLibraries(oldName, libraryToEdit.name);
+                parentController.updateLibraries(oldName, libraryToEdit.getName());
 
                 parentController.searchFiles();
             }else{

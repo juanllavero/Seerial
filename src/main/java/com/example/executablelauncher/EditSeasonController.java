@@ -167,10 +167,10 @@ public class EditSeasonController {
             logosViewButton.setVisible(false);
             postersViewButton.setVisible(false);
         }else{
-            selectedLogo = new File(s.logoSrc);
+            selectedLogo = new File(s.getLogoSrc());
             logosViewButton.setVisible(true);
 
-            selectedPoster = new File(s.coverSrc);
+            selectedPoster = new File(s.getCoverSrc());
             postersViewButton.setVisible(true);
         }
 
@@ -636,10 +636,10 @@ public class EditSeasonController {
             YoutubeSearchController controller = loader.getController();
 
             String searchText;
-            if (DataManager.INSTANCE.currentLibrary.type.equals("Shows"))
+            if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows"))
                 searchText = seriesName;
             else
-                searchText = seasonToEdit.name;
+                searchText = seasonToEdit.getName();
 
             controller.initValues(parentController, this, searchText);
 
@@ -762,11 +762,11 @@ public class EditSeasonController {
 
         //Save Logo
         if (selectedLogo != null)
-            seasonToEdit.logoSrc = "resources/img/logos/" + seasonToEdit.getId() + "/" + selectedLogo.getName();
+            seasonToEdit.setLogoSrc("resources/img/logos/" + seasonToEdit.getId() + "/" + selectedLogo.getName());
 
         //Save Poster
         if (selectedPoster != null)
-            seasonToEdit.coverSrc = "resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + selectedPoster.getName();
+            seasonToEdit.setCoverSrc("resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + selectedPoster.getName());
 
         parentController.hideBackgroundShadow();
         parentController.refreshSeason(seasonToEdit);

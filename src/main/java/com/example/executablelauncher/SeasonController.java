@@ -496,13 +496,13 @@ public class SeasonController {
 
         String logoSrc;
         if (isShow)
-            logoSrc = series.logoSrc;
+            logoSrc = series.getLogoSrc();
         else
-            logoSrc = season.logoSrc;
+            logoSrc = season.getLogoSrc();
 
         if (logoSrc.isEmpty()){
             infoBox.getChildren().remove(0);
-            Label seriesTitle = new Label(series.name);
+            Label seriesTitle = new Label(series.getName());
             seriesTitle.setFont(new Font("Arial", 58));
             seriesTitle.setStyle("-fx-font-weight: bold");
             seriesTitle.setTextFill(Color.color(1, 1, 1));
@@ -540,26 +540,26 @@ public class SeasonController {
             buttonCount = getVisibleButtonsCount();
 
             if (episodeButtons.size() > 1 || isShow)
-                episodeButtons.get(season.lastDisc).requestFocus();
+                episodeButtons.get(season.getLastDisc()).requestFocus();
             else
                 playButton.requestFocus();
         });
 
-        if (!season.overview.isEmpty())
-            overviewField.setText(season.overview);
+        if (!season.getOverview().isEmpty())
+            overviewField.setText(season.getOverview());
         else
             overviewField.setText(App.textBundle.getString("defaultOverview"));
 
         yearField.setText(season.getYear());
-        durationField.setText(setRuntime(selectedEpisode.runtime));
+        durationField.setText(setRuntime(selectedEpisode.getRuntime()));
         episodeName.setText("");
 
-        if (selectedEpisode.imdbScore != 0){
+        if (selectedEpisode.getImdbScore() != 0){
             scoreProviderImg.setImage(new Image("file:resources/img/icons/imdb.png", 30, 30, true, true));
-            scoreField.setText(String.valueOf(selectedEpisode.imdbScore));
+            scoreField.setText(String.valueOf(selectedEpisode.getImdbScore()));
         }else{
             scoreProviderImg.setImage(new Image("file:resources/img/icons/tmdb.png", 30, 30, true, true));
-            scoreField.setText(String.valueOf(selectedEpisode.score));
+            scoreField.setText(String.valueOf(selectedEpisode.getScore()));
         }
 
         if (!isShow){
@@ -627,7 +627,7 @@ public class SeasonController {
                         enableAllEpisodes();
                     }
 
-                    seasons.get(currentSeason).lastDisc = episodeButtons.indexOf(btn);
+                    seasons.get(currentSeason).setLastDisc(episodeButtons.indexOf(btn));
 
                     //Move ScrollPane
                     handleButtonFocus(btn);
@@ -750,9 +750,9 @@ public class SeasonController {
             scene.setCursor(Cursor.NONE);
             stage.setScene(scene);
 
-            String name = series.name;
+            String name = series.getName();
             if (!isShow)
-                name = seasons.get(currentSeason).name;
+                name = seasons.get(currentSeason).getName();
 
             VideoPlayerController playerController = fxmlLoader.getController();
             playerController.setParent(this);
@@ -834,11 +834,11 @@ public class SeasonController {
         thumbnail.setFitWidth(targetWidth);
         thumbnail.setFitHeight(targetHeight);
 
-        File newFile = new File(selectedEpisode.imgSrc);
+        File newFile = new File(selectedEpisode.getImgSrc());
         if (!newFile.exists())
-            selectedEpisode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
+            selectedEpisode.setImgSrc("resources/img/Default_video_thumbnail.jpg");
 
-        Image originalImage = new Image("file:" + selectedEpisode.imgSrc, targetWidth, targetHeight, true, true);
+        Image originalImage = new Image("file:" + selectedEpisode.getImgSrc(), targetWidth, targetHeight, true, true);
 
         thumbnail.setImage(originalImage);
         thumbnail.setPreserveRatio(false);
@@ -850,7 +850,7 @@ public class SeasonController {
         BorderPane details = new BorderPane();
 
         if (selectedEpisode.getTimeWatched() > 5000){
-            JFXSlider slider = new JFXSlider(0, selectedEpisode.runtime * 60 * 1000
+            JFXSlider slider = new JFXSlider(0, selectedEpisode.getRuntime() * 60 * 1000
                     , selectedEpisode.getTimeWatched());
             slider.setFocusTraversable(false);
             details.setBottom(slider);
@@ -870,7 +870,7 @@ public class SeasonController {
         videoInfoParent.getChildren().add(videoInfo);
 
         if (isShow){
-            Label info = new Label("S" + seasons.get(currentSeason).seasonNumber + "E" + selectedEpisode.episodeNumber);
+            Label info = new Label("S" + seasons.get(currentSeason).getSeasonNumber() + "E" + selectedEpisode.getEpisodeNumber());
             info.setFont(new Font(24));
             info.setTextFill(Color.WHITE);
             videoInfo.getChildren().add(info);
@@ -976,17 +976,17 @@ public class SeasonController {
         fadeOutEffect(mainPane);
 
         if (isShow){
-            detailsImage.setImage(new Image("file:" + selectedEpisode.imgSrc));
+            detailsImage.setImage(new Image("file:" + selectedEpisode.getImgSrc()));
             genresField.setText(series.getGenres());
         }else{
             detailsImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
-            detailsImage.setImage(new Image("file:" + seasons.get(currentSeason).coverSrc));
+            detailsImage.setImage(new Image("file:" + seasons.get(currentSeason).getCoverSrc()));
             genresField.setText(seasons.get(currentSeason).getGenres());
         }
-        detailsTitle.setText(selectedEpisode.name);
+        detailsTitle.setText(selectedEpisode.getName());
         detailsOverview.setText(overviewField.getText());
 
-        File file = new File(selectedEpisode.videoSrc);
+        File file = new File(selectedEpisode.getVideoSrc());
         fileNameField.setText(file.getName());
 
         fadeInEffect(menuShadow);
@@ -1013,17 +1013,17 @@ public class SeasonController {
     }
     private void updateDiscInfo(Episode episode) {
         selectedEpisode = episode;
-        episodeName.setText(episode.name);
+        episodeName.setText(episode.getName());
 
-        if (!episode.overview.isEmpty())
-            overviewField.setText(episode.overview);
+        if (!episode.getOverview().isEmpty())
+            overviewField.setText(episode.getOverview());
         else
             overviewField.setText(App.textBundle.getString("defaultOverview"));
 
-        seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).seasonNumber + " " + App.textBundle.getString("episodeLetter") + episode.episodeNumber);
-        yearField.setText(episode.year);
-        durationField.setText(setRuntime(episode.runtime));
-        scoreField.setText(String.valueOf(episode.score));
+        seasonEpisodeNumber.setText(App.textBundle.getString("seasonLetter") + seasons.get(currentSeason).getSeasonNumber() + " " + App.textBundle.getString("episodeLetter") + episode.getEpisodeNumber());
+        yearField.setText(episode.getYear());
+        durationField.setText(setRuntime(episode.getRuntime()));
+        scoreField.setText(String.valueOf(episode.getScore()));
 
         setTimeLeft(episode);
 
@@ -1032,7 +1032,7 @@ public class SeasonController {
     private void setTimeLeft(Episode episode){
         if (episode.getTimeWatched() > 5000){
             timeLeftBox.setVisible(true);
-            long leftTime = ((long) episode.runtime * 60 * 1000) - episode.getTimeWatched();
+            long leftTime = ((long) episode.getRuntime() * 60 * 1000) - episode.getTimeWatched();
 
             long hours = leftTime / 3600000;
             long minutes = (leftTime % 3600000) / 60000;

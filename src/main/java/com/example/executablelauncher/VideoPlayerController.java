@@ -432,11 +432,11 @@ public class VideoPlayerController {
         String episodeRuntime;
 
         if (parentController != null)
-            episodeRuntime = parentController.setRuntime(episode.runtime);
+            episodeRuntime = parentController.setRuntime(episode.getRuntime());
         else
-            episodeRuntime = parentControllerDesktop.setRuntime(episode.runtime);
+            episodeRuntime = parentControllerDesktop.setRuntime(episode.getRuntime());
 
-        if (DataManager.INSTANCE.currentLibrary.type.equals("Shows")){
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
             episodeInfo.setText(episode.getName() + " - " +
                     App.textBundle.getString("seasonLetter") + season.getSeasonNumber() + " " + App.textBundle.getString("episodeLetter") + episode.getEpisodeNumber() +
                     " - " + episode.getYear() + " - " + episodeRuntime);
@@ -444,7 +444,7 @@ public class VideoPlayerController {
             episodeInfo.setText(episode.getName() + " - " + episodeRuntime);
         }
 
-        double durationInSeconds = episode.runtime * 60;
+        double durationInSeconds = episode.getRuntime() * 60;
         double fiveSecondsPercentage = (5.0 / durationInSeconds) * 100.0;
         percentageStep = (fiveSecondsPercentage / 100.0) * 100;
 

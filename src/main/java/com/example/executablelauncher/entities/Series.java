@@ -7,22 +7,22 @@ import java.util.UUID;
 
 public class Series implements Serializable {
     final String id;
-    public int themdbID = -1;
-    public String name = "";
-    public String overview = "";
-    public String year = "";
-    public int order = 0;
-    public float score = 0;
-    public int numberOfEpisodes = 0;
-    public int numberOfSeasons = 0;
-    public String coverSrc = "";
-    public String logoSrc = "";
-    public String folder = "";
-    public float videoZoom = 0;
-    public String episodeGroupID = "";
-    public List<Season> seasons = new ArrayList<>();
-    public List<String> genres = new ArrayList<>();
-    public boolean playSameMusic = false;
+    int themdbID = -1;
+    String name = "";
+    String overview = "";
+    String year = "";
+    int order = 0;
+    float score = 0;
+    int numberOfEpisodes = 0;
+    int numberOfSeasons = 0;
+    String coverSrc = "";
+    String logoSrc = "";
+    String folder = "";
+    float videoZoom = 0;
+    String episodeGroupID = "";
+    List<Season> seasons = new ArrayList<>();
+    List<String> genres = new ArrayList<>();
+    boolean playSameMusic = false;
 
     public Series() {
         id = UUID.randomUUID().toString();

@@ -457,12 +457,12 @@ public class DesktopViewController {
         yearText.setText(App.textBundle.getString("year"));
         orderText.setText(App.textBundle.getString("order"));
 
-        if (currentLibrary != null && currentLibrary.type.equals("Shows"))
+        if (currentLibrary != null && currentLibrary.getType().equals("Shows"))
             episodesText.setText(App.textBundle.getString("episodes"));
         else
             episodesText.setText(App.textBundle.getString("videos"));
 
-        if (currentLibrary != null && currentLibrary.type.equals("Shows")){
+        if (currentLibrary != null && currentLibrary.getType().equals("Shows")){
             seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
         }else{
             seasonNumberText.setText("");
@@ -589,17 +589,17 @@ public class DesktopViewController {
         yearText.setText(App.textBundle.getString("year"));
         orderText.setText(App.textBundle.getString("order"));
 
-        if (currentLibrary.type.equals("Shows")) {
+        if (currentLibrary.getType().equals("Shows")) {
             episodesText.setText(App.textBundle.getString("episodes"));
             seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
-            seasonNumberField.setText(String.valueOf(selectedSeason.seasonNumber));
+            seasonNumberField.setText(String.valueOf(selectedSeason.getSeasonNumber()));
 
-            if (selectedSeries.logoSrc.isEmpty()){
+            if (selectedSeries.getLogoSrc().isEmpty()){
                 setTextNoLogo();
             }else{
                 seasonLogoBox.getChildren().remove(0);
                 seasonLogo = new ImageView();
-                File file = new File(selectedSeries.logoSrc);
+                File file = new File(selectedSeries.getLogoSrc());
                 setLogoNoText(file);
             }
         }else {
@@ -698,7 +698,7 @@ public class DesktopViewController {
 
         if (files != null){
             File posterDir = files[0];
-            selectedSeries.coverSrc = "resources/img/seriesCovers/" + selectedSeries.getId() + "/" + posterDir.getName();
+            selectedSeries.setCoverSrc("resources/img/seriesCovers/" + selectedSeries.getId() + "/" + posterDir.getName());
         }
 
         Series series = selectedSeries;
@@ -739,7 +739,7 @@ public class DesktopViewController {
         seriesList = currentLibrary.getSeries();
         seriesList.sort(new Utils.SeriesComparator());
 
-        if (currentLibrary.type.equals("Shows")) {
+        if (currentLibrary.getType().equals("Shows")) {
             changeEpisodesGroup.setDisable(false);
             identificationShow.setDisable(false);
             identificationMovie.setDisable(true);
@@ -851,7 +851,7 @@ public class DesktopViewController {
             System.err.println("saveBackground: error compressing background image");
         }
 
-        s.backgroundSrc = "resources/img/backgrounds/" + s.getId() + "/background.jpg";
+        s.setBackgroundSrc("resources/img/backgrounds/" + s.getId() + "/background.jpg");
 
         setTransparencyEffect(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
         processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg", "resources/img/DownloadCache/" + s.getId() + ".png");
@@ -1092,7 +1092,7 @@ public class DesktopViewController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("searchSeries.fxml"));
             Parent root1 = fxmlLoader.load();
             SearchSeriesController controller = fxmlLoader.getController();
-            controller.initiValues(this, selectedSeries.name, true, tmdbApi, currentLibrary.language);
+            controller.initiValues(this, selectedSeries.getName(), true, tmdbApi, currentLibrary.getLanguage());
             Stage stage = new Stage();
             stage.setTitle("Correct Identification");
             stage.initStyle(StageStyle.UNDECORATED);
@@ -1118,7 +1118,7 @@ public class DesktopViewController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("searchSeries.fxml"));
             Parent root1 = fxmlLoader.load();
             SearchSeriesController controller = fxmlLoader.getController();
-            controller.initiValues(this, selectedSeason.name, false, tmdbApi, currentLibrary.language);
+            controller.initiValues(this, selectedSeason.getName(), false, tmdbApi, currentLibrary.getLanguage());
             Stage stage = new Stage();
             stage.setTitle("Correct Identification");
             stage.initStyle(StageStyle.UNDECORATED);
@@ -1149,7 +1149,7 @@ public class DesktopViewController {
 
                 //Remove Series Data
                 DataManager.INSTANCE.deleteSeriesData(selectedSeries);
-                selectedSeries.seasons.clear();
+                selectedSeries.getSeasons().clear();
 
                 //Scan Series
                 scanTVShow(currentLibrary, folder, filesInFolder, true);
@@ -1161,7 +1161,7 @@ public class DesktopViewController {
                 Season season = selectedSeries.getSeasons().get(0);
 
                 //Process background music
-                List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
+                List<YoutubeVideo> results = searchYoutube(season.getName() + " main theme");
 
                 if (results != null)
                     downloadMedia(season, results.get(0).watch_url);
@@ -1192,28 +1192,28 @@ public class DesktopViewController {
         Task<Void> correctIM = new Task<>() {
             @Override
             protected Void call() {
-                MovieMetadata metadata = downloadMovieMetadata(currentLibrary, selectedSeason.themdbID);
+                MovieMetadata metadata = downloadMovieMetadata(currentLibrary, selectedSeason.getThemdbID());
 
                 if (metadata == null)
                     return null;
 
-                selectedSeason.name = metadata.title;
-                selectedSeason.overview = metadata.overview;
-                selectedSeason.year = metadata.release_date.substring(0, metadata.release_date.indexOf("-"));
-                selectedSeason.score = (float) ((int) (metadata.vote_average * 10.0)) / 10.0f;
-                selectedSeason.imdbID = metadata.imdb_id;
+                selectedSeason.setName(metadata.title);
+                selectedSeason.setOverview(metadata.overview);
+                selectedSeason.setYear(metadata.release_date.substring(0, metadata.release_date.indexOf("-")));
+                selectedSeason.setScore((float) ((int) (metadata.vote_average * 10.0)) / 10.0f);
+                selectedSeason.setImdbID(metadata.imdb_id);
 
-                if (selectedSeason.imdbID == null)
-                    selectedSeason.imdbID = "";
+                if (selectedSeason.getImdbID() == null)
+                    selectedSeason.setImdbID("");
 
-                Images images = downloadImages(currentLibrary, selectedSeason.themdbID);
+                Images images = downloadImages(currentLibrary, selectedSeason.getThemdbID());
 
                 if (images != null)
-                    loadImages(currentLibrary, selectedSeason.getId(), images, selectedSeason.themdbID, false);
+                    loadImages(currentLibrary, selectedSeason.getId(), images, selectedSeason.getThemdbID(), false);
 
                 File posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
                 if (posterDir.exists()){
-                    selectedSeason.coverSrc = "resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg";
+                    selectedSeason.setCoverSrc("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
 
                     if (selectedSeries.getSeasons().size() == 1 || selectedSeries.getCoverSrc().equals("resources/img/DefaultPoster.png") || selectedSeries.getCoverSrc().isEmpty()){
                         posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
@@ -1233,39 +1233,39 @@ public class DesktopViewController {
                                 System.err.println("correctIdentificationMovie: error copying season cover image");
                             }
 
-                            selectedSeries.coverSrc = "resources/img/seriesCovers/" + selectedSeries.getId() + "/0.jpg";
+                            selectedSeries.setCoverSrc("resources/img/seriesCovers/" + selectedSeries.getId() + "/0.jpg");
                         }
                     }
                 }
 
-                downloadLogos(currentLibrary, selectedSeries, selectedSeason, selectedSeason.themdbID);
-                saveBackground(selectedSeason, "resources/img/DownloadCache/" + selectedSeason.themdbID + ".jpg");
+                downloadLogos(currentLibrary, selectedSeries, selectedSeason, selectedSeason.getThemdbID());
+                saveBackground(selectedSeason, "resources/img/DownloadCache/" + selectedSeason.getThemdbID() + ".jpg");
 
                 //Process background music
-                List<YoutubeVideo> results = searchYoutube(selectedSeason.name + " main theme");
+                List<YoutubeVideo> results = searchYoutube(selectedSeason.getName() + " main theme");
 
                 if (results != null)
                     downloadMedia(selectedSeason, results.get(0).watch_url);
 
                 if (selectedSeason.getEpisodes().size() == 1){
                     Episode episode = selectedSeason.getEpisodes().get(0);
-                    episode.name = selectedSeason.getName();
+                    episode.setName(selectedSeason.getName());
                 }
 
                 for (Episode episode : selectedSeason.getEpisodes()){
                     if (episode == null)
                         continue;
 
-                    episode.score = selectedSeason.score;
-                    episode.overview = selectedSeason.getOverview();
-                    episode.year = selectedSeason.getYear();
-                    episode.seasonNumber = selectedSeason.getSeasonNumber();
-                    episode.runtime = metadata.runtime;
+                    episode.setScore(selectedSeason.getScore());
+                    episode.setOverview(selectedSeason.getOverview());
+                    episode.setYear(selectedSeason.getYear());
+                    episode.setSeasonNumber(selectedSeason.getSeasonNumber());
+                    episode.setRuntime(metadata.runtime);
 
-                    if (!selectedSeason.imdbID.isEmpty())
-                        setIMDBScore(selectedSeason.imdbID, episode);
+                    if (!selectedSeason.getImdbID().isEmpty())
+                        setIMDBScore(selectedSeason.getImdbID(), episode);
 
-                    setMovieThumbnail(episode, selectedSeason.themdbID);
+                    setMovieThumbnail(episode, selectedSeason.getThemdbID());
                 }
 
                 refreshSeason(selectedSeason);
@@ -1288,11 +1288,11 @@ public class DesktopViewController {
     }
     public void setCorrectIdentificationShow(int newID){
         seriesMetadataToCorrect = true;
-        selectedSeries.themdbID = newID;
+        selectedSeries.setThemdbID(newID);
     }
     public void setCorrectIdentificationMovie(int newID){
         movieMetadataToCorrect = true;
-        selectedSeason.themdbID = newID;
+        selectedSeason.setThemdbID(newID);
     }
     //endregion
 
@@ -1307,7 +1307,7 @@ public class DesktopViewController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("searchEpisodesGroup.fxml"));
             Parent root1 = fxmlLoader.load();
             SearchEpisodesGroupController controller = fxmlLoader.getController();
-            controller.initiValues(this, selectedSeries.themdbID);
+            controller.initiValues(this, selectedSeries.getThemdbID());
             Stage stage = new Stage();
             stage.setTitle("Change Episodes Group");
             stage.initStyle(StageStyle.UNDECORATED);
@@ -1343,7 +1343,7 @@ public class DesktopViewController {
                 //Remove Seasons
                 for (Season season : selectedSeries.getSeasons())
                     DataManager.INSTANCE.deleteSeasonData(season);
-                selectedSeries.seasons.clear();
+                selectedSeries.getSeasons().clear();
 
                 //Scan Series
                 scanTVShow(currentLibrary, folder, filesInFolder, false);
@@ -1355,7 +1355,7 @@ public class DesktopViewController {
                 Season season = selectedSeries.getSeasons().get(0);
 
                 //Process background music
-                List<YoutubeVideo> results = searchYoutube(season.name + " main theme");
+                List<YoutubeVideo> results = searchYoutube(season.getName() + " main theme");
 
                 if (results != null)
                     downloadMedia(season, results.get(0).watch_url);
@@ -1428,7 +1428,7 @@ public class DesktopViewController {
     private void searchFilesTask(Library library){
         downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
 
-        List<String> folders = library.folders;
+        List<String> folders = library.getFolders();
 
         for (String folderSrc : folders){
             File folder = new File(folderSrc);
@@ -1466,7 +1466,7 @@ public class DesktopViewController {
 
                     File file = files.get(i);
 
-                    if (library.type.equals("Shows")) {
+                    if (library.getType().equals("Shows")) {
                         if (file.isFile())
                             continue;
 
@@ -1527,7 +1527,7 @@ public class DesktopViewController {
                     if (!season.getMusicSrc().isEmpty())
                         continue;
 
-                    List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
+                    List<YoutubeVideo> results = searchYoutube(series.getName() + " main theme");
 
                     if (results != null)
                         downloadMedia(season, results.get(0).watch_url);
@@ -1536,7 +1536,7 @@ public class DesktopViewController {
                         if (!season.getMusicSrc().isEmpty())
                             continue;
 
-                        List<YoutubeVideo> results = searchYoutube(series.name + " main theme");
+                        List<YoutubeVideo> results = searchYoutube(series.getName() + " main theme");
 
                         if (results != null)
                             downloadMedia(season, results.get(0).watch_url);
@@ -1589,16 +1589,16 @@ public class DesktopViewController {
         Series series;
         boolean exists = false;
 
-        if (library.analyzedFolders.get(directory.getAbsolutePath()) != null){
-            series = library.getSeries(library.analyzedFolders.get(directory.getAbsolutePath()));
+        if (library.getAnalyzedFolders().get(directory.getAbsolutePath()) != null){
+            series = library.getSeries(library.getAnalyzedFiles().get(directory.getAbsolutePath()));
             exists = true;
         }else{
             series = new Series();
-            series.folder = directory.getAbsolutePath();
-            library.analyzedFolders.put(directory.getAbsolutePath(), series.getId());
+            series.setFolder(directory.getAbsolutePath());
+            library.getAnalyzedFolders().put(directory.getAbsolutePath(), series.getId());
         }
 
-        int themdbID = series.themdbID;
+        int themdbID = series.getThemdbID();
 
         //This means that this is a new Folder to be analyzed, so we need to search for the show metadata
         if (themdbID == -1){
@@ -1622,14 +1622,14 @@ public class DesktopViewController {
                 year = "1";
 
             //Search show by name of the folder
-            TvResultsPage tvResults = tmdbApi.getSearch().searchTv(finalName, Integer.valueOf(year), library.language, true, 1);
+            TvResultsPage tvResults = tmdbApi.getSearch().searchTv(finalName, Integer.valueOf(year), library.getLanguage(), true, 1);
 
             if (tvResults.getTotalResults() == 0)
                 return;
 
             //Set themdbID as the id of the first result
             themdbID = tvResults.getResults().get(0).getId();
-            series.themdbID = themdbID;
+            series.setThemdbID(themdbID);
 
             //Set values in order to set the attributes from the search result in the new series and download images
             updateMetadata = true;
@@ -1646,7 +1646,7 @@ public class DesktopViewController {
         //Download metadata for each season of the show
         List<SeasonMetadata> seasonsMetadata = new ArrayList<>();
         for (SeasonMetadataBasic seasonMetadataBasicBasic : seriesMetadata.seasons){
-            SeasonMetadata seasonMetadata = downloadSeasonMetadata(library, series.themdbID, seasonMetadataBasicBasic.season_number);
+            SeasonMetadata seasonMetadata = downloadSeasonMetadata(library, series.getThemdbID(), seasonMetadataBasicBasic.season_number);
 
             if (seasonMetadata != null) {
                 seasonsMetadata.add(seasonMetadata);
@@ -1660,7 +1660,7 @@ public class DesktopViewController {
 
         //Process each episode
         for (File video : videoFiles){
-            if (library.analyzedFiles.get(video.getAbsolutePath()) != null)
+            if (library.getAnalyzedFiles().get(video.getAbsolutePath()) != null)
                 continue;
 
             processEpisode(library, series, video, seasonsMetadata, episodesGroup);
@@ -1684,18 +1684,18 @@ public class DesktopViewController {
     }
     private void setSeriesMetadataAndImages(Library library, Series series, SeriesMetadata seriesMetadata, boolean downloadImages){
         //Set metadata
-        series.name = seriesMetadata.name;
-        series.overview = seriesMetadata.overview;
-        series.score = (float) ((int) (seriesMetadata.vote_average * 10.0)) / 10.0f;
-        series.playSameMusic = true;
+        series.setName(seriesMetadata.name);
+        series.setOverview(seriesMetadata.overview);
+        series.setScore((float) ((int) (seriesMetadata.vote_average * 10.0)) / 10.0f);
+        series.setPlaySameMusic(true);
 
         String year = seriesMetadata.first_air_date.substring(0, seriesMetadata.first_air_date.indexOf("-")) + "-";
         if (!seriesMetadata.in_production)
             year += seriesMetadata.last_air_date.substring(0, seriesMetadata.first_air_date.indexOf("-"));
-        series.year = year;
+        series.setYear(year);
 
-        series.numberOfSeasons = seriesMetadata.number_of_seasons;
-        series.numberOfEpisodes = seriesMetadata.number_of_episodes;
+        series.setNumberOfSeasons(seriesMetadata.number_of_seasons);
+        series.setNumberOfEpisodes(seriesMetadata.number_of_episodes);
 
         List<Genre> genres = seriesMetadata.genres;
 
@@ -1705,21 +1705,21 @@ public class DesktopViewController {
                 genreList.add(genre.name);
             }
 
-            series.genres = genreList;
+            series.setGenres(genreList);
         }
 
         //Download posters and logos for the show
         if (downloadImages) {
-            Images images = downloadImages(library, series.themdbID);
+            Images images = downloadImages(library, series.getThemdbID());
 
             if (images != null)
-                loadImages(library, series.getId(), images, series.themdbID, false);
+                loadImages(library, series.getId(), images, series.getThemdbID(), false);
 
             File[] files = new File("resources/img/seriesCovers/" + series.getId() + "/").listFiles();
 
             if (files != null){
                 File posterDir = files[0];
-                series.coverSrc = "resources/img/seriesCovers/" + series.getId() + "/" + posterDir.getName();
+                series.setCoverSrc("resources/img/seriesCovers/" + series.getId() + "/" + posterDir.getName());
             }
         }
     }
@@ -1758,7 +1758,7 @@ public class DesktopViewController {
             List<Backdrop> backdropList = images.backdrops;
             if (!backdropList.isEmpty()){
                 String path;
-                if (library.type.equals("Shows"))
+                if (library.getType().equals("Shows"))
                     path = backdropList.get(0).file_path;
                 else
                     path = backdropList.get(backdropList.size() - 1).file_path;
@@ -2000,36 +2000,36 @@ public class DesktopViewController {
             season = new Season();
             series.addSeason(season);
 
-            season.name = seasonMetadata.name;
-            season.overview = seasonMetadata.overview;
-            season.year = seasonMetadata.episodes.get(0).air_date.substring(0, seasonMetadata.episodes.get(0).air_date.indexOf("-"));
+            season.setName(seasonMetadata.name);
+            season.setOverview(seasonMetadata.overview);
+            season.setYear(seasonMetadata.episodes.get(0).air_date.substring(0, seasonMetadata.episodes.get(0).air_date.indexOf("-")));
 
             if (realEpisode != -1)
-                season.seasonNumber = realSeason;
+                season.setSeasonNumber(realSeason);
             else
-                season.seasonNumber = seasonMetadata.season_number;
+                season.setSeasonNumber(seasonMetadata.season_number);
 
-            season.score = (float) ((int) (seasonMetadata.vote_average * 10.0)) / 10.0f;
-            season.seriesID = series.getId();
+            season.setScore((float) ((int) (seasonMetadata.vote_average * 10.0)) / 10.0f);
+            season.setSeriesID(series.getId());
 
-            if (season.backgroundSrc.isEmpty() || season.backgroundSrc.equals("resources/img/DefaultBackground.png")) {
-                File f = new File("resources/img/DownloadCache/" + series.themdbID + ".jpg");
+            if (season.getBackgroundSrc().isEmpty() || season.getBackgroundSrc().equals("resources/img/DefaultBackground.png")) {
+                File f = new File("resources/img/DownloadCache/" + series.getThemdbID() + ".jpg");
                 if (!f.exists() && series.getSeasons().size() > 1){
                     Season s = series.getSeasons().get(0);
 
                     if (s != null){
-                        saveBackground(season, s.backgroundSrc);
+                        saveBackground(season, s.getBackgroundSrc());
                     }
                 }else if (f.exists()){
-                    saveBackground(season, "resources/img/DownloadCache/" + series.themdbID + ".jpg");
+                    saveBackground(season, "resources/img/DownloadCache/" + series.getThemdbID() + ".jpg");
                 }
             }
 
-            if (series.seasons.size() == 1)
-                downloadLogos(library, series, season, series.themdbID);
+            if (series.getSeasons().size() == 1)
+                downloadLogos(library, series, season, series.getThemdbID());
 
-            if (season.seasonNumber == 0)
-                season.order = 100;
+            if (season.getSeasonNumber() == 0)
+                season.setOrder(100);
         }
 
         Episode episode;
@@ -2039,7 +2039,7 @@ public class DesktopViewController {
             episode = season.getEpisode(episodeMetadata.episode_number);
 
         if (episode != null) {
-            episode.videoSrc = file.getAbsolutePath();
+            episode.setVideoSrc(file.getAbsolutePath());
             return;
         }
 
@@ -2047,13 +2047,13 @@ public class DesktopViewController {
         season.addEpisode(episode);
 
         //Set the metadata for the new episode
-        episode.seasonID = season.getId();
-        episode.videoSrc = file.getAbsolutePath();
+        episode.setSeasonID(season.getId());
+        episode.setVideoSrc(file.getAbsolutePath());
         setEpisodeData(library, episode, episodeMetadata, series, realEpisode);
 
         getChapters(episode);
 
-        library.analyzedFiles.put(file.getAbsolutePath(), episode.getId());
+        library.getAnalyzedFiles().put(file.getAbsolutePath(), episode.getId());
     }
     private void getChapters(Episode episode){
         try {
@@ -2094,17 +2094,16 @@ public class DesktopViewController {
         }
     }
     private void setEpisodeData(Library library, Episode episode, EpisodeMetadata episodeMetadata, Series show, int realEpisode){
-        episode.name = episodeMetadata.name;
-        episode.overview = episodeMetadata.overview;
+        episode.setName(episodeMetadata.name);
+        episode.setOverview(episodeMetadata.overview);
 
         if (realEpisode != -1)
-            episode.episodeNumber = realEpisode;
+            episode.setEpisodeNumber(realEpisode);
         else
-            episode.episodeNumber = episodeMetadata.episode_number;
+            episode.setEpisodeNumber(episodeMetadata.episode_number);
 
-        episode.year = Utils.episodeDateFormat(episodeMetadata.air_date, library.language);
-        episode.score = (float) ((int) (episodeMetadata.vote_average * 10.0)) / 10.0f;
-        episode.runtime = episodeMetadata.runtime;
+        episode.setYear(Utils.episodeDateFormat(episodeMetadata.air_date, library.getLanguage()));
+        episode.setScore((float) ((int) (episodeMetadata.vote_average * 10.0)) / 10.0f);
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
         try{
@@ -2113,7 +2112,7 @@ public class DesktopViewController {
             System.err.println("setEpisodeData: Directory could not be created");
         }
 
-        MovieImages images = tmdbApi.getTvEpisodes().getEpisode(show.themdbID, episodeMetadata.season_number, episodeMetadata.episode_number, null, TmdbTvEpisodes.EpisodeMethod.images).getImages();
+        MovieImages images = tmdbApi.getTvEpisodes().getEpisode(show.getThemdbID(), episodeMetadata.season_number, episodeMetadata.episode_number, null, TmdbTvEpisodes.EpisodeMethod.images).getImages();
         List<Artwork> thumbnails = images.getStills();
 
         List<String> thumbnailsUrls = new ArrayList<>();
@@ -2145,9 +2144,9 @@ public class DesktopViewController {
 
         File img = new File("resources/img/discCovers/" + episode.getId() + "/0.jpg");
         if (!img.exists()){
-            episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
+            episode.setImgSrc("resources/img/Default_video_thumbnail.jpg");
         }else{
-            episode.imgSrc = "resources/img/discCovers/" + episode.getId() + "/0.jpg";
+            episode.setImgSrc("resources/img/discCovers/" + episode.getId() + "/0.jpg");
         }
     }
     private void saveCover(String id, int i, String originalImage) {
@@ -2207,13 +2206,13 @@ public class DesktopViewController {
                 return;
             }
 
-            if (library.analyzedFiles.get(f.getAbsolutePath()) != null)
+            if (library.getAnalyzedFiles().get(f.getAbsolutePath()) != null)
                 return;
 
             //region CREATE/EDIT SERIES
             Series series = new Series();
-            series.folder = f.getAbsolutePath();
-            library.analyzedFolders.put(f.getAbsolutePath(), series.getId());
+            series.setFolder(f.getAbsolutePath());
+            library.getAnalyzedFolders().put(f.getAbsolutePath(), series.getId());
 
             NameYearContainer result = extractNameAndYear(f.getName().substring(0, f.getName().lastIndexOf(".")));
 
@@ -2227,15 +2226,15 @@ public class DesktopViewController {
             int themdbID = searchFirstMovie(library, movieName, Integer.parseInt(year));
 
             if (themdbID == -1) {
-                series.name = movieName;
+                series.setName(movieName);
                 Season newSeason = new Season();
                 series.addSeason(newSeason);
-                newSeason.name = movieName;
-                newSeason.year = year;
-                newSeason.seriesID = series.getId();
-                newSeason.seasonNumber = series.seasons.size();
+                newSeason.setName(movieName);
+                newSeason.setYear(year);
+                newSeason.setSeriesID(series.getId());
+                newSeason.setSeasonNumber(series.getSeasons().size());
 
-                library.analyzedFolders.put(f.getAbsolutePath(), series.getId());
+                library.getAnalyzedFolders().put(f.getAbsolutePath(), series.getId());
 
                 saveDiscWithoutMetadata(library, f, newSeason);
                 addSeries(library, series);
@@ -2244,22 +2243,22 @@ public class DesktopViewController {
 
             MovieMetadata movieMetadata = downloadMovieMetadata(library, themdbID);
 
-            series.name = movieMetadata.title;
+            series.setName(movieMetadata.title);
             Season season = new Season();
             series.addSeason(season);
-            season.folder = f.getAbsolutePath();
-            season.seriesID = series.getId();
-            season.themdbID = themdbID;
-            season.imdbID = movieMetadata.imdb_id;
+            season.setFolder(f.getAbsolutePath());
+            season.setSeriesID(series.getId());
+            season.setThemdbID(themdbID);
+            season.setImdbID(movieMetadata.imdb_id);
 
-            if (season.imdbID == null)
-                season.imdbID = "";
+            if (season.getImdbID() == null)
+                season.setImdbID("");
 
-            season.name = movieMetadata.title;
-            season.overview = movieMetadata.overview;
-            season.year = movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-"));
-            season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
-            season.seasonNumber = series.seasons.size() + 1;
+            season.setName(movieMetadata.title);
+            season.setOverview(movieMetadata.overview);
+            season.setYear(movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-")));
+            season.setScore((float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f);
+            season.setSeasonNumber(series.getSeasons().size() + 1);
 
             List<Genre> genres = movieMetadata.genres;
 
@@ -2269,30 +2268,30 @@ public class DesktopViewController {
                     genreList.add(genre.name);
                 }
 
-                season.genres = genreList;
+                season.setGenres(genreList);
             }
 
-            library.seasonFolders.put(f.getAbsolutePath(), season.getId());
+            library.getSeasonFolders().put(f.getAbsolutePath(), season.getId());
 
-            Images images = downloadImages(library, season.themdbID);
+            Images images = downloadImages(library, season.getThemdbID());
 
             if (images != null){
-                loadImages(library, season.getId(), images, season.themdbID, false);
-                loadImages(library, series.getId(), images, season.themdbID, true);
+                loadImages(library, season.getId(), images, season.getThemdbID(), false);
+                loadImages(library, series.getId(), images, season.getThemdbID(), true);
             }
 
             File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
             if (posterDir.exists()){
-                season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
+                season.setCoverSrc("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
             }
 
             posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.jpg");
             if (posterDir.exists()){
-                series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
+                series.setCoverSrc("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
             }
 
-            downloadLogos(library, series, season, season.themdbID);
-            saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".jpg");
+            downloadLogos(library, series, season, season.getThemdbID());
+            saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg");
 
             processMovie(library, f, season, movieMetadata.runtime);
 
@@ -2314,17 +2313,17 @@ public class DesktopViewController {
 
             Series series;
 
-            if (library.analyzedFolders.get(f.getAbsolutePath()) != null) {
-                series = library.getSeries(library.analyzedFolders.get(f.getAbsolutePath()));
+            if (library.getAnalyzedFolders().get(f.getAbsolutePath()) != null) {
+                series = library.getSeries(library.getAnalyzedFolders().get(f.getAbsolutePath()));
                 exists = true;
 
                 if (series == null)
                     return;
             }else{
                 series = new Series();
-                series.name = f.getName();
-                series.folder = f.getAbsolutePath();
-                library.analyzedFolders.put(f.getAbsolutePath(), series.getId());
+                series.setName(f.getName());
+                series.setFolder(f.getAbsolutePath());
+                library.getAnalyzedFolders().put(f.getAbsolutePath(), series.getId());
             }
 
             if (!folders.isEmpty()){
@@ -2345,20 +2344,20 @@ public class DesktopViewController {
                     boolean updateMetadata = false;
 
                     Season season;
-                    if (library.seasonFolders.get(folder.getAbsolutePath()) != null){
-                        season = series.getSeason(library.seasonFolders.get(folder.getAbsolutePath()));
+                    if (library.getSeasonFolders().get(folder.getAbsolutePath()) != null){
+                        season = series.getSeason(library.getSeasonFolders().get(folder.getAbsolutePath()));
                     }else {
                         season = new Season();
                         series.addSeason(season);
-                        library.seasonFolders.put(folder.getAbsolutePath(), season.getId());
-                        season.seasonNumber = series.seasons.size() + 1;
-                        season.seriesID = series.getId();
-                        season.folder = folder.getAbsolutePath();
+                        library.getSeasonFolders().put(folder.getAbsolutePath(), season.getId());
+                        season.setSeasonNumber(series.getSeasons().size() + 1);
+                        season.setSeriesID(series.getId());
+                        season.setFolder(folder.getAbsolutePath());
 
                         updateMetadata = true;
                     }
 
-                    int themdbID = season.themdbID;
+                    int themdbID = season.getThemdbID();
                     MovieMetadata movieMetadata = null;
 
                     if (themdbID == -1){
@@ -2368,10 +2367,10 @@ public class DesktopViewController {
                     if (themdbID != -1)
                         movieMetadata = downloadMovieMetadata(library, themdbID);
 
-                    season.themdbID = themdbID;
+                    season.setThemdbID(themdbID);
 
                     if (movieMetadata == null){
-                        season.name = movieName;
+                        season.setName(movieName);
 
                         for (File file : filesInFolder){
                             if (file.isFile() && validVideoFile(file))
@@ -2382,17 +2381,17 @@ public class DesktopViewController {
                     }
 
                     if (updateMetadata){
-                        season.folder = f.getAbsolutePath();
-                        season.seriesID = series.getId();
+                        season.setFolder(f.getAbsolutePath());
+                        season.setSeriesID(series.getId());
 
-                        season.name = movieMetadata.title;
-                        season.overview = movieMetadata.overview;
-                        season.year = movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-"));
-                        season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
-                        season.imdbID = movieMetadata.imdb_id;
+                        season.setName(movieMetadata.title);
+                        season.setOverview(movieMetadata.overview);
+                        season.setYear(movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-")));
+                        season.setScore((float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f);
+                        season.setImdbID(movieMetadata.imdb_id);
 
-                        if (season.imdbID == null)
-                            season.imdbID = "";
+                        if (season.getImdbID() == null)
+                            season.setImdbID("");
 
                         List<Genre> genres = movieMetadata.genres;
 
@@ -2402,28 +2401,28 @@ public class DesktopViewController {
                                 genreList.add(genre.name);
                             }
 
-                            season.genres = genreList;
+                            season.setGenres(genreList);
                         }
 
-                        Images images = downloadImages(library, season.themdbID);
+                        Images images = downloadImages(library, season.getThemdbID());
 
                         if (images != null){
-                            loadImages(library, season.getId(), images, season.themdbID, false);
-                            loadImages(library, series.getId(), images, season.themdbID, true);
+                            loadImages(library, season.getId(), images, season.getThemdbID(), false);
+                            loadImages(library, series.getId(), images, season.getThemdbID(), true);
                         }
 
                         File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
                         if (posterDir.exists()){
-                            season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
+                            season.setCoverSrc("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
                         }
 
                         posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.jpg");
                         if (posterDir.exists()){
-                            series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
+                            series.setCoverSrc("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
                         }
 
-                        downloadLogos(library, series, season, season.themdbID);
-                        saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".jpg");
+                        downloadLogos(library, series, season, season.getThemdbID());
+                        saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg");
                     }
 
                     for (File file : filesInFolder){
@@ -2448,20 +2447,20 @@ public class DesktopViewController {
                 boolean updateMetadata = false;
 
                 Season season;
-                if (library.seasonFolders.get(f.getAbsolutePath()) != null){
-                    season = series.getSeason(library.seasonFolders.get(f.getAbsolutePath()));
+                if (library.getSeasonFolders().get(f.getAbsolutePath()) != null){
+                    season = series.getSeason(library.getSeasonFolders().get(f.getAbsolutePath()));
                 }else {
                     season = new Season();
                     series.addSeason(season);
-                    library.seasonFolders.put(f.getAbsolutePath(), season.getId());
-                    season.seasonNumber = series.seasons.size() + 1;
-                    season.seriesID = series.getId();
-                    season.folder = f.getAbsolutePath();
+                    library.getSeasonFolders().put(f.getAbsolutePath(), season.getId());
+                    season.setSeasonNumber(series.getSeasons().size() + 1);
+                    season.setSeriesID(series.getId());
+                    season.setFolder(f.getAbsolutePath());
 
                     updateMetadata = true;
                 }
 
-                int themdbID = season.themdbID;
+                int themdbID = season.getThemdbID();
 
                 if (themdbID == -1){
                     themdbID = searchFirstMovie(library, movieName, Integer.parseInt(year));
@@ -2472,12 +2471,12 @@ public class DesktopViewController {
                 if (themdbID != -1)
                     movieMetadata = downloadMovieMetadata(library, themdbID);
 
-                season.themdbID = themdbID;
+                season.setThemdbID(themdbID);
 
-                series.name = movieName;
+                series.setName(movieName);
 
                 if (movieMetadata == null){
-                    season.name = movieName;
+                    season.setName(movieName);
 
                     for (File file : filesInRoot){
                         if (file.isFile() && validVideoFile(file))
@@ -2490,17 +2489,17 @@ public class DesktopViewController {
                 }
 
                 if (updateMetadata){
-                    season.folder = f.getAbsolutePath();
-                    season.seriesID = series.getId();
+                    season.setFolder(f.getAbsolutePath());
+                    season.setSeriesID(series.getId());
 
-                    season.name = movieMetadata.title;
-                    season.overview = movieMetadata.overview;
-                    season.year = movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-"));
-                    season.score = (float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f;
-                    season.imdbID = movieMetadata.imdb_id;
+                    season.setName(movieMetadata.title);
+                    season.setOverview(movieMetadata.overview);
+                    season.setYear(movieMetadata.release_date.substring(0, movieMetadata.release_date.indexOf("-")));
+                    season.setScore((float) ((int) (movieMetadata.vote_average * 10.0)) / 10.0f);
+                    season.setImdbID(movieMetadata.imdb_id);
 
-                    if (season.imdbID == null)
-                        season.imdbID = "";
+                    if (season.getImdbID() == null)
+                        season.setImdbID("");
 
                     List<Genre> genres = movieMetadata.genres;
 
@@ -2510,30 +2509,30 @@ public class DesktopViewController {
                             genreList.add(genre.name);
                         }
 
-                        season.genres = genreList;
+                        season.setGenres(genreList);
                     }
 
-                    library.seasonFolders.put(f.getAbsolutePath(), season.getId());
+                    library.getSeasonFolders().put(f.getAbsolutePath(), season.getId());
 
-                    Images images = downloadImages(library, season.themdbID);
+                    Images images = downloadImages(library, season.getThemdbID());
 
                     if (images != null){
-                        loadImages(library, season.getId(), images, season.themdbID, false);
-                        loadImages(library, series.getId(), images, season.themdbID, true);
+                        loadImages(library, season.getId(), images, season.getThemdbID(), false);
+                        loadImages(library, series.getId(), images, season.getThemdbID(), true);
                     }
 
                     File posterDir = new File("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
                     if (posterDir.exists()){
-                        season.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
+                        season.setCoverSrc("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
                     }
 
                     posterDir = new File("resources/img/seriesCovers/" + series.getId() + "/0.jpg");
                     if (posterDir.exists()){
-                        series.coverSrc = "resources/img/seriesCovers/" + season.getId() + "/0.jpg";
+                        series.setCoverSrc("resources/img/seriesCovers/" + season.getId() + "/0.jpg");
                     }
 
-                    downloadLogos(library, series, season, season.themdbID);
-                    saveBackground(season, "resources/img/DownloadCache/" + season.themdbID + ".jpg");
+                    downloadLogos(library, series, season, season.getThemdbID());
+                    saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg");
                 }
 
                 for (File file : filesInRoot){
@@ -2572,7 +2571,7 @@ public class DesktopViewController {
         return container;
     }
     private int searchFirstMovie(Library library, String name, int year){
-        MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(name, year, library.language, true, 1);
+        MovieResultsPage movieResults = tmdbApi.getSearch().searchMovie(name, year, library.getLanguage(), true, 1);
 
         if (movieResults.getTotalResults() > 0)
             return movieResults.getResults().get(0).getId();
@@ -2582,47 +2581,47 @@ public class DesktopViewController {
     private void saveDiscWithoutMetadata(Library library, File f, Season season) {
         Episode episode;
 
-        if (library.analyzedFiles.get(f.getAbsolutePath()) != null){
-            episode = season.getEpisode(library.analyzedFiles.get(f.getAbsolutePath()));
+        if (library.getAnalyzedFiles().get(f.getAbsolutePath()) != null){
+            episode = season.getEpisode(library.getAnalyzedFiles().get(f.getAbsolutePath()));
         }else{
             episode = new Episode();
             season.addEpisode(episode);
-            episode.seasonID = season.getId();
-            library.analyzedFiles.put(f.getAbsolutePath(), episode.getId());
+            episode.setSeasonID(season.getId());
+            library.getAnalyzedFiles().put(f.getAbsolutePath(), episode.getId());
         }
 
-        episode.name = f.getName().substring(0, f.getName().lastIndexOf("."));
-        episode.videoSrc = f.getAbsolutePath();
-        episode.seasonNumber = season.seasonNumber;
-        episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
+        episode.setName(f.getName().substring(0, f.getName().lastIndexOf(".")));
+        episode.setVideoSrc(f.getAbsolutePath());
+        episode.setSeasonNumber(season.getSeasonNumber());
+        episode.setImgSrc("resources/img/Default_video_thumbnail.jpg");
 
         getChapters(episode);
     }
     private void processMovie(Library library, File file, Season season, int runtime){
         Episode episode;
 
-        if (library.analyzedFiles.get(file.getAbsolutePath()) != null){
-            episode = season.getEpisode(library.analyzedFiles.get(file.getAbsolutePath()));
+        if (library.getAnalyzedFiles().get(file.getAbsolutePath()) != null){
+            episode = season.getEpisode(library.getAnalyzedFiles().get(file.getAbsolutePath()));
         }else{
             episode = new Episode();
             season.addEpisode(episode);
-            episode.seasonID = season.getId();
-            library.analyzedFiles.put(file.getAbsolutePath(), episode.getId());
+            episode.setSeasonID(season.getId());
+            library.getAnalyzedFiles().put(file.getAbsolutePath(), episode.getId());
         }
 
-        episode.name = file.getName().substring(0, file.getName().lastIndexOf("."));
-        episode.episodeNumber = season.getEpisodes().size();
-        episode.score = season.score;
-        episode.overview = season.overview;
-        episode.year = season.year;
-        episode.runtime = runtime;
-        episode.seasonNumber = season.seasonNumber;
-        episode.videoSrc = file.getAbsolutePath();
+        episode.setName(file.getName().substring(0, file.getName().lastIndexOf(".")));
+        episode.setEpisodeNumber(season.getEpisodes().size());
+        episode.setScore(season.getScore());
+        episode.setOverview(season.getOverview());
+        episode.setYear(season.getYear());
+        episode.setRuntime(runtime);
+        episode.setSeasonNumber(season.getSeasonNumber());
+        episode.setVideoSrc(file.getAbsolutePath());
 
-        if (!season.imdbID.isEmpty())
-            setIMDBScore(season.imdbID, episode);
+        if (!season.getImdbID().isEmpty())
+            setIMDBScore(season.getImdbID(), episode);
 
-        setMovieThumbnail(episode, season.themdbID);
+        setMovieThumbnail(episode, season.getThemdbID());
 
         getChapters(episode);
     }
@@ -2633,7 +2632,7 @@ public class DesktopViewController {
             for (Element e : body.select("span.sc-bde20123-1"))
             {
                 String score = e.text();
-                episode.imdbScore = Float.parseFloat(score);
+                episode.setImdbScore(Float.parseFloat(score));
                 break;
             }
         } catch (IOException e) {
@@ -2681,9 +2680,9 @@ public class DesktopViewController {
 
         File img = new File("resources/img/discCovers/" + episode.getId() + "/0.jpg");
         if (!img.exists()){
-            episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
+            episode.setImgSrc("resources/img/Default_video_thumbnail.jpg");
         }else{
-            episode.imgSrc = "resources/img/discCovers/" + episode.getId() + "/0.jpg";
+            episode.setImgSrc("resources/img/discCovers/" + episode.getId() + "/0.jpg");
         }
     }
     private void saveThumbnail(Episode episode, String urlImage, int number){
@@ -2710,7 +2709,7 @@ public class DesktopViewController {
             OkHttpClient client = new OkHttpClient();
 
             Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/movie/" + tmdbID + "?language=" + library.language)
+                    .url("https://api.themoviedb.org/3/movie/" + tmdbID + "?language=" + library.getLanguage())
                     .get()
                     .addHeader("accept", "application/json")
                     .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
@@ -2737,7 +2736,7 @@ public class DesktopViewController {
             OkHttpClient client = new OkHttpClient();
 
             Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "?language=" + library.language)
+                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "?language=" + library.getLanguage())
                     .get()
                     .addHeader("accept", "application/json")
                     .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
@@ -2765,7 +2764,7 @@ public class DesktopViewController {
             OkHttpClient client = new OkHttpClient();
 
             Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "/season/" + season + "?language=" + library.language)
+                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "/season/" + season + "?language=" + library.getLanguage())
                     .get()
                     .addHeader("accept", "application/json")
                     .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
@@ -2789,13 +2788,13 @@ public class DesktopViewController {
     }
     private Images downloadImages(Library library, int tmdbID){
         String type = "tv";
-        String languages = "null%2C" + library.language;
+        String languages = "null%2C" + library.getLanguage();
 
-        if (!library.type.equals("Shows")){
+        if (!library.getType().equals("Shows")){
             type = "movie";
         }
 
-        if (!library.language.equals("en"))
+        if (!library.getLanguage().equals("en"))
             languages += "%2Cen";
 
         try{
@@ -2832,17 +2831,17 @@ public class DesktopViewController {
 
         String id;
 
-        if (library.type.equals("Shows"))
+        if (library.getType().equals("Shows"))
             id = series.getId();
         else
             id = season.getId();
 
-        if (!library.type.equals("Shows")){
+        if (!library.getType().equals("Shows")){
             type = "movie";
             languages = "null%2Cen";
 
-            if (!library.language.equals("en"))
-                languages += "%2C" + library.language;
+            if (!library.getLanguage().equals("en"))
+                languages += "%2C" + library.getLanguage();
         }
 
         //region GET IMAGES
@@ -2893,10 +2892,10 @@ public class DesktopViewController {
 
                 File posterDir = new File("resources/img/logos/" + id + "/0.png");
                 if (posterDir.exists()){
-                    if (library.type.equals("Shows"))
-                        series.logoSrc = "resources/img/logos/" + id + "/0.png";
+                    if (library.getType().equals("Shows"))
+                        series.setLogoSrc("resources/img/logos/" + id + "/0.png");
                     else
-                        season.logoSrc = "resources/img/logos/" + id + "/0.png";
+                        season.setLogoSrc("resources/img/logos/" + id + "/0.png");
                 }
                 //endregion
             } else {
@@ -2976,7 +2975,7 @@ public class DesktopViewController {
 
                 try{
                     Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
-                    season.musicSrc = "resources/music/" + season.getId() + ".mp4";
+                    season.setMusicSrc("resources/music/" + season.getId() + ".mp4");
 
                     File dir = new File("resources/downloadedMediaCache/" + season.getId() + "/");
                     FileUtils.deleteDirectory(directory);
@@ -3002,7 +3001,7 @@ public class DesktopViewController {
 
         setCoverImage();
 
-        if (currentLibrary.type.equals("Shows") && !selectedSeries.getLogoSrc().isEmpty())
+        if (currentLibrary.getType().equals("Shows") && !selectedSeries.getLogoSrc().isEmpty())
             setLogoNoText(new File(selectedSeries.getLogoSrc()));
     }
     private void updateSeries(Series series){
@@ -3019,7 +3018,7 @@ public class DesktopViewController {
             if (s.getSeasons().isEmpty())
                 return;
 
-            library.series.add(s);
+            library.getSeries().add(s);
 
             if (currentLibrary == library)
                 addSeriesCard(s);
@@ -3047,7 +3046,7 @@ public class DesktopViewController {
         seriesButtons.add(seriesButton);
     }
     @FXML
-    void addLibrary(MouseEvent event) {
+    void addLibrary() {
         if (!App.isConnectedToInternet) {
             App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
             return;
@@ -3097,7 +3096,7 @@ public class DesktopViewController {
 
     //region EDIT SECTION
     @FXML
-    void editLibrary(MouseEvent event) {
+    void editLibrary() {
         if (!App.isConnectedToInternet) {
             App.showErrorMessage(App.textBundle.getString("connectionErrorTitle"), "", App.textBundle.getString("connectionErrorMessage"));
             return;
@@ -3132,7 +3131,7 @@ public class DesktopViewController {
                 Parent root1 = fxmlLoader.load();
                 EditCollectionController addColController = fxmlLoader.getController();
                 addColController.setParentController(this);
-                addColController.setSeries(selectedSeries, currentLibrary.type.equals("Shows"));
+                addColController.setSeries(selectedSeries, currentLibrary.getType().equals("Shows"));
                 Stage stage = new Stage();
                 stage.setTitle(App.textBundle.getString("collectionWindowTitleEdit"));
                 stage.initStyle(StageStyle.UNDECORATED);
@@ -3148,14 +3147,14 @@ public class DesktopViewController {
         }
     }
     @FXML
-    void editSeason(MouseEvent event){
+    void editSeason(){
         showBackgroundShadow();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editSeason-view.fxml"));
             Parent root1 = fxmlLoader.load();
             EditSeasonController addSeasonController = fxmlLoader.getController();
             addSeasonController.setParentController(this);
-            addSeasonController.setSeason(selectedSeason, currentLibrary.type.equals("Shows"));
+            addSeasonController.setSeason(selectedSeason, currentLibrary.getType().equals("Shows"));
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("seasonWindowTitle"));
             stage.initStyle(StageStyle.UNDECORATED);
@@ -3171,7 +3170,7 @@ public class DesktopViewController {
         hideMenu();
     }
     @FXML
-    void editDisc(MouseEvent event){
+    void editDisc(){
         editDisc(selectedEpisode);
     }
     void editDisc(Episode d){
@@ -3334,7 +3333,7 @@ public class DesktopViewController {
 
     //region FULLSCREEN
     @FXML
-    void switchToFullScreen(MouseEvent event) {
+    void switchToFullScreen() {
         fullScreen();
     }
     private void fullScreen(){

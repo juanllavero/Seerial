@@ -60,7 +60,7 @@ public class DiscController {
     public void setData(Episode d) {
         name.setText(d.getName());
 
-        if (d.getEpisodeNumber() == 0 || !DataManager.INSTANCE.currentLibrary.type.equals("Shows")){
+        if (d.getEpisodeNumber() == 0 || !DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
             mainBox.getChildren().remove(number);
         }else{
             number.setText(App.textBundle.getString("episode") + " " + d.getEpisodeNumber());
@@ -69,7 +69,7 @@ public class DiscController {
         episode = d;
 
         clearSelection();
-        if (!d.imgSrc.isEmpty())
+        if (!d.getImgSrc().isEmpty())
             setThumbnail();
 
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
@@ -204,19 +204,19 @@ public class DiscController {
     }
 
     public void setThumbnail(){
-        if (episode.imgSrc.isEmpty() || oldThumbnailPath.equals(episode.imgSrc))
+        if (episode.getImgSrc().isEmpty() || oldThumbnailPath.equals(episode.getImgSrc()))
             return;
 
         double targetWidth = thumbnail.getFitWidth();
         double targetHeight = thumbnail.getFitHeight();
 
-        File newFile = new File(episode.imgSrc);
+        File newFile = new File(episode.getImgSrc());
         if (!newFile.exists())
-            episode.imgSrc = "resources/img/Default_video_thumbnail.jpg";
+            episode.setImgSrc("resources/img/Default_video_thumbnail.jpg");
 
-        Image originalImage = new Image("file:" + episode.imgSrc, targetWidth, targetHeight, true, true);
+        Image originalImage = new Image("file:" + episode.getImgSrc(), targetWidth, targetHeight, true, true);
 
-        oldThumbnailPath = episode.imgSrc;
+        oldThumbnailPath = episode.getImgSrc();
 
         /*double aspectRatio = targetWidth / targetHeight;
         double originalWidth = originalImage.getWidth();

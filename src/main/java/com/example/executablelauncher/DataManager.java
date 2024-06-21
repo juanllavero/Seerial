@@ -129,7 +129,7 @@ public class DataManager {
 
     public Library getLibrary(String name){
         for (Library library : libraries){
-            if (library.name.equals(name))
+            if (library.getName().equals(name))
                 return library;
         }
         return null;
@@ -137,7 +137,7 @@ public class DataManager {
 
     public boolean libraryExists(String name){
         for (Library library : libraries){
-            if (library.name.equals(name))
+            if (library.getName().equals(name))
                 return true;
         }
         return false;
@@ -197,7 +197,7 @@ public class DataManager {
         for (Episode episode : season.getEpisodes())
             deleteEpisodeData(episode);
 
-        currentLibrary.seasonFolders.remove(season.folder);
+        currentLibrary.getSeasonFolders().remove(season.getFolder());
     }
     public void deleteEpisodeData(Episode episode){
         try{
@@ -206,7 +206,7 @@ public class DataManager {
             System.err.println("App.removeDisc: Error deleting directory: resources/img/discCovers/" + episode.getId());
         }
 
-        currentLibrary.analyzedFiles.remove(episode.videoSrc);
+        currentLibrary.getAnalyzedFiles().remove(episode.getVideoSrc());
     }
     //endregion
 }

@@ -97,7 +97,7 @@ public class EditDiscController {
         fileText.setText(App.textBundle.getString("file"));
         nameText.setText(App.textBundle.getString("name"));
 
-        selectedImage = new File(d.imgSrc);
+        selectedImage = new File(d.getImgSrc());
         nameField.setText(d.getName());
 
         fileText.setDisable(true);
@@ -302,13 +302,13 @@ public class EditDiscController {
             return;
         }
 
-        episodeToEdit.name = nameField.getText();
+        episodeToEdit.setName(nameField.getText());
 
         if (!orderField.getText().isEmpty() && !orderField.getText().equals("0"))
             episodeToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
         if (selectedImage != null)
-            episodeToEdit.imgSrc = "resources/img/discCovers/" + episodeToEdit.getId() + "/" + selectedImage.getName();
+            episodeToEdit.setImgSrc("resources/img/discCovers/" + episodeToEdit.getId() + "/" + selectedImage.getName());
 
         controllerParent.hideBackgroundShadow();
         controllerParent.updateDisc(episodeToEdit);

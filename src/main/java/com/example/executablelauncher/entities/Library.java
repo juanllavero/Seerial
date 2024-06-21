@@ -5,16 +5,16 @@ import java.util.*;
 
 public class Library implements Serializable {
     final String id;
-    public String name;
-    public String language;
-    public String type;
-    public int order = 0;
-    public List<String> folders;
-    public boolean showOnFullscreen;
-    public List<Series> series = new ArrayList<>();
-    public Map<String, String> analyzedFiles = new HashMap<>();               //<File, DiscID>
-    public Map<String, String> analyzedFolders = new HashMap<>();             //<Folder, SeriesID>
-    public Map<String, String> seasonFolders = new HashMap<>();               //<Folder, SeasonID>
+    String name;
+    String language;
+    String type;
+    int order = 0;
+    List<String> folders;
+    boolean showOnFullscreen;
+    List<Series> series = new ArrayList<>();
+    Map<String, String> analyzedFiles = new HashMap<>();               //<File, DiscID>
+    Map<String, String> analyzedFolders = new HashMap<>();             //<Folder, SeriesID>
+    Map<String, String> seasonFolders = new HashMap<>();               //<Folder, SeasonID>
 
     public Library() {
         id = UUID.randomUUID().toString();
