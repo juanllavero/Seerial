@@ -52,7 +52,6 @@ public class DiscController {
     private Button playButton;
 
     public Episode episode;
-    private SeasonController parentController = null;
     private DesktopViewController desktopParent = null;
     public boolean discSelected = false;
     private String oldThumbnailPath = "";
@@ -84,17 +83,6 @@ public class DiscController {
                 if (event.getCode().equals(KeyCode.ENTER)){
                     if (desktopParent != null)
                         desktopParent.playEpisode(episode);
-                    else
-                        parentController.playEpisode(episode);
-                }
-            }
-        });
-
-        thumbnailStackPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
-            if (playButton.isVisible()){
-                if (event.getButton().equals(MouseButton.PRIMARY)){
-                    if (parentController != null)
-                        parentController.playEpisode(episode);
                 }
             }
         });
@@ -144,10 +132,6 @@ public class DiscController {
         img.setOnMouseEntered(e -> img.setOpacity(1));
 
         img.setOnMouseExited(e -> img.setOpacity(0.7));
-    }
-
-    public void setParent(SeasonController c){
-        parentController = c;
     }
 
     public void setDesktopParentParent(DesktopViewController c){
