@@ -1590,7 +1590,7 @@ public class DesktopViewController {
         boolean exists = false;
 
         if (library.getAnalyzedFolders().get(directory.getAbsolutePath()) != null){
-            series = library.getSeries(library.getAnalyzedFiles().get(directory.getAbsolutePath()));
+            series = library.getSeries(library.getAnalyzedFolders().get(directory.getAbsolutePath()));
             exists = true;
         }else{
             series = new Series();
