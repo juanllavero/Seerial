@@ -28,6 +28,7 @@ public class VideoPlayer extends MediaView {
     private final List<Track> videoTracks = new ArrayList<>();
     private final List<Track> audioTracks = new ArrayList<>();
     private final List<Track> subtitleTracks = new ArrayList<>();
+    private boolean nextVideo = false;
 
     public void setParent(VideoPlayerController parent){
         parentController = parent;
@@ -180,6 +181,11 @@ public class VideoPlayer extends MediaView {
         if (newCurrentTime != currentTimeMillis) {
             currentTimeMillis = newCurrentTime;
             parentController.notifyChanges(currentTimeMillis);
+        }
+
+        if (getDuration() - newCurrentTime <= 200 && !nextVideo){
+            nextVideo = true;
+            parentController.nextEpisode();
         }
     }
     public long getDuration() {

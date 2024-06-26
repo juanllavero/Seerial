@@ -839,6 +839,10 @@ public class VideoPlayerController {
         runtimeSlider.requestFocus();
     }
     public void nextEpisode(){
+        if (currentDisc + 1 >= episodeList.size() - 1){
+            stop();
+        }
+
         Episode episode = episodeList.get(currentDisc);
         episode.setTime(videoPlayer.getCurrentTime());
 

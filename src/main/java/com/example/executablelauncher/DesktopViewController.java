@@ -2096,6 +2096,7 @@ public class DesktopViewController {
     private void setEpisodeData(Library library, Episode episode, EpisodeMetadata episodeMetadata, Series show, int realEpisode){
         episode.setName(episodeMetadata.name);
         episode.setOverview(episodeMetadata.overview);
+        episode.setRuntime(episodeMetadata.runtime);
 
         if (realEpisode != -1)
             episode.setEpisodeNumber(realEpisode);

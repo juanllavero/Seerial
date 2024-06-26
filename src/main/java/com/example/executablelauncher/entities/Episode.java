@@ -127,18 +127,6 @@ public class Episode implements Serializable {
         this.imgSrc = imgSrc;
     }
 
-    public void setWatched(boolean watched) {
-        this.watched = watched;
-    }
-
-    public long getLastMilisecond() {
-        return lastMilisecond;
-    }
-
-    public void setLastMilisecond(long lastMilisecond) {
-        this.lastMilisecond = lastMilisecond;
-    }
-
     public void setWatched(){
         lastMilisecond = 0;
         watched = true;
