@@ -799,7 +799,12 @@ public class SeasonController {
             selectedEpisode.setWatched();
 
         reloadEpisodeCard();
+        updateWatchedButton();
+    }
 
+    public void setWatched(){
+        selectedEpisode.setWatched();
+        reloadEpisodeCard();
         updateWatchedButton();
     }
     private void updateWatchedButton(){

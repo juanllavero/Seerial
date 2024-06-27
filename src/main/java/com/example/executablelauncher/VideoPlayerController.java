@@ -778,6 +778,8 @@ public class VideoPlayerController {
         Episode episode = episodeList.get(currentDisc);
         episode.setTime(videoPlayer.getCurrentTime());
 
+        checkTimeWatched();
+
         for (Track aTrack : audioTracks)
             if (aTrack.selected && !aTrack.lang.isEmpty())
                 season.setAudioTrackLanguage(aTrack.lang);
@@ -838,6 +840,15 @@ public class VideoPlayerController {
         showControls();
         runtimeSlider.requestFocus();
     }
+    private void checkTimeWatched(){
+        Episode episode = episodeList.get(currentDisc);
+        episode.setTime(videoPlayer.getCurrentTime());
+
+        long runtimeMilliseconds = (long) episode.getRuntime() * 60 * 1000;
+        if (episode.getTimeWatched() > (runtimeMilliseconds * 0.9)){
+            parentController.setWatched();
+        }
+    }
     public void nextEpisode(){
         if (currentDisc + 1 >= episodeList.size() - 1){
             stop();
@@ -845,6 +856,8 @@ public class VideoPlayerController {
 
         Episode episode = episodeList.get(currentDisc);
         episode.setTime(videoPlayer.getCurrentTime());
+
+        checkTimeWatched();
 
         videoPlayer.stop();
 
@@ -857,6 +870,8 @@ public class VideoPlayerController {
             if (currentDisc > 0) {
                 Episode episode = episodeList.get(currentDisc);
                 episode.setTime(videoPlayer.getCurrentTime());
+
+                checkTimeWatched();
 
                 videoPlayer.stop();
 

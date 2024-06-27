@@ -143,8 +143,10 @@ public class Episode implements Serializable {
         lastMilisecond = miliseconds;
 
         //If we have watched more than 90% of the video, it is marked as watched
-        /*if (((runtime * 60L) - ((double) lastMilisecond / 100)) < (runtime * 60L * 0.1))
-            setWatched();*/
+        /*long runtimeMilliseconds = (long) runtime * 60 * 1000;
+        if (lastMilisecond > (runtimeMilliseconds * 0.9)){
+            setWatched();
+        }*/
     }
 
     public long getTimeWatched(){ return lastMilisecond; }
