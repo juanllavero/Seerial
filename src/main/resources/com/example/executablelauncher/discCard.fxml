@@ -49,6 +49,14 @@
                   <Insets left="5.0" top="5.0" />
                </StackPane.margin>
             </ImageView>
+            <ImageView fx:id="watched" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" visible="false" StackPane.alignment="TOP_RIGHT">
+               <image>
+                  <Image url="@../../../img/icons/watchedDesktop.png" />
+               </image>
+               <StackPane.margin>
+                  <Insets right="5.0" top="5.0" />
+               </StackPane.margin>
+            </ImageView>
          </children>
          <VBox.margin>
             <Insets bottom="5.0" />

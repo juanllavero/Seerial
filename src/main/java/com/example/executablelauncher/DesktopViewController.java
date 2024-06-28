@@ -95,6 +95,24 @@ import java.util.regex.Pattern;
 public class DesktopViewController {
     //region FXML ATTRIBUTES
     @FXML
+    private Button setWatchedSeries;
+
+    @FXML
+    private Button setWatchedSeason;
+
+    @FXML
+    private Button setWatchedEpisode;
+
+    @FXML
+    private Button setUnwatchedSeries;
+
+    @FXML
+    private Button setUnwatchedSeason;
+
+    @FXML
+    private Button setUnwatchedEpisode;
+
+    @FXML
     private Button addLibraryButton;
 
     @FXML
@@ -456,6 +474,12 @@ public class DesktopViewController {
         detailsText.setText(App.textBundle.getString("details"));
         yearText.setText(App.textBundle.getString("year"));
         orderText.setText(App.textBundle.getString("order"));
+        setWatchedSeries.setText(App.buttonsBundle.getString("markWatched"));
+        setWatchedSeason.setText(App.buttonsBundle.getString("markWatched"));
+        setWatchedEpisode.setText(App.buttonsBundle.getString("markWatched"));
+        setUnwatchedSeries.setText(App.buttonsBundle.getString("markUnwatched"));
+        setUnwatchedSeason.setText(App.buttonsBundle.getString("markUnwatched"));
+        setUnwatchedEpisode.setText(App.buttonsBundle.getString("markUnwatched"));
 
         if (currentLibrary != null && currentLibrary.getType().equals("Shows"))
             episodesText.setText(App.textBundle.getString("episodes"));
@@ -1004,6 +1028,17 @@ public class DesktopViewController {
             System.out.println("El sistema operativo es Linux.");
         }
 
+        //region SET WATCHED EPISODES
+        if (currentLibrary.getType().equals("Shows")){
+            int end = episodeList.indexOf(episode);
+
+            for (int i = 0; i < end; i++){
+                episodeList.get(i).setWatched();
+                episodesControllers.get(i).setWatched();
+            }
+        }
+        //endregion
+
         File player = new File("resources/lib/mpvnet.exe");
 
         try {
@@ -1028,6 +1063,52 @@ public class DesktopViewController {
             return (m + "m");
 
         return (h + "h " + m + "m");
+    }
+    @FXML
+    void setWatchedSeries(){
+        for (Season season : selectedSeries.getSeasons()){
+            setWatchedSeasonEpisodes(season);
+        }
+    }
+    @FXML
+    void setWatchedSeason(){
+        setWatchedSeasonEpisodes(selectedSeason);
+    }
+    @FXML
+    void setWatchedEpisode(){
+        selectedEpisode.setWatched();
+        episodesControllers.get(episodeList.indexOf(selectedEpisode)).setWatched();
+    }
+    @FXML
+    void setUnwatchedSeries(){
+        for (Season season : selectedSeries.getSeasons()){
+            setUnWatchedSeasonEpisodes(season);
+        }
+    }
+    @FXML
+    void setUnwatchedSeason(){
+        setUnWatchedSeasonEpisodes(selectedSeason);
+    }
+    @FXML
+    void setUnwatchedEpisode(){
+        selectedEpisode.setUnWatched();
+        episodesControllers.get(episodeList.indexOf(selectedEpisode)).setWatched();
+    }
+    private void setWatchedSeasonEpisodes(Season season){
+        for (Episode ep : season.getEpisodes()) {
+            ep.setUnWatched();
+
+            if (selectedSeason == season)
+                episodesControllers.get(episodeList.indexOf(ep)).setWatched();
+        }
+    }
+    private void setUnWatchedSeasonEpisodes(Season season){
+        for (Episode ep : season.getEpisodes()) {
+            ep.setUnWatched();
+
+            if (selectedSeason == season)
+                episodesControllers.get(episodeList.indexOf(ep)).setWatched();
+        }
     }
     //endregion
 

@@ -46,6 +46,9 @@ public class DiscController {
     private ImageView thumbnailShadow;
 
     @FXML
+    private ImageView watched;
+
+    @FXML
     private StackPane thumbnailStackPane;
 
     @FXML
@@ -66,6 +69,9 @@ public class DiscController {
         }
 
         episode = d;
+
+        //Enable/Disable watched icon
+        setWatched();
 
         clearSelection();
         if (!d.getImgSrc().isEmpty())
@@ -126,6 +132,10 @@ public class DiscController {
         playButton.setOnMouseExited(e -> {
             playImage.setImage(new Image("file:resources/img/icons/play.png"));
         });
+    }
+
+    public void setWatched(){
+        watched.setVisible(episode.isWatched());
     }
 
     private void setHoverButtons(ImageView img){

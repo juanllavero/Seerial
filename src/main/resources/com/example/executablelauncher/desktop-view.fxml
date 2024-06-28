@@ -473,6 +473,16 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
+                  <Button fx:id="setWatchedSeries" alignment="BASELINE_LEFT" graphicTextGap="10.0" layoutX="12.0" layoutY="12.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#setWatchedSeries" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Mark as watched" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="setUnwatchedSeries" alignment="BASELINE_LEFT" graphicTextGap="10.0" layoutX="10.0" layoutY="42.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#setUnwatchedSeries" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Mark as unwatched" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
                   <Button fx:id="identificationShow" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#correctIdentificationShow" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Correct identification" textFill="WHITE">
                      <font>
                         <Font size="14.0" />
@@ -506,6 +516,16 @@
                         <Font size="14.0" />
                      </font>
                   </Button>
+                  <Button fx:id="setWatchedSeason" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#setWatchedSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Mark as watched" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="setUnwatchedSeason" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#setUnwatchedSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Mark as unwatched" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
                   <Button fx:id="identificationMovie" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#correctIdentificationMovie" onMouseClicked="#editSeason" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Correct identification" textFill="WHITE">
                      <font>
                         <Font size="14.0" />
@@ -530,6 +550,16 @@
                      <VBox.margin>
                         <Insets left="2.0" right="2.0" />
                      </VBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="setWatchedEpisode" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#setWatchedEpisode" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Mark as watched" textFill="WHITE">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="setUnwatchedEpisode" alignment="BASELINE_LEFT" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onMouseClicked="#setUnwatchedEpisode" styleClass="desktopMenuButtons" stylesheets="@styles.css" text="Mark as unwatched" textFill="WHITE">
                      <font>
                         <Font size="14.0" />
                      </font>
