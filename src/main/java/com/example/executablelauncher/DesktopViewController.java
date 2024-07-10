@@ -1582,6 +1582,8 @@ public class DesktopViewController {
             searchFilesButton.setDisable(false);
             addLibraryButton.setDisable(false);
 
+            clearImageCache();
+
             downloadingContentWindow.setVisible(false);
             downloadDefaultMusic(library);
         }
@@ -3305,7 +3307,7 @@ public class DesktopViewController {
         if (currentLibrary == null)
             return;
 
-        Stage stage = showConfirmationWindow(App.textBundle.getString("removeElement"), App.textBundle.getString("removeElementMessage"));
+        Stage stage = showConfirmationWindow(App.textBundle.getString("removeLibrary"), App.textBundle.getString("removeLibraryMessage"));
         stage.showAndWait();
 
         if (acceptRemove){
