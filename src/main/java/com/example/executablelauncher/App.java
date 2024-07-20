@@ -22,10 +22,7 @@ import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -184,11 +181,22 @@ public class App extends Application {
     }
 
     public static void isInternetAvailable() {
+        HttpURLConnection connection = null;
         try {
-            InetAddress address = InetAddress.getByName("www.google.com");
-            isConnectedToInternet = address.isReachable(2000);
+            URL url = new URL("http://www.google.com");
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.setConnectTimeout(2000);
+            connection.setReadTimeout(2000);
+            int responseCode = connection.getResponseCode();
+            isConnectedToInternet = (200 <= responseCode && responseCode <= 399);
         } catch (IOException e) {
             System.err.println("isInternetAvailable: no internet connection");
+            isConnectedToInternet = false;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
