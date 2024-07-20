@@ -94,5 +94,5 @@ This software is required in order for the application to run.
 -   `v1.0`  - old branch with the previous version of the application. It lacks automated file search, music search, the video player and a lot of fullscreen functionality.
 
 ## Localization
-Localization is done with the help of Java's **ResourceBundle**, having two groups of `.properties` files in the folder `src/main/resources/`.  These groups are for **buttons** and **text**, and additional languages can be added just by creating another file in each group.
+Localization is done with the help of Java's **ResourceBundle**, having two groups of `.properties` files in the folder `resources/`.  These groups are for **buttons** and **text**, and additional languages can be added just by creating another file in each group.
 
