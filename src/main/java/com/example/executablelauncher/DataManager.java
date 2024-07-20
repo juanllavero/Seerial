@@ -14,6 +14,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +28,16 @@ public class DataManager {
 
     //region LOAD/SAVE DATA
     public void loadData(){
+        //Create empty folders
+        createFolder("resources/music");
+        createFolder("resources/downloadedMediaCache");
+        createFolder("resources/img/chaptersCovers");
+        createFolder("resources/img/backgrounds");
+        createFolder("resources/img/discCovers");
+        createFolder("resources/img/logos");
+        createFolder("resources/img/seriesCovers");
+        createFolder("resources/img/DownloadCache");
+
         try{
             JsonReader reader = new JsonReader(new FileReader(LOCAL_FILE));
             Type type = new TypeToken<List<Library>>() {}.getType();
@@ -73,6 +84,12 @@ public class DataManager {
         } catch (IOException e) {
             System.err.println("createEmptyJson: data.json could not be created");
         }
+    }
+    public void createFolder(String dir){
+        File folder = new File(dir);
+
+        if (!folder.exists())
+            folder.mkdirs();
     }
     //endregion
 

@@ -20,6 +20,7 @@ import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbTvEpisodes;
 import info.movito.themoviedbapi.TvResultsPage;
 import info.movito.themoviedbapi.model.Artwork;
+import info.movito.themoviedbapi.model.Data;
 import info.movito.themoviedbapi.model.MovieImages;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import javafx.animation.FadeTransition;
@@ -852,11 +853,7 @@ public class DesktopViewController {
 
     //region EFFECTS AND MODIFICATIONS
     public void saveBackground(Season s, String imageToCopy){
-        try{
-            Files.createDirectories(Paths.get("resources/img/backgrounds/" + s.getId() + "/"));
-        } catch (IOException e) {
-            System.err.println("saveBackground: Directory could not be created");
-        }
+        DataManager.INSTANCE.createFolder("resources/img/backgrounds/" + s.getId() + "/");
 
         //Clear old images
         File dir = new File("resources/img/backgrounds/" + s.getId());
@@ -1323,11 +1320,7 @@ public class DesktopViewController {
                             Path sourcePath = Paths.get(posterDir.toURI());
                             Path destinationPath = Paths.get("resources/img/seriesCovers/" + selectedSeries.getId() + "/0.jpg");
 
-                            try{
-                                Files.createDirectories(Paths.get("resources/img/seriesCovers/" + selectedSeries.getId() + "/"));
-                            } catch (IOException e) {
-                                System.err.println("correctIdentificationMovie: series covers folder could not be created");
-                            }
+                            DataManager.INSTANCE.createFolder("resources/img/seriesCovers/" + selectedSeries.getId() + "/");
 
                             try {
                                 Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
@@ -2185,14 +2178,7 @@ public class DesktopViewController {
                     }
                 }
 
-                File directory = new File("resources/img/chaptersCovers/" + episode.getId() + "/");
-                if (!directory.exists()){
-                    try{
-                        Files.createDirectories(directory.toPath());
-                    } catch (IOException e) {
-                        System.err.println("generateThumbnail: Error creating directory");
-                    }
-                }
+                DataManager.INSTANCE.createFolder("resources/img/chaptersCovers/" + episode.getId() + "/");
             }
 
             process.waitFor();
@@ -2214,11 +2200,8 @@ public class DesktopViewController {
         episode.setScore((float) ((int) (episodeMetadata.vote_average * 10.0)) / 10.0f);
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
-        try{
-            Files.createDirectories(Paths.get("resources/img/discCovers/" + episode.getId() + "/"));
-        } catch (IOException e) {
-            System.err.println("setEpisodeData: Directory could not be created");
-        }
+        //Create folder for episode thumbnails
+        DataManager.INSTANCE.createFolder("resources/img/discCovers/" + episode.getId() + "/");
 
         MovieImages images = tmdbApi.getTvEpisodes().getEpisode(show.getThemdbID(), episodeMetadata.season_number, episodeMetadata.episode_number, null, TmdbTvEpisodes.EpisodeMethod.images).getImages();
         List<Artwork> thumbnails = images.getStills();
@@ -2258,11 +2241,7 @@ public class DesktopViewController {
         }
     }
     private void saveCover(String id, int i, String originalImage) {
-        try{
-            Files.createDirectories(Paths.get("resources/img/seriesCovers/" + id + "/"));
-        } catch (IOException e) {
-            System.err.println("Directory could not be created");
-        }
+        DataManager.INSTANCE.createFolder("resources/img/seriesCovers/" + id + "/");
 
         try{
             URI uri = new URI(originalImage);
@@ -2285,11 +2264,7 @@ public class DesktopViewController {
         }
     }
     private void saveLogo(String id, int i, String urlImage) {
-        try{
-            Files.createDirectories(Paths.get("resources/img/logos/" + id + "/"));
-        } catch (IOException e) {
-            System.err.println("Directory could not be created");
-        }
+        DataManager.INSTANCE.createFolder("resources/img/logos/" + id + "/");
 
         try  {
             URI uri = new URI(urlImage);
@@ -2750,11 +2725,7 @@ public class DesktopViewController {
     private void setMovieThumbnail(Episode episode, int themdbID){
         String imageBaseURL = "https://image.tmdb.org/t/p/original";
 
-        try{
-            Files.createDirectories(Paths.get("resources/img/discCovers/" + episode.getId() + "/"));
-        } catch (IOException e) {
-            System.err.println("setEpisodeData: Directory could not be created");
-        }
+        DataManager.INSTANCE.createFolder("resources/img/discCovers/" + episode.getId() + "/");
 
         MovieImages images = tmdbApi.getMovies().getImages(themdbID, null);
         List<Artwork> thumbnails = images.getBackdrops();
@@ -3063,7 +3034,7 @@ public class DesktopViewController {
         String seasonID = season.getId();
 
         try {
-            Files.createDirectories(Paths.get("resources/downloadedMediaCache/" + seasonID + "/"));
+            DataManager.INSTANCE.createFolder("resources/downloadedMediaCache/" + seasonID + "/");
             File directory = new File("resources/downloadedMediaCache/" + seasonID + "/");
 
             ProcessBuilder pb;
