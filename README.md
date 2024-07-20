@@ -79,12 +79,12 @@ If a folder contains various video files, it will be cataloged as a movie with e
 - m2ts
 
 ## Installation
-Portable versions exist for Windows, Linux and MacOS.
+Portable versions exist for Windows and Linux.
 
 ### Requirements
 This software is required in order for the application to run.
 
-- Java 8.
+- JavaFX 22 or newer.
 - Python 3.
 - Python Pytube (pip install pytube).
 
