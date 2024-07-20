@@ -201,7 +201,7 @@ public class DataManager {
     }
     public void deleteEpisodeData(Episode episode){
         try{
-            FileUtils.deleteDirectory(new File("resources/img/discCovers/" + episode.getId()));
+            FileUtils.forceDelete(new File("resources/img/discCovers/" + episode.getId()));
         } catch (IOException e) {
             System.err.println("App.removeDisc: Error deleting directory: resources/img/discCovers/" + episode.getId());
         }

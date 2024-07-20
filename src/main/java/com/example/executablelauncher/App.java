@@ -75,7 +75,7 @@ public class App extends Application {
             }
         }
 
-        isConnectedToInternet = isInternetAvailable();
+        isInternetAvailable();
 
         //Check every minute if there is Internet connection
         executorService = Executors.newSingleThreadScheduledExecutor();
@@ -183,12 +183,12 @@ public class App extends Application {
         Platform.exit();
     }
 
-    public static boolean isInternetAvailable() {
+    public static void isInternetAvailable() {
         try {
             InetAddress address = InetAddress.getByName("www.google.com");
-            return address.isReachable(2000);
+            isConnectedToInternet = address.isReachable(2000);
         } catch (IOException e) {
-            return false;
+            System.err.println("isInternetAvailable: no internet connection");
         }
     }
 

@@ -335,7 +335,7 @@ public class DesktopViewController {
     public void initValues(){
         Stage stage = (Stage) mainBox.getScene().getWindow();
 
-        if (App.isInternetAvailable())
+        if (App.isConnectedToInternet)
             tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
 
         selectionOptions.setVisible(false);
@@ -734,6 +734,8 @@ public class DesktopViewController {
             seasonsButtons.get(seasonList.indexOf(selectedSeason)).setText(selectedSeason.getName());
             selectedSeason = null;
             selectSeason(s);
+
+            DataManager.INSTANCE.saveData();
         });
     }
     //endregion
@@ -1033,7 +1035,9 @@ public class DesktopViewController {
             int end = episodeList.indexOf(episode);
 
             for (int i = 0; i < end; i++){
-                episodeList.get(i).setWatched();
+                if (!episodeList.get(i).isWatched())
+                    episodeList.get(i).setWatched();
+
                 episodesControllers.get(i).setWatched();
             }
         }
@@ -1066,48 +1070,65 @@ public class DesktopViewController {
     }
     @FXML
     void setWatchedSeries(){
+        hideMenu();
         for (Season season : selectedSeries.getSeasons()){
             setWatchedSeasonEpisodes(season);
         }
     }
     @FXML
     void setWatchedSeason(){
+        hideMenu();
         setWatchedSeasonEpisodes(selectedSeason);
     }
     @FXML
     void setWatchedEpisode(){
+        hideMenu();
         selectedEpisode.setWatched();
         episodesControllers.get(episodeList.indexOf(selectedEpisode)).setWatched();
+
+        updateDisc(selectedEpisode);
+    }
+    @FXML
+    void setUnwatchedEpisode(){
+        hideMenu();
+        selectedEpisode.setUnWatched();
+        episodesControllers.get(episodeList.indexOf(selectedEpisode)).setWatched();
+
+        updateDisc(selectedEpisode);
     }
     @FXML
     void setUnwatchedSeries(){
+        hideMenu();
         for (Season season : selectedSeries.getSeasons()){
             setUnWatchedSeasonEpisodes(season);
         }
     }
     @FXML
     void setUnwatchedSeason(){
+        hideMenu();
         setUnWatchedSeasonEpisodes(selectedSeason);
     }
-    @FXML
-    void setUnwatchedEpisode(){
-        selectedEpisode.setUnWatched();
-        episodesControllers.get(episodeList.indexOf(selectedEpisode)).setWatched();
-    }
+
     private void setWatchedSeasonEpisodes(Season season){
+        hideMenu();
         for (Episode ep : season.getEpisodes()) {
-            ep.setUnWatched();
+            ep.setWatched();
 
             if (selectedSeason == season)
                 episodesControllers.get(episodeList.indexOf(ep)).setWatched();
+
+            updateDisc(ep);
         }
     }
     private void setUnWatchedSeasonEpisodes(Season season){
+        hideMenu();
         for (Episode ep : season.getEpisodes()) {
             ep.setUnWatched();
 
             if (selectedSeason == season)
                 episodesControllers.get(episodeList.indexOf(ep)).setWatched();
+
+            updateDisc(ep);
         }
     }
     //endregion
@@ -1242,7 +1263,7 @@ public class DesktopViewController {
                 Season season = selectedSeries.getSeasons().get(0);
 
                 //Process background music
-                List<YoutubeVideo> results = searchYoutube(season.getName() + " main theme");
+                List<YoutubeVideo> results = searchYoutube(selectedSeries.getName() + " main theme");
 
                 if (results != null)
                     downloadMedia(season, results.get(0).watch_url);
@@ -1576,8 +1597,11 @@ public class DesktopViewController {
     private void postFileSearch(Library library){
         numFilesToCheck--;
         if (numFilesToCheck == 0) {
+            DataManager.INSTANCE.saveData();
+
             //Restore library buttons
             editLibraryButton.setDisable(false);
+            removeLibraryButton.setDisable(false);
             removeLibraryButton.setDisable(false);
             searchFilesButton.setDisable(false);
             addLibraryButton.setDisable(false);
@@ -1619,7 +1643,7 @@ public class DesktopViewController {
                         if (!season.getMusicSrc().isEmpty())
                             continue;
 
-                        List<YoutubeVideo> results = searchYoutube(series.getName() + " main theme");
+                        List<YoutubeVideo> results = searchYoutube(season.getName() + " main theme");
 
                         if (results != null)
                             downloadMedia(season, results.get(0).watch_url);
@@ -3051,8 +3075,7 @@ public class DesktopViewController {
             Process process = pb.start();
             process.waitFor();
 
-            File mediaCahceDir = new File("resources/downloadedMediaCache/" + season.getId() + "/");
-            File[] filesInMediaCache = mediaCahceDir.listFiles();
+            File[] filesInMediaCache = directory.listFiles();
 
             if (filesInMediaCache != null && filesInMediaCache.length != 0){
                 File audioFile = filesInMediaCache[0];
@@ -3061,9 +3084,7 @@ public class DesktopViewController {
                     Files.copy(audioFile.toPath(), Paths.get("resources/music/" + season.getId() + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
                     season.setMusicSrc("resources/music/" + season.getId() + ".mp4");
 
-                    File dir = new File("resources/downloadedMediaCache/" + season.getId() + "/");
-                    FileUtils.deleteDirectory(directory);
-                    FileUtils.deleteDirectory(dir);
+                    FileUtils.forceDelete(directory);
                 } catch (IOException error) {
                     System.err.println("downloadMedia: Could not copy downloaded audio file");
                     return false;
@@ -3080,6 +3101,8 @@ public class DesktopViewController {
 
     //region ADD SECTION
     public void updateSeries(){
+        DataManager.INSTANCE.saveData();
+
         Button btn = seriesButtons.get(seriesList.indexOf(selectedSeries));
         btn.setText(selectedSeries.getName());
 
@@ -3097,8 +3120,6 @@ public class DesktopViewController {
     public void addSeries(Library library, Series s){
         Platform.runLater(() ->
         {
-            DataManager.INSTANCE.checkEmptySeasons(currentLibrary, s, true);
-
             if (s.getSeasons().isEmpty())
                 return;
 
@@ -3106,6 +3127,8 @@ public class DesktopViewController {
 
             if (currentLibrary == library)
                 addSeriesCard(s);
+
+            DataManager.INSTANCE.saveData();
         });
     }
     private void addSeriesCard(Series s){
@@ -3169,6 +3192,8 @@ public class DesktopViewController {
         }
     }
     public void updateDisc(Episode d){
+        DataManager.INSTANCE.saveData();
+
         for (DiscController discController : episodesControllers) {
             if (discController.episode.getId().equals(d.getId())){
                 discController.setData(d);

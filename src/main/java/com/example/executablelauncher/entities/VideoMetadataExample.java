@@ -1,5 +1,6 @@
 package com.example.executablelauncher.entities;
 
+import com.example.executablelauncher.App;
 import com.example.executablelauncher.VideoPlayerController;
 import com.example.executablelauncher.fileMetadata.ChaptersContainer;
 import com.example.executablelauncher.tmdbMetadata.images.Images;
@@ -7,6 +8,7 @@ import com.example.executablelauncher.tmdbMetadata.movies.MovieMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.effect.BoxBlur;
@@ -21,6 +23,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import javax.imageio.*;
@@ -35,6 +38,7 @@ import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -74,12 +78,105 @@ public class VideoMetadataExample extends Application {
 
         setTransparencyEffect(inputImagePath, outputImagePath);*/
 
-        MovieMetadata movieMetadata = downloadMovieMetadata(525);
+        /*MovieMetadata movieMetadata = downloadMovieMetadata(525);
 
         if (movieMetadata != null)
-            System.out.println(movieMetadata.title);
+            System.out.println(movieMetadata.title);*/
+
+        downloadDefaultMusic();
     }
 
+    public static void downloadDefaultMusic(){
+        Task<Void> musicDownloadTask = new Task<>() {
+            @Override
+            protected Void call() {
+                List<YoutubeVideo> results = searchYoutube("The Lord of the Rings" + " main theme");
+
+                if (results != null)
+                    downloadMedia(results.get(0).watch_url);
+                return null;
+            }
+        };
+
+        Thread thread = new Thread(musicDownloadTask);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    public static List<YoutubeVideo> searchYoutube(String videoName){
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("python", "resources/python/YoutubeSearch.py", videoName);
+            processBuilder.redirectErrorStream(true);
+            Process process = processBuilder.start();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            StringBuilder output = new StringBuilder();
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+
+            String regex = "\\[\\{\".*?\"\\}\\]";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(output);
+
+            YoutubeVideo[] searchResults = null;
+            if (matcher.find()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                searchResults = objectMapper.readValue(matcher.group(0), YoutubeVideo[].class);
+            }
+
+            process.waitFor();
+
+            if (searchResults != null)
+                return List.of(searchResults);
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error searching in youtube");
+        }
+
+        return null;
+    }
+
+    public static boolean downloadMedia(String url){
+        System.out.println(url);
+
+        try {
+            Files.createDirectories(Paths.get("resources/downloadedMediaCache/" + "IDPRUEBA" + "/"));
+            File directory = new File("resources/downloadedMediaCache/" + "IDPRUEBA" + "/");
+
+            ProcessBuilder pb;
+            pb = new ProcessBuilder("pytube"
+                    , url
+                    , "-a", "-t", directory.getAbsolutePath());
+
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            process.waitFor();
+
+            File[] filesInMediaCache = directory.listFiles();
+
+            if (filesInMediaCache != null && filesInMediaCache.length != 0){
+                File audioFile = filesInMediaCache[0];
+
+                try{
+                    Files.copy(audioFile.toPath(), Paths.get("resources/music/" + "IDPRUEBA" + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
+
+                    //FileUtils.forceDelete(directory);
+                } catch (IOException error) {
+                    System.err.println("downloadMedia: Could not copy downloaded audio file");
+                    return false;
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            System.err.println("downloadMedia: Error downloading media");
+            return false;
+        }
+
+        return true;
+    }
+
+    //region TEST
     public static MovieMetadata downloadMovieMetadata(int tmdbID){
         try{
             OkHttpClient client = new OkHttpClient();
@@ -107,48 +204,6 @@ public class VideoMetadataExample extends Application {
         }
 
         return null;
-    }
-
-    private static void setTransparencyEffect(String src, String outputPath) {
-        try {
-            BufferedImage originalImage = ImageIO.read(new File(src));
-            int width = originalImage.getWidth();
-            int height = originalImage.getHeight();
-
-            // Calcular el ancho escalado manteniendo la relación de aspecto original
-            int scaledWidth = (int) ((double) width / height * 720);
-
-            // Redimensionar la imagen original con una altura de 1080 píxeles y el ancho calculado
-            BufferedImage scaledImage = new BufferedImage(scaledWidth, 720, BufferedImage.TYPE_INT_ARGB); // Cambiar a BufferedImage.TYPE_INT_ARGB
-            Graphics2D graphics2D = scaledImage.createGraphics();
-            graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            graphics2D.drawImage(originalImage, 0, 0, scaledWidth, 720, null);
-            graphics2D.dispose();
-
-            BufferedImage blendedImage = new BufferedImage(scaledWidth, 720, BufferedImage.TYPE_INT_ARGB); // Cambiar a BufferedImage.TYPE_INT_ARGB
-
-            for (int y = 0; y < 720; y++) {
-                float opacity = 1.0f - ((float) y / (720 / 1.15f));
-                opacity = Math.min(1.0f, Math.max(0.0f, opacity));
-
-                for (int x = 0; x < scaledWidth; x++) {
-                    java.awt.Color originalColor = new java.awt.Color(scaledImage.getRGB(x, y), true);
-                    int blendedAlpha = (int) (originalColor.getAlpha() * opacity);
-                    java.awt.Color blendedColor = new java.awt.Color(originalColor.getRGB() & 0xFFFFFF | blendedAlpha << 24, true);
-
-                    blendedImage.setRGB(x, y, blendedColor.getRGB());
-                }
-            }
-
-            File outputFilePath = new File(outputPath);
-            ImageIO.write(blendedImage, "png", outputFilePath);
-
-            originalImage.flush();
-            scaledImage.flush();
-            blendedImage.flush();
-        } catch (IOException e) {
-            System.err.println("setTransparencyEffect: error applying transparency effect to background");
-        }
     }
 
     private static void getChapters(Episode episode){
@@ -272,6 +327,8 @@ public class VideoMetadataExample extends Application {
             e.printStackTrace();
         }
     }
+
+    //endregion
 
     @Override
     public void start(Stage primaryStage) throws Exception {
