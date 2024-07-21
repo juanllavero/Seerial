@@ -20,7 +20,6 @@ import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbTvEpisodes;
 import info.movito.themoviedbapi.TvResultsPage;
 import info.movito.themoviedbapi.model.Artwork;
-import info.movito.themoviedbapi.model.Data;
 import info.movito.themoviedbapi.model.MovieImages;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
 import javafx.animation.FadeTransition;
@@ -28,8 +27,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.concurrent.Task;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -43,11 +40,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -87,9 +81,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -324,6 +318,7 @@ public class DesktopViewController {
     private boolean acceptRemove = false;
     private static int numFilesToCheck = 0;
     private boolean searchingForFiles = false;
+    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     //endregion
 
     //region THEMOVIEDB ATTRIBUTES
@@ -855,14 +850,6 @@ public class DesktopViewController {
     public void saveBackground(Season s, String imageToCopy){
         DataManager.INSTANCE.createFolder("resources/img/backgrounds/" + s.getId() + "/");
 
-        //Clear old images
-        File dir = new File("resources/img/backgrounds/" + s.getId());
-        if (dir.exists()) {
-            deleteFile(s.getBackgroundSrc());
-            deleteFile("resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg");
-            deleteFile("resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
-        }
-
         //Compress and save image file
         File destination = new File("resources/img/backgrounds/" + s.getId() + "/background.jpg");
         try{
@@ -878,16 +865,6 @@ public class DesktopViewController {
 
         setTransparencyEffect(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
         processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg", "resources/img/DownloadCache/" + s.getId() + ".png");
-    }
-    private void deleteFile(String filePath) {
-        try {
-            Path path = Paths.get(filePath);
-            if (Files.exists(path)) {
-                Files.delete(path);
-            }
-        } catch (IOException e) {
-            System.err.println("deleteFile: Error removing file: " + e.getMessage());
-        }
     }
     private static void setTransparencyEffect(String src, String outputPath) {
         try {
@@ -1176,6 +1153,7 @@ public class DesktopViewController {
     //region WINDOW
     @FXML
     private void closeWindow(){
+        executor.shutdown();
         App.close();
     }
     //endregion
@@ -1237,64 +1215,58 @@ public class DesktopViewController {
         showBackgroundShadow();
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
-        Task<Void> correctIS = new Task<>() {
-            @Override
-            protected Void call() {
+
+        executor.submit(() -> {
+            try {
                 File folder = new File(selectedSeries.getFolder());
                 File[] filesInFolder = folder.listFiles();
 
-                if (filesInFolder == null)
-                    return null;
+                if (filesInFolder == null) return;
 
-                //Remove Series Data
+                // Remove Series Data
                 DataManager.INSTANCE.deleteSeriesData(selectedSeries);
                 selectedSeries.getSeasons().clear();
 
-                //Scan Series
+                // Scan Series
                 scanTVShow(currentLibrary, folder, filesInFolder, true);
 
-                if (selectedSeries.getSeasons().isEmpty()) {
-                    return null;
-                }
+                if (selectedSeries.getSeasons().isEmpty())
+                    return;
 
                 Season season = selectedSeries.getSeasons().get(0);
 
-                //Process background music
+                // Process background music
                 List<YoutubeVideo> results = searchYoutube(selectedSeries.getName() + " main theme");
 
                 if (results != null)
                     downloadMedia(season, results.get(0).watch_url);
 
-                return null;
+                Platform.runLater(() -> {
+                    downloadingContentWindowStatic.setVisible(false);
+                    hideBackgroundShadow();
+                    refreshSeries();
+                });
+
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    downloadingContentWindowStatic.setVisible(false);
+                    hideBackgroundShadow();
+                    refreshSeries();
+                });
             }
-        };
-
-        correctIS.setOnSucceeded(e -> {
-            downloadingContentWindowStatic.setVisible(false);
-            hideBackgroundShadow();
-            refreshSeries();
         });
-        correctIS.setOnFailed(e -> {
-            downloadingContentWindowStatic.setVisible(false);
-            hideBackgroundShadow();
-            refreshSeries();
-        });
-
-        Thread thread = new Thread(correctIS);
-        thread.setDaemon(true);
-        thread.start();
     }
     public void correctIdentificationMovie(){
         showBackgroundShadow();
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
-        Task<Void> correctIM = new Task<>() {
-            @Override
-            protected Void call() {
+
+        executor.submit(() -> {
+            try {
                 MovieMetadata metadata = downloadMovieMetadata(currentLibrary, selectedSeason.getThemdbID());
 
                 if (metadata == null)
-                    return null;
+                    return;
 
                 selectedSeason.setName(metadata.title);
                 selectedSeason.setOverview(metadata.overview);
@@ -1311,12 +1283,12 @@ public class DesktopViewController {
                     loadImages(currentLibrary, selectedSeason.getId(), images, selectedSeason.getThemdbID(), false);
 
                 File posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
-                if (posterDir.exists()){
+                if (posterDir.exists()) {
                     selectedSeason.setCoverSrc("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
 
-                    if (selectedSeries.getSeasons().size() == 1 || selectedSeries.getCoverSrc().equals("resources/img/DefaultPoster.png") || selectedSeries.getCoverSrc().isEmpty()){
+                    if (selectedSeries.getSeasons().size() == 1 || selectedSeries.getCoverSrc().equals("resources/img/DefaultPoster.png") || selectedSeries.getCoverSrc().isEmpty()) {
                         posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
-                        if (posterDir.exists()){
+                        if (posterDir.exists()) {
                             Path sourcePath = Paths.get(posterDir.toURI());
                             Path destinationPath = Paths.get("resources/img/seriesCovers/" + selectedSeries.getId() + "/0.jpg");
 
@@ -1336,18 +1308,18 @@ public class DesktopViewController {
                 downloadLogos(currentLibrary, selectedSeries, selectedSeason, selectedSeason.getThemdbID());
                 saveBackground(selectedSeason, "resources/img/DownloadCache/" + selectedSeason.getThemdbID() + ".jpg");
 
-                //Process background music
+                // Process background music
                 List<YoutubeVideo> results = searchYoutube(selectedSeason.getName() + " main theme");
 
                 if (results != null)
                     downloadMedia(selectedSeason, results.get(0).watch_url);
 
-                if (selectedSeason.getEpisodes().size() == 1){
+                if (selectedSeason.getEpisodes().size() == 1) {
                     Episode episode = selectedSeason.getEpisodes().get(0);
                     episode.setName(selectedSeason.getName());
                 }
 
-                for (Episode episode : selectedSeason.getEpisodes()){
+                for (Episode episode : selectedSeason.getEpisodes()) {
                     if (episode == null)
                         continue;
 
@@ -1364,22 +1336,19 @@ public class DesktopViewController {
                 }
 
                 refreshSeason(selectedSeason);
-                return null;
+
+                Platform.runLater(() -> {
+                    downloadingContentWindowStatic.setVisible(false);
+                    hideBackgroundShadow();
+                });
+
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    downloadingContentWindowStatic.setVisible(false);
+                    hideBackgroundShadow();
+                });
             }
-        };
-
-        correctIM.setOnSucceeded(e -> {
-            downloadingContentWindowStatic.setVisible(false);
-            hideBackgroundShadow();
         });
-        correctIM.setOnFailed(e -> {
-            downloadingContentWindowStatic.setVisible(false);
-            hideBackgroundShadow();
-        });
-
-        Thread thread = new Thread(correctIM);
-        thread.setDaemon(true);
-        thread.start();
     }
     public void setCorrectIdentificationShow(int newID){
         seriesMetadataToCorrect = true;
@@ -1426,55 +1395,51 @@ public class DesktopViewController {
         showBackgroundShadow();
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
-        Task<Void> changeEG = new Task<>() {
-            @Override
-            protected Void call() {
+
+        executor.submit(() -> {
+            try {
                 File folder = new File(selectedSeries.getFolder());
                 File[] filesInFolder = folder.listFiles();
 
                 if (filesInFolder == null)
-                    return null;
+                    return;
 
-                //Remove Seasons
+                // Remove Seasons
                 for (Season season : selectedSeries.getSeasons())
                     DataManager.INSTANCE.deleteSeasonData(season);
                 selectedSeries.getSeasons().clear();
 
-                //Scan Series
+                // Scan Series
                 scanTVShow(currentLibrary, folder, filesInFolder, false);
 
                 if (selectedSeries.getSeasons().isEmpty()) {
-                    return null;
+                    return;
                 }
 
                 Season season = selectedSeries.getSeasons().get(0);
 
-                //Process background music
+                // Process background music
                 List<YoutubeVideo> results = searchYoutube(season.getName() + " main theme");
 
                 if (results != null)
                     downloadMedia(season, results.get(0).watch_url);
 
-                return null;
+                Platform.runLater(() -> {
+                    downloadingContentWindowStatic.setVisible(false);
+                    changeEpisodeGroup = false;
+                    hideBackgroundShadow();
+                    refreshSeries();
+                });
+
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    downloadingContentWindowStatic.setVisible(false);
+                    changeEpisodeGroup = false;
+                    hideBackgroundShadow();
+                    refreshSeries();
+                });
             }
-        };
-
-        changeEG.setOnSucceeded(e -> {
-            downloadingContentWindowStatic.setVisible(false);
-            changeEpisodeGroup = false;
-            hideBackgroundShadow();
-            refreshSeries();
         });
-        changeEG.setOnFailed(e -> {
-            downloadingContentWindowStatic.setVisible(false);
-            changeEpisodeGroup = false;
-            hideBackgroundShadow();
-            refreshSeries();
-        });
-
-        Thread thread = new Thread(changeEG);
-        thread.setDaemon(true);
-        thread.start();
     }
     //endregion
 
@@ -1523,138 +1488,131 @@ public class DesktopViewController {
     private void searchFilesTask(Library library){
         downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
 
-        List<String> folders = library.getFolders();
+        //Get every file and folder from within the root folders
+        List<File> files = getFiles(library);
 
-        for (String folderSrc : folders){
-            File folder = new File(folderSrc);
+        if (files.isEmpty())
+            return;
 
-            if (!folder.exists())
-                return;
+        numFilesToCheck = files.size();
 
-            File[] files = folder.listFiles();
-
-            if (files == null)
-                return;
-
-            List<File> filesList = Arrays.stream(files).toList();
-
-            int totalSize = filesList.size();
-            int midElement = totalSize / 2;
-
-            if (totalSize <= 1){
-                numFilesToCheck = 1;
-                loadHalfTask(library, filesList, 0, totalSize);
-            }else{
-                numFilesToCheck = 2;
-                loadHalfTask(library, filesList, 0, midElement);
-                loadHalfTask(library, filesList, midElement, totalSize);
-            }
-        }
-    }
-    private void loadHalfTask(Library library, List<File> files, int start, int end){
-        Task<Void> loadHalfTask = new Task<>() {
-            @Override
-            protected Void call() {
-                for (int i = start; i < end; i++){
-                    if (isCancelled())
-                        break;
-
-                    File file = files.get(i);
+        //Execute a new thread for each file
+        for (File file : files) {
+            executor.submit(() -> {
+                try {
+                    // To break the execution when the task is cancelled
+                    if (Thread.currentThread().isInterrupted())
+                        return;
 
                     if (library.getType().equals("Shows")) {
                         if (file.isFile())
-                            continue;
+                            return;
 
                         File[] filesInDir = file.listFiles();
                         if (filesInDir == null)
-                            continue;
+                            return;
 
+                        System.out.println("Thread " + Thread.currentThread().getName() + " scanning TV show directory: " + file.getAbsolutePath());
                         scanTVShow(library, file, filesInDir, false);
-                    }else {
+                    } else {
+                        System.out.println("Thread " + Thread.currentThread().getName() + " scanning movie file: " + file.getAbsolutePath());
                         scanMovie(library, file);
                     }
+
+                    synchronized (DesktopViewController.class) {
+                        numFilesToCheck--;
+                        System.out.println("\nThread " + Thread.currentThread().getName() + " completed. Remaining files to check: " + numFilesToCheck + "\n");
+                        if (numFilesToCheck == 0)
+                            Platform.runLater(() -> postFileSearch(library));
+                    }
+                } catch (Exception e) {
+                    synchronized (DesktopViewController.class) {
+                        numFilesToCheck--;
+                        System.out.println("\nThread " + Thread.currentThread().getName() + " encountered an exception" + e.getMessage() + "--> Remaining files to check: " + numFilesToCheck + "\n");
+                        if (numFilesToCheck == 0)
+                            Platform.runLater(() -> postFileSearch(library));
+                    }
                 }
-                return null;
-            }
-        };
-
-        loadHalfTask.setOnSucceeded(e -> postFileSearch(library));
-        loadHalfTask.setOnFailed(e -> postFileSearch(library));
-
-        Thread thread = new Thread(loadHalfTask);
-        thread.setDaemon(true);
-        thread.start();
-
-        App.tasks.add(loadHalfTask);
-    }
-    private void postFileSearch(Library library){
-        numFilesToCheck--;
-        if (numFilesToCheck == 0) {
-            DataManager.INSTANCE.saveData();
-
-            //Restore library buttons
-            editLibraryButton.setDisable(false);
-            removeLibraryButton.setDisable(false);
-            removeLibraryButton.setDisable(false);
-            searchFilesButton.setDisable(false);
-            addLibraryButton.setDisable(false);
-
-            clearImageCache();
-
-            downloadingContentWindow.setVisible(false);
-            downloadDefaultMusic(library);
+            });
         }
     }
+    private static List<File> getFiles(Library library) {
+        List<String> folders = library.getFolders();
+
+        List<File> files = new ArrayList<>();
+        for (String folderPath : folders) {
+            File folder = new File(folderPath);
+            if (folder.exists() && folder.isDirectory()) {
+                File[] folderFiles = folder.listFiles();
+                if (folderFiles != null) {
+                    for (File file : folderFiles) {
+                        if (file.exists()) {
+                            files.add(file);
+                        }
+                    }
+                }
+            }
+        }
+        return files;
+    }
+    private void postFileSearch(Library library){
+        DataManager.INSTANCE.saveData();
+
+        //Restore library buttons
+        editLibraryButton.setDisable(false);
+        removeLibraryButton.setDisable(false);
+        removeLibraryButton.setDisable(false);
+        searchFilesButton.setDisable(false);
+        addLibraryButton.setDisable(false);
+
+        clearImageCache();
+
+        downloadingContentWindow.setVisible(false);
+        downloadDefaultMusic(library);
+    }
     public void downloadDefaultMusic(Library library){
-        Task<Void> musicDownloadTask = new Task<>() {
-            @Override
-            protected Void call() {
-            Platform.runLater(() -> {
-                downloadingContentText.setText(App.textBundle.getString("downloadingMusicMessage"));
-                downloadingContentWindow.setVisible(true);
-            });
+        executor.submit(() -> {
+            try {
+                Platform.runLater(() -> {
+                    downloadingContentText.setText(App.textBundle.getString("downloadingMusicMessage"));
+                    downloadingContentWindow.setVisible(true);
+                });
 
-            for (Series series : library.getSeries()){
-                if (isCancelled())
-                    break;
+                for (Series series : library.getSeries()) {
+                    if (Thread.currentThread().isInterrupted())
+                        break;
 
-                if (series == null)
-                    continue;
-
-                if (library.getType().equals("Shows")){
-                    Season season = series.getSeasons().get(0);
-
-                    if (!season.getMusicSrc().isEmpty())
+                    if (series == null)
                         continue;
 
-                    List<YoutubeVideo> results = searchYoutube(series.getName() + " main theme");
+                    if (library.getType().equals("Shows")) {
+                        Season season = series.getSeasons().get(0);
 
-                    if (results != null)
-                        downloadMedia(season, results.get(0).watch_url);
-                }else{
-                    for (Season season : series.getSeasons()){
                         if (!season.getMusicSrc().isEmpty())
                             continue;
 
-                        List<YoutubeVideo> results = searchYoutube(season.getName() + " main theme");
+                        List<YoutubeVideo> results = searchYoutube(series.getName() + " main theme");
 
                         if (results != null)
                             downloadMedia(season, results.get(0).watch_url);
+                    } else {
+                        for (Season season : series.getSeasons()) {
+                            if (!season.getMusicSrc().isEmpty())
+                                continue;
+
+                            List<YoutubeVideo> results = searchYoutube(season.getName() + " main theme");
+
+                            if (results != null)
+                                downloadMedia(season, results.get(0).watch_url);
+                        }
                     }
                 }
+
+                Platform.runLater(this::postDownloadDefaultMusic);
+            } catch (Exception e) {
+                Platform.runLater(this::postDownloadDefaultMusic);
             }
-            return null;
-            }
-        };
-
-        musicDownloadTask.setOnSucceeded(e -> postDownloadDefaultMusic());
-        musicDownloadTask.setOnFailed(e -> postDownloadDefaultMusic());
-
-        Thread thread = new Thread(musicDownloadTask);
-        thread.setDaemon(true);
-        thread.start();
-
-        App.tasks.add(musicDownloadTask);
+        });
     }
     public void postDownloadDefaultMusic(){
         downloadingContentWindow.setVisible(false);
@@ -1831,11 +1789,10 @@ public class DesktopViewController {
         if (!posterList.isEmpty()){
             saveCover(id, 0, imageBaseURL + posterList.get(0).file_path);
 
-            Task<Void> posterTask = new Task<>() {
-                @Override
-                protected Void call() {
+            executor.submit(() -> {
+                try {
                     int processedFiles = 1;
-                    for (int i = processedFiles; i < posterList.size(); i++){
+                    for (int i = processedFiles; i < posterList.size(); i++) {
                         if (processedFiles == 60)
                             break;
 
@@ -1843,13 +1800,11 @@ public class DesktopViewController {
 
                         processedFiles++;
                     }
-                    return null;
-                }
-            };
 
-            Thread thread = new Thread(posterTask);
-            thread.setDaemon(true);
-            thread.start();
+                } catch (Exception e) {
+                    System.err.println("loadImages: thread task cancelled " + e.getMessage());
+                }
+            });
         }
         //endregion
 
@@ -1873,7 +1828,7 @@ public class DesktopViewController {
                 } catch (IOException e) {
                     System.err.println("DesktopViewController: Downloaded background not saved");
                 } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
+                    System.err.println("DesktopViewController: Invalid URL syntax");
                 }
             }
         }
@@ -1946,7 +1901,7 @@ public class DesktopViewController {
             }
             //endregion
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println(e.getMessage());
         }
 
         return null;
@@ -2217,19 +2172,15 @@ public class DesktopViewController {
         if (!thumbnailsUrls.isEmpty()){
             saveThumbnail(episode, thumbnailsUrls.get(0), 0);
 
-            Task<Void> thumbnailTask = new Task<>() {
-                @Override
-                protected Void call() {
-                    for (int i = 1; i < thumbnailsUrls.size(); i++){
+            executor.submit(() -> {
+                try {
+                    for (int i = 1; i < thumbnailsUrls.size(); i++) {
                         saveThumbnail(episode, thumbnailsUrls.get(i), i);
                     }
-                    return null;
+                } catch (Exception e) {
+                    System.err.println("setEpisodeData: thread task cancelled " + e.getMessage());
                 }
-            };
-
-            Thread thread = new Thread(thumbnailTask);
-            thread.setDaemon(true);
-            thread.start();
+            });
         }
         //endregion
 
@@ -2260,7 +2211,7 @@ public class DesktopViewController {
         } catch (IOException e) {
             System.err.println("DesktopViewController: Error compressing image");
         } catch (URISyntaxException e) {
-            System.err.println("DesktopViewController: Downloaded cover not saved");
+            System.err.println("DesktopViewController: Invalid URL syntax " + originalImage);
         }
     }
     private void saveLogo(String id, int i, String urlImage) {
@@ -2271,12 +2222,17 @@ public class DesktopViewController {
             URL url = uri.toURL();
 
             BufferedImage image = ImageIO.read(url);
-            ImageIO.write(image, "png", new File("resources/img/logos/" + id + "/" + i + ".png"));
-            image.flush();
+
+            if (image != null) {
+                ImageIO.write(image, "png", new File("resources/img/logos/" + id + "/" + i + ".png"));
+                image.flush();
+            } else {
+                System.err.println("DesktopViewController: Failed to read image from URL " + urlImage);
+            }
         } catch (IOException e) {
             System.err.println("DesktopViewController: Downloaded logo not saved");
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            System.err.println("DesktopViewController: Invalid URL syntax " + urlImage);
         }
     }
     private void scanMovie(Library library, File f){
@@ -2741,19 +2697,15 @@ public class DesktopViewController {
         if (!thumbnailsUrls.isEmpty()){
             saveThumbnail(episode, thumbnailsUrls.get(0), 0);
 
-            Task<Void> thumbnailTask = new Task<>() {
-                @Override
-                protected Void call() {
-                    for (int i = 1; i < thumbnailsUrls.size(); i++){
+            executor.submit(() -> {
+                try {
+                    for (int i = 1; i < thumbnailsUrls.size(); i++) {
                         saveThumbnail(episode, thumbnailsUrls.get(i), i);
                     }
-                    return null;
+                } catch (Exception e) {
+                    System.err.println("setMovieThumbnail: thread task cancelled " + e.getMessage());
                 }
-            };
-
-            Thread thread = new Thread(thumbnailTask);
-            thread.setDaemon(true);
-            thread.start();
+            });
         }
         //endregion
 
@@ -2860,7 +2812,7 @@ public class DesktopViewController {
                 System.out.println("downloadSeasonMetadata: Response not successful for " + tmdbID + " season: " + season);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println(e.getMessage());
         }
 
         return null;
@@ -2897,7 +2849,7 @@ public class DesktopViewController {
                 System.out.println("downloadImages: Response not successful: " + response.code());
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("downloadImages: " + e.getMessage());
         }
 
         return null;
@@ -2949,24 +2901,20 @@ public class DesktopViewController {
                 if (!logosList.isEmpty()){
                     saveLogo(id, 0, imageBaseURL + logosList.get(0).file_path);
 
-                    Task<Void> logosTask = new Task<>() {
-                        @Override
-                        protected Void call() {
+                    executor.submit(() -> {
+                        try {
                             int processedFiles = 1;
-                            for (int i = processedFiles; i < logosList.size(); i++){
+                            for (int i = processedFiles; i < logosList.size(); i++) {
                                 if (processedFiles == 16)
                                     break;
 
                                 saveLogo(id, processedFiles, imageBaseURL + logosList.get(i).file_path);
                                 processedFiles++;
                             }
-                            return null;
+                        } catch (Exception e) {
+                            System.err.println("downloadLogos: thread task cancelled " + e.getMessage());
                         }
-                    };
-
-                    Thread thread = new Thread(logosTask);
-                    thread.setDaemon(true);
-                    thread.start();
+                    });
                 }
 
                 File posterDir = new File("resources/img/logos/" + id + "/0.png");
@@ -2981,7 +2929,7 @@ public class DesktopViewController {
                 System.out.println("downloadLogos: Response not successful: " + response.code());
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("downloadLogos: " + e.getMessage());
         }
         //endregion
     }
@@ -2989,7 +2937,7 @@ public class DesktopViewController {
         try{
             FileUtils.cleanDirectory(new File("resources/img/DownloadCache"));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("clearImageCache: cannot clean directory");
         }
     }
     //endregion
@@ -3098,9 +3046,9 @@ public class DesktopViewController {
 
             if (currentLibrary == library)
                 addSeriesCard(s);
-
-            DataManager.INSTANCE.saveData();
         });
+
+        DataManager.INSTANCE.saveData();
     }
     private void addSeriesCard(Series s){
         Button seriesButton = new Button();

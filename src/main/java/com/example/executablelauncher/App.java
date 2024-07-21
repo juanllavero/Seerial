@@ -166,11 +166,6 @@ public class App extends Application {
 
     public static void close(){
         executorService.shutdown();
-        try {
-            executorService.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         for (Task<Void> task : tasks)
             if (task.isRunning())
