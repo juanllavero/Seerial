@@ -84,8 +84,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 public class DesktopViewController {
     //region FXML ATTRIBUTES
@@ -318,11 +325,17 @@ public class DesktopViewController {
     private boolean acceptRemove = false;
     private static int numFilesToCheck = 0;
     private boolean searchingForFiles = false;
-    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    //private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 4);
+    private static final OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build();
     //endregion
 
     //region THEMOVIEDB ATTRIBUTES
-    TmdbApi tmdbApi;
+    static TmdbApi tmdbApi;
     boolean movieMetadataToCorrect = false;
     boolean seriesMetadataToCorrect = false;
     boolean changeEpisodeGroup = false;
@@ -743,7 +756,7 @@ public class DesktopViewController {
         globalBackground.setImage(new Image("file:resources/img/Background.png"));
         editLibraryButton.setDisable(true);
         searchFilesButton.setDisable(true);
-        removeLibraryButton.setDisable(true);
+        removeLibraryButton.setDisable(false);
 
         seriesContainer.getChildren().clear();
     }
@@ -847,24 +860,41 @@ public class DesktopViewController {
     //endregion
 
     //region EFFECTS AND MODIFICATIONS
-    public void saveBackground(Season s, String imageToCopy){
+    public void saveBackground(Season s, String imageToCopy, boolean copyImages){
         DataManager.INSTANCE.createFolder("resources/img/backgrounds/" + s.getId() + "/");
 
-        //Compress and save image file
-        File destination = new File("resources/img/backgrounds/" + s.getId() + "/background.jpg");
-        try{
-            Thumbnails.of(imageToCopy)
-                    .scale(1)
-                    .outputQuality(0.9)
-                    .toFile(destination);
-        } catch (IOException e) {
-            System.err.println("saveBackground: error compressing background image");
+        if (copyImages){
+            String directoryPath = imageToCopy.substring(0, imageToCopy.lastIndexOf('/'));
+            copyAndRenameImage(directoryPath, "resources/img/backgrounds/" + s.getId() + "/", "background.jpg");
+            copyAndRenameImage(directoryPath, "resources/img/backgrounds/" + s.getId() + "/", "transparencyEffect.png");
+            copyAndRenameImage(directoryPath, "resources/img/backgrounds/" + s.getId() + "/", "fullBlur.jpg");
+        }else{
+            //Compress and save image file
+            File destination = new File("resources/img/backgrounds/" + s.getId() + "/background.jpg");
+            try{
+                Thumbnails.of(imageToCopy)
+                        .scale(1)
+                        .outputQuality(0.9)
+                        .toFile(destination);
+            } catch (IOException e) {
+                System.err.println("saveBackground: error compressing background image");
+            }
+
+            s.setBackgroundSrc("resources/img/backgrounds/" + s.getId() + "/background.jpg");
+
+            setTransparencyEffect(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
+            //processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg", "resources/img/DownloadCache/" + s.getId() + ".png");
         }
+    }
+    public void copyAndRenameImage(String srcImagePath, String destDirPath, String imageName) {
+        Path srcPath = Paths.get(srcImagePath + imageName);
+        Path destDir = Paths.get(destDirPath + imageName);
 
-        s.setBackgroundSrc("resources/img/backgrounds/" + s.getId() + "/background.jpg");
-
-        setTransparencyEffect(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
-        processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg", "resources/img/DownloadCache/" + s.getId() + ".png");
+        try {
+            Files.copy(srcPath, destDir);
+        } catch (IOException e) {
+            System.err.println("copyAndRenameImage: image " + srcImagePath + imageName + " could not be copied to " + destDirPath);
+        }
     }
     private static void setTransparencyEffect(String src, String outputPath) {
         try {
@@ -911,7 +941,7 @@ public class DesktopViewController {
             System.err.println("setTransparencyEffect: error applying transparency effect to background");
         }
     }
-    public static void processBlurAndSave(String imagePath, String outputFilePath, String cacheOutput) {
+    /*public static void processBlurAndSave(String imagePath, String outputFilePath, String cacheOutput) {
         try {
             BufferedImage originalImage = ImageIO.read(new File(imagePath));
 
@@ -939,6 +969,9 @@ public class DesktopViewController {
 
             File outputFile = new File(cacheOutput);
             ImageIO.write(croppedImage, "png", outputFile);
+
+            originalImage.flush();
+            croppedImage.flush();
         } catch (IOException e) {
             System.err.println("Image processing error");
         }
@@ -951,6 +984,44 @@ public class DesktopViewController {
                     .toFile(outputFilePath);
         } catch (IOException e) {
             System.err.println("saveBackground: error compressing background image");
+        }
+    }*/
+    public static void processBlurAndSave(String imagePath, String outputFilePath, String cacheOutput) {
+        try {
+            // Load the image
+            Mat originalImage = Imgcodecs.imread(imagePath);
+
+            // Apply GaussianBlur effect
+            Mat blurredImage = new Mat();
+            Imgproc.GaussianBlur(originalImage, blurredImage, new Size(21, 21), 0);
+
+            // Crop a portion of the blurred image
+            int cropX = (int) (blurredImage.cols() * 0.03);
+            int cropY = (int) (blurredImage.rows() * 0.05);
+            int cropWidth = (int) (blurredImage.cols() * 0.93);
+            int cropHeight = (int) (blurredImage.rows() * 0.9);
+
+            Mat croppedImage = new Mat(blurredImage, new Rect(cropX, cropY, cropWidth, cropHeight));
+
+            // Save the cropped blurred image to cache
+            Imgcodecs.imwrite(cacheOutput, croppedImage);
+
+            // Compress and save image file
+            try {
+                Thumbnails.of(cacheOutput)
+                        .scale(1)
+                        .outputQuality(0.9)
+                        .toFile(outputFilePath);
+            } catch (IOException e) {
+                System.err.println("saveBackground: error compressing background image");
+            }
+
+            // Release resources
+            originalImage.release();
+            blurredImage.release();
+            croppedImage.release();
+        } catch (Exception e) {
+            System.err.println("Image processing error: " + e.getMessage());
         }
     }
     private void fadeInTransition(ImageView imageV){
@@ -1306,7 +1377,7 @@ public class DesktopViewController {
                 }
 
                 downloadLogos(currentLibrary, selectedSeries, selectedSeason, selectedSeason.getThemdbID());
-                saveBackground(selectedSeason, "resources/img/DownloadCache/" + selectedSeason.getThemdbID() + ".jpg");
+                saveBackground(selectedSeason, "resources/img/DownloadCache/" + selectedSeason.getThemdbID() + ".jpg", false);
 
                 // Process background music
                 List<YoutubeVideo> results = searchYoutube(selectedSeason.getName() + " main theme");
@@ -1501,7 +1572,7 @@ public class DesktopViewController {
             executor.submit(() -> {
                 try {
                     // To break the execution when the task is cancelled
-                    if (Thread.currentThread().isInterrupted())
+                    if (executor.isShutdown())
                         return;
 
                     if (library.getType().equals("Shows")) {
@@ -1579,7 +1650,7 @@ public class DesktopViewController {
                 });
 
                 for (Series series : library.getSeries()) {
-                    if (Thread.currentThread().isInterrupted())
+                    if (executor.isShutdown())
                         break;
 
                     if (series == null)
@@ -1721,7 +1792,7 @@ public class DesktopViewController {
             if (library.getAnalyzedFiles().get(video.getAbsolutePath()) != null)
                 continue;
 
-            processEpisode(library, series, video, seasonsMetadata, episodesGroup);
+            processEpisode(library, series, video, seasonsMetadata, episodesGroup, exists);
         }
 
         //Change the name of every season to match the Episodes Group
@@ -1735,10 +1806,10 @@ public class DesktopViewController {
             }
         }
 
-        if (exists)
+        /*if (exists)
             updateSeries(series);
         else
-            addSeries(library, series);
+            addSeries(library, series);*/
     }
     private void setSeriesMetadataAndImages(Library library, Series series, SeriesMetadata seriesMetadata, boolean downloadImages){
         //Set metadata
@@ -1836,20 +1907,16 @@ public class DesktopViewController {
     }
     private SeasonsGroupMetadata getEpisodesGroup(Series series){
         String seasonGroupID = "";
-        try{
-            if (series.getEpisodeGroupID().isEmpty()){
-                //region GET EPISODE GROUPS
-                OkHttpClient client = new OkHttpClient();
-                Request requestGroups = new Request.Builder()
-                        .url("https://api.themoviedb.org/3/tv/" + series.getThemdbID() + "/episode_groups")
-                        .get()
-                        .addHeader("accept", "application/json")
-                        .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                        .build();
+        if (series.getEpisodeGroupID().isEmpty()){
+            //region GET EPISODE GROUPS
+            Request requestGroups = new Request.Builder()
+                    .url("https://api.themoviedb.org/3/tv/" + series.getThemdbID() + "/episode_groups")
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                    .build();
 
-                Response response = client.newCall(requestGroups).execute();
-
-
+            try (Response response = client.newCall(requestGroups).execute()) {
                 if (response.isSuccessful()) {
                     ObjectMapper objectMapper = new ObjectMapper();
                     assert response.body() != null;
@@ -1873,36 +1940,36 @@ public class DesktopViewController {
                 } else {
                     System.out.println("getEpisodeGroup: Response not successful: " + response.code());
                 }
-                //endregion
-            }else{
-                seasonGroupID = series.getEpisodeGroupID();
+            } catch (IOException e) {
+                System.out.println("getEpisodeGroup: Response not successful: " + e.getMessage());
             }
+            //endregion
+        }else{
+            seasonGroupID = series.getEpisodeGroupID();
+        }
 
-            //region GET EPISODE GROUP DETAILS
-            if (!seasonGroupID.isEmpty()){
-                OkHttpClient client = new OkHttpClient();
-                Request requestGroup = new Request.Builder()
-                        .url("https://api.themoviedb.org/3/tv/episode_group/" + seasonGroupID)
-                        .get()
-                        .addHeader("accept", "application/json")
-                        .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                        .build();
+        //region GET EPISODE GROUP DETAILS
+        if (!seasonGroupID.isEmpty()){
+            Request requestGroup = new Request.Builder()
+                    .url("https://api.themoviedb.org/3/tv/episode_group/" + seasonGroupID)
+                    .get()
+                    .addHeader("accept", "application/json")
+                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                    .build();
 
-                Response response = client.newCall(requestGroup).execute();
-
+            try (Response response = client.newCall(requestGroup).execute()) {
                 if (response.isSuccessful()) {
                     ObjectMapper objectMapper = new ObjectMapper();
-
                     assert response.body() != null;
                     return objectMapper.readValue(response.body().string(), SeasonsGroupMetadata.class);
                 } else {
                     System.out.println("getEpisodeGroup: Response not successful: " + response.code());
                 }
+            } catch (IOException e) {
+                System.out.println("getEpisodeGroup: Response not successful");
             }
-            //endregion
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
         }
+        //endregion
 
         return null;
     }
@@ -1913,7 +1980,7 @@ public class DesktopViewController {
         return videoExtension.equals(".mkv") || videoExtension.equals(".mp4") || videoExtension.equals(".avi") || videoExtension.equals(".mov")
                 || videoExtension.equals(".wmv") || videoExtension.equals(".mpeg") || videoExtension.equals(".m2ts");
     }
-    private void processEpisode(Library library, Series series, File file, List<SeasonMetadata> seasonsMetadata, SeasonsGroupMetadata episodesGroup){
+    private void processEpisode(Library library, Series series, File file, List<SeasonMetadata> seasonsMetadata, SeasonsGroupMetadata episodesGroup, boolean seriesExists){
         //Name of the file without the extension
         String fullName = file.getName().substring(0, file.getName().lastIndexOf("."));
 
@@ -1941,8 +2008,8 @@ public class DesktopViewController {
                 return;
 
             int absoluteNumber = Integer.parseInt(newMatch.group("episode"));
-            int episodeNumber = 1;
             boolean episodeFound = false;
+            int episodeNumber = 1;
 
             //Find the real season and episode for the file
             for (SeasonMetadata season : seasonsMetadata){
@@ -2067,16 +2134,17 @@ public class DesktopViewController {
             season.setScore((float) ((int) (seasonMetadata.vote_average * 10.0)) / 10.0f);
             season.setSeriesID(series.getId());
 
+            //Save season background
             if (season.getBackgroundSrc().isEmpty() || season.getBackgroundSrc().equals("resources/img/DefaultBackground.png")) {
                 File f = new File("resources/img/DownloadCache/" + series.getThemdbID() + ".jpg");
                 if (!f.exists() && series.getSeasons().size() > 1){
                     Season s = series.getSeasons().get(0);
 
                     if (s != null){
-                        saveBackground(season, s.getBackgroundSrc());
+                        saveBackground(season, s.getBackgroundSrc(), true);
                     }
                 }else if (f.exists()){
-                    saveBackground(season, "resources/img/DownloadCache/" + series.getThemdbID() + ".jpg");
+                    saveBackground(season, "resources/img/DownloadCache/" + series.getThemdbID() + ".jpg", false);
                 }
             }
 
@@ -2106,9 +2174,12 @@ public class DesktopViewController {
         episode.setVideoSrc(file.getAbsolutePath());
         setEpisodeData(library, episode, episodeMetadata, series, realEpisode);
 
-        getChapters(episode);
+        //getChapters(episode);
 
         library.getAnalyzedFiles().put(file.getAbsolutePath(), episode.getId());
+
+        if (!seriesExists && series.getSeasons().size() == 1 && season.getEpisodes().size() == 1)
+            addSeries(library, series);
     }
     private void getChapters(Episode episode){
         try {
@@ -2330,7 +2401,7 @@ public class DesktopViewController {
             }
 
             downloadLogos(library, series, season, season.getThemdbID());
-            saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg");
+            saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg", false);
 
             processMovie(library, f, season, movieMetadata.runtime);
 
@@ -2461,7 +2532,7 @@ public class DesktopViewController {
                         }
 
                         downloadLogos(library, series, season, season.getThemdbID());
-                        saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg");
+                        saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg", false);
                     }
 
                     for (File file : filesInFolder){
@@ -2571,7 +2642,7 @@ public class DesktopViewController {
                     }
 
                     downloadLogos(library, series, season, season.getThemdbID());
-                    saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg");
+                    saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg", false);
                 }
 
                 for (File file : filesInRoot){
@@ -2736,48 +2807,38 @@ public class DesktopViewController {
         }
     }
     public MovieMetadata downloadMovieMetadata(Library library, int tmdbID){
-        try{
-            OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://api.themoviedb.org/3/movie/" + tmdbID + "?language=" + library.getLanguage())
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .build();
 
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/movie/" + tmdbID + "?language=" + library.getLanguage())
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
+        try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
-
                 if (response.body() != null)
                     return objectMapper.readValue(response.body().string(), MovieMetadata.class);
             } else {
                 System.out.println("Response not successful: " + response.code());
             }
         } catch (IOException e) {
-            System.err.println("downloadMovieMetadata: movie metadata could not be downloaded");
+            System.err.println("Error executing request: " + e.getMessage());
         }
 
         return null;
     }
     public SeriesMetadata downloadSeriesMetadata(Library library, int tmdbID){
-        try{
-            OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://api.themoviedb.org/3/tv/" + tmdbID + "?language=" + library.getLanguage())
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .build();
 
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "?language=" + library.getLanguage())
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
+        try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
-
                 if (response.body() != null)
                     return objectMapper.readValue(response.body().string(), SeriesMetadata.class);
             } else {
@@ -2791,18 +2852,14 @@ public class DesktopViewController {
     }
 
     public SeasonMetadata downloadSeasonMetadata(Library library, int tmdbID, int season){
-        try{
-            OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://api.themoviedb.org/3/tv/" + tmdbID + "/season/" + season + "?language=" + library.getLanguage())
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .build();
 
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/tv/" + tmdbID + "/season/" + season + "?language=" + library.getLanguage())
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
+        try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
 
@@ -2812,7 +2869,7 @@ public class DesktopViewController {
                 System.out.println("downloadSeasonMetadata: Response not successful for " + tmdbID + " season: " + season);
             }
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            System.out.println("downloadSeasonMetadata: Response not successful for " + tmdbID + " season: " + season);
         }
 
         return null;
@@ -2828,18 +2885,14 @@ public class DesktopViewController {
         if (!library.getLanguage().equals("en"))
             languages += "%2Cen";
 
-        try{
-            OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://api.themoviedb.org/3/"+ type +"/" + tmdbID + "/images?include_image_language=" + languages)
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .build();
 
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/"+ type +"/" + tmdbID + "/images?include_image_language=" + languages)
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
+        try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
 
@@ -2849,7 +2902,7 @@ public class DesktopViewController {
                 System.out.println("downloadImages: Response not successful: " + response.code());
             }
         } catch (IOException e) {
-            System.err.println("downloadImages: " + e.getMessage());
+            System.out.println("downloadImages: Response not successful: " + e.getMessage());
         }
 
         return null;
@@ -2876,18 +2929,14 @@ public class DesktopViewController {
         }
 
         //region GET IMAGES
-        try{
-            OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://api.themoviedb.org/3/"+ type +"/" + tmdbID + "/images?include_image_language=" + languages)
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .build();
 
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/"+ type +"/" + tmdbID + "/images?include_image_language=" + languages)
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
+        try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 assert response.body() != null;
@@ -2929,7 +2978,7 @@ public class DesktopViewController {
                 System.out.println("downloadLogos: Response not successful: " + response.code());
             }
         } catch (IOException e) {
-            System.err.println("downloadLogos: " + e.getMessage());
+            System.out.println("downloadLogos: Response not successful: " + e.getMessage());
         }
         //endregion
     }
@@ -3020,8 +3069,6 @@ public class DesktopViewController {
 
     //region ADD SECTION
     public void updateSeries(){
-        DataManager.INSTANCE.saveData();
-
         Button btn = seriesButtons.get(seriesList.indexOf(selectedSeries));
         btn.setText(selectedSeries.getName());
 
@@ -3037,18 +3084,16 @@ public class DesktopViewController {
         }
     }
     public void addSeries(Library library, Series s){
+        if (s.getSeasons().isEmpty())
+            return;
+
+        library.getSeries().add(s);
+
         Platform.runLater(() ->
         {
-            if (s.getSeasons().isEmpty())
-                return;
-
-            library.getSeries().add(s);
-
             if (currentLibrary == library)
                 addSeriesCard(s);
         });
-
-        DataManager.INSTANCE.saveData();
     }
     private void addSeriesCard(Series s){
         Button seriesButton = new Button();

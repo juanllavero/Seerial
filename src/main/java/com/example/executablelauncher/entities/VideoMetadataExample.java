@@ -25,6 +25,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.opencv.core.Mat;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import javax.imageio.*;
 import javax.imageio.metadata.IIOMetadata;
@@ -83,7 +88,46 @@ public class VideoMetadataExample extends Application {
         if (movieMetadata != null)
             System.out.println(movieMetadata.title);*/
 
-        downloadDefaultMusic();
+        processBlurAndSave("resources/img/test2.png", "resources/img/test2_fullblur.png", "resources/img/test2_cacheBlur.png");
+    }
+
+    public static void processBlurAndSave(String imagePath, String outputFilePath, String cacheOutput) {
+        try {
+            // Load the image
+            Mat originalImage = Imgcodecs.imread(imagePath);
+
+            // Apply GaussianBlur effect
+            Mat blurredImage = new Mat();
+            Imgproc.GaussianBlur(originalImage, blurredImage, new Size(21, 21), 0);
+
+            // Crop a portion of the blurred image
+            int cropX = (int) (blurredImage.cols() * 0.03);
+            int cropY = (int) (blurredImage.rows() * 0.05);
+            int cropWidth = (int) (blurredImage.cols() * 0.93);
+            int cropHeight = (int) (blurredImage.rows() * 0.9);
+
+            Mat croppedImage = new Mat(blurredImage, new Rect(cropX, cropY, cropWidth, cropHeight));
+
+            // Save the cropped blurred image to cache
+            Imgcodecs.imwrite(cacheOutput, croppedImage);
+
+            // Compress and save image file
+            try {
+                Thumbnails.of(cacheOutput)
+                        .scale(1)
+                        .outputQuality(0.9)
+                        .toFile(outputFilePath);
+            } catch (IOException e) {
+                System.err.println("saveBackground: error compressing background image");
+            }
+
+            // Release resources
+            originalImage.release();
+            blurredImage.release();
+            croppedImage.release();
+        } catch (Exception e) {
+            System.err.println("Image processing error: " + e.getMessage());
+        }
     }
 
     public static void downloadDefaultMusic(){

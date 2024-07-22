@@ -714,7 +714,7 @@ public class EditSeasonController {
             oldName = oldBackgroundPath.substring(oldBackgroundPath.lastIndexOf("/")+1);
         if (oldBackgroundPath.isEmpty() || !newName.equals(oldName)){
             if (selectedBackground != null){
-                parentController.saveBackground(seasonToEdit, selectedBackground.getAbsolutePath());
+                parentController.saveBackground(seasonToEdit, selectedBackground.getAbsolutePath(), false);
             }
         }
 
