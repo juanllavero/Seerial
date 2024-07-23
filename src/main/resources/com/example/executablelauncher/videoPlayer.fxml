@@ -21,6 +21,25 @@
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
+      <HBox>
+         <children>
+            <Button fx:id="closeButton" focusTraversable="false" mnemonicParsing="false" onMouseClicked="#stop" styleClass="fullscreenButtonTransparent">
+               <HBox.margin>
+                  <Insets left="20.0" top="20.0" />
+               </HBox.margin>
+               <graphic>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../../../img/icons/close.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </Button>
+         </children>
+      </HBox>
       <VBox fx:id="controlsBox" alignment="BOTTOM_LEFT" maxWidth="2560.0">
          <children>
             <Label fx:id="seriesTitle" text="Juego de tronos" textFill="WHITE">

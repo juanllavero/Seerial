@@ -27,6 +27,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -50,6 +52,9 @@ public class SeasonController {
     //region FXML ATTRIBUTES
     @FXML
     private BorderPane videoError;
+
+    @FXML
+    private Button goBackButton;
 
     @FXML
     private Label errorTitle;
@@ -246,6 +251,15 @@ public class SeasonController {
                 else
                     playButton.requestFocus();
             }
+        });
+
+        errorButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+            videoError.setVisible(false);
+
+            if (isShow)
+                episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+            else
+                playButton.requestFocus();
         });
 
         videoError.setVisible(false);
@@ -674,6 +688,16 @@ public class SeasonController {
                 }
             });
 
+            btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
+                if (event.getButton().equals(MouseButton.PRIMARY)){
+
+                    if (btn == episodeButtons.get(episodes.indexOf(selectedEpisode)))
+                        playEpisode(selectedEpisode);
+                    else
+                        btn.requestFocus();
+                }
+            });
+
             setEpisodeCardValues(btn, episode);
 
             cardContainer.getChildren().add(btn);
@@ -747,7 +771,7 @@ public class SeasonController {
             stage.initOwner(thisStage);
             Scene scene = new Scene(root1);
             scene.setFill(Color.TRANSPARENT);
-            scene.setCursor(Cursor.NONE);
+            //scene.setCursor(Cursor.NONE);
             stage.setScene(scene);
 
             String name = series.getName();
@@ -792,7 +816,8 @@ public class SeasonController {
         }
     }
 
-    private void toggleWatched(){
+    @FXML
+    void toggleWatched(){
         if (selectedEpisode.isWatched())
             selectedEpisode.setUnWatched();
         else
@@ -912,7 +937,7 @@ public class SeasonController {
             Stage stage = (Stage) mainBox.getScene().getWindow();
             stage.setTitle("ExecutableLauncher");
             Scene scene = new Scene(root);
-            scene.setCursor(Cursor.NONE);
+            //scene.setCursor(Cursor.NONE);
             scene.setFill(Color.BLACK);
             stage.setScene(scene);
             stage.setMaximized(true);
@@ -1000,6 +1025,7 @@ public class SeasonController {
         detailsBox.requestFocus();
     }
 
+    @FXML
     private void closeDetails(){
         fadeOutEffect(menuShadow);
         fadeOutEffect(detailsBox);

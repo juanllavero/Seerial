@@ -199,7 +199,7 @@
                   </ScrollPane>
                   <HBox fillHeight="false" spacing="20.0">
                      <children>
-                        <Button fx:id="playButton" accessibleRole="IMAGE_VIEW" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onAction="#play" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
+                        <Button fx:id="playButton" accessibleRole="IMAGE_VIEW" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onMouseClicked="#play" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
                            <font>
                               <Font name="System Bold" size="18.0" />
                            </font>
@@ -217,7 +217,7 @@
                               <Insets />
                            </HBox.margin>
                         </Button>
-                        <Button fx:id="watchedButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
+                        <Button fx:id="watchedButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onMouseClicked="#toggleWatched" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
                            <graphic>
                               <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
                                  <image>
@@ -261,13 +261,34 @@
                </children>
             </VBox>
          </center>
+         <top>
+            <BorderPane BorderPane.alignment="CENTER">
+               <left>
+                  <Button fx:id="goBackButton" focusTraversable="false" mnemonicParsing="false" onMouseClicked="#goBack" styleClass="fullscreenButtonTransparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+                     <graphic>
+                        <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../img/icons/flechaAtras.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <BorderPane.margin>
+                        <Insets left="10.0" top="10.0" />
+                     </BorderPane.margin>
+                  </Button>
+               </left>
+            </BorderPane>
+         </top>
       </BorderPane>
       <ImageView fx:id="menuShadow" fitHeight="1078.0" fitWidth="1918.0" pickOnBounds="true" visible="false">
          <image>
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
-      <BorderPane fx:id="detailsBox" StackPane.alignment="CENTER">
+      <BorderPane fx:id="detailsBox" onMouseClicked="#closeDetails" StackPane.alignment="CENTER">
          <padding>
             <Insets bottom="150.0" left="150.0" right="150.0" top="150.0" />
          </padding>

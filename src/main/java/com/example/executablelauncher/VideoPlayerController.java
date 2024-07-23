@@ -27,6 +27,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -81,6 +82,9 @@ public class VideoPlayerController {
 
     @FXML
     private Button prevButton;
+
+    @FXML
+    private Button closeButton;
 
     @FXML
     private Button subtitlesButton;
@@ -191,17 +195,21 @@ public class VideoPlayerController {
         rightOptions.setPrefWidth(screenWidth * 0.5);
 
         timeline = new javafx.animation.Timeline(
-            new javafx.animation.KeyFrame(Duration.seconds(20), event -> {
-                hideControls();
-            })
+            new javafx.animation.KeyFrame(Duration.seconds(20), event -> hideControls())
         );
         timeline.play();
 
         volumeCount = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(Duration.seconds(2), event -> {
-                    volumeBox.setVisible(false);
-                })
+                new javafx.animation.KeyFrame(Duration.seconds(2), event -> volumeBox.setVisible(false))
         );
+
+        mainPane.requestFocus();
+
+        scene.addEventHandler(MouseEvent.MOUSE_MOVED, event -> {
+            if (!controlsShown)
+                showControls();
+            timeline.playFromStart();
+        });
 
         scene.setOnKeyReleased(e -> {
             if (App.pressedBack(e)){
@@ -737,11 +745,13 @@ public class VideoPlayerController {
         timeline.playFromStart();
         fadeInEffect(controlsBox);
         fadeInEffect(shadowImage);
+        fadeInEffect(closeButton);
         playButton.requestFocus();
     }
     private void hideControls(){
         timeline.stop();
         fadeOutEffect(shadowImage);
+        fadeOutEffect(closeButton);
 
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), controlsBox);
         fadeOut.setFromValue(1.0);
@@ -757,6 +767,13 @@ public class VideoPlayerController {
         fadeOut.play();
         img.setVisible(false);
     }
+    public void fadeOutEffect(Button btn){
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), btn);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0);
+        fadeOut.play();
+        btn.setVisible(false);
+    }
     public void fadeInEffect(Pane pane){
         pane.setVisible(true);
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), pane);
@@ -767,6 +784,13 @@ public class VideoPlayerController {
     public void fadeInEffect(ImageView img){
         img.setVisible(true);
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), img);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+    }
+    public void fadeInEffect(Button btn){
+        btn.setVisible(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), btn);
         fadeIn.setFromValue(0);
         fadeIn.setToValue(1.0);
         fadeIn.play();

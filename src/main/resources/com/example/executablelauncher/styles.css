@@ -222,6 +222,12 @@
     -fx-text-fill: white;
 }
 
+.playerOptionsButton:hover{
+    -fx-background-color: #b6b6b6;
+    -fx-background-radius: 5px;
+    -fx-text-fill: black;
+}
+
 .playerOptionsButton:focused{
     -fx-background-color: #EDF2F4;
     -fx-background-radius: 5px;

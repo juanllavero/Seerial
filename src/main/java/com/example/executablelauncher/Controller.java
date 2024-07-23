@@ -105,6 +105,12 @@ public class Controller implements Initializable {
     private VBox cardSizeOptions;
 
     @FXML
+    private Button backButton;
+
+    @FXML
+    private Button menuButton;
+
+    @FXML
     private Button tinyCardButton;
 
     @FXML
@@ -144,10 +150,9 @@ public class Controller implements Initializable {
     private int rowCount = 0;
 
     @FXML
-    private void close() {
+    void close() {
         playInteractionSound();
         App.close();
-        Platform.exit();
     }
 
     @Override
@@ -155,6 +160,7 @@ public class Controller implements Initializable {
         settingsButton.setText(App.buttonsBundle.getString("settings"));
         exitButton.setText(App.buttonsBundle.getString("exitFullscreen"));
         switchToDesktopButton.setText(App.buttonsBundle.getString("switchToDesktop"));
+        backButton.setText(App.buttonsBundle.getString("backButton"));
 
         settingsTitle.setText(App.buttonsBundle.getString("settings"));
 
@@ -163,6 +169,11 @@ public class Controller implements Initializable {
 
         //Open/Close Menu
         mainMenu.setVisible(false);
+
+        mainMenu.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+            playCategoriesSound();
+            hideContextMenu();
+        });
 
         librariesBox.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
@@ -292,6 +303,19 @@ public class Controller implements Initializable {
         globalShadow.setFitHeight(screenHeight);
         globalShadow.setVisible(false);
 
+        menuButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
+            playInteractionSound();
+
+            if (App.pressedLeft(event))
+                librariesBox.getChildren().getLast().requestFocus();
+            else if (App.pressedSelect(event))
+                showMenu();
+        });
+
+        menuButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+            playInteractionSound();
+        });
+
         libraries = DataManager.INSTANCE.getLibraries(true);
 
         for (Library cat : libraries){
@@ -305,7 +329,7 @@ public class Controller implements Initializable {
 
             btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
                 playCategoriesSound();
-                showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)));
+                selectLibraryButton(btn);
             });
 
             btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
@@ -314,7 +338,11 @@ public class Controller implements Initializable {
                 }else if (App.pressedLeft(event)){
                     librariesBox.getChildren().get(Math.max(0, librariesBox.getChildren().indexOf(btn) - 1)).requestFocus();
                 }else if (App.pressedRight(event)){
-                    librariesBox.getChildren().get(Math.min(librariesBox.getChildren().indexOf(btn) + 1, librariesBox.getChildren().size() - 1)).requestFocus();
+                    if (btn == librariesBox.getChildren().getLast()){
+                        backButton.requestFocus();
+                    }else{
+                        librariesBox.getChildren().get(Math.min(librariesBox.getChildren().indexOf(btn) + 1, librariesBox.getChildren().size() - 1)).requestFocus();
+                    }
                 }else if (App.pressedDown(event)){
                     if (selectedSeries != null)
                         seriesButtons.get(series.indexOf(selectedSeries)).requestFocus();
@@ -662,7 +690,6 @@ public class Controller implements Initializable {
         btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
             if (App.pressedSelect(event)){
                 if (selectedSeries != null) {
-                    playCategoriesSound();
                     showSeason(selectedSeries);
                 }
             }
@@ -688,8 +715,11 @@ public class Controller implements Initializable {
 
         btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (event.getButton().equals(MouseButton.PRIMARY)){
-                selectSeries(series.get(seriesButtons.indexOf(btn)));
-                playInteractionSound();
+
+                if (btn == seriesButtons.get(series.indexOf(selectedSeries)))
+                    showSeason(selectedSeries);
+                else
+                    btn.requestFocus();
             }
         });
 
@@ -721,7 +751,8 @@ public class Controller implements Initializable {
         restoreSelection();
     }
 
-    private void showMenu(){
+    @FXML
+    void showMenu(){
         globalShadow.setVisible(true);
         mainMenu.setVisible(true);
         menuOptions.setVisible(true);
@@ -738,6 +769,7 @@ public class Controller implements Initializable {
     }
 
     public void showSeason(Series s){
+        playCategoriesSound();
         if (s != null && !s.getSeasons().isEmpty()) {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
@@ -748,7 +780,7 @@ public class Controller implements Initializable {
                 Stage stage = (Stage) mainPane.getScene().getWindow();
                 stage.setTitle(App.textBundle.getString("season"));
                 Scene scene = new Scene(root);
-                scene.setCursor(Cursor.NONE);
+                //scene.setCursor(Cursor.NONE);
                 scene.setFill(Color.BLACK);
                 stage.setScene(scene);
                 stage.setMaximized(true);

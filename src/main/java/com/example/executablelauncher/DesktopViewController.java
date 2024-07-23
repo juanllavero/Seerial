@@ -3514,7 +3514,7 @@ public class DesktopViewController {
             stage.setTitle(App.textBundle.getString("fullscreenMode"));
             stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
             Scene scene = new Scene(root);
-            scene.setCursor(Cursor.NONE);
+            //scene.setCursor(Cursor.NONE);
             scene.setFill(Color.BLACK);
             stage.setScene(scene);
             stage.setMaximized(true);

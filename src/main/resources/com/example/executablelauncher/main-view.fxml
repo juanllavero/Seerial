@@ -34,19 +34,6 @@
                      <HBox.margin>
                         <Insets top="10.0" />
                      </HBox.margin>
-                     <right>
-                        <Label fx:id="clock" alignment="CENTER" prefHeight="35.0" prefWidth="98.0" text="22:30" textFill="WHITE" BorderPane.alignment="CENTER">
-                           <font>
-                              <Font size="26.0" />
-                           </font>
-                           <effect>
-                              <DropShadow />
-                           </effect>
-                           <BorderPane.margin>
-                              <Insets right="20.0" />
-                           </BorderPane.margin>
-                        </Label>
-                     </right>
                      <left>
                         <ScrollPane hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
                            <content>
@@ -58,6 +45,38 @@
                            </content>
                         </ScrollPane>
                      </left>
+                     <right>
+                        <HBox BorderPane.alignment="CENTER">
+                           <children>
+                              <Label fx:id="clock" alignment="CENTER" prefHeight="35.0" prefWidth="98.0" text="22:30" textFill="WHITE">
+                                 <font>
+                                    <Font size="26.0" />
+                                 </font>
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
+                                 <HBox.margin>
+                                    <Insets top="8.0" />
+                                 </HBox.margin>
+                              </Label>
+                              <Button fx:id="menuButton" focusTraversable="false" mnemonicParsing="false" onAction="#showMenu" styleClass="fullscreenButtonTransparent" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/menu.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets right="20.0" />
+                           </padding>
+                        </HBox>
+                     </right>
                   </BorderPane>
                </children>
                <BorderPane.margin>
@@ -129,6 +148,14 @@
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
+                     <padding>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                     </padding>
+                  </Button>
+                  <Button fx:id="backButton" alignment="CENTER" graphicTextGap="8.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#hideContextMenu" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Volver" textFill="WHITE">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
                      <padding>
                         <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
