@@ -27,6 +27,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -84,10 +85,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -332,6 +330,8 @@ public class DesktopViewController {
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .build();
+
+    private volatile boolean interrupted = false;
     //endregion
 
     //region THEMOVIEDB ATTRIBUTES
@@ -343,6 +343,8 @@ public class DesktopViewController {
 
     public void initValues(){
         Stage stage = (Stage) mainBox.getScene().getWindow();
+
+        App.setDesktopController(this);
 
         if (App.isConnectedToInternet)
             tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
@@ -391,8 +393,6 @@ public class DesktopViewController {
         stage.widthProperty().addListener(widthListener);
         stage.heightProperty().addListener(heightListener);
         //endregion
-
-        mainBox.getScene().getWindow().setOnCloseRequest(e -> closeWindow());
 
         menuParentPane.setVisible(false);
         mainMenu.setVisible(false);
@@ -1186,8 +1186,35 @@ public class DesktopViewController {
 
     //region WINDOW
     @FXML
-    private void closeWindow(){
-        executor.shutdown();
+    public void closeWindow(){
+        Task<Void> closeTask = new Task<>() {
+            @Override
+            protected Void call() {
+                interrupted = true;
+
+                executor.close();
+                try {
+                    if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                        System.out.println("Executor did not terminate in the specified time. Attempting to shutdown now.");
+                        List<Runnable> notExecutedTasks = executor.shutdownNow();
+                        System.out.println("Not executed tasks: " + notExecutedTasks.size());
+
+                        if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                            System.err.println("Executor did not terminate after being forced to shut down.");
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    System.err.println("Interrupted while waiting for termination.");
+                    executor.shutdownNow();
+                    Thread.currentThread().interrupt();
+                }
+
+                return null;
+            }
+        };
+
+        new Thread(closeTask).start();
+
         App.close();
     }
     //endregion
@@ -1534,21 +1561,19 @@ public class DesktopViewController {
         for (File file : files) {
             executor.submit(() -> {
                 try {
-                    // To break the execution when the task is cancelled
-                    if (executor.isShutdown())
-                        return;
+                    if (!interrupted) {
+                        if (library.getType().equals("Shows")) {
+                            if (file.isFile())
+                                return;
 
-                    if (library.getType().equals("Shows")) {
-                        if (file.isFile())
-                            return;
+                            File[] filesInDir = file.listFiles();
+                            if (filesInDir == null)
+                                return;
 
-                        File[] filesInDir = file.listFiles();
-                        if (filesInDir == null)
-                            return;
-
-                        scanTVShow(library, file, filesInDir, false);
-                    } else {
-                        scanMovie(library, file);
+                            scanTVShow(library, file, filesInDir, false);
+                        } else {
+                            scanMovie(library, file);
+                        }
                     }
 
                     synchronized (DesktopViewController.class) {
@@ -1609,11 +1634,15 @@ public class DesktopViewController {
         });
 
         for (Series series : library.getSeries()) {
-            if (series == null || executor.isShutdown())
-                return;
+            if (series == null)
+                continue;
+
+            if(interrupted)
+                break;
 
             executor.submit(() -> {
                 try {
+
                     if (library.getType().equals("Shows")) {
                         Season season = series.getSeasons().get(0);
 
@@ -1625,6 +1654,9 @@ public class DesktopViewController {
                         }
                     } else {
                         for (Season season : series.getSeasons()) {
+                            if (interrupted)
+                                break;
+
                             if (!season.getMusicSrc().isEmpty())
                                 continue;
 
@@ -1747,13 +1779,11 @@ public class DesktopViewController {
 
         //Process each episode
         for (File video : videoFiles){
+            if (interrupted)
+                break;
+
             if (library.getAnalyzedFiles().get(video.getAbsolutePath()) != null)
                 continue;
-
-            if (executor.isShutdown()){
-                series.setAnalyzingFiles(false);
-                return;
-            }
 
             processEpisode(library, series, video, seasonsMetadata, episodesGroup, exists);
         }

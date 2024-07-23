@@ -23,7 +23,7 @@ public class Series implements Serializable {
     List<Season> seasons = new ArrayList<>();
     List<String> genres = new ArrayList<>();
     boolean playSameMusic = false;
-    boolean analyzingFiles = true;
+    boolean analyzingFiles = false;
 
     public Series() {
         id = UUID.randomUUID().toString();

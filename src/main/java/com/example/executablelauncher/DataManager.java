@@ -97,6 +97,7 @@ public class DataManager {
         Iterator<Series> seriesIterator = library.getSeries().iterator();
         while (seriesIterator.hasNext()) {
             Series show = seriesIterator.next();
+            show.setAnalyzingFiles(false);
 
             Iterator<Season> temporadaIterator = show.getSeasons().iterator();
             while (temporadaIterator.hasNext()) {
@@ -111,6 +112,18 @@ public class DataManager {
                     if (App.checkIfDriveIsConnected(episode.getVideoSrc()) && !file.exists()) {
                         episodioIterator.remove();
                         deleteEpisodeData(episode);
+                    }else if (episode.getImgSrc().isEmpty()){
+                        File imageFolder = new File("resources/img/discCovers/" + episode.getId() + "/");
+
+                        if (!imageFolder.exists())
+                            continue;
+
+                        File[] images = imageFolder.listFiles();
+
+                        if (images == null)
+                            continue;
+
+                        episode.setImgSrc("resources/img/discCovers/" + episode.getId() + "/" + images[0].getName());
                     }
                 }
 

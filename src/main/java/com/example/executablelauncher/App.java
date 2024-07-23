@@ -45,6 +45,7 @@ public class App extends Application {
     public static boolean isConnectedToInternet = false;
     static ScheduledExecutorService executorService;
     public static List<Task<Void>> tasks = new ArrayList<>();
+    private static DesktopViewController desktopController;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -106,7 +107,17 @@ public class App extends Application {
 
         primaryStage.show();
 
-        primaryStage.setOnCloseRequest(event -> close());
+        primaryStage.setOnCloseRequest(event -> {
+            if (desktopController != null)
+                desktopController.closeWindow();
+            else
+                close();
+
+            event.consume();
+        });
+    }
+    public static void setDesktopController(DesktopViewController controller){
+        desktopController = controller;
     }
     private void loadDesktopMode() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
