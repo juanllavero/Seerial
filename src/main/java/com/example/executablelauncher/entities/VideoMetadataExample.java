@@ -20,11 +20,13 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import net.coobird.thumbnailator.Thumbnails;
+import nu.pattern.OpenCV;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
@@ -38,6 +40,9 @@ import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
@@ -88,17 +93,20 @@ public class VideoMetadataExample extends Application {
         if (movieMetadata != null)
             System.out.println(movieMetadata.title);*/
 
-        processBlurAndSave("resources/img/test2.png", "resources/img/test2_fullblur.png", "resources/img/test2_cacheBlur.png");
+        OpenCV.loadLocally();
+
+        processBlurAndSave("resources/img/test2.png", "resources/img/test2_fullBlur.jpg");
     }
 
-    public static void processBlurAndSave(String imagePath, String outputFilePath, String cacheOutput) {
+    public static void processBlurAndSave(String imagePath, String outputFilePath) {
         try {
             // Load the image
             Mat originalImage = Imgcodecs.imread(imagePath);
 
             // Apply GaussianBlur effect
             Mat blurredImage = new Mat();
-            Imgproc.GaussianBlur(originalImage, blurredImage, new Size(21, 21), 0);
+            int kernelSize = 41;
+            Imgproc.GaussianBlur(originalImage, blurredImage, new Size(kernelSize, kernelSize), 0);
 
             // Crop a portion of the blurred image
             int cropX = (int) (blurredImage.cols() * 0.03);
@@ -109,11 +117,11 @@ public class VideoMetadataExample extends Application {
             Mat croppedImage = new Mat(blurredImage, new Rect(cropX, cropY, cropWidth, cropHeight));
 
             // Save the cropped blurred image to cache
-            Imgcodecs.imwrite(cacheOutput, croppedImage);
+            Imgcodecs.imwrite(outputFilePath, croppedImage);
 
             // Compress and save image file
             try {
-                Thumbnails.of(cacheOutput)
+                Thumbnails.of(outputFilePath)
                         .scale(1)
                         .outputQuality(0.9)
                         .toFile(outputFilePath);
@@ -130,6 +138,7 @@ public class VideoMetadataExample extends Application {
         }
     }
 
+    //region TEST
     public static void downloadDefaultMusic(){
         Task<Void> musicDownloadTask = new Task<>() {
             @Override
@@ -219,8 +228,6 @@ public class VideoMetadataExample extends Application {
 
         return true;
     }
-
-    //region TEST
     public static MovieMetadata downloadMovieMetadata(int tmdbID){
         try{
             OkHttpClient client = new OkHttpClient();

@@ -19,6 +19,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import nu.pattern.OpenCV;
 
 import java.io.File;
 import java.io.IOException;
@@ -272,6 +273,10 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
+
+        //Load OpenCV library to apply blur effect to images
+        OpenCV.loadLocally();
+
         launch(args);
     }
 }

@@ -1,9 +1,12 @@
 package com.example.executablelauncher.entities;
 
+import com.example.executablelauncher.utils.Utils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Season implements Serializable {
     final String id;
@@ -26,7 +29,7 @@ public class Season implements Serializable {
     boolean showName = true;
     String audioTrackLanguage = "";
     String subtitleTrackLanguage = "";
-    List<Episode> episodes = new ArrayList<>();
+    List<Episode> episodes = new CopyOnWriteArrayList<>();
     List<String> genres = new ArrayList<>();
 
     public Season() {

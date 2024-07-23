@@ -142,6 +142,8 @@
       <element id="library" level="project" name="Maven: org.openjfx:javafx-base:21-ea+24" />
       <element id="library" level="project" name="Maven: org.openjfx:javafx-base:win:21-ea+24" />
       <element id="library" level="project" name="Maven: org.bytedeco:ffmpeg:6.0-1.5.9" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/openpnp/opencv/4.9.0-0/opencv-4.9.0-0.jar" path-in-jar="/" />
+      <element id="library" level="project" name="Maven: org.openpnp:opencv:4.9.0-0" />
     </root>
   </artifact>
 </component>

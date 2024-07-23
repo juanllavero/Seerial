@@ -117,7 +117,7 @@
          <center>
             <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <BorderPane.margin>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+                  <Insets bottom="20.0" left="10.0" right="20.0" top="10.0" />
                </BorderPane.margin>
                <content>
                   <StackPane fx:id="seasonInfoPane">
@@ -285,7 +285,7 @@
          <left>
             <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="250.0" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <BorderPane.margin>
-                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+                  <Insets bottom="20.0" left="20.0" right="10.0" top="10.0" />
                </BorderPane.margin>
                <content>
                   <StackPane fx:id="seriesStack" prefHeight="150.0" prefWidth="200.0">

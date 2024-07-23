@@ -60,7 +60,7 @@ public class Utils {
                 return Integer.compare(a.getOrder(), b.getOrder());
             }
 
-            return Integer.compare(b.getEpisodeNumber(), a.getEpisodeNumber());
+            return Integer.compare(a.getEpisodeNumber(), b.getEpisodeNumber());
         }
     }
 

@@ -23,6 +23,7 @@ public class Series implements Serializable {
     List<Season> seasons = new ArrayList<>();
     List<String> genres = new ArrayList<>();
     boolean playSameMusic = false;
+    boolean analyzingFiles = true;
 
     public Series() {
         id = UUID.randomUUID().toString();
@@ -181,5 +182,13 @@ public class Series implements Serializable {
                 return season;
 
         return null;
+    }
+
+    public boolean isAnalyzingFiles() {
+        return analyzingFiles;
+    }
+
+    public void setAnalyzingFiles(boolean analyzingFiles) {
+        this.analyzingFiles = analyzingFiles;
     }
 }
