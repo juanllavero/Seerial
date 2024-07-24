@@ -5,6 +5,10 @@ import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import javafx.animation.FadeTransition;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.util.Duration;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -99,4 +103,34 @@ public class Utils {
         }
     }
 
+    //region EFFECTS
+    public static void fadeOutEffect(Pane pane){
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.6), pane);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0);
+        fadeOut.play();
+        pane.setVisible(false);
+    }
+    public static void fadeOutEffect(ImageView img){
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.6), img);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0);
+        fadeOut.play();
+        img.setVisible(false);
+    }
+    public static void fadeInEffect(Pane pane){
+        pane.setVisible(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.6), pane);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+    }
+    public static void fadeInEffect(ImageView img){
+        img.setVisible(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.6), img);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+    }
+    //endregion
 }

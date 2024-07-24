@@ -600,5 +600,10 @@
             <DropShadow />
          </effect>
       </VBox>
+      <ImageView fx:id="blackBackground" fitHeight="1080.0" fitWidth="2027.0" pickOnBounds="true" visible="false">
+         <image>
+            <Image url="@../../../img/aaa.png" />
+         </image>
+      </ImageView>
    </children>
 </StackPane>

@@ -27,6 +27,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
@@ -54,6 +55,12 @@ public class VideoPlayerController {
 
     @FXML
     private ScrollPane chapterScroll;
+
+    @FXML
+    private VBox leftTouchArea;
+
+    @FXML
+    private VBox rightTouchArea;
 
     @FXML
     private StackPane mainPane;
@@ -305,7 +312,23 @@ public class VideoPlayerController {
     }
     private void onLoad(){
         optionsBox.setOnMouseClicked(e -> hideOptions());
-        controlsBox.setOnMouseClicked(e -> hideControls());
+        //controlsBox.setOnMouseClicked(e -> hideControls());
+
+        rightTouchArea.setOnMouseClicked(e -> {
+            if(e.getButton().equals(MouseButton.PRIMARY)){
+                if(e.getClickCount() >= 2){
+                    seekForward();
+                }
+            }
+        });
+
+        leftTouchArea.setOnMouseClicked(e -> {
+            if(e.getButton().equals(MouseButton.PRIMARY)){
+                if(e.getClickCount() >= 2){
+                    seekBackward();
+                }
+            }
+        });
 
         fullScreenButton.setOnMouseClicked(e -> {
             fullscreen = !fullscreen;
@@ -952,6 +975,12 @@ public class VideoPlayerController {
     public void goBack(){
         showControls();
         runtimeSlider.requestFocus();
+    }
+    public void seekForward(){
+        videoPlayer.seekForward();
+    }
+    public void seekBackward(){
+        videoPlayer.seekBackward();
     }
     private void checkTimeWatched(){
         Episode episode = episodeList.get(currentDisc);

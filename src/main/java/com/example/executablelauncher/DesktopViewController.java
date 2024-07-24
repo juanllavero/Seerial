@@ -95,8 +95,14 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import static com.example.executablelauncher.utils.Utils.fadeInEffect;
+import static com.example.executablelauncher.utils.Utils.fadeOutEffect;
+
 public class DesktopViewController {
     //region FXML ATTRIBUTES
+    @FXML
+    private ImageView blackBackground;
+
     @FXML
     private Button setWatchedSeries;
 
@@ -1034,7 +1040,10 @@ public class DesktopViewController {
             return;
         }
 
+        selectedEpisode = episode;
+
         //Open Video Player
+        fadeInEffect(blackBackground);
         mainBox.setDisable(true);
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
@@ -1105,9 +1114,10 @@ public class DesktopViewController {
     }
     public void stopPlayer(){
         mainBox.setDisable(false);
+        fadeOutEffect(blackBackground);
 
-        //reloadEpisodeCard();
-        //updateWatchedButton();
+        if (selectedEpisode != null)
+            updateDisc(selectedEpisode);
     }
     public String setRuntime(int runtime){
         int h = runtime / 60;

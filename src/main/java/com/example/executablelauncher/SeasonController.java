@@ -48,6 +48,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.example.executablelauncher.utils.Utils.fadeInEffect;
+import static com.example.executablelauncher.utils.Utils.fadeOutEffect;
+
 public class SeasonController {
     //region FXML ATTRIBUTES
     @FXML
@@ -969,40 +972,6 @@ public class SeasonController {
     void play(){
         if (selectedEpisode != null)
             playEpisode(selectedEpisode);
-    }
-    //endregion
-
-    //region EFFECTS
-    public void fadeOutEffect(Pane pane){
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.6), pane);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0);
-        fadeOut.play();
-        pane.setVisible(false);
-    }
-
-    public void fadeOutEffect(ImageView img){
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), img);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0);
-        fadeOut.play();
-        img.setVisible(false);
-    }
-
-    public void fadeInEffect(Pane pane){
-        pane.setVisible(true);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.6), pane);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
-    }
-
-    public void fadeInEffect(ImageView img){
-        img.setVisible(true);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), img);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
     }
     //endregion
 

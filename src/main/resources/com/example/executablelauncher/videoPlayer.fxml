@@ -25,6 +25,47 @@
          <center>
             <VBox fx:id="controlsBox" alignment="BOTTOM_LEFT" maxWidth="2560.0" BorderPane.alignment="CENTER">
                <children>
+                  <BorderPane>
+                     <left>
+                        <VBox fx:id="leftTouchArea" alignment="CENTER_RIGHT" prefHeight="350.0" prefWidth="500.0" styleClass="translucent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button alignment="CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="5.0" mnemonicParsing="false" styleClass="transparent" stylesheets="@styles.css" text="-10" textFill="WHITE">
+                                 <graphic>
+                                    <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/skipBackguard.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </left>
+                     <right>
+                        <VBox fx:id="rightTouchArea" alignment="CENTER_LEFT" prefWidth="500.0" styleClass="translucent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button alignment="CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="5.0" mnemonicParsing="false" styleClass="transparent" stylesheets="@styles.css" text="10" textFill="WHITE">
+                                 <graphic>
+                                    <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/skipForward.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </VBox>
+                     </right>
+                     <center>
+                        <VBox fillWidth="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="50.0" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
                   <Label fx:id="seriesTitle" text="Juego de tronos" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="46.0" />
