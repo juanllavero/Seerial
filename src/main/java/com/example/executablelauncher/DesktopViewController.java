@@ -15,6 +15,7 @@ import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadataBasic;
 import com.example.executablelauncher.tmdbMetadata.series.SeriesMetadata;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
+import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbTvEpisodes;
@@ -54,6 +55,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -304,6 +306,7 @@ public class DesktopViewController {
     //endregion
 
     //region ATTRIBUTES
+    private VideoPlayerController videoPlayerController;
     private final ImageViewPane seasonBackground = new ImageViewPane();
     private final ImageViewPane seasonBackgroundNoise = new ImageViewPane();
     private final ImageViewPane seriesBackgroundNoise = new ImageViewPane();
@@ -792,6 +795,7 @@ public class DesktopViewController {
             return;
         }
 
+        App.setSelectedSeries(selectedSeries);
         selectedEpisodes.clear();
         seasonScroll.setVisible(true);
         selectionOptions.setVisible(false);
@@ -1030,7 +1034,39 @@ public class DesktopViewController {
             return;
         }
 
-        String osName = System.getProperty("os.name").toLowerCase();
+        //Open Video Player
+        mainBox.setDisable(true);
+        try{
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
+            Parent root = fxmlLoader.load();
+
+            Stage videoStage = (Stage) mainBox.getScene().getWindow();
+
+            Stage controlsStage = new Stage();
+            controlsStage.setTitle("Video Player Controls");
+            controlsStage.initOwner(videoStage);
+            controlsStage.initModality(Modality.NONE);
+            controlsStage.initStyle(StageStyle.TRANSPARENT);
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            //scene.setCursor(Cursor.NONE);
+            controlsStage.setScene(scene);
+
+            String name = selectedSeries.getName();
+            if (!currentLibrary.getType().equals("Shows"))
+                name = selectedSeason.getName();
+
+            VideoPlayerController playerController = fxmlLoader.getController();
+            playerController.setDesktopPlayer(this, controlsStage);
+            playerController.setVideo(selectedSeason, episode, name, videoStage);
+
+            controlsStage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        /*String osName = System.getProperty("os.name").toLowerCase();
+
 
         if (osName.contains("windows")) {
             System.out.println("El sistema operativo es Windows.");
@@ -1065,7 +1101,13 @@ public class DesktopViewController {
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             System.err.println("Error playing episode in DesktopViewController");
-        }
+        }*/
+    }
+    public void stopPlayer(){
+        mainBox.setDisable(false);
+
+        //reloadEpisodeCard();
+        //updateWatchedButton();
     }
     public String setRuntime(int runtime){
         int h = runtime / 60;
@@ -1187,6 +1229,13 @@ public class DesktopViewController {
     //region WINDOW
     @FXML
     public void closeWindow(){
+        VideoPlayer videoPlayer = null;
+        if (videoPlayerController != null)
+            videoPlayer = videoPlayerController.getVideoPlayer();
+
+        if (videoPlayer != null)
+            videoPlayer.stop();
+
         Task<Void> closeTask = new Task<>() {
             @Override
             protected Void call() {
@@ -1711,6 +1760,14 @@ public class DesktopViewController {
         if (library.getAnalyzedFolders().get(directory.getAbsolutePath()) != null){
             series = library.getSeries(library.getAnalyzedFolders().get(directory.getAbsolutePath()));
             exists = true;
+
+            series.setAnalyzingFiles(true);
+            if (selectedSeries == series){
+                Button showButton = seriesButtons.get(seriesList.indexOf(series));;
+
+                ProgressIndicator loadingIndicator = (ProgressIndicator) ((BorderPane) showButton.getGraphic()).getRight();
+                loadingIndicator.setVisible(true);
+            }
         }else{
             series = new Series();
             series.setFolder(directory.getAbsolutePath());

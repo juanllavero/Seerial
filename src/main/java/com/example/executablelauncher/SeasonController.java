@@ -376,6 +376,11 @@ public class SeasonController {
                 lastSeasonButton.requestFocus();
         });
 
+        playButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (App.pressedSelect(event))
+                playEpisode(selectedEpisode);
+        });
+
         watchedButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             if (App.pressedUp(event)){
                 if (episodeButtons.size() <= 1 && !isShow)
@@ -610,6 +615,7 @@ public class SeasonController {
         nextSeasonButton.setVisible(currentSeason != seasons.size() - 1);
     }
     public void stopVideo(){
+        mainBox.setDisable(false);
         playingVideo = false;
 
         if (episodeButtons.size() > 1 || isShow)
@@ -758,35 +764,36 @@ public class SeasonController {
             return;
         }
 
+        mainBox.setDisable(true);
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
-            Parent root1 = fxmlLoader.load();
+            Parent root = fxmlLoader.load();
 
-            Stage thisStage = (Stage) mainBox.getScene().getWindow();
+            Stage videoStage = (Stage) mainBox.getScene().getWindow();
 
-            Stage stage = new Stage();
-            stage.setTitle("VideoPlayer");
-            stage.initStyle(StageStyle.TRANSPARENT);
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initOwner(thisStage);
-            Scene scene = new Scene(root1);
+            Stage controlsStage = new Stage();
+            controlsStage.setTitle("Video Player Controls");
+            controlsStage.initStyle(StageStyle.TRANSPARENT);
+            controlsStage.initModality(Modality.NONE);
+            controlsStage.initOwner(videoStage);
+            Scene scene = new Scene(root);
             scene.setFill(Color.TRANSPARENT);
             //scene.setCursor(Cursor.NONE);
-            stage.setScene(scene);
+            controlsStage.setScene(scene);
 
             String name = series.getName();
             if (!isShow)
                 name = seasons.get(currentSeason).getName();
 
             VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setParent(this);
-            playerController.setVideo(seasons.get(currentSeason), episode, name, scene);
+            playerController.setFullScreenPlayer(this, controlsStage);
+            playerController.setVideo(seasons.get(currentSeason), episode, name, videoStage);
 
-            stage.setMaximized(true);
-            stage.show();
+            controlsStage.setMaximized(true);
+            controlsStage.show();
 
-            new Robot().mouseMove(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
-            fadeInEffect((Pane) root1);
+            //new Robot().mouseMove(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+            fadeInEffect((Pane) root);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

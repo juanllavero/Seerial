@@ -14,251 +14,252 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="730.0" prefWidth="1412.0" style="-fx-background-color: transparent;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.VideoPlayerController">
+<StackPane fx:id="mainPane" style="-fx-background-color: transparent;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.VideoPlayerController">
    <children>
-      <ImageView fx:id="shadowImage" fitHeight="406.0" fitWidth="916.0" opacity="0.6" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="shadowImage" fitHeight="406.0" fitWidth="916.0" opacity="0.6" pickOnBounds="true" visible="false">
          <image>
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
-      <HBox>
-         <children>
-            <Button fx:id="closeButton" focusTraversable="false" mnemonicParsing="false" onMouseClicked="#stop" styleClass="fullscreenButtonTransparent">
-               <HBox.margin>
-                  <Insets left="20.0" top="20.0" />
-               </HBox.margin>
-               <graphic>
-                  <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../../../img/icons/close.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <padding>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-               </padding>
-            </Button>
-         </children>
-      </HBox>
-      <VBox fx:id="controlsBox" alignment="BOTTOM_LEFT" maxWidth="2560.0">
-         <children>
-            <Label fx:id="seriesTitle" text="Juego de tronos" textFill="WHITE">
-               <font>
-                  <Font name="System Bold" size="46.0" />
-               </font>
-               <VBox.margin>
-                  <Insets bottom="10.0" />
-               </VBox.margin>
-               <effect>
-                  <DropShadow />
-               </effect>
-            </Label>
-            <HBox spacing="5.0">
+      <BorderPane>
+         <center>
+            <VBox fx:id="controlsBox" alignment="BOTTOM_LEFT" maxWidth="2560.0" BorderPane.alignment="CENTER">
                <children>
-                  <Label fx:id="episodeInfo" text="Se acerca el invierno" textFill="WHITE">
+                  <Label fx:id="seriesTitle" text="Juego de tronos" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="30.0" />
+                        <Font name="System Bold" size="46.0" />
                      </font>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
                      <effect>
                         <DropShadow />
                      </effect>
                   </Label>
-               </children>
-               <VBox.margin>
-                  <Insets bottom="20.0" />
-               </VBox.margin>
-            </HBox>
-            <JFXSlider fx:id="runtimeSlider" blockIncrement="1.0" focusTraversable="false" styleClass="jfx-slider" stylesheets="@styles.css">
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
-            </JFXSlider>
-            <BorderPane>
-               <left>
-                  <VBox BorderPane.alignment="CENTER">
+                  <HBox spacing="5.0">
                      <children>
-                        <Label fx:id="currentTime" text="18:31" textFill="WHITE">
+                        <Label fx:id="episodeInfo" text="Se acerca el invierno" textFill="WHITE">
                            <font>
-                              <Font name="System Bold" size="16.0" />
+                              <Font name="System Bold" size="30.0" />
                            </font>
                            <effect>
                               <DropShadow />
                            </effect>
-                           <VBox.margin>
-                              <Insets bottom="10.0" />
-                           </VBox.margin>
                         </Label>
-                        <HBox>
-                           <children>
-                              <Button fx:id="subtitlesButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showSubtitleOptions" styleClass="playerButton" stylesheets="@styles.css">
-                                 <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/icons/subs.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <padding>
-                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                 </padding>
-                              </Button>
-                              <Button fx:id="audiosButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showAudioOptions" styleClass="playerButton" stylesheets="@styles.css">
-                                 <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/icons/audio.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <padding>
-                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                 </padding>
-                              </Button>
-                           </children>
-                           <VBox.margin>
-                              <Insets top="10.0" />
-                           </VBox.margin>
-                        </HBox>
                      </children>
-                  </VBox>
-               </left>
-               <right>
-                  <VBox alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
-                     <children>
-                        <Label fx:id="toFinishTime" alignment="TOP_RIGHT" text="43:10" textFill="WHITE">
-                           <font>
-                              <Font name="System Bold" size="16.0" />
-                           </font>
-                           <effect>
-                              <DropShadow />
-                           </effect>
-                           <VBox.margin>
-                              <Insets bottom="10.0" />
-                           </VBox.margin>
-                        </Label>
-                        <HBox>
+                     <VBox.margin>
+                        <Insets bottom="20.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <JFXSlider fx:id="runtimeSlider" blockIncrement="1.0" focusTraversable="false" styleClass="jfx-slider" stylesheets="@styles.css">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                  </JFXSlider>
+                  <BorderPane>
+                     <left>
+                        <VBox BorderPane.alignment="CENTER">
                            <children>
-                              <Button fx:id="optionsButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css" visible="false">
-                                 <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../../../../resources/img/icons/discOptions.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <padding>
-                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                 </padding>
-                              </Button>
-                              <Button fx:id="videoButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showVideoOptions" styleClass="playerButton" stylesheets="@styles.css">
-                                 <graphic>
-                                    <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/icons/dvdMenu.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <padding>
-                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                                 </padding>
-                              </Button>
+                              <Label fx:id="currentTime" text="18:31" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <HBox>
+                                 <children>
+                                    <Button fx:id="subtitlesButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showSubtitleOptions" styleClass="playerButton" stylesheets="@styles.css">
+                                       <graphic>
+                                          <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/subs.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <padding>
+                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                       </padding>
+                                    </Button>
+                                    <Button fx:id="audiosButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showAudioOptions" styleClass="playerButton" stylesheets="@styles.css">
+                                       <graphic>
+                                          <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/audio.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <padding>
+                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                       </padding>
+                                    </Button>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </HBox>
                            </children>
-                           <VBox.margin>
-                              <Insets top="10.0" />
-                           </VBox.margin>
-                        </HBox>
-                     </children>
-                  </VBox>
-               </right>
-               <center>
-                  <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
-                     <children>
-                        <HBox alignment="TOP_CENTER">
+                        </VBox>
+                     </left>
+                     <right>
+                        <VBox alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
                            <children>
-                              <Button fx:id="prevButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
-                                 <graphic>
-                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/icons/prevTrack.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <padding>
-                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                 </padding>
-                              </Button>
-                              <Button fx:id="playButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
-                                 <graphic>
-                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/icons/pause.png" />
-                                       </image>
-                                       <effect>
-                                          <DropShadow height="10.0" radius="4.5" width="10.0" />
-                                       </effect>
-                                    </ImageView>
-                                 </graphic>
-                                 <padding>
-                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                 </padding>
-                              </Button>
-                              <Button fx:id="nextButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
-                                 <graphic>
-                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/icons/nextTrack.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                                 <padding>
-                                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                 </padding>
-                              </Button>
+                              <Label fx:id="toFinishTime" alignment="TOP_RIGHT" text="43:10" textFill="WHITE">
+                                 <font>
+                                    <Font name="System Bold" size="16.0" />
+                                 </font>
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <HBox>
+                                 <children>
+                                    <Button fx:id="fullScreenButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                       <graphic>
+                                          <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/PantallaCompleta.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <padding>
+                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                       </padding>
+                                    </Button>
+                                    <Button fx:id="videoButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showVideoOptions" styleClass="playerButton" stylesheets="@styles.css">
+                                       <graphic>
+                                          <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/dvdMenu.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <padding>
+                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                       </padding>
+                                    </Button>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="10.0" />
+                                 </VBox.margin>
+                              </HBox>
                            </children>
-                           <VBox.margin>
-                              <Insets top="30.0" />
-                           </VBox.margin>
-                        </HBox>
-                     </children>
-                  </VBox>
-               </center>
-               <VBox.margin>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-               </VBox.margin>
-               <padding>
-                  <Insets bottom="5.0" />
-               </padding>
-            </BorderPane>
-            <Label fx:id="chaptersTitle" text="Chapters" textFill="WHITE">
-               <font>
-                  <Font name="System Bold" size="28.0" />
-               </font>
-               <effect>
-                  <DropShadow />
-               </effect>
-               <VBox.margin>
-                  <Insets top="20.0" />
-               </VBox.margin>
-            </Label>
-            <ScrollPane fx:id="chapterScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
-               <content>
-                  <HBox fx:id="chapterContainer" fillHeight="false" spacing="50.0">
+                        </VBox>
+                     </right>
+                     <center>
+                        <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+                           <children>
+                              <HBox alignment="TOP_CENTER">
+                                 <children>
+                                    <Button fx:id="prevButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                       <graphic>
+                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/prevTrack.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <padding>
+                                          <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                       </padding>
+                                    </Button>
+                                    <Button fx:id="playButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                       <graphic>
+                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/pause.png" />
+                                             </image>
+                                             <effect>
+                                                <DropShadow height="10.0" radius="4.5" width="10.0" />
+                                             </effect>
+                                          </ImageView>
+                                       </graphic>
+                                       <padding>
+                                          <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                       </padding>
+                                    </Button>
+                                    <Button fx:id="nextButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
+                                       <graphic>
+                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../img/icons/nextTrack.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <padding>
+                                          <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                                       </padding>
+                                    </Button>
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets top="30.0" />
+                                 </VBox.margin>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </center>
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin>
                      <padding>
-                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                     </padding></HBox>
-               </content>
-               <VBox.margin>
-                  <Insets top="50.0" />
-               </VBox.margin>
-            </ScrollPane>
-         </children>
-         <StackPane.margin>
-            <Insets bottom="10.0" left="50.0" right="50.0" top="10.0" />
-         </StackPane.margin>
-         <padding>
-            <Insets bottom="40.0" />
-         </padding>
-      </VBox>
+                        <Insets bottom="5.0" />
+                     </padding>
+                  </BorderPane>
+                  <Label fx:id="chaptersTitle" text="Chapters" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="28.0" />
+                     </font>
+                     <effect>
+                        <DropShadow />
+                     </effect>
+                     <VBox.margin>
+                        <Insets top="20.0" />
+                     </VBox.margin>
+                  </Label>
+                  <ScrollPane fx:id="chapterScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
+                     <content>
+                        <HBox fx:id="chapterContainer" fillHeight="false" spacing="50.0">
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                        </HBox>
+                     </content>
+                     <VBox.margin>
+                        <Insets top="40.0" />
+                     </VBox.margin>
+                  </ScrollPane>
+               </children>
+               <padding>
+                  <Insets bottom="30.0" left="50.0" right="50.0" />
+               </padding>
+            </VBox>
+         </center>
+         <top>
+            <HBox BorderPane.alignment="CENTER">
+               <children>
+                  <Button fx:id="closeButton" alignment="TOP_LEFT" contentDisplay="CENTER" focusTraversable="false" mnemonicParsing="false" onMouseClicked="#stop" styleClass="fullscreenButtonTransparent">
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../img/icons/close.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="20.0" top="20.0" />
+               </padding>
+            </HBox>
+         </top>
+      </BorderPane>
       <HBox fx:id="volumeBox" alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="volumeSliderBox" stylesheets="@styles.css" StackPane.alignment="CENTER">
          <children>
             <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">

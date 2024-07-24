@@ -1,62 +1,38 @@
 package com.example.executablelauncher.entities;
 
-import com.example.executablelauncher.App;
-import com.example.executablelauncher.VideoPlayerController;
 import com.example.executablelauncher.fileMetadata.ChaptersContainer;
-import com.example.executablelauncher.tmdbMetadata.images.Images;
 import com.example.executablelauncher.tmdbMetadata.movies.MovieMetadata;
+import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
-import javafx.scene.effect.BoxBlur;
-import javafx.scene.effect.GaussianBlur;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.WritableImage;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.Button;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import net.coobird.thumbnailator.Thumbnails;
-import nu.pattern.OpenCV;
+import javafx.stage.StageStyle;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
-import javax.imageio.*;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.FileImageOutputStream;
-import javax.imageio.stream.ImageInputStream;
-import javax.imageio.stream.ImageOutputStream;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
 import java.io.*;
-import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class VideoMetadataExample extends Application {
+    static Stage videoStage;
+    static Stage controlsStage;
 
     public static void main(String[] args) throws IOException {
         // Ruta del archivo de vídeo
@@ -93,49 +69,8 @@ public class VideoMetadataExample extends Application {
         if (movieMetadata != null)
             System.out.println(movieMetadata.title);*/
 
-        OpenCV.loadLocally();
 
-        processBlurAndSave("resources/img/test2.png", "resources/img/test2_fullBlur.jpg");
-    }
-
-    public static void processBlurAndSave(String imagePath, String outputFilePath) {
-        try {
-            // Load the image
-            Mat originalImage = Imgcodecs.imread(imagePath);
-
-            // Apply GaussianBlur effect
-            Mat blurredImage = new Mat();
-            int kernelSize = 41;
-            Imgproc.GaussianBlur(originalImage, blurredImage, new Size(kernelSize, kernelSize), 0);
-
-            // Crop a portion of the blurred image
-            int cropX = (int) (blurredImage.cols() * 0.03);
-            int cropY = (int) (blurredImage.rows() * 0.05);
-            int cropWidth = (int) (blurredImage.cols() * 0.93);
-            int cropHeight = (int) (blurredImage.rows() * 0.9);
-
-            Mat croppedImage = new Mat(blurredImage, new Rect(cropX, cropY, cropWidth, cropHeight));
-
-            // Save the cropped blurred image to cache
-            Imgcodecs.imwrite(outputFilePath, croppedImage);
-
-            // Compress and save image file
-            try {
-                Thumbnails.of(outputFilePath)
-                        .scale(1)
-                        .outputQuality(0.9)
-                        .toFile(outputFilePath);
-            } catch (IOException e) {
-                System.err.println("saveBackground: error compressing background image");
-            }
-
-            // Release resources
-            originalImage.release();
-            blurredImage.release();
-            croppedImage.release();
-        } catch (Exception e) {
-            System.err.println("Image processing error: " + e.getMessage());
-        }
+        launch(args);
     }
 
     //region TEST
@@ -383,10 +318,5 @@ public class VideoMetadataExample extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Pane root = new Pane();
-        Scene scene = new Scene(root, 400, 400);
-
-        primaryStage.setScene(scene);
-        primaryStage.show();
     }
 }

@@ -10,7 +10,12 @@ import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.LongByReference;
 import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.media.MediaView;
+import javafx.stage.Stage;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -19,22 +24,22 @@ import java.util.concurrent.TimeUnit;
 
 import static com.example.executablelauncher.videoPlayer.MPV.MPV_EVENT_FILE_LOADED;
 
-public class VideoPlayer extends MediaView {
+public class VideoPlayer {
     long handle;
-    private boolean paused = false;
-    private ScheduledExecutorService clockExecutor;
-    private volatile long currentTimeMillis = 0;
-    private VideoPlayerController parentController;
-    private final List<Track> videoTracks = new ArrayList<>();
-    private final List<Track> audioTracks = new ArrayList<>();
-    private final List<Track> subtitleTracks = new ArrayList<>();
-    private boolean nextVideo = false;
-
+    boolean paused = false;
+    ScheduledExecutorService clockExecutor;
+    volatile long currentTimeMillis = 0;
+    VideoPlayerController parentController;
+    final List<Track> videoTracks = new ArrayList<>();
+    final List<Track> audioTracks = new ArrayList<>();
+    final List<Track> subtitleTracks = new ArrayList<>();
+    boolean nextVideo = false;
+    boolean isVideoLoaded = false;
     public void setParent(VideoPlayerController parent){
         parentController = parent;
     }
 
-    public void playVideo(String src, long seekTimeMillis) {
+    public void playVideo(String src, long seekTimeMillis, String stageName) {
         //Get interface to MPV DLL
         MPV mpv = MPV.INSTANCE;
 
@@ -42,11 +47,11 @@ public class VideoPlayer extends MediaView {
         handle = mpv.mpv_create();
 
         //Get the native window id by looking up a window by title:
-        WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null, App.textBundle.getString("season"));
+        //WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null, App.textBundle.getString("season"));
+        WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null, stageName);
 
-        //Tell MPV on which window video should be displayed:
-        LongByReference longByReference =
-                new LongByReference(Pointer.nativeValue(hwnd.getPointer()));
+        long hwndLong = Pointer.nativeValue(hwnd.getPointer());
+        LongByReference longByReference = new LongByReference(hwndLong);
         mpv.mpv_set_option(handle, "wid", 4, longByReference.getPointer());
 
         int error;
@@ -96,6 +101,8 @@ public class VideoPlayer extends MediaView {
             mpvSetProperty("tscale-radius", "1.0");
             mpvSetProperty("tscale-clamp", "0.0");
         }
+
+        isVideoLoaded = true;
     }
     public void loadTracks(){
         String tracklist = mpvGetProperty("track-list");
@@ -140,13 +147,14 @@ public class VideoPlayer extends MediaView {
 
     //region VIDEO CONTROLS
     public boolean isPaused(){
-        return clockExecutor.isShutdown();
+        return clockExecutor != null && clockExecutor.isShutdown();
     }
     public void stop() {
         mpvCommand("stop");
+        clockExecutor.shutdownNow();
     }
     public void togglePause() {
-        if (clockExecutor.isShutdown()){
+        if (clockExecutor == null || clockExecutor.isShutdown()){
             startClock();
         }else{
             pauseClock();
@@ -195,6 +203,13 @@ public class VideoPlayer extends MediaView {
             return 0;
 
         return (long) (Double.parseDouble(durationString) * 1000);
+    }
+    public void setVideoBrightness(double brightness) {
+        if (brightness < -100.0 || brightness > 100.0)
+            brightness = 0;
+
+        if (isVideoLoaded)
+            mpvSetProperty("brightness", String.valueOf(brightness));
     }
     public String getChapters(){
         return mpvGetProperty("chapter-list");
