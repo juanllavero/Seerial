@@ -27,6 +27,7 @@ module com.example.executablelauncher {
     requires com.google.api.client.json.jackson2;
     requires org.bytedeco.ffmpeg;
     requires opencv;
+    requires com.github.kokorin.jaffree;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

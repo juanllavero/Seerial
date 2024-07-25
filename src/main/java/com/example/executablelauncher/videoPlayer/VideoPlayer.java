@@ -2,6 +2,7 @@ package com.example.executablelauncher.videoPlayer;
 
 import com.example.executablelauncher.App;
 import com.example.executablelauncher.VideoPlayerController;
+import com.example.executablelauncher.fileMetadata.Track;
 import com.example.executablelauncher.utils.Configuration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,9 +31,6 @@ public class VideoPlayer {
     ScheduledExecutorService clockExecutor;
     volatile long currentTimeMillis = 0;
     VideoPlayerController parentController;
-    final List<Track> videoTracks = new ArrayList<>();
-    final List<Track> audioTracks = new ArrayList<>();
-    final List<Track> subtitleTracks = new ArrayList<>();
     boolean nextVideo = false;
     boolean isVideoLoaded = false;
     public void setParent(VideoPlayerController parent){
@@ -104,34 +102,6 @@ public class VideoPlayer {
 
         isVideoLoaded = true;
     }
-    public void loadTracks(){
-        String tracklist = mpvGetProperty("track-list");
-
-        if (tracklist == null)
-            return;
-
-        //Convert to json
-        try{
-            ObjectMapper om = new ObjectMapper();
-            Track[] trackList = om.readValue(tracklist, Track[].class);
-
-            for (Track track : trackList){
-                switch (track.type){
-                    case "video":
-                        videoTracks.add(track);
-                        break;
-                    case "audio":
-                        audioTracks.add(track);
-                        break;
-                    case "sub":
-                        subtitleTracks.add(track);
-                        break;
-                }
-            }
-        } catch (JsonProcessingException e) {
-            System.err.println("VideoPlayer: error converting to json");
-        }
-    }
     public void pauseClock() {
         if (clockExecutor != null && !clockExecutor.isShutdown()) {
             clockExecutor.shutdown();
@@ -167,6 +137,9 @@ public class VideoPlayer {
         double newVolume = increase ? Math.min(currentVolume + 5, 100) : Math.max(currentVolume - 5, 0.0);
 
         mpvSetProperty("volume", String.valueOf(newVolume));
+    }
+    public void adjustVolume(double volume) {
+        mpvSetProperty("volume", String.valueOf(volume));
     }
     public double getVolume() {
         String volumeString = mpvGetProperty("volume");
@@ -213,15 +186,6 @@ public class VideoPlayer {
     }
     public String getChapters(){
         return mpvGetProperty("chapter-list");
-    }
-    public List<Track> getVideoTracks() {
-        return videoTracks;
-    }
-    public List<Track> getAudioTracks() {
-        return audioTracks;
-    }
-    public List<Track> getSubtitleTracks() {
-        return subtitleTracks;
     }
     public void setVideoTrack(int videoId) {
         mpvSetProperty("vid", Integer.toString(videoId));

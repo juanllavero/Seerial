@@ -1,7 +1,6 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.*;
-import com.example.executablelauncher.fileMetadata.ChaptersContainer;
 import com.example.executablelauncher.tmdbMetadata.common.Genre;
 import com.example.executablelauncher.tmdbMetadata.groups.*;
 import com.example.executablelauncher.tmdbMetadata.images.Backdrop;
@@ -34,7 +33,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -61,7 +59,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import net.coobird.thumbnailator.Thumbnails;
-import nu.pattern.OpenCV;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -2283,7 +2280,7 @@ public class DesktopViewController {
         }
     }
     private void getChapters(Episode episode){
-        try {
+        /*try {
             ProcessBuilder processBuilder;
             processBuilder = new ProcessBuilder("ffprobe"
                     , "-v", "quiet", "-print_format", "json", "-show_chapters", episode.getVideoSrc());
@@ -2311,7 +2308,7 @@ public class DesktopViewController {
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             System.err.println("getChapters: Error getting chapters");
-        }
+        }*/
     }
     private void setEpisodeData(Library library, Episode episode, EpisodeMetadata episodeMetadata, Series show, int realEpisode){
         episode.setName(episodeMetadata.name);

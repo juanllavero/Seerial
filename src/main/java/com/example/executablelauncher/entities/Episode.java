@@ -1,5 +1,7 @@
 package com.example.executablelauncher.entities;
 
+import com.example.executablelauncher.fileMetadata.Track;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,9 @@ public class Episode implements Serializable {
     boolean watched = false;
     long lastMilisecond = 0;
     List<Chapter> chapters = new ArrayList<>();
+    String mediaDetails = "";
+    String tracksDetails = "";
+    List<Track> tracks = new ArrayList<>();
 
     public Episode() {
         id = UUID.randomUUID().toString();
@@ -143,13 +148,37 @@ public class Episode implements Serializable {
         lastMilisecond = miliseconds;
 
         //If we have watched more than 90% of the video, it is marked as watched
-        /*long runtimeMilliseconds = (long) runtime * 60 * 1000;
+        long runtimeMilliseconds = (long) runtime * 60 * 1000;
         if (lastMilisecond > (runtimeMilliseconds * 0.9)){
             setWatched();
-        }*/
+        }
     }
 
     public long getTimeWatched(){ return lastMilisecond; }
     public List<Chapter> getChapters() { return chapters; }
     public void addChapter(Chapter chapter) { chapters.add(chapter); }
+
+    public String getMediaDetails() {
+        return mediaDetails;
+    }
+
+    public void setMediaDetails(String mediaDetails) {
+        this.mediaDetails = mediaDetails;
+    }
+
+    public String getTracksDetails() {
+        return tracksDetails;
+    }
+
+    public void setTracksDetails(String tracksDetails) {
+        this.tracksDetails = tracksDetails;
+    }
+
+    public List<Track> getTracks() {
+        return tracks;
+    }
+
+    public void setTracks(List<Track> tracks) {
+        this.tracks = tracks;
+    }
 }

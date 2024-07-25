@@ -1,231 +1,280 @@
 package com.example.executablelauncher.entities;
 
-import com.example.executablelauncher.fileMetadata.ChaptersContainer;
-import com.example.executablelauncher.tmdbMetadata.movies.MovieMetadata;
-import com.example.executablelauncher.videoPlayer.VideoPlayer;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.kokorin.jaffree.StreamType;
+import com.github.kokorin.jaffree.ffprobe.FFprobe;
+import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
+import com.github.kokorin.jaffree.ffprobe.Format;
+import com.github.kokorin.jaffree.ffprobe.Stream;
 import javafx.application.Application;
-import javafx.concurrent.Task;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.text.DecimalFormat;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Locale;
 
 public class VideoMetadataExample extends Application {
-    static Stage videoStage;
-    static Stage controlsStage;
 
     public static void main(String[] args) throws IOException {
-        // Ruta del archivo de vídeo
-        /*String pathToVideo = "F:\\The Middle-Earth Collection\\La Comunidad Del Anillo\\El Señor de los Anillos - La Comunidad del Anillo (2001).mkv";
-        String pathToVideo2 = "F:\\ANIME\\[BDMV] FullMetal Alchemist Brotherhood\\S1\\Fullmetal Alchemist Brotherhood S01E01-E02.m2ts";
+        //String pathToVideo = "F:\\UHD\\Mad Max - Fury Road\\Mad Max - Furia en la Carretera.mkv";
+        String pathToVideo = "F:\\VER\\The Strongest Magician in the Demon Lord's Army Was a Human\\S01\\" +
+                "The Strongest Magician in the Demon Lord's Army Was a Human - S01E01.mkv";
+        File video = new File(pathToVideo);
 
-        // Obtener metadatos del vídeo
-        getVideoMetadata(pathToVideo);
+        try {
+            FFprobeResult result = FFprobe.atPath()
+                    .setShowStreams(true)
+                    .setShowFormat(true)
+                    .setShowChapters(true)
+                    .setInput(pathToVideo)
+                    .execute();
 
-        // Obtener metadatos del audio
-        getAudioMetadata(pathToVideo);
+            Format format = result.getFormat();
+            DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-        // Obtener metadatos de los subtítulos
-        getSubtitleMetadata(pathToVideo);*/
+            //region MEDIA INFO
+            System.out.println("Información del Medio:");
 
-        /*Episode episode = new Episode();
-        episode.setVideoSrc("F:\\UHD\\Dune\\Dune (2021).mkv");
-        episode.setName("Dune (2021)");
+            float durationInSeconds = format.getDuration();
+            System.out.println("Duration: " + formatTime(durationInSeconds));
+            System.out.println("File: " + video.getName());
+            System.out.println("Location: " + video.getAbsolutePath());
+            System.out.println("Bitrate: " + format.getBitRate() / Math.pow(10, 3) + " kbps");
 
-        getChapters(episode);
+            //region FILE SIZE
+            double fileSize = Double.valueOf(format.getSize());
 
-        for (Chapter chapter : episode.getChapters()){
-            generateThumbnail(chapter);
-        }*/
+            String sizeSufix = " GB";
+            fileSize = fileSize / Math.pow(1024, 3);
 
-        // Ruta del archivo PNG original y comprimido
-        /*String inputImagePath = "out/artifacts/Seerial/resources/img/DownloadCache/1315631.png";
-        String outputImagePath = "out/artifacts/Seerial/resources/img/DownloadCache/COMPRESSED.png";
+            if (fileSize < 1) {
+                fileSize = fileSize * Math.pow(1024, 1);
+                sizeSufix = " MB";
+            }
 
-        setTransparencyEffect(inputImagePath, outputImagePath);*/
+            System.out.println("Size: " + decimalFormat.format(fileSize) + sizeSufix);
+            //endregion
+            System.out.println("Container: " + video.getName().substring(video.getName().lastIndexOf(".") + 1).toUpperCase());
+            //endregion
 
-        /*MovieMetadata movieMetadata = downloadMovieMetadata(525);
+            //Boolean to stop the loop after the last subtitle track
+            boolean subtitleSectionStarted = false;
 
-        if (movieMetadata != null)
-            System.out.println(movieMetadata.title);*/
+            //Tracks
+            List<Stream> streams = result.getStreams();
+            for (Stream stream : streams) {
+                if (stream.getCodecType().equals(StreamType.SUBTITLE))
+                    subtitleSectionStarted = true;
+                else if (subtitleSectionStarted)
+                    break;
 
+                if (stream.getCodecType().equals(StreamType.VIDEO))
+                    processVideoData(stream);
+                else if (stream.getCodecType().equals(StreamType.AUDIO))
+                    processAudioData(stream);
+                else if (stream.getCodecType().equals(StreamType.SUBTITLE))
+                    processSubtitleData(stream);
+            }
+
+            //Chapters
+            List<com.github.kokorin.jaffree.ffprobe.Chapter> chapters = result.getChapters();
+            if (chapters != null && chapters.size() > 1){
+                //DataManager.INSTANCE.createFolder("resources/img/chaptersCovers/" + episode.getId() + "/");
+                for (com.github.kokorin.jaffree.ffprobe.Chapter chapter : chapters){
+                    double milliseconds = chapter.getStart() / 1_000_000.0;
+
+                    //Chapter newChapter = new Chapter(chapter.getTag("title"), milliseconds);
+                    //episode.addChapter(newChapter);
+
+                    System.out.println("Chapter: " + chapter.getTag("title") + "; Start: " + milliseconds + " ms");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         launch(args);
     }
 
-    //region TEST
-    public static void downloadDefaultMusic(){
-        Task<Void> musicDownloadTask = new Task<>() {
-            @Override
-            protected Void call() {
-                List<YoutubeVideo> results = searchYoutube("The Lord of the Rings" + " main theme");
+    private static void processVideoData(Stream stream){
+        DecimalFormat decimalFormatExtended = new DecimalFormat("#.###");
+        DecimalFormat decimalFormatShort = new DecimalFormat("#.##");
 
-                if (results != null)
-                    downloadMedia(results.get(0).watch_url);
-                return null;
-            }
+        String resolution = "", hdr = "", codec = "", profile = "";
+
+
+        System.out.println("\nVideo");
+
+        System.out.println(stream.getIndex());
+        if (stream.getCodecName() != null) {
+            codec = stream.getCodecName().toUpperCase();
+            System.out.println("Codec: " + codec);
+        }
+
+        if (stream.getCodecLongName() != null)
+            System.out.println("Codec Extended: " + stream.getCodecLongName());
+
+        if (stream.getTag("BPS-eng") != null)
+            System.out.println("Bitrate: " + Math.round(Double.parseDouble(stream.getTag("BPS-eng"))  / Math.pow(10, 3)) + " kbps");
+
+        if (stream.getAvgFrameRate() != null)
+            System.out.println("Frame Rate: " + decimalFormatExtended.format(stream.getAvgFrameRate().floatValue()) + " fps");
+
+        if (stream.getCodedWidth() != null && stream.getCodedHeight() != null) {
+            resolution = formatResolution(stream.getCodedWidth(), stream.getCodedHeight());
+            System.out.println("Coded Height: " + stream.getCodedHeight());
+            System.out.println("Coded Width: " + stream.getCodedWidth());
+        }
+
+        if (stream.getChromaLocation() != null)
+            System.out.println("Chroma Location: " + stream.getChromaLocation());
+
+        if (stream.getColorSpace() != null) {
+            if (stream.getColorSpace().equals("bt2020nc"))
+                hdr = " HDR10";
+            System.out.println("Color Space: " + stream.getColorSpace());
+        }
+
+        if (stream.getDisplayAspectRatio() != null)
+            System.out.println("Aspect Ratio: " + decimalFormatShort.format(stream.getDisplayAspectRatio().floatValue()));
+
+        if (stream.getProfile() != null) {
+            profile = stream.getProfile();
+            System.out.println("Profile: " + profile);
+        }
+
+        if (stream.getRefs() != null)
+            System.out.println("Ref Frames: " + stream.getRefs());
+
+        if (stream.getColorRange() != null)
+            System.out.println("Color Range: " + stream.getColorRange());
+
+        System.out.println("Display Title: " + resolution + hdr + " (" + codec + " " + profile + ")");
+    }
+    private static void processAudioData(Stream stream){
+        String channels = "", language = "", codecDisplayName;
+
+        System.out.println("\nAudio");
+
+        System.out.println(stream.getIndex());
+
+        if (stream.getCodecName() != null)
+            System.out.println("Codec: " + stream.getCodecName().toUpperCase());
+
+        if (stream.getCodecLongName() != null)
+            System.out.println("Codec Extended: " + stream.getCodecLongName());
+
+        if (stream.getChannels() != null)
+            System.out.println("Channels: " + stream.getChannels());
+
+        if (stream.getChannelLayout() != null)
+            System.out.println("Channel Layout: " + stream.getChannelLayout());
+
+        if (stream.getTag("BPS-eng") != null)
+            System.out.println("Bitrate: " + Math.round(Double.parseDouble(stream.getTag("BPS-eng"))  / Math.pow(10, 3)) + " kbps");
+
+        if (stream.getTag("language") != null) {
+            language = Locale.of(stream.getTag("language")).getDisplayName();
+            System.out.println("Language: " + language);
+
+            System.out.println("Language tag: " + stream.getTag("language"));
+        }
+
+        if (stream.getBitsPerRawSample() != null)
+            System.out.println("Bit Depth: " + stream.getBitsPerRawSample());
+
+        if (stream.getProfile() != null && stream.getProfile().equals("DTS-HD MA"))
+            System.out.println("Profile: ma");
+
+        if (stream.getSampleRate() != null)
+            System.out.println("Sampling Rate: " + stream.getSampleRate() + " Hz");
+
+        if (stream.getProfile() != null && stream.getProfile().equals("DTS-HD MA")){
+            codecDisplayName = stream.getProfile();
+        } else {
+            codecDisplayName = stream.getCodecName().toUpperCase();
+        }
+
+        if (stream.getChannels() != null)
+            channels = formatAudioChannels(stream.getChannels());
+
+        System.out.println("Display Title: " + language + " (" + codecDisplayName + " " + channels +")");
+    }
+    private static void processSubtitleData(Stream stream){
+        String title = "", language = "", codecDisplayName = "";
+
+        System.out.println("\nSubtitles");
+
+        System.out.println(stream.getIndex());
+
+        if (stream.getCodecName() != null){
+            codecDisplayName = stream.getCodecName().toUpperCase();
+
+            if (codecDisplayName.equals("HDMV_PGS_SUBTITLE"))
+                codecDisplayName = "PGS";
+
+            System.out.println("Codec: " + codecDisplayName);
+        }
+
+        if (stream.getCodecLongName() != null)
+            System.out.println("Codec Extended: " + stream.getCodecLongName());
+
+        if (stream.getTag("language") != null) {
+            language = Locale.of(stream.getTag("language")).getDisplayName();
+            System.out.println("Language: " + language);
+            System.out.println("Language tag: " + stream.getTag("language"));
+        }
+
+        if (stream.getTag("title") != null) {
+            title = stream.getTag("title");
+            System.out.println("Title: " + title);
+        }
+
+        System.out.println("Display Title: " + title + " (" + language + " " + codecDisplayName +")");
+    }
+    private static String formatResolution(int width, int height) {
+        return switch (width) {
+            case 7680 -> "8K";
+            case 3840 -> "4K";
+            case 2560 -> "QHD";
+            case 1920 -> "1080p";
+            case 1280 -> "720p";
+            case 854 -> "480p";
+            case 640 -> "360p";
+            default -> height + "p";
         };
+    }
+    private static String formatAudioChannels(int channels){
+        return switch (channels) {
+            case 1 -> "MONO";
+            case 2 -> "STEREO";
+            case 3 -> "2.1";
+            case 4 -> "3.1";
+            case 5 -> "4.1";
+            case 6 -> "5.1";
+            case 7 -> "6.1";
+            case 8 -> "7.1";
+            case 9 -> "7.2";
+            case 10 -> "9.1";
+            case 11 -> "10.1";
+            case 12 -> "11.1";
+            default -> String.valueOf(channels);
+        };
+    }
+    private static String formatTime(float time){
+        int h = (int) (time / 3600);
+        int m = (int) ((time % 3600) / 60);
+        int s = (int) (time % 60);
 
-        Thread thread = new Thread(musicDownloadTask);
-        thread.setDaemon(true);
-        thread.start();
+        if (h > 0)
+            return String.format("%02d:%02d:%02d", h, m, s);
+
+        return String.format("%02d:%02d", m, s);
     }
 
-    public static List<YoutubeVideo> searchYoutube(String videoName){
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder("python", "resources/python/YoutubeSearch.py", videoName);
-            processBuilder.redirectErrorStream(true);
-            Process process = processBuilder.start();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder output = new StringBuilder();
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-
-            String regex = "\\[\\{\".*?\"\\}\\]";
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(output);
-
-            YoutubeVideo[] searchResults = null;
-            if (matcher.find()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                searchResults = objectMapper.readValue(matcher.group(0), YoutubeVideo[].class);
-            }
-
-            process.waitFor();
-
-            if (searchResults != null)
-                return List.of(searchResults);
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Error searching in youtube");
-        }
-
-        return null;
-    }
-
-    public static boolean downloadMedia(String url){
-        System.out.println(url);
-
-        try {
-            Files.createDirectories(Paths.get("resources/downloadedMediaCache/" + "IDPRUEBA" + "/"));
-            File directory = new File("resources/downloadedMediaCache/" + "IDPRUEBA" + "/");
-
-            ProcessBuilder pb;
-            pb = new ProcessBuilder("pytube"
-                    , url
-                    , "-a", "-t", directory.getAbsolutePath());
-
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-            process.waitFor();
-
-            File[] filesInMediaCache = directory.listFiles();
-
-            if (filesInMediaCache != null && filesInMediaCache.length != 0){
-                File audioFile = filesInMediaCache[0];
-
-                try{
-                    Files.copy(audioFile.toPath(), Paths.get("resources/music/" + "IDPRUEBA" + ".mp4"), StandardCopyOption.REPLACE_EXISTING);
-
-                    //FileUtils.forceDelete(directory);
-                } catch (IOException error) {
-                    System.err.println("downloadMedia: Could not copy downloaded audio file");
-                    return false;
-                }
-            }
-        } catch (IOException | InterruptedException e) {
-            System.err.println("downloadMedia: Error downloading media");
-            return false;
-        }
-
-        return true;
-    }
-    public static MovieMetadata downloadMovieMetadata(int tmdbID){
-        try{
-            OkHttpClient client = new OkHttpClient();
-
-            Request request = new Request.Builder()
-                    .url("https://api.themoviedb.org/3/movie/" + tmdbID + "?language=es-ES")
-                    .get()
-                    .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
-                    .build();
-
-            Response response = client.newCall(request).execute();
-
-            if (response.isSuccessful()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-
-                if (response.body() != null)
-                    return objectMapper.readValue(response.body().string(), MovieMetadata.class);
-            } else {
-                System.out.println("Response not successful: " + response.code());
-            }
-        } catch (IOException e) {
-            //System.err.println("downloadMovieMetadata: movie metadata could not be downloaded");
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private static void getChapters(Episode episode){
-        try {
-            ProcessBuilder processBuilder;
-            processBuilder = new ProcessBuilder("ffprobe"
-                    , "-v", "quiet", "-print_format", "json", "-show_chapters", episode.getVideoSrc());
-
-            Process process = processBuilder.start();
-
-            String stdout = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
-
-            if (stdout != null){
-                ObjectMapper objectMapper = new ObjectMapper();
-                ChaptersContainer chaptersContainer = objectMapper.readValue(stdout, ChaptersContainer.class);
-
-
-                for (com.example.executablelauncher.fileMetadata.Chapter c : chaptersContainer.chapters){
-                    if (c.tags != null){
-                        double milliseconds = c.start / 1_000_000.0;
-                        Chapter chapter = new Chapter(c.tags.title, milliseconds);
-                        System.out.println(chapter.title);
-                        System.out.println(chapter.time);
-                        System.out.println(chapter.displayTime);
-
-                        episode.addChapter(chapter);
-                    }
-                }
-            }
-
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            System.err.println("getChapters: Error getting chapters");
-        }
-    }
-
+    //region TEST
     private static void generateThumbnail(Chapter chapter){
         try{
             Files.createDirectories(Paths.get("resources/img/chaptersCovers/" + "test" + "/"));
@@ -259,58 +308,6 @@ public class VideoMetadataExample extends Application {
             System.err.println("Error generating thumbnail for chapter " + "test" + "/" + chapter.getTime());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static void getVideoMetadata(String videoFilePath) {
-        String[] command = {
-                "ffmpeg",
-                "-i", videoFilePath
-        };
-
-        executeFFmpegCommand(command, "Metadatos del Vídeo");
-    }
-
-    private static void getAudioMetadata(String videoFilePath) {
-        String[] command = {
-                "ffmpeg",
-                "-i", videoFilePath,
-                "-select_streams", "a",
-                "-show_entries", "stream=index,codec_name,bit_rate,channels",
-                "-of", "default=noprint_wrappers=1:nokey=1"
-        };
-
-        executeFFmpegCommand(command, "Metadatos del Audio");
-    }
-
-    private static void getSubtitleMetadata(String videoFilePath) {
-        String[] command = {
-                "ffmpeg",
-                "-i", videoFilePath,
-                "-map", "0:s",
-                "-show_entries", "stream=index,codec_name,language,title,forced",
-                "-of", "default=noprint_wrappers=1:nokey=1"
-        };
-
-        executeFFmpegCommand(command, "Metadatos de Subtítulos");
-    }
-
-    private static void executeFFmpegCommand(String[] command, String metadataType) {
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-            Process process = processBuilder.start();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            String line;
-            System.out.println(metadataType + ":");
-
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
         }
     }
 

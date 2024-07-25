@@ -51,6 +51,10 @@
     -fx-background-color: rgba(0, 0, 0, 0.37);
 }
 
+.transparentTrick{
+    -fx-background-color: rgba(0, 0, 0, 0.01);
+}
+
 .minimizeButton{
     -fx-background-color: transparent;
 }
