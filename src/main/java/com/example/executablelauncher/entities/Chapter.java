@@ -1,8 +1,8 @@
 package com.example.executablelauncher.entities;
 
 public class Chapter {
-    String title = "";
-    double time = 0;
+    String title;
+    double time;
     String displayTime = "";
     String thumbnailSrc = "";
 

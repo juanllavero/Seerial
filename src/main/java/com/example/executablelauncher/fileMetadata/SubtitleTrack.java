@@ -1,28 +1,18 @@
 package com.example.executablelauncher.fileMetadata;
 
-public class Track {
-    TrackType type;
+public class SubtitleTrack {
     String displayTitle;
     int id;
     String language;
     String languageTag;
     boolean selected;
+    String codec;
+    String codecExt;
+    String title;
 
-    public Track(TrackType type, String displayTitle, int id, String language, String languageTag, boolean selected) {
-        this.type = type;
-        this.displayTitle = displayTitle;
+    public SubtitleTrack(int id) {
+        this.selected = false;
         this.id = id;
-        this.language = language;
-        this.languageTag = languageTag;
-        this.selected = selected;
-    }
-
-    public TrackType getType() {
-        return type;
-    }
-
-    public void setType(TrackType type) {
-        this.type = type;
     }
 
     public String getDisplayTitle() {
@@ -63,5 +53,29 @@ public class Track {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public String getCodec() {
+        return codec;
+    }
+
+    public void setCodec(String codec) {
+        this.codec = codec;
+    }
+
+    public String getCodecExt() {
+        return codecExt;
+    }
+
+    public void setCodecExt(String codecExt) {
+        this.codecExt = codecExt;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

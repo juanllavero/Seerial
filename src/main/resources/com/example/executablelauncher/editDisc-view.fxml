@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="450.0" prefWidth="570.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.EditDiscController">
+<BorderPane prefHeight="625.0" prefWidth="993.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.EditDiscController">
    <top>
       <BorderPane prefHeight="55.0" prefWidth="600.0" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
@@ -81,6 +81,14 @@
                </font>
             </Button>
             <Button fx:id="thumbnailsViewButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showThumbnailsView" styleClass="editButton" stylesheets="@styles.css" text="Thumbnails">
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+            <Button fx:id="detailsViewButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showDetails" styleClass="editButton" stylesheets="@styles.css" text="Details">
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
@@ -173,6 +181,29 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </padding>
             </VBox>
+            <BorderPane fx:id="detailsBox" prefHeight="200.0" prefWidth="200.0">
+               <left>
+                  <VBox fx:id="generalInfoBox" prefHeight="485.0" prefWidth="419.0" BorderPane.alignment="CENTER">
+                     <padding>
+                        <Insets left="5.0" right="5.0" />
+                     </padding>
+                  </VBox>
+               </left>
+               <center>
+                  <ScrollPane styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+                     <content>
+                        <VBox fx:id="tracksInfoBox">
+                           <padding>
+                              <Insets bottom="10.0" left="5.0" />
+                           </padding>
+                        </VBox>
+                     </content>
+                  </ScrollPane>
+               </center>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="10.0" />
+               </padding>
+            </BorderPane>
          </children>
       </StackPane>
    </center>

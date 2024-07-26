@@ -1,6 +1,11 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.MediaInfo;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
+import com.github.kokorin.jaffree.ffprobe.Stream;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -19,6 +24,8 @@ import net.coobird.thumbnailator.Thumbnails;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.Locale;
 
 public class DiscController {
     @FXML

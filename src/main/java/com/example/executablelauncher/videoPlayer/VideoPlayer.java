@@ -2,7 +2,6 @@ package com.example.executablelauncher.videoPlayer;
 
 import com.example.executablelauncher.App;
 import com.example.executablelauncher.VideoPlayerController;
-import com.example.executablelauncher.fileMetadata.Track;
 import com.example.executablelauncher.utils.Configuration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +44,6 @@ public class VideoPlayer {
         handle = mpv.mpv_create();
 
         //Get the native window id by looking up a window by title:
-        //WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null, App.textBundle.getString("season"));
         WinDef.HWND hwnd = User32.INSTANCE.FindWindow(null, stageName);
 
         long hwndLong = Pointer.nativeValue(hwnd.getPointer());

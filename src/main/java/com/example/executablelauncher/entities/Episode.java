@@ -1,6 +1,9 @@
 package com.example.executablelauncher.entities;
 
-import com.example.executablelauncher.fileMetadata.Track;
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.MediaInfo;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ public class Episode implements Serializable {
     float score = 0;
     float imdbScore = 0;
     int runtime = 0;
+    float runtimeInSeconds = 0;
     int episodeNumber = 0;
     int seasonNumber = 0;
     String videoSrc = "";
@@ -24,9 +28,10 @@ public class Episode implements Serializable {
     boolean watched = false;
     long lastMilisecond = 0;
     List<Chapter> chapters = new ArrayList<>();
-    String mediaDetails = "";
-    String tracksDetails = "";
-    List<Track> tracks = new ArrayList<>();
+    MediaInfo mediaInfo;
+    List<VideoTrack> videoTracks = new ArrayList<>();
+    List<AudioTrack> audioTracks = new ArrayList<>();
+    List<SubtitleTrack> subtitleTracks = new ArrayList<>();
 
     public Episode() {
         id = UUID.randomUUID().toString();
@@ -116,6 +121,14 @@ public class Episode implements Serializable {
         this.runtime = runtime;
     }
 
+    public float getRuntimeInSeconds() {
+        return runtimeInSeconds;
+    }
+
+    public void setRuntimeInSeconds(float runtimeInSeconds) {
+        this.runtimeInSeconds = runtimeInSeconds;
+    }
+
     public int getSeasonNumber() {
         return seasonNumber;
     }
@@ -158,27 +171,35 @@ public class Episode implements Serializable {
     public List<Chapter> getChapters() { return chapters; }
     public void addChapter(Chapter chapter) { chapters.add(chapter); }
 
-    public String getMediaDetails() {
-        return mediaDetails;
+    public MediaInfo getMediaInfo() {
+        return mediaInfo;
     }
 
-    public void setMediaDetails(String mediaDetails) {
-        this.mediaDetails = mediaDetails;
+    public void setMediaInfo(MediaInfo mediaInfo) {
+        this.mediaInfo = mediaInfo;
     }
 
-    public String getTracksDetails() {
-        return tracksDetails;
+    public List<VideoTrack> getVideoTracks() {
+        return videoTracks;
     }
 
-    public void setTracksDetails(String tracksDetails) {
-        this.tracksDetails = tracksDetails;
+    public void setVideoTracks(List<VideoTrack> videoTracks) {
+        this.videoTracks = videoTracks;
     }
 
-    public List<Track> getTracks() {
-        return tracks;
+    public List<AudioTrack> getAudioTracks() {
+        return audioTracks;
     }
 
-    public void setTracks(List<Track> tracks) {
-        this.tracks = tracks;
+    public void setAudioTracks(List<AudioTrack> audioTracks) {
+        this.audioTracks = audioTracks;
+    }
+
+    public List<SubtitleTrack> getSubtitleTracks() {
+        return subtitleTracks;
+    }
+
+    public void setSubtitleTracks(List<SubtitleTrack> subtitleTracks) {
+        this.subtitleTracks = subtitleTracks;
     }
 }

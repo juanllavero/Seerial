@@ -1,6 +1,10 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.*;
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.MediaInfo;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
 import com.example.executablelauncher.tmdbMetadata.common.Genre;
 import com.example.executablelauncher.tmdbMetadata.groups.*;
 import com.example.executablelauncher.tmdbMetadata.images.Backdrop;
@@ -16,6 +20,11 @@ import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
 import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.kokorin.jaffree.StreamType;
+import com.github.kokorin.jaffree.ffprobe.FFprobe;
+import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
+import com.github.kokorin.jaffree.ffprobe.Format;
+import com.github.kokorin.jaffree.ffprobe.Stream;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbTvEpisodes;
 import info.movito.themoviedbapi.TvResultsPage;
@@ -84,6 +93,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2255,7 +2265,7 @@ public class DesktopViewController {
         episode.setVideoSrc(file.getAbsolutePath());
         setEpisodeData(library, episode, episodeMetadata, series, realEpisode);
 
-        //getChapters(episode);
+        getMediaInfo(episode);
 
         library.getAnalyzedFiles().put(file.getAbsolutePath(), episode.getId());
 
@@ -2278,37 +2288,6 @@ public class DesktopViewController {
         }else if (season == selectedSeason){
             addEpisodeCardInOrder(episode);
         }
-    }
-    private void getChapters(Episode episode){
-        /*try {
-            ProcessBuilder processBuilder;
-            processBuilder = new ProcessBuilder("ffprobe"
-                    , "-v", "quiet", "-print_format", "json", "-show_chapters", episode.getVideoSrc());
-
-            Process process = processBuilder.start();
-            String stdout = IOUtils.toString(process.getInputStream(), Charset.defaultCharset());
-
-            if (stdout != null){
-                ObjectMapper objectMapper = new ObjectMapper();
-                ChaptersContainer chaptersContainer = objectMapper.readValue(stdout, ChaptersContainer.class);
-
-                if (chaptersContainer.chapters.isEmpty() || chaptersContainer.chapters.size() == 1)
-                    return;
-
-                for (com.example.executablelauncher.fileMetadata.Chapter c : chaptersContainer.chapters){
-                    if (c.tags != null){
-                        double milliseconds = c.start / 1_000_000.0;
-                        episode.addChapter(new Chapter(c.tags.title, milliseconds));
-                    }
-                }
-
-                DataManager.INSTANCE.createFolder("resources/img/chaptersCovers/" + episode.getId() + "/");
-            }
-
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            System.err.println("getChapters: Error getting chapters");
-        }*/
     }
     private void setEpisodeData(Library library, Episode episode, EpisodeMetadata episodeMetadata, Series show, int realEpisode){
         episode.setName(episodeMetadata.name);
@@ -2810,7 +2789,7 @@ public class DesktopViewController {
         episode.setSeasonNumber(season.getSeasonNumber());
         episode.setImgSrc("resources/img/Default_video_thumbnail.jpg");
 
-        getChapters(episode);
+        getMediaInfo(episode);
     }
     private void processMovie(Library library, File file, Season season, int runtime){
         Episode episode;
@@ -2838,7 +2817,7 @@ public class DesktopViewController {
 
         setMovieThumbnail(episode, season.getThemdbID());
 
-        getChapters(episode);
+        getMediaInfo(episode);
     }
     private void setIMDBScore(String imdbID, Episode episode){
         try{
@@ -3096,6 +3075,234 @@ public class DesktopViewController {
         } catch (IOException e) {
             System.err.println("clearImageCache: cannot clean directory");
         }
+    }
+    //endregion
+
+    //region MEDIA INFO EXTRACTION
+    public void getMediaInfo(Episode episode){
+        File video = new File(episode.getVideoSrc());
+
+        if (!video.exists())
+            return;
+
+        try {
+            FFprobeResult result = FFprobe.atPath()
+                    .setShowStreams(true)
+                    .setShowFormat(true)
+                    .setShowChapters(true)
+                    .setInput(episode.getVideoSrc())
+                    .execute();
+
+            Format format = result.getFormat();
+
+            //Media Info
+            MediaInfo mediaInfo = new MediaInfo(
+                    video.getName(),
+                    video.getAbsolutePath(),
+                    format.getBitRate() / Math.pow(10, 3),
+                    format.getDuration(),
+                    format.getSize(),
+                    video.getName().substring(video.getName().lastIndexOf(".") + 1).toUpperCase()
+            );
+
+            episode.setMediaInfo(mediaInfo);
+
+            //Remove previous tracks
+            episode.getVideoTracks().clear();
+            episode.getAudioTracks().clear();
+            episode.getSubtitleTracks().clear();
+
+            //Boolean to stop the loop after the last subtitle track
+            boolean subtitleSectionStarted = false;
+
+            //Tracks
+            List<Stream> streams = result.getStreams();
+            for (Stream stream : streams) {
+                if (stream.getCodecType().equals(StreamType.SUBTITLE))
+                    subtitleSectionStarted = true;
+                else if (subtitleSectionStarted)
+                    break;
+
+                if (stream.getCodecType().equals(StreamType.VIDEO))
+                    processVideoData(stream, episode);
+                else if (stream.getCodecType().equals(StreamType.AUDIO))
+                    processAudioData(stream, episode);
+                else if (stream.getCodecType().equals(StreamType.SUBTITLE))
+                    processSubtitleData(stream, episode);
+            }
+
+            //Chapters
+            List<com.github.kokorin.jaffree.ffprobe.Chapter> chapters = result.getChapters();
+            episode.getChapters().clear();
+            if (chapters != null && chapters.size() > 1){
+                //DataManager.INSTANCE.createFolder("resources/img/chaptersCovers/" + episode.getId() + "/");
+                for (com.github.kokorin.jaffree.ffprobe.Chapter chapter : chapters){
+                    double milliseconds = chapter.getStart() / 1_000_000.0;
+
+                    Chapter newChapter = new Chapter(chapter.getTag("title"), milliseconds);
+                    episode.addChapter(newChapter);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("getMediaInfo: could not get local metadata from file " + video.getAbsolutePath());
+        }
+    }
+    private void processVideoData(Stream stream, Episode episode){
+        String resolution = "", hdr = "", codec = "", profile = "";
+        VideoTrack videoTrack = new VideoTrack(stream.getIndex());
+
+        if (stream.getCodecName() != null) {
+            codec = stream.getCodecName().toUpperCase();
+            videoTrack.setCodec(stream.getCodecName().toUpperCase());
+        }
+
+        if (stream.getCodecLongName() != null)
+            videoTrack.setCodecExt(stream.getCodecLongName());
+
+        if (stream.getTag("BPS-eng") != null)
+            videoTrack.setBitrate(Math.round(Double.parseDouble(stream.getTag("BPS-eng"))  / Math.pow(10, 3)));
+
+        if (stream.getAvgFrameRate() != null)
+            videoTrack.setFramerate(stream.getAvgFrameRate().floatValue());
+
+        if (stream.getCodedWidth() != null && stream.getCodedHeight() != null) {
+            resolution = formatResolution(stream.getCodedWidth(), stream.getCodedHeight());
+            videoTrack.setCodedHeight(stream.getCodedHeight());
+            videoTrack.setCodedWidth(stream.getCodedWidth());
+        }
+
+        if (stream.getChromaLocation() != null)
+            videoTrack.setChromaLocation(stream.getChromaLocation());
+
+        if (stream.getColorSpace() != null) {
+            if (stream.getColorSpace().equals("bt2020nc"))
+                hdr = " HDR10";
+            videoTrack.setColorSpace(stream.getColorSpace());
+        }
+
+        if (stream.getDisplayAspectRatio() != null)
+            videoTrack.setAspectRatio(stream.getDisplayAspectRatio().floatValue());
+
+        if (stream.getProfile() != null) {
+            profile = stream.getProfile();
+            videoTrack.setProfile(stream.getProfile());
+        }
+
+        if (stream.getRefs() != null)
+            videoTrack.setRefFrames(stream.getRefs());
+
+        if (stream.getColorRange() != null)
+            videoTrack.setColorRange(stream.getColorRange());
+
+        videoTrack.setDisplayTitle(resolution + hdr + " (" + codec + " " + profile + ")");
+        episode.getVideoTracks().add(videoTrack);
+    }
+    private void processAudioData(Stream stream, Episode episode){
+        String channels = "", language = "", codecDisplayName;
+        AudioTrack audioTrack = new AudioTrack(stream.getIndex());
+
+        if (stream.getCodecName() != null)
+            audioTrack.setCodec(stream.getCodecName().toUpperCase());
+
+        if (stream.getCodecLongName() != null)
+            audioTrack.setCodecExt(stream.getCodecLongName());
+
+        if (stream.getChannels() != null) {
+            channels = formatAudioChannels(stream.getChannels());
+            audioTrack.setChannels(channels);
+        }
+
+        if (stream.getChannelLayout() != null)
+            audioTrack.setChannelLayout(stream.getChannelLayout());
+
+        if (stream.getTag("BPS-eng") != null)
+            audioTrack.setBitrate(Math.round(Double.parseDouble(stream.getTag("BPS-eng"))  / Math.pow(10, 3)));
+
+        if (stream.getTag("language") != null) {
+            language = Locale.of(stream.getTag("language")).getDisplayName();
+            audioTrack.setLanguageTag(stream.getTag("language"));
+            audioTrack.setLanguage(language);
+        }
+
+        if (stream.getBitsPerRawSample() != null)
+            audioTrack.setBitDepth(String.valueOf(stream.getBitsPerRawSample()));
+
+        if (stream.getProfile() != null){
+            if (stream.getProfile().equals("DTS-HD MA"))
+                audioTrack.setProfile("ma");
+            else if (stream.getProfile().equals("LC"))
+                audioTrack.setProfile(("lc"));
+        }
+
+        if (stream.getSampleRate() != null)
+            audioTrack.setSamplingRate(String.valueOf(stream.getSampleRate()));
+
+        if (stream.getProfile() != null && stream.getProfile().equals("DTS-HD MA"))
+            codecDisplayName = stream.getProfile();
+        else
+            codecDisplayName = stream.getCodecName().toUpperCase();
+
+        audioTrack.setDisplayTitle(language + " (" + codecDisplayName + " " + channels +")");
+        episode.getAudioTracks().add(audioTrack);
+    }
+    private void processSubtitleData(Stream stream, Episode episode){
+        String title = "", language = "", codecDisplayName = "";
+        SubtitleTrack subtitleTrack = new SubtitleTrack(stream.getIndex());
+
+        if (stream.getCodecName() != null){
+            codecDisplayName = stream.getCodecName().toUpperCase();
+
+            if (codecDisplayName.equals("HDMV_PGS_SUBTITLE"))
+                codecDisplayName = "PGS";
+
+            subtitleTrack.setCodec(codecDisplayName);
+        }
+
+        if (stream.getCodecLongName() != null)
+            subtitleTrack.setCodecExt(stream.getCodecLongName());
+
+        if (stream.getTag("language") != null) {
+            language = Locale.of(stream.getTag("language")).getDisplayName();
+            subtitleTrack.setLanguageTag(stream.getTag("language"));
+            subtitleTrack.setLanguage(language);
+        }
+
+        if (stream.getTag("title") != null) {
+            title = stream.getTag("title");
+            subtitleTrack.setTitle(title);
+        }
+
+        subtitleTrack.setDisplayTitle(title + " (" + language + " " + codecDisplayName +")");
+        episode.getSubtitleTracks().add(subtitleTrack);
+    }
+    private String formatResolution(int width, int height) {
+        return switch (width) {
+            case 7680 -> "8K";
+            case 3840 -> "4K";
+            case 2560 -> "QHD";
+            case 1920 -> "1080p";
+            case 1280 -> "720p";
+            case 854 -> "480p";
+            case 640 -> "360p";
+            default -> height + "p";
+        };
+    }
+    private String formatAudioChannels(int channels){
+        return switch (channels) {
+            case 1 -> "MONO";
+            case 2 -> "STEREO";
+            case 3 -> "2.1";
+            case 4 -> "3.1";
+            case 5 -> "4.1";
+            case 6 -> "5.1";
+            case 7 -> "6.1";
+            case 8 -> "7.1";
+            case 9 -> "7.2";
+            case 10 -> "9.1";
+            case 11 -> "10.1";
+            case 12 -> "11.1";
+            default -> String.valueOf(channels);
+        };
     }
     //endregion
 

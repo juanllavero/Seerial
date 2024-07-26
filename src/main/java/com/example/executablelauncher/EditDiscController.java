@@ -1,6 +1,11 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.MediaInfo;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -13,6 +18,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.*;
 
 import java.io.File;
@@ -24,6 +34,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class EditDiscController {
     //region FXML ATTRIBUTES
@@ -41,6 +52,18 @@ public class EditDiscController {
 
     @FXML
     private Button generalViewButton;
+
+    @FXML
+    private Button detailsViewButton;
+
+    @FXML
+    private BorderPane detailsBox;
+
+    @FXML
+    private VBox generalInfoBox;
+
+    @FXML
+    private VBox tracksInfoBox;
 
     @FXML
     private FlowPane imagesContainer;
@@ -80,6 +103,7 @@ public class EditDiscController {
     private List<File> imagesFiles = new ArrayList<>();
     private File selectedImage = null;
     public Episode episodeToEdit = null;
+    boolean mediaInfoShown = false;
 
     //region INITIALIZATION
     public void setDisc(Episode d){
@@ -88,6 +112,7 @@ public class EditDiscController {
 
         generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
         thumbnailsViewButton.setText(App.buttonsBundle.getString("thumbnailsButton"));
+        thumbnailsViewButton.setText(App.textBundle.getString("details"));
         selectImageButton.setText(App.buttonsBundle.getString("selectImage"));
         urlImageLoadButton.setText(App.buttonsBundle.getString("downloadImages"));
         titleText.setText(App.textBundle.getString("episodeWindowTitleEdit"));
@@ -228,7 +253,7 @@ public class EditDiscController {
     }
     private void addImage(File file){
         try{
-            Image img = new Image(file.toURI().toURL().toExternalForm(), 150, 84, true, true);
+            Image img = new Image(file.toURI().toURL().toExternalForm(), 250, 184, true, true);
             ImageView image = new ImageView(img);
 
             Button btn = new Button();
@@ -267,17 +292,22 @@ public class EditDiscController {
     void showGeneralView() {
         posterBox.setVisible(false);
         generalBox.setVisible(true);
+        detailsBox.setVisible(false);
 
         generalViewButton.getStyleClass().clear();
         generalViewButton.getStyleClass().add("buttonSelected");
 
         thumbnailsViewButton.getStyleClass().clear();
         thumbnailsViewButton.getStyleClass().add("editButton");
+
+        detailsViewButton.getStyleClass().clear();
+        detailsViewButton.getStyleClass().add("editButton");
     }
     @FXML
     void showThumbnailsView() {
         posterBox.setVisible(true);
         generalBox.setVisible(false);
+        detailsBox.setVisible(false);
 
         thumbnailsViewButton.getStyleClass().clear();
         thumbnailsViewButton.getStyleClass().add("buttonSelected");
@@ -285,13 +315,240 @@ public class EditDiscController {
         generalViewButton.getStyleClass().clear();
         generalViewButton.getStyleClass().add("editButton");
 
+        detailsViewButton.getStyleClass().clear();
+        detailsViewButton.getStyleClass().add("editButton");
+
         showImages();
+    }
+    //endregion
+
+    //region DETAILS
+    @FXML
+    void showDetails(){
+        posterBox.setVisible(false);
+        generalBox.setVisible(false);
+        detailsBox.setVisible(true);
+
+        detailsViewButton.getStyleClass().clear();
+        detailsViewButton.getStyleClass().add("buttonSelected");
+
+        generalViewButton.getStyleClass().clear();
+        generalViewButton.getStyleClass().add("editButton");
+
+        thumbnailsViewButton.getStyleClass().clear();
+        thumbnailsViewButton.getStyleClass().add("editButton");
+
+        if (!mediaInfoShown)
+            mediaInfoShown = true;
+        else
+            return;
+
+        //Add a progress circle while generating metadata
+        ProgressIndicator loadingIndicator = new ProgressIndicator();
+        loadingIndicator.setPrefSize(25, 25);
+        detailsBox.setTop(loadingIndicator);
+
+        Task<Void> generateMetadataTask = new Task<>() {
+            @Override
+            protected Void call() {
+                controllerParent.getMediaInfo(episodeToEdit);
+                return null;
+            }
+        };
+
+        generateMetadataTask.setOnSucceeded(e -> {
+            detailsBox.getChildren().remove(loadingIndicator);
+
+            MediaInfo mediaInfo = episodeToEdit.getMediaInfo();
+
+            //MEDIA INFO
+            generalInfoBox.getChildren().add(
+                    new Text() {{
+                        setText("Media Info");
+                        setFill(Color.WHITE);
+                        setFont(Font.font("System", FontWeight.BOLD, 16));
+                    }}
+            );
+            addTextLine(generalInfoBox, "Duration: ", mediaInfo.getDuration());
+            addTextLine(generalInfoBox, "File: ", mediaInfo.getFile());
+            addTextLine(generalInfoBox, "Location: ", mediaInfo.getLocation());
+            addTextLine(generalInfoBox, "Bitrate: ", mediaInfo.getBitrate());
+            addTextLine(generalInfoBox, "Size: ", mediaInfo.getSize());
+            addTextLine(generalInfoBox, "Container: ", mediaInfo.getContainer());
+
+            for (VideoTrack track : episodeToEdit.getVideoTracks())
+                processVideoData(track);
+
+            for (AudioTrack track : episodeToEdit.getAudioTracks())
+                processAudioData(track);
+
+            for (SubtitleTrack track : episodeToEdit.getSubtitleTracks())
+                processSubtitleData(track);
+        });
+
+        generateMetadataTask.setOnFailed(e -> {
+            detailsBox.getChildren().remove(loadingIndicator);
+            generalInfoBox.getChildren().add(new Text() {{
+                setText("Media info could not be generated");
+                setFill(Color.WHITE);
+                setFont(Font.font("System", FontWeight.BOLD, 16));
+            }});
+        });
+
+        new Thread(generateMetadataTask).start();
+    }
+
+    private void processVideoData(VideoTrack track){
+        if (!tracksInfoBox.getChildren().isEmpty()){
+            Region spacer = new Region();
+            spacer.setPrefHeight(15);
+            tracksInfoBox.getChildren().add(spacer);
+        }
+
+        tracksInfoBox.getChildren().add(
+                new Text() {{
+                    setText("Video");
+                    setFill(Color.WHITE);
+                    setFont(Font.font("System", FontWeight.BOLD, 16));
+                }}
+        );
+
+        if (track.getCodec() != null)
+            addTextLine(tracksInfoBox, "Codec: ", track.getCodec());
+
+        if (track.getCodecExt() != null)
+            addTextLine(tracksInfoBox, "Codec Extended: ", track.getCodecExt());
+
+        if (track.getBitrate() != null)
+            addTextLine(tracksInfoBox, "Bitrate: ", track.getBitrate());
+
+        if (track.getFramerate() != null)
+            addTextLine(tracksInfoBox, "Frame Rate: ", track.getFramerate());
+
+        if (track.getCodedHeight() != null && track.getCodedWidth() != null) {
+            addTextLine(tracksInfoBox, "Coded Height: ", track.getCodedHeight());
+            addTextLine(tracksInfoBox, "Coded Width: ", track.getCodedWidth());
+        }
+
+        if (track.getChromaLocation() != null)
+            addTextLine(tracksInfoBox, "Chroma Location: ", track.getChromaLocation());
+
+        if (track.getColorSpace() != null)
+            addTextLine(tracksInfoBox, "Color Space: ", track.getColorSpace());
+
+        if (track.getAspectRatio() != null)
+            addTextLine(tracksInfoBox, "Aspect Ratio: ", track.getAspectRatio());
+
+        if (track.getProfile() != null)
+            addTextLine(tracksInfoBox, "Profile: ", track.getProfile());
+
+        if (track.getRefFrames() != null)
+            addTextLine(tracksInfoBox, "Ref Frames: ", track.getRefFrames());
+
+        if (track.getColorRange() != null)
+            addTextLine(tracksInfoBox, "Color Range: ", track.getColorRange());
+
+        addTextLine(tracksInfoBox, "Display Title: ", track.getDisplayTitle());
+    }
+    private void processAudioData(AudioTrack track){
+        if (!tracksInfoBox.getChildren().isEmpty()){
+            Region spacer = new Region();
+            spacer.setPrefHeight(15);
+            tracksInfoBox.getChildren().add(spacer);
+        }
+
+        tracksInfoBox.getChildren().add(
+                new Text() {{
+                    setText("Audio");
+                    setFill(Color.WHITE);
+                    setFont(Font.font("System", FontWeight.BOLD, 16));
+                }}
+        );
+
+        if (track.getCodec() != null)
+            addTextLine(tracksInfoBox, "Codec: ", track.getCodec());
+
+        if (track.getCodecExt() != null)
+            addTextLine(tracksInfoBox, "Codec Extended: ", track.getCodecExt());
+
+        if (track.getChannels() != null)
+            addTextLine(tracksInfoBox, "Channels: ", track.getChannels());
+
+        if (track.getChannelLayout() != null)
+            addTextLine(tracksInfoBox, "Channel Layout: ", track.getChannelLayout());
+
+        if (track.getBitrate() != null)
+            addTextLine(tracksInfoBox, "Bitrate: ", track.getBitrate());
+
+        if (track.getLanguage() != null) {
+            addTextLine(tracksInfoBox, "Language: ", track.getLanguage());
+            addTextLine(tracksInfoBox, "Language tag: ", track.getLanguageTag());
+        }
+
+        if (track.getBitDepth() != null)
+            addTextLine(tracksInfoBox, "Bit Depth: ", track.getBitDepth());
+
+        if (track.getProfile() != null)
+            addTextLine(tracksInfoBox, "Profile: ", track.getProfile());
+
+        if (track.getSamplingRate() != null)
+            addTextLine(tracksInfoBox, "SamplingRate: ", track.getSamplingRate());
+
+        addTextLine(tracksInfoBox, "Display Title: ", track.getDisplayTitle());
+    }
+    private void processSubtitleData(SubtitleTrack track){
+        if (!tracksInfoBox.getChildren().isEmpty()){
+            Region spacer = new Region();
+            spacer.setPrefHeight(15);
+            tracksInfoBox.getChildren().add(spacer);
+        }
+
+        tracksInfoBox.getChildren().add(
+                new Text() {{
+                    setText("Subtitles");
+                    setFill(Color.WHITE);
+                    setFont(Font.font("System", FontWeight.BOLD, 16));
+                }}
+        );
+
+        if (track.getCodec() != null){
+            addTextLine(tracksInfoBox, "Codec: ", track.getCodec());
+        }
+
+        if (track.getCodecExt() != null)
+            addTextLine(tracksInfoBox, "Codec Extended: ", track.getCodecExt());
+
+        if (track.getLanguage() != null) {
+            addTextLine(tracksInfoBox, "Language: ", track.getLanguage());
+            addTextLine(tracksInfoBox, "Language tag: ", track.getLanguageTag());
+        }
+
+        if (track.getTitle() != null) {
+            addTextLine(tracksInfoBox, "Title: ", track.getTitle());
+        }
+
+        addTextLine(tracksInfoBox, "Display Title: ", track.getDisplayTitle());
+    }
+    private void addTextLine(VBox box, String header, String content){
+        box.getChildren().add(
+                new TextFlow(
+                        new Text() {{
+                            setText(header);
+                            setFill(Color.GRAY);
+                            setFont(Font.font("System", FontWeight.NORMAL, 15));
+                        }},
+                        new Text() {{
+                            setText(content);
+                            setFill(Color.WHITE);
+                            setFont(Font.font("System", FontWeight.BOLD, 14));
+                        }}
+                )
+        );
     }
     //endregion
 
     @FXML
     void save(ActionEvent event) {
-
         if (nameField.getText().isEmpty()){
             App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("emptyField"));
             return;
