@@ -463,6 +463,10 @@ public class DesktopViewController {
         backgroundShadow.fitHeightProperty().bind(mainBox.heightProperty());
         backgroundShadow.setPreserveRatio(false);
 
+        blackBackground.fitWidthProperty().bind(mainBox.widthProperty());
+        blackBackground.fitHeightProperty().bind(mainBox.heightProperty());
+        blackBackground.setPreserveRatio(false);
+
         identificationMovie.setDisable(true);
         identificationShow.setDisable(true);
         changeEpisodesGroup.setDisable(true);
@@ -1080,44 +1084,6 @@ public class DesktopViewController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        /*String osName = System.getProperty("os.name").toLowerCase();
-
-
-        if (osName.contains("windows")) {
-            System.out.println("El sistema operativo es Windows.");
-        } else if (osName.contains("linux")) {
-            System.out.println("El sistema operativo es Linux.");
-        }
-
-        //region SET WATCHED EPISODES
-        if (currentLibrary.getType().equals("Shows")){
-            int end = episodeList.indexOf(episode);
-
-            for (int i = 0; i < end; i++){
-                if (!episodeList.get(i).isWatched())
-                    episodeList.get(i).setWatched();
-
-                episodesControllers.get(i).setWatched();
-            }
-        }
-        //endregion
-
-        File player = new File("resources/lib/mpvnet.exe");
-
-        try {
-            ProcessBuilder pBuilder = new ProcessBuilder(player.getAbsolutePath(),"--save-position-on-quit", episode.getVideoSrc());
-
-            // don't forget to handle the error stream, and so
-            // either combine error stream with input stream, as shown here
-            // or gobble it separately
-            pBuilder.redirectErrorStream(true);
-            final Process process = pBuilder.start();
-
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Error playing episode in DesktopViewController");
-        }*/
     }
     public void stopPlayer(){
         mainBox.setDisable(false);
@@ -3106,6 +3072,10 @@ public class DesktopViewController {
             );
 
             episode.setMediaInfo(mediaInfo);
+
+            //Set real runtime
+            if (format.getDuration() != null)
+                episode.setRuntimeInSeconds(format.getDuration());
 
             //Remove previous tracks
             episode.getVideoTracks().clear();

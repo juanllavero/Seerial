@@ -26,7 +26,7 @@ public class Episode implements Serializable {
     String imgSrc = "";
     String seasonID = "";
     boolean watched = false;
-    long lastMilisecond = 0;
+    float timeWatched = 0;       //In seconds
     List<Chapter> chapters = new ArrayList<>();
     MediaInfo mediaInfo;
     List<VideoTrack> videoTracks = new ArrayList<>();
@@ -127,6 +127,7 @@ public class Episode implements Serializable {
 
     public void setRuntimeInSeconds(float runtimeInSeconds) {
         this.runtimeInSeconds = runtimeInSeconds;
+        this.runtime = (int) (runtimeInSeconds / 60);
     }
 
     public int getSeasonNumber() {
@@ -146,28 +147,28 @@ public class Episode implements Serializable {
     }
 
     public void setWatched(){
-        lastMilisecond = 0;
+        timeWatched = 0;
         watched = true;
     }
 
     public void setUnWatched(){
-        lastMilisecond = 0;
+        timeWatched = 0;
         watched = false;
     }
 
     public boolean isWatched(){ return watched; }
 
-    public void setTime(long miliseconds){
-        lastMilisecond = miliseconds;
+    public void setTimeWatched(float seconds){
+        timeWatched = seconds;
 
         //If we have watched more than 90% of the video, it is marked as watched
-        long runtimeMilliseconds = (long) runtime * 60 * 1000;
-        if (lastMilisecond > (runtimeMilliseconds * 0.9)){
+        float runtimeMilliseconds = runtimeInSeconds;
+        if (timeWatched > (runtimeMilliseconds * 0.9)){
             setWatched();
         }
     }
 
-    public long getTimeWatched(){ return lastMilisecond; }
+    public float getTimeWatched(){ return timeWatched; }
     public List<Chapter> getChapters() { return chapters; }
     public void addChapter(Chapter chapter) { chapters.add(chapter); }
 

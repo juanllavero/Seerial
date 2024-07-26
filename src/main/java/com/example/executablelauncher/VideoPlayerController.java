@@ -41,6 +41,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.executablelauncher.utils.Utils.formatTime;
+
 public class VideoPlayerController {
     //region FXML ATTRIBUTES
     @FXML
@@ -152,7 +154,7 @@ public class VideoPlayerController {
     Timeline timeline = null;
     Timeline touchTimeline = new Timeline();
     Timeline volumeCount = null;
-    double percentageStep = 0;
+    Timeline runtimeTimeline = new Timeline();
     Season season = null;
     List<Episode> episodeList = new ArrayList<>();
     Episode episode = null;
@@ -165,21 +167,7 @@ public class VideoPlayerController {
     int currentDisc = 0;
     int buttonCount = 0;
     boolean movingSlider = false;
-
-    //Mappings for tracks languages
-    private static final Map<String, String> languageCodeMap = new HashMap<>();
-    static {
-        languageCodeMap.put("es", "spa");
-        languageCodeMap.put("en", "eng");
-        languageCodeMap.put("fr", "fre");
-        languageCodeMap.put("de", "ger");
-        languageCodeMap.put("it", "ita");
-        languageCodeMap.put("ja", "jpn");
-        languageCodeMap.put("zh", "chi");
-        languageCodeMap.put("ko", "kor");
-        languageCodeMap.put("hi", "hin");
-        languageCodeMap.put("ar", "ara");
-    }
+    float currentTimeSeconds = 0;
 
     //region INITIALIZATION
     public void setDesktopPlayer(DesktopViewController parent, Stage stage){
@@ -197,6 +185,9 @@ public class VideoPlayerController {
         this.videoStage = stage;
         this.season = season;
         this.episodeList = season.getEpisodes();
+        this.videoTracks = episode.getVideoTracks();
+        this.audioTracks = episode.getAudioTracks();
+        this.subtitleTracks = episode.getSubtitleTracks();
         onLoad();
 
         currentDisc = episodeList.indexOf(episode);
@@ -219,8 +210,8 @@ public class VideoPlayerController {
         syncStageSize(videoStage);
         syncStagePosition(videoStage);
 
-        shadowImage.fitWidthProperty().bind(mainPane.prefWidthProperty());
-        shadowImage.fitHeightProperty().bind(mainPane.prefHeightProperty());
+        shadowImage.fitWidthProperty().bind(videoStage.widthProperty());
+        shadowImage.fitHeightProperty().bind(videoStage.heightProperty());
 
         //Window adjustment and movement behaviour
         videoStage.widthProperty().addListener((obs, oldVal, newVal) -> syncStageSize(videoStage));
@@ -235,7 +226,10 @@ public class VideoPlayerController {
         optionsBox.setVisible(false);
 
         timeline = new javafx.animation.Timeline(
-            new javafx.animation.KeyFrame(Duration.seconds(20), event -> hideControls())
+            new javafx.animation.KeyFrame(Duration.seconds(5), event -> {
+                if (!optionsBox.isVisible() && !movingSlider)
+                    hideControls();
+            })
         );
         timeline.play();
 
@@ -379,13 +373,22 @@ public class VideoPlayerController {
         });
 
         runtimeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (movingSlider)
+            if (movingSlider) {
+                currentTimeSeconds = newValue.floatValue();
                 videoPlayer.seekToTime(newValue.longValue());
+                updateSliderValue();
+            }
         });
 
-        runtimeSlider.setOnMousePressed(e -> movingSlider = true);
+        runtimeSlider.setOnMousePressed(e -> {
+            movingSlider = true;
+            runtimeTimeline.stop();
+        });
 
-        runtimeSlider.setOnMouseReleased(e -> movingSlider = false);
+        runtimeSlider.setOnMouseReleased(e -> {
+            movingSlider = false;
+            runtimeTimeline.playFromStart();
+        });
 
         runtimeSlider.setOnKeyPressed(e -> {
             timeline.playFromStart();
@@ -396,9 +399,9 @@ public class VideoPlayerController {
             }
 
             if (App.pressedLeft(e))
-                videoPlayer.seekBackward();
+                runtimeSlider.setValue(runtimeSlider.getValue() - 5);
             else if (App.pressedRight(e))
-                videoPlayer.seekForward();
+                runtimeSlider.setValue(runtimeSlider.getValue() + 10);
             else if (App.pressedDown(e))
                 playButton.requestFocus();
         });
@@ -587,78 +590,73 @@ public class VideoPlayerController {
             episodeInfo.setText(episode.getName() + " - " + episodeRuntime);
         }
 
-        double durationInSeconds = episode.getRuntime() * 60;
-        double fiveSecondsPercentage = (5.0 / durationInSeconds) * 100.0;
-        percentageStep = (fiveSecondsPercentage / 100.0) * 100;
-
+        runtimeSlider.setMax(episode.getRuntimeInSeconds());
         nextButton.setDisable(episodeList.indexOf(episode) == (episodeList.size() - 1));
 
         if (episode.isWatched())
             episode.setUnWatched();
 
+        //Set video and start
+        if (parentControllerDesktop == null)
+            videoPlayer.playVideo(episode.getVideoSrc(), App.textBundle.getString("season"));
+        else
+            videoPlayer.playVideo(episode.getVideoSrc(), App.textBundle.getString("desktopMode"));
+
+        Series series = App.getSelectedSeries();
+        if (series.getVideoZoom() == 0) {
+            videoPlayer.fixZoom(0);
+            series.setVideoZoom(0);
+        }else{
+            videoPlayer.fixZoom(0.5f);
+            series.setVideoZoom(0.5f);
+        }
+
+        videoPlayer.setSubtitleSize(Float.parseFloat(Configuration.loadConfig("subtitleSize", "0.8")));
+
+        //region CHAPTERS
+        chaptersTitle.setText(App.textBundle.getString("chapters"));
+        buttonCount = 7;
+
+        if (episode.getChapters().isEmpty()) {
+            chaptersTitle.setVisible(false);
+            chapterScroll.setVisible(false);
+        }else{
+            Platform.runLater(() -> {
+                for (Chapter chapter : episode.getChapters())
+                    addChapterCard(chapter);
+            });
+        }
+        //endregion
+
+        loadTracks();
+
         FadeTransition fade = new FadeTransition(Duration.seconds(0.8), mainPane);
         fade.setFromValue(0);
         fade.setToValue(1.0);
 
-        fade.setOnFinished(event -> {
-            //Set video and start
-            if (parentControllerDesktop == null)
-                videoPlayer.playVideo(episode.getVideoSrc(), episode.getTimeWatched(), App.textBundle.getString("season"));
-            else
-                videoPlayer.playVideo(episode.getVideoSrc(), episode.getTimeWatched(), App.textBundle.getString("desktopMode"));
-            //asdasdasdruntimeSlider.setBlockIncrement(percentageStep);
-
-            Series series = App.getSelectedSeries();
-            if (series.getVideoZoom() == 0) {
-                videoPlayer.fixZoom(0);
-                series.setVideoZoom(0);
-            }else{
-                videoPlayer.fixZoom(0.5f);
-                series.setVideoZoom(0.5f);
-            }
-
-            videoPlayer.setSubtitleSize(Float.parseFloat(Configuration.loadConfig("subtitleSize", "0.8")));
-
-            //region CHAPTERS
-            chaptersTitle.setText(App.textBundle.getString("chapters"));
-
-            buttonCount = 7;
-
-            if (episode.getChapters().isEmpty()) {
-                chaptersTitle.setVisible(false);
-                chapterScroll.setVisible(false);
-            }else{
-                Platform.runLater(() -> {
-                    for (Chapter chapter : episode.getChapters())
-                        addChapterCard(chapter);
-                });
-            }
-            //endregion
-
-            //loadTracks();
-        });
-
         fade.play();
     }
-    /*private void loadTracks(){
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private void loadTracks(){
+        String selectedAudioTrackLanguage = "";
+        String audioTrackLanguage = season.getAudioTrackLanguage();
+        String defaultAudioTrackLanguage = Locale.forLanguageTag(Configuration.loadConfig("preferAudioLan", "es-ES")).getISO3Language();
 
-        scheduler.schedule(() -> {
-            videoTracks = videoPlayer.getVideoTracks();
-            audioTracks = videoPlayer.getAudioTracks();
-            subtitleTracks = videoPlayer.getSubtitleTracks();
+        if (audioTrackLanguage.isEmpty())
+            audioTrackLanguage = defaultAudioTrackLanguage;
 
-            String selectedAudioTrackLanguage = "";
-            String audioTrackLanguage = season.getAudioTrackLanguage();
-            String defaultAudioTrackLanguage = languageCodeMap.getOrDefault(Locale.forLanguageTag(Configuration.loadConfig("preferAudioLan", "es-ES")).getLanguage(), "spa");
+        if (season.getSelectedAudioTrack() < audioTracks.size() && season.getSelectedAudioTrack() >= 0){
+            for (AudioTrack aTrack : audioTracks)
+                aTrack.setSelected(false);
 
-            if (audioTrackLanguage.isEmpty())
-                audioTrackLanguage = defaultAudioTrackLanguage;
+            audioTracks.get(season.getSelectedAudioTrack()).setSelected(true);
+            selectedAudioTrackLanguage = audioTrackLanguage;
 
+            videoPlayer.setAudioTrack(audioTracks.get(season.getSelectedAudioTrack()).getId());
+        }else{
             if (audioTracks.size() > 1) {
-                for (Track track : audioTracks) {
+                for (AudioTrack track : audioTracks) {
                     if (track.getLanguage().equals(audioTrackLanguage)) {
-                        for (Track aTrack : audioTracks)
+                        for (AudioTrack aTrack : audioTracks)
                             aTrack.setSelected(false);
 
                         track.setSelected(true);
@@ -668,59 +666,95 @@ public class VideoPlayerController {
                         break;
                     }
                 }
+            }else if (!audioTracks.isEmpty()){
+                audioTracks.getFirst().setSelected(true);
+                selectedAudioTrackLanguage =  audioTracks.getFirst().getLanguage();
+                videoPlayer.setAudioTrack( audioTracks.getFirst().getId());
             }
+        }
 
-            int subsMode = Integer.parseInt(Configuration.loadConfig("subsMode", "2"));
-            String subtitleTrackLanguage = season.getSubtitleTrackLanguage();
-            boolean foreignAudio = false;
+        int subsMode = Integer.parseInt(Configuration.loadConfig("subsMode", "2"));
+        String subtitleTrackLanguage = season.getSubtitleTrackLanguage();
+        boolean foreignAudio = false;
 
-            if (subtitleTrackLanguage.isEmpty())
-                subtitleTrackLanguage = languageCodeMap.getOrDefault(Locale.forLanguageTag(Configuration.loadConfig("preferSubsLan", "es-ES")).getLanguage(), "spa");
+        if (subtitleTrackLanguage.isEmpty())
+            subtitleTrackLanguage = Locale.forLanguageTag(Configuration.loadConfig("preferSubsLan", "es-ES")).getISO3Language();
 
-            if (!defaultAudioTrackLanguage.equals(selectedAudioTrackLanguage))
-                foreignAudio = true;
+        if (!defaultAudioTrackLanguage.equals(selectedAudioTrackLanguage))
+            foreignAudio = true;
 
-            if ((subsMode == 2 && foreignAudio) || subsMode == 3){
-                if (!subtitleTrackLanguage.isEmpty() && !subtitleTracks.isEmpty()){
-                    if (subtitleTracks.size() > 1){
-                        for (Track track : subtitleTracks) {
-                            if (track.getLanguage().equals(subtitleTrackLanguage)) {
-                                for (Track sTrack : subtitleTracks)
-                                    sTrack.setSelected(false);
-
-                                track.setSelected(true);
-
-                                videoPlayer.setSubtitleTrack(track.getId());
-                            }
-                        }
-                    }else
-                        videoPlayer.setSubtitleTrack(subtitleTracks.get(0).getId());
-                }else{
-                    videoPlayer.disableSubtitles();
-
-                    for (Track sTrack : subtitleTracks)
+        if ((subsMode == 2 && foreignAudio) || subsMode == 3){
+            if (!subtitleTrackLanguage.isEmpty() && !subtitleTracks.isEmpty()){
+                if (season.getSelectedSubtitleTrack() < subtitleTracks.size() && season.getSelectedSubtitleTrack() >= 0){
+                    for (SubtitleTrack sTrack : subtitleTracks)
                         sTrack.setSelected(false);
+
+                    subtitleTracks.get(season.getSelectedSubtitleTrack()).setSelected(true);
+
+                    videoPlayer.setSubtitleTrack(subtitleTracks.get(season.getSelectedSubtitleTrack()).getId());
+                }else if (subtitleTracks.size() > 1){
+                    for (SubtitleTrack track : subtitleTracks) {
+                        if (track.getLanguage().equals(subtitleTrackLanguage)) {
+                            for (SubtitleTrack sTrack : subtitleTracks)
+                                sTrack.setSelected(false);
+
+                            track.setSelected(true);
+
+                            videoPlayer.setSubtitleTrack(track.getId());
+                        }
+                    }
+                }else {
+                    subtitleTracks.getFirst().setSelected(true);
+                    videoPlayer.setSubtitleTrack(subtitleTracks.getFirst().getId());
                 }
             }else{
                 videoPlayer.disableSubtitles();
 
-                for (Track sTrack : subtitleTracks)
+                for (SubtitleTrack sTrack : subtitleTracks)
                     sTrack.setSelected(false);
             }
+        }else{
+            videoPlayer.disableSubtitles();
 
-            //Initialize Buttons
-            videoButton.setDisable(videoTracks == null || videoTracks.isEmpty());
-            audiosButton.setDisable(audioTracks == null || audioTracks.isEmpty());
-            subtitlesButton.setDisable(subtitleTracks == null || subtitleTracks.isEmpty());
+            for (SubtitleTrack sTrack : subtitleTracks)
+                sTrack.setSelected(false);
+        }
 
-            scheduler.shutdown();
-        }, 1, TimeUnit.SECONDS);
-    }*/
+        //Initialize Buttons
+        videoButton.setDisable(videoTracks == null || videoTracks.isEmpty());
+        audiosButton.setDisable(audioTracks == null || audioTracks.isEmpty());
+        subtitlesButton.setDisable(subtitleTracks == null || subtitleTracks.isEmpty());
+    }
     private void addInteractionSound(Button btn){
         btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
                 playInteractionSound();
         });
+    }
+    public void startCount(){
+        runtimeTimeline.getKeyFrames().setAll(new KeyFrame(Duration.seconds(1), e ->{
+            currentTimeSeconds++;
+
+            updateSliderValue();
+
+            runtimeTimeline.playFromStart();
+        }));
+
+        currentTimeSeconds = episode.getTimeWatched();
+
+        runtimeTimeline.play();
+        runtimeSlider.setValue(currentTimeSeconds);
+        videoPlayer.seekToTime((long) currentTimeSeconds);
+    }
+    private void updateSliderValue(){
+        currentTime.setText(formatTime(currentTimeSeconds));
+        toFinishTime.setText(formatTime((float) (runtimeSlider.getMax() - currentTimeSeconds)));
+
+        if (!movingSlider)
+            runtimeSlider.setValue(currentTimeSeconds);
+
+        if (runtimeSlider.getValue() >= runtimeSlider.getMax())
+            nextEpisode();
     }
     //endregion
 
@@ -962,6 +996,10 @@ public class VideoPlayerController {
     public void stop() {
         checkTimeWatched();
 
+        timeline.stop();
+        touchTimeline.stop();
+        runtimeTimeline.stop();
+
         videoStage.setFullScreen(false);
 
         for (AudioTrack aTrack : audioTracks)
@@ -1059,7 +1097,7 @@ public class VideoPlayerController {
     }
     private void checkTimeWatched(){
         Episode episode = episodeList.get(currentDisc);
-        episode.setTime(videoPlayer.getCurrentTime());
+        episode.setTimeWatched((float) runtimeSlider.getValue());
 
         long runtimeMilliseconds = (long) episode.getRuntime() * 60 * 1000;
         if (episode.getTimeWatched() > (runtimeMilliseconds * 0.9)){
@@ -1071,7 +1109,7 @@ public class VideoPlayerController {
             stop();
         }else{
             Episode episode = episodeList.get(currentDisc);
-            episode.setTime(videoPlayer.getCurrentTime());
+            episode.setTimeWatched((float) runtimeSlider.getValue());
 
             checkTimeWatched();
 
@@ -1086,7 +1124,7 @@ public class VideoPlayerController {
         }else{
             if (currentDisc > 0) {
                 Episode episode = episodeList.get(currentDisc);
-                episode.setTime(videoPlayer.getCurrentTime());
+                episode.setTimeWatched((float) runtimeSlider.getValue());
 
                 checkTimeWatched();
 
@@ -1467,26 +1505,6 @@ public class VideoPlayerController {
         showControls();
     }
     //endregion
-
-    private String formatTime(long time){
-        long totalSec = time / 1000;
-        long h = totalSec / 3600;
-        long m = (totalSec % 3600) / 60;
-        long s = totalSec % 60;
-
-        if (h > 0)
-            return String.format("%02d:%02d:%02d", h, m, s);
-
-        return String.format("%02d:%02d", m, s);
-    }
-
-    public void notifyChanges(long timeMillis){
-        currentTime.setText(formatTime(timeMillis));
-        toFinishTime.setText(formatTime(videoPlayer.getDuration() - timeMillis));
-
-        if (!movingSlider)
-            runtimeSlider.setValue((double) 100 / ((double) videoPlayer.getDuration() / timeMillis));
-    }
 
     public VideoPlayer getVideoPlayer(){
         return videoPlayer;

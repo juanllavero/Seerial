@@ -2,6 +2,8 @@ package com.example.executablelauncher.fileMetadata;
 
 import java.text.DecimalFormat;
 
+import static com.example.executablelauncher.utils.Utils.formatTime;
+
 public class MediaInfo {
     String file;
     String location;
@@ -77,16 +79,5 @@ public class MediaInfo {
 
     public void setContainer(String container) {
         this.container = container;
-    }
-
-    public String formatTime(float time){
-        int h = (int) (time / 3600);
-        int m = (int) ((time % 3600) / 60);
-        int s = (int) (time % 60);
-
-        if (h > 0)
-            return String.format("%02d:%02d:%02d", h, m, s);
-
-        return String.format("%02d:%02d", m, s);
     }
 }

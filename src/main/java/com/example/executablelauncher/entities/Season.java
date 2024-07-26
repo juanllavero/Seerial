@@ -28,7 +28,9 @@ public class Season implements Serializable {
     String folder = "";
     boolean showName = true;
     String audioTrackLanguage = "";
+    int selectedAudioTrack = -1;
     String subtitleTrackLanguage = "";
+    int selectedSubtitleTrack = -1;
     List<Episode> episodes = new CopyOnWriteArrayList<>();
     List<String> genres = new ArrayList<>();
 
@@ -84,6 +86,22 @@ public class Season implements Serializable {
 
     public void setSubtitleTrackLanguage(String subtitleTrackLanguage) {
         this.subtitleTrackLanguage = subtitleTrackLanguage;
+    }
+
+    public int getSelectedAudioTrack() {
+        return selectedAudioTrack;
+    }
+
+    public void setSelectedAudioTrack(int selectedAudioTrack) {
+        this.selectedAudioTrack = selectedAudioTrack;
+    }
+
+    public int getSelectedSubtitleTrack() {
+        return selectedSubtitleTrack;
+    }
+
+    public void setSelectedSubtitleTrack(int selectedSubtitleTrack) {
+        this.selectedSubtitleTrack = selectedSubtitleTrack;
     }
 
     public String getLogoSrc() {

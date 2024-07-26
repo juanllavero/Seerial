@@ -1,42 +1,26 @@
 package com.example.executablelauncher.videoPlayer;
 
-import com.example.executablelauncher.App;
 import com.example.executablelauncher.VideoPlayerController;
 import com.example.executablelauncher.utils.Configuration;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.ptr.LongByReference;
-import javafx.application.Platform;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.media.MediaView;
-import javafx.stage.Stage;
 
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 
 import static com.example.executablelauncher.videoPlayer.MPV.MPV_EVENT_FILE_LOADED;
 
 public class VideoPlayer {
     long handle;
     boolean paused = false;
-    ScheduledExecutorService clockExecutor;
-    volatile long currentTimeMillis = 0;
     VideoPlayerController parentController;
-    boolean nextVideo = false;
     boolean isVideoLoaded = false;
     public void setParent(VideoPlayerController parent){
         parentController = parent;
     }
 
-    public void playVideo(String src, long seekTimeMillis, String stageName) {
+    public void playVideo(String src, String stageName) {
         //Get interface to MPV DLL
         MPV mpv = MPV.INSTANCE;
 
@@ -62,71 +46,82 @@ public class VideoPlayer {
             throw new IllegalStateException("Playback failed with error: " + error);
         }
 
-        if (seekTimeMillis > 5000){
-            //Detect when the video id loaded
-            boolean[] videoLoaded = {false};
-            mpv.mpv_request_event(handle, MPV_EVENT_FILE_LOADED, 1);
-
-            while (!videoLoaded[0]) {
-                MPV.mpv_event event = mpv.mpv_wait_event(handle, -1);
-                if (event.event_id == MPV_EVENT_FILE_LOADED) {
-                    videoLoaded[0] = true;
-                }
-            }
-
-            seekToTime(seekTimeMillis - 5000);
-        }
-
-        startClock();
-
-        //Player base settings
+        //Low End Settings
+        mpvSetProperty("gpu-api", "d3d11");
+        mpvSetProperty("gpu-context", "d3d11");
         mpvSetProperty("profile", "fast");
         mpvSetProperty("vo", "gpu-next");
+        mpvSetProperty("hwdec", "d3d11va");
+        mpvSetProperty("dither-depth", "auto");
+
+        /*
+        //Video Settings
+        mpvSetProperty("gpu-api", "vulkan");
+        mpvSetProperty("profile", "high-quality");
+        mpvSetProperty("vo", "gpu-next");
+        mpvSetProperty("hwdec", "auto-safe");
+
+        //HDR Settings
+        mpvSetProperty("tone-mapping", "bt.2446a");
+        mpvSetProperty("hdr-peak-percentile", "99.995");
+        mpvSetProperty("hdr-contrast-recovery", "0.30");
         mpvSetProperty("target-colorspace-hint", "yes");
+        mpvSetProperty("target-contrast", "auto");
+
+        mpvSetProperty("deinterlace", "no");
+        mpvSetProperty("dither-depth", "auto");
+        mpvSetProperty("deband", "yes");
+        mpvSetProperty("deband-iterations", "4");
+        mpvSetProperty("deband-threshold", "35");
+        mpvSetProperty("deband-range", "16");
+        mpvSetProperty("deband-grain", "4");
+
+        mpvSetProperty("cursor-autohide", "100");
+
+        //Subtitles Settings
+        mpvSetProperty("blend-subtitles", "no");
+        mpvSetProperty("demuxer-mkv-subtitle-preroll", "yes");
+        mpvSetProperty("embeddedfonts", "yes");
+        mpvSetProperty("sub-fix-timing", "no");
+        mpvSetProperty("sub-font", "Open Sans SemiBold");
+        mpvSetProperty("sub-font-size", "46");
+        mpvSetProperty("sub-blur", "0.3");
+        mpvSetProperty("sub-border-color", "0.0/0.0/0.0/0.8");
+        mpvSetProperty("sub-border-size", "3.2");
+        mpvSetProperty("sub-color", "0.9/0.9/0.9/1.0");
+        mpvSetProperty("sub-margin-x", "100");
+        mpvSetProperty("sub-margin-y", "50");
+        mpvSetProperty("sub-shadow-color", "0.0/0.0/0.0/0.25");
+        mpvSetProperty("sub-shadow-offset", "0");
+
+        //Audio Settings
+        mpvSetProperty("audio-stream", "silence");
+        mpvSetProperty("audio-pitch-correction", "yes");
 
         boolean interpolation = Boolean.parseBoolean(Configuration.loadConfig("interpolation", "false"));
 
         if (interpolation){
             mpvSetProperty("video-sync", "display-resample");
             mpvSetProperty("interpolation", "yes");
-            mpvSetProperty("tscale", "mitchell");
-            mpvSetProperty("interpolation-preserve", "no");
+            mpvSetProperty("tscale", "sphinx");
 
-            mpvSetProperty("tscale-window", "sphinx");
             mpvSetProperty("tscale-blur", "0.6991556596428412");
-            mpvSetProperty("tscale-radius", "1.0");
+            mpvSetProperty("tscale-radius", "1.05");
             mpvSetProperty("tscale-clamp", "0.0");
-        }
+        }*/
 
         isVideoLoaded = true;
-    }
-    public void pauseClock() {
-        if (clockExecutor != null && !clockExecutor.isShutdown()) {
-            clockExecutor.shutdown();
-        }
-    }
-    public void startClock() {
-        if (clockExecutor == null || clockExecutor.isShutdown()) {
-            clockExecutor = Executors.newSingleThreadScheduledExecutor();
-            int UPDATE_INTERVAL = 100;
-            clockExecutor.scheduleAtFixedRate(() -> Platform.runLater(this::updateCurrentTime), 0, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
-        }
+        parentController.startCount();
     }
 
     //region VIDEO CONTROLS
     public boolean isPaused(){
-        return clockExecutor != null && clockExecutor.isShutdown();
+        return paused;
     }
     public void stop() {
         mpvCommand("stop");
-        clockExecutor.shutdownNow();
     }
     public void togglePause() {
-        if (clockExecutor == null || clockExecutor.isShutdown()){
-            startClock();
-        }else{
-            pauseClock();
-        }
         paused = !paused;
         mpvCommand("cycle", "pause");
     }
@@ -154,18 +149,6 @@ public class VideoPlayer {
             return 0;
 
         return (long) (Double.parseDouble(currentTimeString) * 1000);
-    }
-    private void updateCurrentTime() {
-        long newCurrentTime = getCurrentTime();
-        if (newCurrentTime != currentTimeMillis) {
-            currentTimeMillis = newCurrentTime;
-            parentController.notifyChanges(currentTimeMillis);
-        }
-
-        if (getDuration() - newCurrentTime <= 200 && !nextVideo){
-            nextVideo = true;
-            parentController.nextEpisode();
-        }
     }
     public long getDuration() {
         String durationString = mpvGetProperty("duration");

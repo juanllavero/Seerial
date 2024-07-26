@@ -91,15 +91,6 @@ public class DiscController {
             number.setFont(new Font("System", 16));
         }
 
-        thumbnailStackPane.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (playButton.isVisible()){
-                if (event.getCode().equals(KeyCode.ENTER)){
-                    if (desktopParent != null)
-                        desktopParent.playEpisode(episode);
-                }
-            }
-        });
-
         playButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (desktopParent != null)
                 desktopParent.playEpisode(episode);

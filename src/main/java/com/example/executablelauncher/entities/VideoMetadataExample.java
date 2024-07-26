@@ -22,6 +22,11 @@ import java.util.Locale;
 public class VideoMetadataExample extends Application {
 
     public static void main(String[] args) throws IOException {
+
+        System.out.println(Locale.of("es").getLanguage());
+        System.out.println(Locale.of("es").getDisplayName());
+        System.out.println(Locale.of("es").getISO3Language());
+
         launch(args);
     }
 

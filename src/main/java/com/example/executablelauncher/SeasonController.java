@@ -1039,10 +1039,10 @@ public class SeasonController {
     private void setTimeLeft(Episode episode){
         if (episode.getTimeWatched() > 5000){
             timeLeftBox.setVisible(true);
-            long leftTime = ((long) episode.getRuntime() * 60 * 1000) - episode.getTimeWatched();
+            float leftTime = (episode.getRuntime() * 60 * 1000) - episode.getTimeWatched();
 
-            long hours = leftTime / 3600000;
-            long minutes = (leftTime % 3600000) / 60000;
+            float hours = leftTime / 3600000;
+            float minutes = (leftTime % 3600000) / 60000;
 
             String timeLeft;
             if (App.globalLanguage != Locale.forLanguageTag("es-ES")) {
