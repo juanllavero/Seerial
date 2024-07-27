@@ -28,6 +28,9 @@ public class MainMenuDesktopController {
     private CheckBox autoScan;
 
     @FXML
+    private CheckBox music;
+
+    @FXML
     private JFXSlider backgroundVolume;
 
     @FXML
@@ -118,6 +121,9 @@ public class MainMenuDesktopController {
         double volume = Double.parseDouble(Configuration.loadConfig("backgroundVolume", "3"));
         backgroundVolume.setValue((int) volume);
 
+        music.setText(App.textBundle.getString("playMusicDesktop"));
+        music.setSelected(Boolean.parseBoolean(Configuration.loadConfig("playMusicDesktop", "false")));
+
         showClock.setText(App.textBundle.getString("showClock"));
         showClock.setSelected(Boolean.parseBoolean(Configuration.loadConfig("showClock", "true")));
         preferAudioText.setText(App.textBundle.getString("preferAudio"));
@@ -181,9 +187,13 @@ public class MainMenuDesktopController {
         else
             mode = "1";
         Configuration.saveConfig("subsMode", mode);
+        Configuration.saveConfig("playMusicDesktop", String.valueOf(music.isSelected()));
 
         initValues(parent);
         parent.updateLanguage();
+
+        if (!music.isSelected())
+            parent.stopMusic();
     }
 
     @FXML

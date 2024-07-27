@@ -57,6 +57,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -357,6 +359,8 @@ public class DesktopViewController {
             .build();
 
     private volatile boolean interrupted = false;
+    MediaPlayer mp = null;
+    ScheduledExecutorService musicExecutor = Executors.newScheduledThreadPool(1);
     //endregion
 
     //region THEMOVIEDB ATTRIBUTES
@@ -855,6 +859,8 @@ public class DesktopViewController {
                 showEpisodes(selectedSeason);
             else
                 episodesContainer.getChildren().clear();
+
+            playMusic();
         } else {
             seasonScroll.setVisible(false);
         }
@@ -871,7 +877,55 @@ public class DesktopViewController {
             } else {
                 episodesContainer.getChildren().clear();
             }
+
+            playMusic();
         }
+    }
+    private void playMusic(){
+        if (!Boolean.parseBoolean(Configuration.loadConfig("playMusicDesktop", "false")))
+            return;
+
+        if (mp != null)
+            mp.stop();
+
+        if (selectedSeries.isPlaySameMusic()){
+            if (!selectedSeason.getMusicSrc().isEmpty()){
+                File file = new File(selectedSeason.getMusicSrc());
+                Media media = new Media(file.toURI().toString());
+
+                int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
+
+                mp = new MediaPlayer(media);
+                mp.setVolume((double) volume / 100);
+                mp.setOnEndOfMedia(this::stopMusic);
+            }
+        }else{
+            for (Season season : selectedSeries.getSeasons()){
+                if (!season.getMusicSrc().isEmpty()){
+                    File file = new File(season.getMusicSrc());
+                    Media media = new Media(file.toURI().toString());
+
+                    int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
+
+                    mp = new MediaPlayer(media);
+                    mp.setVolume((double) volume / 100);
+                    mp.setOnEndOfMedia(this::stopMusic);
+                    break;
+                }
+            }
+        }
+
+        musicExecutor.schedule(() -> {
+            if (mp != null) {
+                mp.play();
+            }
+        }, 1, TimeUnit.SECONDS);
+    }
+    public void stopMusic() {
+        if (mp != null) {
+            mp.stop();
+        }
+        musicExecutor.shutdown();
     }
 
     private void selectSeriesButton(Button btn) {
@@ -1263,6 +1317,7 @@ public class DesktopViewController {
     //region WINDOW
     @FXML
     public void closeWindow() {
+        stopMusic();
         VideoPlayer videoPlayer = null;
         if (videoPlayerController != null)
             videoPlayer = videoPlayerController.getVideoPlayer();
