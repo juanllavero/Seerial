@@ -24,6 +24,7 @@ public class Series implements Serializable {
     List<String> genres = new ArrayList<>();
     boolean playSameMusic = false;
     boolean analyzingFiles = false;
+    int currentlyWatchingSeason = -1;
 
     public Series() {
         id = UUID.randomUUID().toString();
@@ -190,5 +191,20 @@ public class Series implements Serializable {
 
     public void setAnalyzingFiles(boolean analyzingFiles) {
         this.analyzingFiles = analyzingFiles;
+    }
+
+    public boolean isBeingWatched(){
+        return currentlyWatchingSeason != -1;
+    }
+
+    public Season getCurrentlyWatchingSeason(){
+        if (currentlyWatchingSeason != -1 && currentlyWatchingSeason < seasons.size())
+            return seasons.get(currentlyWatchingSeason);
+
+        return null;
+    }
+
+    public void setCurrentlyWatchingSeason(int index){
+        currentlyWatchingSeason = index;
     }
 }

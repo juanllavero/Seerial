@@ -27,6 +27,18 @@
          <top>
             <HBox fx:id="topBar" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="TOP_CENTER">
                <children>
+                  <Button fx:id="mainViewButton" focusTraversable="false" mnemonicParsing="false" styleClass="fullscreenButtonTransparent" stylesheets="@styles.css">
+                     <graphic>
+                        <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../img/icons/AppIcon.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <HBox.margin>
+                        <Insets top="20.0" />
+                     </HBox.margin>
+                  </Button>
                   <BorderPane fx:id="topBorderPane">
                      <padding>
                         <Insets top="5.0" />
@@ -88,21 +100,120 @@
             </HBox>
          </top>
          <center>
-            <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS" BorderPane.alignment="CENTER">
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
-               <content>
-                  <FlowPane fx:id="cardContainer" hgap="30.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="40.0">
-                     <padding>
-                        <Insets bottom="50.0" top="100.0" />
-                     </padding>
-                  </FlowPane>
-               </content>
-               <BorderPane.margin>
-                  <Insets bottom="20.0" top="20.0" />
-               </BorderPane.margin>
-            </ScrollPane>
+            <StackPane fx:id="mainStack" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <content>
+                        <FlowPane fx:id="cardContainer" hgap="30.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="40.0">
+                           <padding>
+                              <Insets bottom="50.0" top="100.0" />
+                           </padding>
+                        </FlowPane>
+                     </content>
+                  </ScrollPane>
+                  <BorderPane fx:id="mainViewPane">
+                     <center>
+                        <VBox fx:id="infoBox" alignment="BOTTOM_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <StackPane>
+                                 <children>
+                                    <ImageView fx:id="logoImage" fitHeight="225.0" fitWidth="326.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT" />
+                                    <Label fx:id="titleText" text="Show's Name" textFill="WHITE" StackPane.alignment="BOTTOM_LEFT">
+                                       <font>
+                                          <Font name="System Bold" size="58.0" />
+                                       </font>
+                                       <effect>
+                                          <DropShadow />
+                                       </effect>
+                                    </Label>
+                                 </children>
+                              </StackPane>
+                              <HBox fx:id="episodeNameBox" />
+                              <HBox spacing="20.0">
+                                 <children>
+                                    <Label fx:id="info1" text="Info" textFill="WHITE" wrapText="true">
+                                       <font>
+                                          <Font size="32.0" />
+                                       </font>
+                                       <effect>
+                                          <DropShadow />
+                                       </effect>
+                                    </Label>
+                                    <Label fx:id="info2" text="Info" textFill="WHITE" wrapText="true">
+                                       <font>
+                                          <Font size="32.0" />
+                                       </font>
+                                       <effect>
+                                          <DropShadow />
+                                       </effect>
+                                    </Label>
+                                    <Label fx:id="info3" text="Info" textFill="WHITE" wrapText="true">
+                                       <font>
+                                          <Font size="32.0" />
+                                       </font>
+                                       <effect>
+                                          <DropShadow />
+                                       </effect>
+                                    </Label>
+                                    <HBox fx:id="timeLeftBox" alignment="CENTER_LEFT" fillHeight="false" styleClass="playerOptionsButton" stylesheets="@styles.css">
+                                       <children>
+                                          <Label fx:id="timeLeftField" text="24m left" textFill="WHITE">
+                                             <font>
+                                                <Font name="System Bold" size="18.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                                       </padding>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+                              <Label fx:id="overviewText" alignment="TOP_LEFT" prefHeight="171.0" prefWidth="1105.0" text="Overview" textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="32.0" />
+                                 </font>
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
+                              </Label>
+                              <Label fx:id="continueWatchingTitle" text="Continue Watching" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
+                                 <font>
+                                    <Font name="System Bold" size="34.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets top="20.0" />
+                                 </VBox.margin>
+                              </Label>
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="100.0" right="100.0" />
+                           </padding>
+                        </VBox>
+                     </center>
+                     <bottom>
+                        <ScrollPane fx:id="continueWatchingScroll" focusTraversable="false" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
+                           <content>
+                              <HBox fx:id="continueWatchingBox" spacing="50.0">
+                                 <padding>
+                                    <Insets bottom="30.0" left="100.0" right="100.0" top="30.0" />
+                                 </padding>
+                              </HBox>
+                           </content>
+                           <BorderPane.margin>
+                              <Insets bottom="50.0" left="20.0" right="20.0" />
+                           </BorderPane.margin>
+                        </ScrollPane>
+                     </bottom>
+                  </BorderPane>
+               </children>
+            </StackPane>
          </center>
       </BorderPane>
       <ImageView fx:id="menuShadow" fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true" visible="false">
@@ -113,7 +224,7 @@
             <GaussianBlur radius="27.0" />
          </effect>
       </ImageView>
-      <ImageView fx:id="globalShadow" fitHeight="720.0" fitWidth="1280.0" nodeOrientation="RIGHT_TO_LEFT" pickOnBounds="true">
+      <ImageView fx:id="globalShadow" fitHeight="720.0" fitWidth="1280.0" nodeOrientation="RIGHT_TO_LEFT" pickOnBounds="true" visible="false">
          <image>
             <Image url="@../../../img/aaa.png" />
          </image>
@@ -121,7 +232,7 @@
             <ColorAdjust contrast="1.0" />
          </effect>
       </ImageView>
-      <StackPane fx:id="mainMenu" styleClass="blurredBackground" stylesheets="@styles.css" StackPane.alignment="CENTER">
+      <StackPane fx:id="mainMenu" styleClass="blurredBackground" stylesheets="@styles.css" visible="false" StackPane.alignment="CENTER">
          <children>
             <VBox fx:id="menuOptions" alignment="TOP_CENTER" spacing="20.0" stylesheets="@styles.css">
                <children>

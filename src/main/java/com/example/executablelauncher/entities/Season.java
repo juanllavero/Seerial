@@ -33,6 +33,7 @@ public class Season implements Serializable {
     int selectedSubtitleTrack = -1;
     List<Episode> episodes = new CopyOnWriteArrayList<>();
     List<String> genres = new ArrayList<>();
+    int currentlyWatchingEpisode = -1;
 
     public Season() {
         id = UUID.randomUUID().toString();
@@ -269,5 +270,20 @@ public class Season implements Serializable {
                 return episode;
 
         return null;
+    }
+
+    public boolean isBeingWatched(){
+        return currentlyWatchingEpisode != -1;
+    }
+
+    public Episode getCurrentlyWatchingEpisode(){
+        if (currentlyWatchingEpisode != -1 && currentlyWatchingEpisode < episodes.size())
+            return episodes.get(currentlyWatchingEpisode);
+
+        return null;
+    }
+
+    public void setCurrentlyWatchingEpisode(int index){
+        currentlyWatchingEpisode = index;
     }
 }

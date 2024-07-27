@@ -1,9 +1,11 @@
 package com.example.executablelauncher;
 
+import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
+import com.jfoenix.controls.JFXSlider;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -13,7 +15,6 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -30,12 +31,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -51,8 +50,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
-import static com.example.executablelauncher.utils.Utils.playCategoriesSound;
-import static com.example.executablelauncher.utils.Utils.playInteractionSound;
+import static com.example.executablelauncher.utils.Utils.*;
 
 public class Controller implements Initializable {
     //region FXML ATTRIBUTES
@@ -67,6 +65,12 @@ public class Controller implements Initializable {
 
     @FXML
     private ImageView backgroundImage;
+
+    @FXML
+    private ImageView logoImage;
+
+    @FXML
+    private HBox episodeNameBox;
 
     @FXML
     private ScrollPane scrollPane;
@@ -91,6 +95,42 @@ public class Controller implements Initializable {
 
     @FXML
     private Button exitButton;
+
+    @FXML
+    private Button mainViewButton;
+
+    @FXML
+    private StackPane mainStack;
+
+    @FXML
+    private Label titleText;
+
+    @FXML
+    private Label info1;
+
+    @FXML
+    private Label info2;
+
+    @FXML
+    private Label info3;
+
+    @FXML
+    private HBox timeLeftBox;
+
+    @FXML
+    private Label timeLeftField;
+
+    @FXML
+    private Label overviewText;
+
+    @FXML
+    private Label continueWatchingTitle;
+
+    @FXML
+    private BorderPane mainViewPane;
+
+    @FXML
+    private HBox continueWatchingBox;
 
     @FXML
     private VBox menuOptions;
@@ -126,6 +166,9 @@ public class Controller implements Initializable {
     private Button largeCardButton;
 
     @FXML
+    private ScrollPane continueWatchingScroll;
+
+    @FXML
     private VBox leftOptionsPane;
 
     @FXML
@@ -141,16 +184,19 @@ public class Controller implements Initializable {
     private ImageView globalShadow;
     //endregion
 
-    private List<Library> libraries = null;
-    private Library currentLibrary = null;
-    private Series selectedSeries;
-    private List<Series> series = new ArrayList<>();
-    private List<Button> seriesButtons = new ArrayList<>();
-    private String libraryType = null;
-    private FadeTransition fadeTransition = null;
-    private PauseTransition delay = null;
-    private int rowSize = 0;
-    private int rowCount = 0;
+    List<Library> libraries = null;
+    Library currentLibrary = null;
+    Series selectedSeries;
+    List<Series> series = new ArrayList<>();
+    List<Button> seriesButtons = new ArrayList<>();
+    List<Episode> continueWatching = new ArrayList<>();
+    Episode selectedEpisode;
+    String libraryType = null;
+    FadeTransition fadeTransition = null;
+    PauseTransition delay = null;
+    int rowSize = 0;
+    int rowCount = 0;
+    int buttonCount = 0;
 
     @FXML
     void close() {
@@ -185,9 +231,6 @@ public class Controller implements Initializable {
             }
         });
 
-        //Add css to scrollPane to make it look modern
-        scrollPane.getStylesheets().add(Objects.requireNonNull(this.getClass().getResource("styles.css")).toExternalForm());
-
         cardSizeButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
                 cardSizeOptions.setVisible(true);
@@ -212,7 +255,10 @@ public class Controller implements Initializable {
                 tinyCardButton.getStyleClass().add("playerOptionsSelected");
                 break;
         }
+
         updateRowSize(columnCount);
+
+        Platform.runLater(() -> buttonCount = getVisibleButtonCountGlobal(continueWatchingScroll, continueWatchingBox));
 
         tinyCardButton.setOnKeyPressed(e -> {
             if (App.pressedSelect(e)){
@@ -276,6 +322,12 @@ public class Controller implements Initializable {
                 updateRowSize(5);
                 showSeriesFrom(currentLibrary);
             }
+        });
+
+        mainViewButton.setOnMouseClicked(e -> showContinueWatchingView());
+        mainViewButton.setOnKeyPressed(e-> {
+            if (App.pressedSelect(e))
+                showContinueWatchingView();
         });
 
         //Fit width and height of components to window size
@@ -395,7 +447,7 @@ public class Controller implements Initializable {
                 }
             });
 
-            selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary)));
+            showContinueWatchingView();
         }else{
             showMenu();
             settingsButton.setDisable(true);
@@ -405,6 +457,50 @@ public class Controller implements Initializable {
         }
     }
 
+    private void showContinueWatchingView(){
+        scrollPane.setVisible(false);
+        mainViewPane.setVisible(true);
+
+        for (Library library : libraries){
+            for (Series series : library.getSeries()){
+                if (!series.isBeingWatched())
+                    continue;
+
+                Season season = series.getCurrentlyWatchingSeason();
+                if (season == null)
+                    continue;
+
+                if (library.getType().equals("Shows")){
+                    Episode episode = season.getCurrentlyWatchingEpisode();
+                    if (episode != null) {
+                        continueWatching.add(episode);
+                        addEpisodeCard(series, season, episode);
+                    }
+                }else{
+                    for (Season s : series.getSeasons()){
+                        if (!s.isBeingWatched())
+                            continue;
+
+                        Episode episode = s.getCurrentlyWatchingEpisode();
+                        if (episode != null) {
+                            continueWatching.add(episode);
+                            addEpisodeCard(series, s, episode);
+                        }
+                    }
+                }
+            }
+        }
+
+        Platform.runLater(() -> {
+            if (!continueWatchingBox.getChildren().isEmpty()){
+                continueWatchingBox.getChildren().getFirst().requestFocus();
+            }else{
+                //SHOW A MESSAGE IN VIEW
+                System.out.println("NO HAY NADA");
+            }
+        });
+
+    }
     private void updateRowSize(int newSize){
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -431,6 +527,9 @@ public class Controller implements Initializable {
 
         btn.getStyleClass().clear();
         btn.getStyleClass().add("CatButtonSelected");
+
+        scrollPane.setVisible(true);
+        mainViewPane.setVisible(false);
 
         playCategoriesSound();
         showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)));
@@ -612,22 +711,13 @@ public class Controller implements Initializable {
         return new WritableImage(pixelReader, 0, 0, (int) newWidth, (int) newHeight);
     }
 
-    private void addCard(Series s){
+    private Button addBaseCard(Series s, Episode episode){
         double screenAspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
         double originalWidth, originalHeight;
-        int innerSpace;
-        double aspectRatio = 1.28125;
 
-        //If screen aspect ratio is greater than 16:90
-        if (screenAspectRatio > 1.8){
-            innerSpace = 250;
-        }else{
-            innerSpace = 125;
-        }
-
-        //Calculate the size of the card
-        originalWidth = (Screen.getPrimary().getBounds().getWidth() - innerSpace - ((30 * (rowSize - 1)) * 2)) / rowSize;
-        originalHeight = originalWidth * aspectRatio;
+        Button btn = new Button();
 
         String coverSrc = "resources/img/DefaultPoster.png";
 
@@ -639,13 +729,56 @@ public class Controller implements Initializable {
         if (!imgFile.isFile())
             coverSrc = "resources/img/DefaultPoster.png";
 
-        Button btn = new Button();
-        btn.setGraphic(setRoundedBorders(coverSrc, originalWidth, originalHeight));
+        int innerSpace;
+        double aspectRatio = 1.28125;
+
+        //If screen aspect ratio is greater than 16:90
+        if (screenAspectRatio > 1.8){
+            innerSpace = 250;
+        }else{
+            innerSpace = 125;
+        }
+
+        //Calculate the size of the card
+        int numCards = 6;
+        if (episode != null){
+            if (screenWidth / screenHeight > 1.8)
+                numCards += 2;
+        }else{
+            numCards = rowSize;
+        }
+
+        originalWidth = (Screen.getPrimary().getBounds().getWidth() - innerSpace - ((30 * (numCards - 1)) * 2)) / numCards;
+        originalHeight = originalWidth * aspectRatio;
+
+        Rectangle img = setRoundedBorders(coverSrc, originalWidth, originalHeight);
+
+        StackPane main = null;
+        if (episode != null){
+            main = new StackPane(img);
+            BorderPane details = new BorderPane();
+
+            if (episode.getTimeWatched() != 0){
+                JFXSlider slider = new JFXSlider(0, episode.getRuntimeInSeconds()
+                        , episode.getTimeWatched());
+                slider.setFocusTraversable(false);
+                details.setBottom(slider);
+            }
+
+            main.getChildren().add(details);
+        }
+
+        btn.setGraphic(Objects.requireNonNullElse(main, img));
         btn.setAlignment(Pos.CENTER);
         btn.setContentDisplay(ContentDisplay.CENTER);
 
         btn.setPadding(new Insets(0));
         btn.getStyleClass().add("seriesCoverButton");
+
+        return btn;
+    }
+    private void addCard(Series s){
+        Button btn = addBaseCard(s, null);
         seriesButtons.add(btn);
 
         btn.setFocusTraversable(false);
@@ -727,6 +860,182 @@ public class Controller implements Initializable {
         });
 
         cardContainer.getChildren().add(btn);
+    }
+    private void addEpisodeCard(Series series, Season season, Episode episode){
+        Button btn = addBaseCard(series, episode);
+        btn.setFocusTraversable(false);
+
+        btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                playInteractionSound();
+
+                ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.15), btn);
+                scaleTransition.setToX(1.1);
+                scaleTransition.setToY(1.1);
+
+                scaleTransition.setOnFinished(e -> CompletableFuture.runAsync(() -> selectEpisode(series, season, episode)));
+
+                scaleTransition.play();
+
+                //Move ScrollPane
+                handleButtonFocus(btn);
+            }else{
+                ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.15), btn);
+                scaleTransition.setToX(1);
+                scaleTransition.setToY(1);
+                scaleTransition.play();
+            }
+        });
+
+        btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
+            if (App.pressedSelect(event)){
+                if (selectedEpisode != null)
+                    showEpisodeMenu(series, season, episode);
+            }
+
+            int index = continueWatchingBox.getChildren().indexOf(btn);
+
+            if (App.pressedUp(event)){
+                librariesBox.getChildren().get(0).requestFocus();
+            }else if (App.pressedLeft(event)){
+                if (index > 0)
+                    continueWatchingBox.getChildren().get(continueWatchingBox.getChildren().indexOf(btn) - 1).requestFocus();
+            }else if (App.pressedRight(event)){
+                if (index < continueWatchingBox.getChildren().size() - 1)
+                    continueWatchingBox.getChildren().get(continueWatchingBox.getChildren().indexOf(btn) + 1).requestFocus();
+            }
+        });
+
+        btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
+            if (event.getButton().equals(MouseButton.PRIMARY)){
+                if (btn == continueWatchingBox.getChildren().get(continueWatching.indexOf(episode)))
+                    showEpisodeMenu(series, season, episode);
+                else
+                    btn.requestFocus();
+            }
+        });
+
+        continueWatchingBox.getChildren().add(btn);
+    }
+    private void showEpisodeMenu(Series series, Season season, Episode episode){
+        System.out.println("Episode menu for: " + episode.getName());
+    }
+    private void selectEpisode(Series series, Season season, Episode episode){
+        Platform.runLater(() -> {
+            if (selectedEpisode != episode){
+                selectedEpisode = episode;
+
+                String logoSrc;
+                if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")) {
+                    logoSrc = series.getLogoSrc();
+                    titleText.setText(series.getName());
+                    info1.setText(App.textBundle.getString("seasonLetter") + season.getSeasonNumber() + " " + App.textBundle.getString("episodeLetter") + episode.getEpisodeNumber());
+                    info2.setText(season.getYear());
+                    info3.setText(setRuntime(episode.getRuntime()));
+                }else {
+                    logoSrc = season.getLogoSrc();
+                    titleText.setText(season.getName());
+                    info1.setText(season.getYear());
+                    info2.setText(setRuntime(episode.getRuntime()));
+                    info3.setText(String.valueOf(season.getScore()));
+                }
+
+                setTimeLeft(timeLeftBox, timeLeftField, episode);
+
+                logoImage.setVisible(!logoSrc.isEmpty());
+                titleText.setVisible(logoSrc.isEmpty());
+
+                if (!logoSrc.isEmpty()){
+                    Image img;
+                    img = new Image("file:" + logoSrc, mainPane.getScene().getWidth() * 0.2, mainPane.getScene().getHeight() * 0.2, true, true);
+
+                    logoImage.setImage(img);
+                    logoImage.setFitWidth(mainPane.getScene().getWidth() * 0.2);
+                    logoImage.setFitHeight(mainPane.getScene().getHeight() * 0.2);
+                }
+
+                episodeNameBox.getChildren().clear();
+                if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
+                    Label episodeName = new Label(episode.getName());
+                    episodeName.setFont(new Font("Arial", 42));
+                    episodeName.setStyle("-fx-font-weight: bold");
+                    episodeName.setTextFill(Color.color(1, 1, 1));
+                    episodeName.setEffect(new DropShadow());
+                    episodeNameBox.getChildren().add(episodeName);
+                }
+
+                if (!episode.getOverview().isEmpty())
+                    overviewText.setText(episode.getOverview());
+                else
+                    overviewText.setText(App.textBundle.getString("defaultOverview"));
+
+                delay = new PauseTransition(Duration.millis(150));
+                delay.setOnFinished(event -> Platform.runLater(() -> {
+                    if (!series.getSeasons().isEmpty() &&
+                            continueWatchingBox.getChildren().get(continueWatching.indexOf(episode)).isFocused()) {
+                        String imagePath = "resources/img/backgrounds/" + season.getId();
+                        File fullBlur = new File(imagePath + "/fullBlur.jpg");
+                        String backgroundPath = fullBlur.exists() ? "fullBlur.jpg" : "background.jpg";
+
+                        Image currentImage = backgroundImage.getImage();
+
+                        ImageView background = new ImageView(new Image("file:" + imagePath + "/" + backgroundPath,
+                                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
+
+                        WritableImage image = getCroppedImage(background);
+
+                        if (image != null){
+                            BackgroundImage myBI = new BackgroundImage(
+                                    Objects.requireNonNull(getCroppedImage(background)),
+                                    BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                                    BackgroundSize.DEFAULT);
+
+                            Platform.runLater(() -> {
+                                fadeEffectComplete(currentImage, getCroppedImage(background));
+                                mainBox.setBackground(new Background(myBI));
+                            });
+                        }
+                    }
+                }));
+
+                delay.play();
+            }
+        });
+    }
+    private void handleButtonFocus(Button focusedButton) {
+        double screenCenter, buttonCenterX, offset, finalPos;
+
+        if (continueWatchingBox.getChildren().indexOf(focusedButton) <= (buttonCount / 2) + 1 ||
+                continueWatchingBox.getChildren().size() <= 6 || continueWatchingBox.getChildren().size() == buttonCount){
+            finalPos = 0;
+        }else{
+            //Get center of screen
+            screenCenter = Screen.getPrimary().getBounds().getWidth() / 2;
+
+            //Check aspect ratio to limit the right end of the button list
+            double aspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+            int maxButtons = (continueWatchingBox.getChildren().size() - (buttonCount / 2));
+            if (aspectRatio > 1.8)
+                maxButtons--;
+
+            if (continueWatchingBox.getChildren().indexOf(focusedButton) >= (continueWatchingBox.getChildren().size() - (buttonCount / 2)))
+                focusedButton = (Button) continueWatchingBox.getChildren().get(Math.max(2, maxButtons));
+
+            //Get center of button in the screen
+            Bounds buttonBounds = focusedButton.localToScene(focusedButton.getBoundsInLocal());
+            buttonCenterX = buttonBounds.getMinX() + buttonBounds.getWidth() / 2;
+
+            //Calculate offset
+            offset = screenCenter - buttonCenterX;
+
+            //Calculate position
+            finalPos = continueWatchingBox.getTranslateX() + offset;
+        }
+
+        //Translation with animation
+        TranslateTransition transition = new TranslateTransition(Duration.seconds(0.2), continueWatchingBox);
+        transition.setToX(finalPos);
+        transition.play();
     }
 
     private Rectangle setRoundedBorders(String imageSrc, double width, double height){

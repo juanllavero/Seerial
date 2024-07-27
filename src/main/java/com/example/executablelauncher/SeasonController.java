@@ -8,14 +8,11 @@ import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -34,7 +31,6 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
-import javafx.scene.robot.Robot;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -547,11 +543,11 @@ public class SeasonController {
             selectedEpisode = episodes.get(0);
 
         if (episodeButtons.size() <= 1 && !isShow)
-            setTimeLeft(episodes.get(0));
+            setTimeLeft(timeLeftBox, timeLeftField, episodes.get(0));
 
         Platform.runLater(() -> {
             cardContainer.setTranslateX(0);
-            buttonCount = getVisibleButtonsCount();
+            buttonCount = getVisibleButtonCountGlobal(episodeScroll, cardContainer);
 
             if (episodeButtons.size() > 1 || isShow)
                 episodeButtons.get(season.getLastDisc()).requestFocus();
@@ -581,23 +577,6 @@ public class SeasonController {
         }
 
         fadeInEffect(backgroundImage);
-    }
-    private int getVisibleButtonsCount() {
-        double scrollPaneWidth = episodeScroll.getWidth();
-        double scrollPaneX = episodeScroll.getLayoutX();
-
-        int visibleButtons = 0;
-
-        for (Node button : cardContainer.getChildren()) {
-            Bounds buttonBounds = button.localToScene(button.getBoundsInLocal());
-            double buttonX = buttonBounds.getMinX();
-
-            if (buttonX >= scrollPaneX && buttonX + buttonBounds.getWidth() <= scrollPaneX + scrollPaneWidth) {
-                visibleButtons++;
-            }
-        }
-
-        return visibleButtons;
     }
     public Controller getParent(){
         return controllerParent;
@@ -655,7 +634,7 @@ public class SeasonController {
             }
         }
 
-        setTimeLeft(selectedEpisode);
+        setTimeLeft(timeLeftBox, timeLeftField, selectedEpisode);
         updateWatchedButton();
 
         for (Episode episode : selectedSeason.getEpisodes())
@@ -1038,15 +1017,7 @@ public class SeasonController {
 
         detailsButton.requestFocus();
     }
-    public String setRuntime(int runtime){
-        int h = runtime / 60;
-        int m = runtime % 60;
 
-        if (h == 0)
-            return (m + "m");
-
-        return (h + "h " + m + "m");
-    }
     private void updateDiscInfo(Episode episode) {
         selectedEpisode = episode;
         episodeName.setText(episode.getName());
@@ -1061,38 +1032,11 @@ public class SeasonController {
         durationField.setText(setRuntime(episode.getRuntime()));
         scoreField.setText(String.valueOf(episode.getScore()));
 
-        setTimeLeft(episode);
+        setTimeLeft(timeLeftBox, timeLeftField, episode);
 
         updateWatchedButton();
     }
-    private void setTimeLeft(Episode episode){
-        if (episode.getTimeWatched() > 5){
-            timeLeftBox.setVisible(true);
-            int leftTime = (int) (episode.getRuntimeInSeconds() - episode.getTimeWatched());
 
-            int hours = leftTime / 3600;
-            int minutes = (leftTime % 3600) / 60;
-
-            String timeLeft;
-            if (App.globalLanguage != Locale.forLanguageTag("es-ES")) {
-                if (hours > 0) {
-                    timeLeft = hours + " " + App.textBundle.getString("hours") + " " + minutes + " " + App.textBundle.getString("minutes") + " " + App.textBundle.getString("timeLeft");
-                } else {
-                    timeLeft = minutes + " min left";
-                }
-            } else {
-                if (hours > 0) {
-                    timeLeft = App.textBundle.getString("timeLeft") + " " + hours + " " + App.textBundle.getString("hours") + " " + minutes + " " + App.textBundle.getString("minutes");
-                } else {
-                    timeLeft = "Quedan " + minutes + " minutos";
-                }
-            }
-
-            timeLeftField.setText(timeLeft);
-        }else{
-            timeLeftBox.setVisible(false);
-        }
-    }
     //endregion
 
     //region BACKGROUND VIDEO/MUSIC
@@ -1149,7 +1093,7 @@ public class SeasonController {
             });
         }, (long) delay * 1000, TimeUnit.MILLISECONDS);
     }
-    private void animateAndStopPlayer(){
+    private void stopPlayer() {
         fadeOutEffect(backgroundVideo);
 
         double increment = mp.getVolume() * 0.05;
@@ -1163,10 +1107,6 @@ public class SeasonController {
             mp.stop();
             mediaExecutor.shutdown();
         });
-    }
-    private void stopPlayer() {
-        mp.stop();
-        mediaExecutor.shutdown();
     }
     private void findAndPlaySong(){
         if (mp != null)

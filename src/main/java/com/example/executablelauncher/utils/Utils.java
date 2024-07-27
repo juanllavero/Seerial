@@ -1,13 +1,19 @@
 package com.example.executablelauncher.utils;
 
+import com.example.executablelauncher.App;
 import com.example.executablelauncher.DataManager;
 import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import javafx.animation.FadeTransition;
+import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -190,6 +196,60 @@ public class Utils {
         player.setVolume(1);
         player.seek(player.getStartTime());
         player.play();
+    }
+    public static int getVisibleButtonCountGlobal(ScrollPane continueWatchingScroll, HBox continueWatchingBox) {
+        double scrollPaneWidth = continueWatchingScroll.getWidth();
+        double scrollPaneX = continueWatchingScroll.getLayoutX();
+
+        int visibleButtons = 0;
+
+        for (Node button : continueWatchingBox.getChildren()) {
+            Bounds buttonBounds = button.localToScene(button.getBoundsInLocal());
+            double buttonX = buttonBounds.getMinX();
+
+            if (buttonX >= scrollPaneX && buttonX + buttonBounds.getWidth() <= scrollPaneX + scrollPaneWidth) {
+                visibleButtons++;
+            }
+        }
+
+        return visibleButtons;
+    }
+    public static String setRuntime(int runtime){
+        int h = runtime / 60;
+        int m = runtime % 60;
+
+        if (h == 0)
+            return (m + "m");
+
+        return (h + "h " + m + "m");
+    }
+    public static void setTimeLeft(HBox timeLeftBox, Label timeLeftField, Episode episode){
+        if (episode.getTimeWatched() > 5){
+            timeLeftBox.setVisible(true);
+            int leftTime = (int) (episode.getRuntimeInSeconds() - episode.getTimeWatched());
+
+            int hours = leftTime / 3600;
+            int minutes = (leftTime % 3600) / 60;
+
+            String timeLeft;
+            if (App.globalLanguage != Locale.forLanguageTag("es-ES")) {
+                if (hours > 0) {
+                    timeLeft = hours + " " + App.textBundle.getString("hours") + " " + minutes + " " + App.textBundle.getString("minutes") + " " + App.textBundle.getString("timeLeft");
+                } else {
+                    timeLeft = minutes + " min left";
+                }
+            } else {
+                if (hours > 0) {
+                    timeLeft = App.textBundle.getString("timeLeft") + " " + hours + " " + App.textBundle.getString("hours") + " " + minutes + " " + App.textBundle.getString("minutes");
+                } else {
+                    timeLeft = "Quedan " + minutes + " minutos";
+                }
+            }
+
+            timeLeftField.setText(timeLeft);
+        }else{
+            timeLeftBox.setVisible(false);
+        }
     }
     //endregion
 }
