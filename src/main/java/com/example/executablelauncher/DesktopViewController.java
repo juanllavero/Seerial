@@ -977,6 +977,8 @@ public class DesktopViewController {
             copyAndRenameImage(directoryPath, "resources/img/backgrounds/" + s.getId() + "/", "background.jpg");
             copyAndRenameImage(directoryPath, "resources/img/backgrounds/" + s.getId() + "/", "transparencyEffect.png");
             copyAndRenameImage(directoryPath, "resources/img/backgrounds/" + s.getId() + "/", "fullBlur.jpg");
+
+            s.setBackgroundSrc("resources/img/backgrounds/" + s.getId() + "/background.jpg");
         } else {
             //Compress and save image file
             File destination = new File("resources/img/backgrounds/" + s.getId() + "/background.jpg");
@@ -1132,6 +1134,9 @@ public class DesktopViewController {
 
     //region PLAY EPISODE
     public void playEpisode(Episode episode) {
+        if (watchingVideo)
+            return;
+
         //Check if the video file exists before showing the video player
         File videoFile = new File(episode.getVideoSrc());
 
@@ -1140,15 +1145,15 @@ public class DesktopViewController {
             return;
         }
 
-        if (watchingVideo)
-            return;
+        if (mp != null)
+            stopPlayer();
 
         selectedEpisode = episode;
+        watchingVideo = true;
 
         //Open Video Player
         fadeInEffect(blackBackground);
         mainBox.setDisable(true);
-        watchingVideo = true;
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
             Parent root = fxmlLoader.load();
@@ -1184,8 +1189,46 @@ public class DesktopViewController {
         mainBox.setDisable(false);
         fadeOutEffect(blackBackground);
 
-        if (selectedEpisode != null)
-            updateDisc(selectedEpisode);
+        if (selectedEpisode == null)
+            return;
+
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
+            //Mark as watched every episode before the current one
+            for (Season season : selectedSeries.getSeasons()){
+                if (season == selectedSeason){
+                    for (Episode episode : season.getEpisodes()){
+                        if (episode == selectedEpisode)
+                            break;
+
+                        episode.setWatched();
+                    }
+                    break;
+                }
+
+                if (season.getSeasonNumber() != 0)
+                    for (Episode episode : season.getEpisodes())
+                        episode.setWatched();
+            }
+
+            //Mark as unwatched every episode after the current one
+            for (int i = selectedSeason.getEpisodes().indexOf(selectedEpisode); i < selectedSeason.getEpisodes().size(); i++){
+                Episode episode = selectedSeason.getEpisodes().get(i);
+
+                if (episode != selectedEpisode)
+                    episode.setUnWatched();
+            }
+            for (int i = selectedSeries.getSeasons().indexOf(selectedSeason); i < selectedSeries.getSeasons().size(); i++){
+                Season season = selectedSeries.getSeasons().get(i);
+
+                if (season.getSeasonNumber() != 0 && season != selectedSeason){
+                    for (Episode episode : season.getEpisodes())
+                        episode.setUnWatched();
+                }
+            }
+        }
+
+        for (Episode episode : selectedSeason.getEpisodes())
+            updateDisc(episode);
     }
 
     public String setRuntime(int runtime) {

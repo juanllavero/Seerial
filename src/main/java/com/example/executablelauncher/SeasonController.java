@@ -47,6 +47,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.example.executablelauncher.utils.Utils.*;
 
@@ -190,21 +193,20 @@ public class SeasonController {
 
     //region ATTRIBUTES
     Controller controllerParent;
-
     List<Season> seasons = new ArrayList<>();
     List<Episode> episodes = new ArrayList<>();
     List<Button> episodeButtons = new ArrayList<>();
-    int currentSeason = 0;
     Episode selectedEpisode = null;
-    Timeline timeline = null;
-    MediaPlayer mp = null;
-    boolean isVideo = false;
-    boolean playSameMusic = false;
-    boolean isShow = false;
     Series series = null;
-    boolean episodesFocussed = true;
-    boolean playingVideo = false;
+    int currentSeason = 0;
     int buttonCount = 0;
+    MediaPlayer mp = null;
+    boolean isShow = false;
+    boolean isVideo = false;
+    boolean playingVideo = false;
+    boolean playSameMusic = false;
+    boolean episodesFocussed = true;
+    ScheduledExecutorService mediaExecutor = Executors.newScheduledThreadPool(1);
     //endregion
 
     //region INITIALIZATION
@@ -451,23 +453,16 @@ public class SeasonController {
         setEpisodesOutOfFocusButton(watchedButton);
         setEpisodesOutOfFocusButton(optionsButton);
 
-        if (playSameMusic){
+        if (playSameMusic)
             findAndPlaySong();
-        }
 
         currentSeason = 0;
         assert seasons != null;
         updateInfo(seasons.get(0));
     }
     private void updateInfo(Season season){
-        if (mp != null){
-            if (isVideo || !playSameMusic) {
-                stopPlayer();
-            }
-        }
-
-        if (timeline != null)
-            timeline.stop();
+        if (mp != null && (isVideo || !playSameMusic))
+            stopPlayer();
 
         if (season.getEpisodes().size() > 1 || isShow){
             cardContainer.setPrefHeight((Screen.getPrimary().getBounds().getHeight() / 5) + 20);
@@ -544,17 +539,15 @@ public class SeasonController {
         episodeButtons.clear();
         episodes = season.getEpisodes();
 
-        episodes.sort(new Utils.EpisodeComparator().reversed());
-        for (Episode episode : episodes){
+        episodes.sort(new Utils.EpisodeComparator());
+        for (Episode episode : episodes)
             addEpisodeCard(episode);
-        }
 
         if (!episodes.isEmpty())
             selectedEpisode = episodes.get(0);
 
-        if (episodeButtons.size() <= 1 && !isShow){
+        if (episodeButtons.size() <= 1 && !isShow)
             setTimeLeft(episodes.get(0));
-        }
 
         Platform.runLater(() -> {
             cardContainer.setTranslateX(0);
@@ -625,12 +618,53 @@ public class SeasonController {
         else
             playButton.requestFocus();
 
+        Series selectedSeries = App.getSelectedSeries();
+        Season selectedSeason = seasons.get(currentSeason);
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
+            //Mark as watched every episode before the current one
+            for (Season season : selectedSeries.getSeasons()){
+                if (season == selectedSeason){
+                    for (Episode episode : season.getEpisodes()){
+                        if (episode == selectedEpisode)
+                            break;
+
+                        episode.setWatched();
+                    }
+                    break;
+                }
+
+                if (season.getSeasonNumber() != 0)
+                    for (Episode episode : season.getEpisodes())
+                        episode.setWatched();
+            }
+
+            //Mark as unwatched every episode after the current one
+            for (int i = selectedSeason.getEpisodes().indexOf(selectedEpisode); i < selectedSeason.getEpisodes().size(); i++){
+                Episode episode = selectedSeason.getEpisodes().get(i);
+
+                if (episode != selectedEpisode)
+                    episode.setUnWatched();
+            }
+            for (int i = selectedSeries.getSeasons().indexOf(selectedSeason); i < selectedSeries.getSeasons().size(); i++){
+                Season season = selectedSeries.getSeasons().get(i);
+
+                if (season.getSeasonNumber() != 0 && season != selectedSeason){
+                    for (Episode episode : season.getEpisodes())
+                        episode.setUnWatched();
+                }
+            }
+        }
+
         setTimeLeft(selectedEpisode);
-        reloadEpisodeCard();
         updateWatchedButton();
 
-        if (mp != null)
-            mp.play();
+        for (Episode episode : selectedSeason.getEpisodes())
+            reloadEpisodeCard(episode);
+
+        if (playSameMusic)
+            findAndPlaySong();
+        else
+            processBackgroundMedia();
     }
     //endregion
 
@@ -752,14 +786,6 @@ public class SeasonController {
         if (playingVideo)
             return;
 
-        if (mp != null)
-            mp.stop();
-
-        if (timeline != null)
-            timeline.stop();
-
-        playingVideo = true;
-
         //Check if the video file exists before showing the video player
         File videoFile = new File(episode.getVideoSrc());
 
@@ -768,6 +794,12 @@ public class SeasonController {
             errorButton.requestFocus();
             return;
         }
+
+        if (mp != null)
+            stopPlayer();
+
+        selectedEpisode = episode;
+        playingVideo = true;
 
         mainBox.setDisable(true);
         try{
@@ -783,7 +815,6 @@ public class SeasonController {
             controlsStage.initOwner(videoStage);
             Scene scene = new Scene(root);
             scene.setFill(Color.TRANSPARENT);
-            //scene.setCursor(Cursor.NONE);
             controlsStage.setScene(scene);
 
             String name = series.getName();
@@ -797,7 +828,6 @@ public class SeasonController {
             controlsStage.setMaximized(true);
             controlsStage.show();
 
-            //new Robot().mouseMove(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
             fadeInEffect((Pane) root);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -835,13 +865,13 @@ public class SeasonController {
         else
             selectedEpisode.setWatched();
 
-        reloadEpisodeCard();
+        reloadEpisodeCard(selectedEpisode);
         updateWatchedButton();
     }
 
     public void setWatched(){
         selectedEpisode.setWatched();
-        reloadEpisodeCard();
+        reloadEpisodeCard(selectedEpisode);
         updateWatchedButton();
     }
     private void updateWatchedButton(){
@@ -861,11 +891,11 @@ public class SeasonController {
             }
         }
     }
-    private void reloadEpisodeCard(){
-        Button btn = episodeButtons.get(episodes.indexOf(selectedEpisode));
+    private void reloadEpisodeCard(Episode episode){
+        Button btn = episodeButtons.get(episodes.indexOf(episode));
         btn.setGraphic(null);
 
-        setEpisodeCardValues(btn, selectedEpisode);
+        setEpisodeCardValues(btn, episode);
     }
     private void setEpisodeCardValues(Button btn, Episode selectedEpisode) {
         ImageView thumbnail = new ImageView();
@@ -891,8 +921,8 @@ public class SeasonController {
         StackPane main = new StackPane(thumbnail);
         BorderPane details = new BorderPane();
 
-        if (selectedEpisode.getTimeWatched() > 5000){
-            JFXSlider slider = new JFXSlider(0, selectedEpisode.getRuntime() * 60 * 1000
+        if (selectedEpisode.getTimeWatched() != 0){
+            JFXSlider slider = new JFXSlider(0, selectedEpisode.getRuntimeInSeconds()
                     , selectedEpisode.getTimeWatched());
             slider.setFocusTraversable(false);
             details.setBottom(slider);
@@ -939,9 +969,6 @@ public class SeasonController {
         if (mp != null) {
             stopPlayer();
         }
-
-        if (timeline != null)
-            timeline.stop();
 
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
@@ -1039,12 +1066,12 @@ public class SeasonController {
         updateWatchedButton();
     }
     private void setTimeLeft(Episode episode){
-        if (episode.getTimeWatched() > 5000){
+        if (episode.getTimeWatched() > 5){
             timeLeftBox.setVisible(true);
-            float leftTime = (episode.getRuntime() * 60 * 1000) - episode.getTimeWatched();
+            int leftTime = (int) (episode.getRuntimeInSeconds() - episode.getTimeWatched());
 
-            float hours = leftTime / 3600000;
-            float minutes = (leftTime % 3600000) / 60000;
+            int hours = leftTime / 3600;
+            int minutes = (leftTime % 3600) / 60;
 
             String timeLeft;
             if (App.globalLanguage != Locale.forLanguageTag("es-ES")) {
@@ -1070,13 +1097,14 @@ public class SeasonController {
 
     //region BACKGROUND VIDEO/MUSIC
     private void processBackgroundMedia(){
-        if (!seasons.get(currentSeason).getVideoSrc().isEmpty()){
-            if (mp != null)
-                mp.stop();
+        if (mp != null)
+            stopPlayer();
 
+        if (!seasons.get(currentSeason).getVideoSrc().isEmpty()){
             File file = new File(seasons.get(currentSeason).getVideoSrc());
             Media media = new Media(file.toURI().toString());
             mp = new MediaPlayer(media);
+
             backgroundVideo.setMediaPlayer(mp);
             backgroundVideo.setVisible(false);
             isVideo = true;
@@ -1092,67 +1120,37 @@ public class SeasonController {
         }
     }
     private void setMediaPlayer(){
-        Task<Void> mpTask = new Task<>() {
-            @Override
-            protected Void call() {
-                int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
-                mp.setVolume((double) volume / 100);
-                mp.setOnEndOfMedia(() -> stopPlayer());
+        double delay;
+        if (isVideo)
+            delay = Double.parseDouble(Configuration.loadConfig("backgroundDelay", "3"));
+        else
+            delay = 0.5;
 
-                double delay = 0.5;
-                if (isVideo)
-                    delay = Double.parseDouble(Configuration.loadConfig("backgroundDelay", "3"));
+        mediaExecutor.schedule(() -> {
+            int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
+            mp.setVolume((double) volume / 100);
+            mp.setOnEndOfMedia(this::stopPlayer);
 
-                timeline = new javafx.animation.Timeline(
-                        new javafx.animation.KeyFrame(Duration.seconds(delay), event -> playBackgroundMedia())
-                );
-                timeline.play();
-                return null;
-            }
-        };
+            Platform.runLater(() ->{
+                if (isVideo){
+                    double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+                    double mediaRatio = (double) backgroundVideo.getMediaPlayer().getMedia().getWidth() / backgroundVideo.getMediaPlayer().getMedia().getHeight();
 
-        Thread thread = new Thread(mpTask);
-        thread.setDaemon(true);
-        thread.start();
+                    backgroundVideo.setPreserveRatio(true);
 
-        App.tasks.add(mpTask);
-    }
-    private void playBackgroundMedia(){
-        Platform.runLater(() ->{
-            if (isVideo){
-                double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
-                double mediaRatio = (double) backgroundVideo.getMediaPlayer().getMedia().getWidth() / backgroundVideo.getMediaPlayer().getMedia().getHeight();
+                    if (screenRatio > 1.8f && mediaRatio > 1.8f)
+                        backgroundVideo.setPreserveRatio(false);
 
-                backgroundVideo.setPreserveRatio(true);
-
-                if (screenRatio > 1.8f && mediaRatio > 1.8f){
-                    backgroundVideo.setPreserveRatio(false);
+                    fadeInEffect(backgroundVideo);
                 }
 
-                backgroundVideo.setVisible(true);
-
-                //Fade In Transition
-                FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
-                fadeIn.setFromValue(0);
-                fadeIn.setToValue(1.0);
-                fadeIn.play();
-                mp.stop();
                 mp.seek(mp.getStartTime());
                 mp.play();
-            }else{
-                if (mp != null) {
-                    mp.stop();
-                    mp.seek(mp.getStartTime());
-                    mp.play();
-                }
-            }
-        });
+            });
+        }, (long) delay * 1000, TimeUnit.MILLISECONDS);
     }
-    private void stopPlayer() {
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), backgroundVideo);
-        fadeIn.setFromValue(1.0);
-        fadeIn.setToValue(0);
-        fadeIn.play();
+    private void animateAndStopPlayer(){
+        fadeOutEffect(backgroundVideo);
 
         double increment = mp.getVolume() * 0.05;
         Timeline timeline = new Timeline(
@@ -1161,9 +1159,19 @@ public class SeasonController {
         timeline.setCycleCount(20);
         timeline.play();
 
-        timeline.setOnFinished(event -> mp.stop());
+        timeline.setOnFinished(event -> {
+            mp.stop();
+            mediaExecutor.shutdown();
+        });
+    }
+    private void stopPlayer() {
+        mp.stop();
+        mediaExecutor.shutdown();
     }
     private void findAndPlaySong(){
+        if (mp != null)
+            stopPlayer();
+
         for (Season season : seasons){
             if (!season.getMusicSrc().isEmpty()){
                 Platform.runLater(() -> {

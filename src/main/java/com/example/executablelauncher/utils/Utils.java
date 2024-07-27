@@ -11,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -136,12 +137,26 @@ public class Utils {
         fadeIn.setToValue(1.0);
         fadeIn.play();
     }
+    public static void fadeInEffect(MediaView mv){
+        mv.setVisible(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), mv);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+    }
     public static void fadeOutEffect(Button btn){
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), btn);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0);
         fadeOut.play();
         btn.setVisible(false);
+    }
+    public static void fadeOutEffect(MediaView mv){
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), mv);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0);
+        fadeOut.play();
+        mv.setVisible(false);
     }
     public static void fadeInEffect(Button btn){
         btn.setVisible(true);

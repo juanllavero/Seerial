@@ -1057,8 +1057,7 @@ public class VideoPlayerController {
             else
                 parentControllerDesktop.stopPlayer();
 
-            Stage stage = (Stage) mainPane.getScene().getWindow();
-            stage.close();
+            controlsStage.close();
         });
 
         fadeOut.play();
@@ -1129,10 +1128,6 @@ public class VideoPlayerController {
     private void checkTimeWatched(){
         Episode episode = episodeList.get(currentDisc);
         episode.setTimeWatched((int) runtimeSlider.getValue());
-
-        if (parentController != null && episode.getTimeWatched() > (currentTimeSeconds * 0.9)){
-            parentController.setWatched();
-        }
     }
     public void nextEpisode(){
         if (currentDisc + 1 >= episodeList.size() - 1){
