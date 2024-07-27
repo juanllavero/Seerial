@@ -16,7 +16,7 @@ public class MediaInfo {
         this.file = file;
         this.location = location;
         this.bitrate = bitrate + " kbps";
-        this.duration = formatTime(duration);
+        this.duration = formatTime((int) duration);
 
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         double fileSize = size;

@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DataManager {
-    public static DataManager INSTANCE = new DataManager();
+    public static final DataManager INSTANCE = new DataManager();
     final String LOCAL_FILE = "data.json";
     List<Library> libraries = new ArrayList<>();
     List<Series> seriesToRemove = new ArrayList<>();

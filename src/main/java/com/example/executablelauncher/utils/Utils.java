@@ -6,10 +6,14 @@ import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import javafx.animation.FadeTransition;
+import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
@@ -132,7 +136,21 @@ public class Utils {
         fadeIn.setToValue(1.0);
         fadeIn.play();
     }
-    public static String formatTime(float time){
+    public static void fadeOutEffect(Button btn){
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), btn);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0);
+        fadeOut.play();
+        btn.setVisible(false);
+    }
+    public static void fadeInEffect(Button btn){
+        btn.setVisible(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), btn);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+    }
+    public static String formatTime(int time){
         int h = (int) (time / 3600);
         int m = (int) ((time % 3600) / 60);
         int s = (int) (time % 60);
@@ -141,6 +159,22 @@ public class Utils {
             return String.format("%02d:%02d:%02d", h, m, s);
 
         return String.format("%02d:%02d", m, s);
+    }
+    public static void playInteractionSound() {
+        File file = new File("resources/audio/interaction.wav");
+        Media media = new Media(file.toURI().toString());
+        MediaPlayer player = new MediaPlayer(media);
+        player.setVolume(1);
+        player.seek(player.getStartTime());
+        player.play();
+    }
+    public static void playCategoriesSound() {
+        File file = new File("resources/audio/categories.wav");
+        Media media = new Media(file.toURI().toString());
+        MediaPlayer player = new MediaPlayer(media);
+        player.setVolume(1);
+        player.seek(player.getStartTime());
+        player.play();
     }
     //endregion
 }

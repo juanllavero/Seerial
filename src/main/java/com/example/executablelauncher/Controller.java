@@ -51,6 +51,9 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
+import static com.example.executablelauncher.utils.Utils.playCategoriesSound;
+import static com.example.executablelauncher.utils.Utils.playInteractionSound;
+
 public class Controller implements Initializable {
     //region FXML ATTRIBUTES
     @FXML
@@ -339,7 +342,7 @@ public class Controller implements Initializable {
                     librariesBox.getChildren().get(Math.max(0, librariesBox.getChildren().indexOf(btn) - 1)).requestFocus();
                 }else if (App.pressedRight(event)){
                     if (btn == librariesBox.getChildren().getLast()){
-                        backButton.requestFocus();
+                        menuButton.requestFocus();
                     }else{
                         librariesBox.getChildren().get(Math.min(librariesBox.getChildren().indexOf(btn) + 1, librariesBox.getChildren().size() - 1)).requestFocus();
                     }
@@ -791,24 +794,6 @@ public class Controller implements Initializable {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    public void playInteractionSound() {
-        File file = new File("resources/audio/interaction.wav");
-        Media media = new Media(file.toURI().toString());
-        MediaPlayer player = new MediaPlayer(media);
-        player.setVolume(1);
-        player.seek(player.getStartTime());
-        player.play();
-    }
-
-    public void playCategoriesSound() {
-        File file = new File("resources/audio/categories.wav");
-        Media media = new Media(file.toURI().toString());
-        MediaPlayer player = new MediaPlayer(media);
-        player.setVolume(1);
-        player.seek(player.getStartTime());
-        player.play();
     }
 
     @FXML

@@ -48,8 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static com.example.executablelauncher.utils.Utils.fadeInEffect;
-import static com.example.executablelauncher.utils.Utils.fadeOutEffect;
+import static com.example.executablelauncher.utils.Utils.*;
 
 public class SeasonController {
     //region FXML ATTRIBUTES
@@ -190,22 +189,22 @@ public class SeasonController {
     //endregion
 
     //region ATTRIBUTES
-    private Controller controllerParent;
+    Controller controllerParent;
 
-    private List<Season> seasons = new ArrayList<>();
-    private List<Episode> episodes = new ArrayList<>();
-    private List<Button> episodeButtons = new ArrayList<>();
-    private int currentSeason = 0;
-    private Episode selectedEpisode = null;
-    private Timeline timeline = null;
-    private MediaPlayer mp = null;
-    private boolean isVideo = false;
-    private boolean playSameMusic = false;
-    private boolean isShow = false;
-    private Series series = null;
-    private boolean episodesFocussed = true;
-    private boolean playingVideo = false;
-    private int buttonCount = 0;
+    List<Season> seasons = new ArrayList<>();
+    List<Episode> episodes = new ArrayList<>();
+    List<Button> episodeButtons = new ArrayList<>();
+    int currentSeason = 0;
+    Episode selectedEpisode = null;
+    Timeline timeline = null;
+    MediaPlayer mp = null;
+    boolean isVideo = false;
+    boolean playSameMusic = false;
+    boolean isShow = false;
+    Series series = null;
+    boolean episodesFocussed = true;
+    boolean playingVideo = false;
+    int buttonCount = 0;
     //endregion
 
     //region INITIALIZATION
@@ -289,12 +288,12 @@ public class SeasonController {
 
         detailsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                controllerParent.playInteractionSound();
+                playInteractionSound();
         });
 
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
-                controllerParent.playInteractionSound();
+                playInteractionSound();
                 playButton.setText(App.buttonsBundle.getString("playButton"));
                 ImageView img = (ImageView) playButton.getGraphic();
                 img.setImage(new Image("file:resources/img/icons/playSelected.png", 30, 30, true, true));
@@ -308,7 +307,7 @@ public class SeasonController {
         watchedButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             ImageView img = (ImageView) watchedButton.getGraphic();
             if (newVal){
-                controllerParent.playInteractionSound();
+                playInteractionSound();
                 if (selectedEpisode.isWatched()){
                     watchedButton.setText(App.buttonsBundle.getString("markUnwatched"));
                     img.setImage(new Image("file:resources/img/icons/watchedSelected.png", 30, 30, true, true));
@@ -328,7 +327,7 @@ public class SeasonController {
 
         optionsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
-                controllerParent.playInteractionSound();
+                playInteractionSound();
                 optionsButton.setText(App.buttonsBundle.getString("moreButton"));
                 ImageView img = (ImageView) optionsButton.getGraphic();
                 img.setImage(new Image("file:resources/img/icons/optionsSelected.png", 30, 30, true, true));
@@ -347,12 +346,12 @@ public class SeasonController {
 
         lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                controllerParent.playInteractionSound();
+                playInteractionSound();
         });
 
         nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                controllerParent.playInteractionSound();
+                playInteractionSound();
         });
 
         detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
@@ -412,7 +411,7 @@ public class SeasonController {
 
         lastSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedSelect(event)){
-                controllerParent.playCategoriesSound();
+                playCategoriesSound();
                 lastSeason();
             }else if (App.pressedRight(event)) {
                 if (episodeButtons.size() > 1 && episodesFocussed)
@@ -420,17 +419,17 @@ public class SeasonController {
                 else
                     playButton.requestFocus();
             }else if (App.pressedLeft(event)) {
-                controllerParent.playCategoriesSound();
+                playCategoriesSound();
                 lastSeason();
             }
         });
 
         nextSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedSelect(event)){
-                controllerParent.playCategoriesSound();
+                playCategoriesSound();
                 nextSeason();
             }else if (App.pressedRight(event)) {
-                controllerParent.playCategoriesSound();
+                playCategoriesSound();
                 nextSeason();
             }else if (App.pressedLeft(event)) {
                 if (episodeButtons.size() > 1 && episodesFocussed)
@@ -660,7 +659,7 @@ public class SeasonController {
                     scaleTransition.setToY(1.1);
                     scaleTransition.play();
 
-                    controllerParent.playInteractionSound();
+                    playInteractionSound();
 
                     updateDiscInfo(episodes.get(episodeButtons.indexOf(btn)));
                 }else{
@@ -750,6 +749,9 @@ public class SeasonController {
     }
 
     public void playEpisode(Episode episode){
+        if (playingVideo)
+            return;
+
         if (mp != null)
             mp.stop();
 
@@ -978,7 +980,7 @@ public class SeasonController {
     //region DETAILS
     @FXML
     void openDetails(){
-        controllerParent.playCategoriesSound();
+        playCategoriesSound();
         fadeOutEffect(mainPane);
 
         if (isShow){

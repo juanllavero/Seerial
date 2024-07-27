@@ -16,10 +16,12 @@ import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -36,12 +38,11 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.File;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
-import static com.example.executablelauncher.utils.Utils.formatTime;
+import static com.example.executablelauncher.utils.Utils.*;
 
 public class VideoPlayerController {
     //region FXML ATTRIBUTES
@@ -50,6 +51,9 @@ public class VideoPlayerController {
 
     @FXML
     private HBox chapterContainer;
+
+    @FXML
+    private HBox desktopVolumeSliderBox;
 
     @FXML
     private ScrollPane chapterScroll;
@@ -167,8 +171,7 @@ public class VideoPlayerController {
     int currentDisc = 0;
     int buttonCount = 0;
     boolean movingSlider = false;
-    float currentTimeSeconds = 0;
-
+    int currentTimeSeconds = 0;
     //region INITIALIZATION
     public void setDesktopPlayer(DesktopViewController parent, Stage stage){
         parentControllerDesktop = parent;
@@ -179,7 +182,7 @@ public class VideoPlayerController {
         controlsStage = stage;
     }
     public void setVideo(Season season, Episode episode, String seriesName, Stage stage){
-        videoPlayer = new VideoPlayer();
+        videoPlayer = VideoPlayer.INSTANCE;
         videoPlayer.setParent(this);
 
         this.videoStage = stage;
@@ -239,16 +242,22 @@ public class VideoPlayerController {
 
         mainPane.requestFocus();
 
-        controlsStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> {
-            if (!controlsShown)
-                showControls();
-            timeline.playFromStart();
-        });
+        //Configure the actions that take place when the mouse movement is detected for more than a second
+        controlsStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> onMouseMovement());
+        controlsStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> onMouseMovement());
 
         videoStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> {
-            if (!controlsShown)
+            if (!controlsShown && videoPlayer.isVideoLoaded())
                 showControls();
             timeline.playFromStart();
+
+            controlsStage.getScene().setCursor(Cursor.DEFAULT);
+            videoStage.getScene().setCursor(Cursor.DEFAULT);
+        });
+
+        videoStage.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (optionsBox.isVisible())
+                hideOptions();
         });
 
         controlsStage.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
@@ -261,7 +270,7 @@ public class VideoPlayerController {
         });
 
         controlsStage.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
-            if (!controlsShown){
+            if (!controlsShown && videoPlayer.isVideoLoaded()){
                 if (App.pressedRight(e))
                     goAhead();
                 else if (App.pressedLeft(e))
@@ -272,7 +281,7 @@ public class VideoPlayerController {
                 }
                 else
                     showControls();
-            }else if (!optionsBox.isVisible()){
+            }else if (!optionsBox.isVisible() && videoPlayer.isVideoLoaded()){
                 if (App.pressedRB(e))
                     volumeUp();
                 else if (App.pressedLB(e))
@@ -298,6 +307,15 @@ public class VideoPlayerController {
 
         seriesTitle.setText(seriesName);
         setDiscValues(episode);
+    }
+    private void onMouseMovement(){
+        if (!controlsShown && videoPlayer.isVideoLoaded())
+            showControls();
+
+        controlsStage.getScene().setCursor(Cursor.DEFAULT);
+        videoStage.getScene().setCursor(Cursor.DEFAULT);
+
+        timeline.playFromStart();
     }
     private void syncStageSize(Stage primaryStage) {
         if (controlsStage != null) {
@@ -338,6 +356,11 @@ public class VideoPlayerController {
 
         fadeOut.play();
 
+        if (parentController != null) {
+            fullScreenButton.setVisible(false);
+            desktopVolumeSliderBox.setVisible(false);
+        }
+
         optionsBox.setOnMouseClicked(e -> hideOptions());
 
         rightTouchArea.setOnMouseClicked(e -> {
@@ -374,8 +397,8 @@ public class VideoPlayerController {
 
         runtimeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (movingSlider) {
-                currentTimeSeconds = newValue.floatValue();
-                videoPlayer.seekToTime(newValue.longValue());
+                currentTimeSeconds = newValue.intValue();
+                videoPlayer.seekToTime(newValue.intValue());
                 updateSliderValue();
             }
         });
@@ -383,11 +406,15 @@ public class VideoPlayerController {
         runtimeSlider.setOnMousePressed(e -> {
             movingSlider = true;
             runtimeTimeline.stop();
+
+            showSlider();
         });
 
         runtimeSlider.setOnMouseReleased(e -> {
             movingSlider = false;
             runtimeTimeline.playFromStart();
+
+            hideSlider();
         });
 
         runtimeSlider.setOnKeyPressed(e -> {
@@ -628,8 +655,6 @@ public class VideoPlayerController {
         }
         //endregion
 
-        loadTracks();
-
         FadeTransition fade = new FadeTransition(Duration.seconds(0.8), mainPane);
         fade.setFromValue(0);
         fade.setToValue(1.0);
@@ -637,6 +662,7 @@ public class VideoPlayerController {
         fade.play();
     }
     private void loadTracks(){
+        int selectedAudioTrack = 0;
         String selectedAudioTrackLanguage = "";
         String audioTrackLanguage = season.getAudioTrackLanguage();
         String defaultAudioTrackLanguage = Locale.forLanguageTag(Configuration.loadConfig("preferAudioLan", "es-ES")).getISO3Language();
@@ -648,33 +674,35 @@ public class VideoPlayerController {
             for (AudioTrack aTrack : audioTracks)
                 aTrack.setSelected(false);
 
-            audioTracks.get(season.getSelectedAudioTrack()).setSelected(true);
             selectedAudioTrackLanguage = audioTrackLanguage;
-
-            videoPlayer.setAudioTrack(audioTracks.get(season.getSelectedAudioTrack()).getId());
+            selectedAudioTrack = season.getSelectedAudioTrack();
+            audioTracks.get(season.getSelectedAudioTrack()).setSelected(true);
         }else{
             if (audioTracks.size() > 1) {
                 for (AudioTrack track : audioTracks) {
-                    if (track.getLanguage().equals(audioTrackLanguage)) {
+                    if (track.getLanguageTag().equals(audioTrackLanguage)) {
                         for (AudioTrack aTrack : audioTracks)
                             aTrack.setSelected(false);
 
                         track.setSelected(true);
-                        selectedAudioTrackLanguage = track.getLanguage();
-
-                        videoPlayer.setAudioTrack(track.getId());
+                        selectedAudioTrackLanguage = track.getLanguageTag();
+                        selectedAudioTrack = audioTracks.indexOf(track);
                         break;
                     }
                 }
             }else if (!audioTracks.isEmpty()){
+                selectedAudioTrackLanguage = audioTracks.getFirst().getLanguageTag();
                 audioTracks.getFirst().setSelected(true);
-                selectedAudioTrackLanguage =  audioTracks.getFirst().getLanguage();
-                videoPlayer.setAudioTrack( audioTracks.getFirst().getId());
             }
         }
 
+        videoPlayer.setAudioTrack(selectedAudioTrack + 1);
+        season.setAudioTrackLanguage(selectedAudioTrackLanguage);
+        season.setSelectedAudioTrack(selectedAudioTrack);
+
         int subsMode = Integer.parseInt(Configuration.loadConfig("subsMode", "2"));
         String subtitleTrackLanguage = season.getSubtitleTrackLanguage();
+        int selectedSubtitleTrack = -1;
         boolean foreignAudio = false;
 
         if (subtitleTrackLanguage.isEmpty())
@@ -683,41 +711,41 @@ public class VideoPlayerController {
         if (!defaultAudioTrackLanguage.equals(selectedAudioTrackLanguage))
             foreignAudio = true;
 
-        if ((subsMode == 2 && foreignAudio) || subsMode == 3){
-            if (!subtitleTrackLanguage.isEmpty() && !subtitleTracks.isEmpty()){
-                if (season.getSelectedSubtitleTrack() < subtitleTracks.size() && season.getSelectedSubtitleTrack() >= 0){
-                    for (SubtitleTrack sTrack : subtitleTracks)
-                        sTrack.setSelected(false);
+        if (season.getSelectedSubtitleTrack() < subtitleTracks.size() && season.getSelectedSubtitleTrack() >= 0) {
+            for (SubtitleTrack sTrack : subtitleTracks)
+                sTrack.setSelected(false);
 
-                    subtitleTracks.get(season.getSelectedSubtitleTrack()).setSelected(true);
+            selectedSubtitleTrack = season.getSelectedSubtitleTrack();
+            subtitleTracks.get(selectedSubtitleTrack).setSelected(true);
+        }else if (((subsMode == 2 && foreignAudio) || subsMode == 3) && !subtitleTrackLanguage.isEmpty() && !subtitleTracks.isEmpty()){
+            if (subtitleTracks.size() > 1){
+                for (SubtitleTrack track : subtitleTracks) {
+                    if (track.getLanguageTag().equals(subtitleTrackLanguage)) {
+                        for (SubtitleTrack sTrack : subtitleTracks)
+                            sTrack.setSelected(false);
 
-                    videoPlayer.setSubtitleTrack(subtitleTracks.get(season.getSelectedSubtitleTrack()).getId());
-                }else if (subtitleTracks.size() > 1){
-                    for (SubtitleTrack track : subtitleTracks) {
-                        if (track.getLanguage().equals(subtitleTrackLanguage)) {
-                            for (SubtitleTrack sTrack : subtitleTracks)
-                                sTrack.setSelected(false);
+                        track.setSelected(true);
 
-                            track.setSelected(true);
-
-                            videoPlayer.setSubtitleTrack(track.getId());
-                        }
+                        selectedSubtitleTrack = subtitleTracks.indexOf(track);
+                        subtitleTracks.get(selectedSubtitleTrack).setSelected(true);
+                        break;
                     }
-                }else {
-                    subtitleTracks.getFirst().setSelected(true);
-                    videoPlayer.setSubtitleTrack(subtitleTracks.getFirst().getId());
                 }
-            }else{
-                videoPlayer.disableSubtitles();
-
-                for (SubtitleTrack sTrack : subtitleTracks)
-                    sTrack.setSelected(false);
+            }else {
+                subtitleTracks.getFirst().setSelected(true);
+                selectedSubtitleTrack = 0;
             }
         }else{
             videoPlayer.disableSubtitles();
 
             for (SubtitleTrack sTrack : subtitleTracks)
                 sTrack.setSelected(false);
+        }
+
+        if (selectedSubtitleTrack >= 0){
+            videoPlayer.setSubtitleTrack(selectedSubtitleTrack + 1);
+            season.setAudioTrackLanguage(subtitleTrackLanguage);
+            season.setSelectedAudioTrack(selectedSubtitleTrack);
         }
 
         //Initialize Buttons
@@ -732,6 +760,7 @@ public class VideoPlayerController {
         });
     }
     public void startCount(){
+        loadTracks();
         runtimeTimeline.getKeyFrames().setAll(new KeyFrame(Duration.seconds(1), e ->{
             currentTimeSeconds++;
 
@@ -744,11 +773,11 @@ public class VideoPlayerController {
 
         runtimeTimeline.play();
         runtimeSlider.setValue(currentTimeSeconds);
-        videoPlayer.seekToTime((long) currentTimeSeconds);
+        videoPlayer.seekToTime(currentTimeSeconds);
     }
     private void updateSliderValue(){
         currentTime.setText(formatTime(currentTimeSeconds));
-        toFinishTime.setText(formatTime((float) (runtimeSlider.getMax() - currentTimeSeconds)));
+        toFinishTime.setText(formatTime((int) (runtimeSlider.getMax() - currentTimeSeconds)));
 
         if (!movingSlider)
             runtimeSlider.setValue(currentTimeSeconds);
@@ -926,12 +955,15 @@ public class VideoPlayerController {
         if (parentController != null)
             fadeInEffect(shadowImage);
         else if (videoPlayer != null)
-            videoPlayer.setVideoBrightness(-15);
+            videoPlayer.setVideoBrightness(-4);
 
         fadeInEffect(closeButton);
         playButton.requestFocus();
     }
     private void hideControls(){
+        controlsStage.getScene().setCursor(Cursor.NONE);
+        videoStage.getScene().setCursor(Cursor.NONE);
+
         timeline.stop();
         fadeOutEffect(closeButton);
 
@@ -947,48 +979,59 @@ public class VideoPlayerController {
         controlsBox.setVisible(false);
         fadeOut.setOnFinished(e -> controlsShown = false);
     }
-    public void fadeOutEffect(ImageView img){
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), img);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0);
-        fadeOut.play();
-        img.setVisible(false);
+    private void showSlider(){
+        if (parentController != null)
+            fadeOutEffect(shadowImage);
+        else
+            videoPlayer.setVideoBrightness(0);
+
+        closeButton.setVisible(false);
+        runtimeSlider.setVisible(true);
+        currentTime.setVisible(true);
+        toFinishTime.setVisible(true);
+        seriesTitle.setVisible(false);
+        episodeInfo.setVisible(false);
+        fullScreenButton.setVisible(false);
+        videoButton.setVisible(false);
+        audiosButton.setVisible(false);
+        subtitlesButton.setVisible(false);
+        playButton.setVisible(false);
+        prevButton.setVisible(false);
+        nextButton.setVisible(false);
+
+        desktopVolumeSliderBox.setVisible(false);
+
+        if (!episode.getChapters().isEmpty()){
+            chaptersTitle.setVisible(false);
+            chapterContainer.setVisible(false);
+        }
     }
-    public void fadeOutEffect(Button btn){
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), btn);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0);
-        fadeOut.play();
-        btn.setVisible(false);
-    }
-    public void fadeInEffect(Pane pane){
-        pane.setVisible(true);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), pane);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
-    }
-    public void fadeInEffect(ImageView img){
-        img.setVisible(true);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), img);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
-    }
-    public void fadeInEffect(Button btn){
-        btn.setVisible(true);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), btn);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
-    }
-    public void playInteractionSound() {
-        File file = new File("resources/audio/interaction.wav");
-        Media media = new Media(file.toURI().toString());
-        MediaPlayer player = new MediaPlayer(media);
-        player.setVolume(1);
-        player.seek(player.getStartTime());
-        player.play();
+    private void hideSlider(){
+        runtimeSlider.setVisible(true);
+        currentTime.setVisible(true);
+        toFinishTime.setVisible(true);
+        seriesTitle.setVisible(true);
+        episodeInfo.setVisible(true);
+
+        if (parentController == null) {
+            fullScreenButton.setVisible(true);
+            desktopVolumeSliderBox.setVisible(true);
+        }
+
+        closeButton.setVisible(true);
+        videoButton.setVisible(true);
+        audiosButton.setVisible(true);
+        subtitlesButton.setVisible(true);
+        playButton.setVisible(true);
+        prevButton.setVisible(true);
+        nextButton.setVisible(true);
+
+        if (!episode.getChapters().isEmpty()){
+            chaptersTitle.setVisible(false);
+            chapterContainer.setVisible(false);
+        }
+
+        hideControls();
     }
     //endregion
 
@@ -1001,18 +1044,6 @@ public class VideoPlayerController {
         runtimeTimeline.stop();
 
         videoStage.setFullScreen(false);
-
-        for (AudioTrack aTrack : audioTracks)
-            if (aTrack.isSelected() && !aTrack.getLanguage().isEmpty())
-                season.setAudioTrackLanguage(aTrack.getLanguage());
-
-        if (subsActivated){
-            for (SubtitleTrack sTrack : subtitleTracks)
-                if (sTrack.isSelected() && !sTrack.getLanguage().isEmpty())
-                    season.setSubtitleTrackLanguage(sTrack.getLanguage());
-        }else{
-            season.setSubtitleTrackLanguage("");
-        }
 
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.7), controlsBox);
         fadeOut.setFromValue(1.0);
@@ -1097,10 +1128,9 @@ public class VideoPlayerController {
     }
     private void checkTimeWatched(){
         Episode episode = episodeList.get(currentDisc);
-        episode.setTimeWatched((float) runtimeSlider.getValue());
+        episode.setTimeWatched((int) runtimeSlider.getValue());
 
-        long runtimeMilliseconds = (long) episode.getRuntime() * 60 * 1000;
-        if (episode.getTimeWatched() > (runtimeMilliseconds * 0.9)){
+        if (parentController != null && episode.getTimeWatched() > (currentTimeSeconds * 0.9)){
             parentController.setWatched();
         }
     }
@@ -1109,7 +1139,7 @@ public class VideoPlayerController {
             stop();
         }else{
             Episode episode = episodeList.get(currentDisc);
-            episode.setTimeWatched((float) runtimeSlider.getValue());
+            episode.setTimeWatched((int) runtimeSlider.getValue());
 
             checkTimeWatched();
 
@@ -1124,7 +1154,7 @@ public class VideoPlayerController {
         }else{
             if (currentDisc > 0) {
                 Episode episode = episodeList.get(currentDisc);
-                episode.setTimeWatched((float) runtimeSlider.getValue());
+                episode.setTimeWatched((int) runtimeSlider.getValue());
 
                 checkTimeWatched();
 
@@ -1177,21 +1207,27 @@ public class VideoPlayerController {
                 btn.getStyleClass().add("playerOptionsSelected");
             }
 
+            btn.setOnMouseClicked(e -> {
+                if (!track.isSelected())
+                    videoButtonAction(track, btn);
+            });
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-                if (App.pressedSelect(event)){
-                    videoPlayer.setVideoTrack(videoTracks.get(optionsContainer.getChildren().indexOf(btn)).getId());
-
-                    for (Node node : optionsContainer.getChildren()){
-                        Button button = (Button) node;
-                        button.getStyleClass().clear();
-                        button.getStyleClass().add("playerOptionsButton");
-                    }
-
-                    btn.getStyleClass().clear();
-                    btn.getStyleClass().add("playerOptionsSelected");
-                }
+                if (App.pressedSelect(event) && !track.isSelected())
+                    videoButtonAction(track, btn);
             });
         }
+    }
+    private void videoButtonAction(VideoTrack track, Button btn){
+        videoPlayer.setVideoTrack(videoTracks.indexOf(track) + 1);
+
+        for (Node node : optionsContainer.getChildren()){
+            Button button = (Button) node;
+            button.getStyleClass().clear();
+            button.getStyleClass().add("playerOptionsButton");
+        }
+
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("playerOptionsSelected");
     }
     private void showZoomOptions(){
         optionsContainer.getChildren().clear();
@@ -1199,37 +1235,33 @@ public class VideoPlayerController {
 
         addOptionCard("Normal");
         Button btn = (Button) optionsContainer.getChildren().get(0);
+        btn.setOnMouseClicked(e -> zoomButtonAction(series, btn, 0, 0.7f, 100, 1));
         btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (App.pressedSelect(event)){
-                videoPlayer.fixZoom(0);
-                videoPlayer.setSubtitleVerticalPosition(100);
-                videoPlayer.setSubtitleSize(0.7);
-                series.setVideoZoom(0);
-                btn.getStyleClass().clear();
-                btn.getStyleClass().add("playerOptionsSelected");
-
-                Button b2 = (Button) optionsContainer.getChildren().get(1);
-                b2.getStyleClass().clear();
-                b2.getStyleClass().add("playerOptionsButton");
+                zoomButtonAction(series, btn, 0, 0.7f, 100, 1);
             }
         });
 
         addOptionCard("Zoom");
         Button button = (Button) optionsContainer.getChildren().get(1);
+        button.setOnMouseClicked(e -> zoomButtonAction(series, button, 0.5f, 0.9f, 90, 0));
         button.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (App.pressedSelect(event)){
-                videoPlayer.fixZoom(0.5f);
-                videoPlayer.setSubtitleVerticalPosition(90);
-                videoPlayer.setSubtitleSize(0.9);
-                series.setVideoZoom(0.5f);
-                button.getStyleClass().clear();
-                button.getStyleClass().add("playerOptionsSelected");
-
-                Button b1 = (Button) optionsContainer.getChildren().get(0);
-                b1.getStyleClass().clear();
-                b1.getStyleClass().add("playerOptionsButton");
+                zoomButtonAction(series, button, 0.5f, 0.9f, 90, 0);
             }
         });
+    }
+    private void zoomButtonAction(Series series, Button btn, float zoom, float subSize, int position, int index){
+        videoPlayer.fixZoom(zoom);
+        videoPlayer.setSubtitleVerticalPosition(position);
+        videoPlayer.setSubtitleSize(subSize);
+        series.setVideoZoom(zoom);
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("playerOptionsSelected");
+
+        Button b1 = (Button) optionsContainer.getChildren().get(index);
+        b1.getStyleClass().clear();
+        b1.getStyleClass().add("playerOptionsButton");
     }
     public void showAudioOptions(){
         if (!videoPlayer.isPaused())
@@ -1259,10 +1291,42 @@ public class VideoPlayerController {
     private void showAudioTracks(){
         optionsContainer.getChildren().clear();
         for (AudioTrack track : audioTracks){
-            addOptionCard( track.getDisplayTitle());
+            Button trackButton = addSimpleButton(track.getDisplayTitle());
+            optionsContainer.getChildren().add(trackButton);
 
-            //setTrackButton(track, true);
+            if (track.isSelected()) {
+                trackButton.getStyleClass().clear();
+                trackButton.getStyleClass().add("playerOptionsSelected");
+            }
+
+            trackButton.setOnMouseClicked(e -> {
+                if (!track.isSelected())
+                    addAudioButtonAction(track, trackButton);
+            });
+            trackButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+                if (App.pressedSelect(event) && !track.isSelected())
+                    addAudioButtonAction(track, trackButton);
+            });
         }
+    }
+    private void addAudioButtonAction(AudioTrack track, Button trackButton) {
+        playInteractionSound();
+
+        for (AudioTrack aTrack : audioTracks)
+            aTrack.setSelected(aTrack == track);
+
+        videoPlayer.setAudioTrack(audioTracks.indexOf(track) + 1);
+        season.setSelectedAudioTrack(audioTracks.indexOf(track));
+        season.setAudioTrackLanguage(track.getLanguageTag());
+
+        for (Node node : optionsContainer.getChildren()){
+            Button button = (Button) node;
+            button.getStyleClass().clear();
+            button.getStyleClass().add("playerOptionsButton");
+        }
+
+        trackButton.getStyleClass().clear();
+        trackButton.getStyleClass().add("playerOptionsSelected");
     }
     public void showSubtitleOptions(){
         if (!videoPlayer.isPaused())
@@ -1298,19 +1362,8 @@ public class VideoPlayerController {
     private void showSubtitleTracks(){
         optionsContainer.getChildren().clear();
 
-        Button btn = new Button();
-        btn.setText(App.buttonsBundle.getString("none"));
-        btn.setFont(new Font("Arial", 24));
-        btn.setTextFill(Color.WHITE);
-        btn.setMaxWidth(Integer.MAX_VALUE);
-        btn.setPrefWidth(Integer.MAX_VALUE);
-        btn.setAlignment(Pos.BOTTOM_LEFT);
-        btn.setPadding(new Insets(10));
-
-        btn.getStyleClass().add("playerOptionsButton");
-
-        addInteractionSound(btn);
-
+        //Add first button to disable subtitles
+        Button btn = addSimpleButton(App.buttonsBundle.getString("none"));
         optionsContainer.getChildren().add(btn);
 
         if (season.getSubtitleTrackLanguage() == null || season.getSubtitleTrackLanguage().isEmpty()) {
@@ -1318,16 +1371,19 @@ public class VideoPlayerController {
             btn.getStyleClass().add("playerOptionsSelected");
 
             videoPlayer.disableSubtitles();
+            season.setSelectedSubtitleTrack(-1);
+            season.setSubtitleTrackLanguage("");
         }
 
         btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (App.pressedSelect(event)){
-                for (SubtitleTrack sTrack : subtitleTracks){
+                for (SubtitleTrack sTrack : subtitleTracks)
                     sTrack.setSelected(false);
-                }
 
-                videoPlayer.disableSubtitles();
                 subsActivated = false;
+                videoPlayer.disableSubtitles();
+                season.setSelectedSubtitleTrack(-1);
+                season.setSubtitleTrackLanguage("");
 
                 for (Node node : optionsContainer.getChildren()){
                     Button button = (Button) node;
@@ -1341,12 +1397,57 @@ public class VideoPlayerController {
         });
 
         for (SubtitleTrack track : subtitleTracks){
-            addOptionCard( track.getDisplayTitle());
+            Button trackButton = addSimpleButton(track.getDisplayTitle());
+            optionsContainer.getChildren().add(trackButton);
 
-            //setTrackButton(track, false);
+            if (track.isSelected()) {
+                trackButton.getStyleClass().clear();
+                trackButton.getStyleClass().add("playerOptionsSelected");
+            }
+
+            trackButton.setOnMouseClicked(e -> {
+                if (!track.isSelected())
+                    addSubtitleButtonAction(track, trackButton, btn);
+            });
+            trackButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+                if (App.pressedSelect(event) && !track.isSelected())
+                    addSubtitleButtonAction(track, trackButton, btn);
+            });
         }
     }
+    private void addSubtitleButtonAction(SubtitleTrack track, Button trackButton, Button btn){
+        playInteractionSound();
 
+        for (SubtitleTrack sTrack : subtitleTracks)
+            sTrack.setSelected(sTrack == track);
+
+        videoPlayer.setSubtitleTrack(subtitleTracks.indexOf(track) + 1);
+        season.setSelectedSubtitleTrack(subtitleTracks.indexOf(track));
+        season.setSubtitleTrackLanguage(track.getLanguageTag());
+
+        Series series = App.getSelectedSeries();
+        if (series.getVideoZoom() == 0) {
+            videoPlayer.setSubtitleSize(0.7);
+            videoPlayer.setSubtitleVerticalPosition(100);
+        }else{
+            videoPlayer.setSubtitleSize(0.9);
+            videoPlayer.setSubtitleVerticalPosition(90);
+        }
+
+        for (Node node : optionsContainer.getChildren()){
+            Button button = (Button) node;
+            button.getStyleClass().clear();
+            button.getStyleClass().add("playerOptionsButton");
+        }
+
+        //Disable selection of button "None"
+        btn.getStyleClass().clear();
+        btn.getStyleClass().add("playerOptionsButton");
+
+        //Select current button
+        trackButton.getStyleClass().clear();
+        trackButton.getStyleClass().add("playerOptionsSelected");
+    }
     private void showSubtitleSize(){
         optionsContainer.getChildren().clear();
 
@@ -1372,56 +1473,44 @@ public class VideoPlayerController {
                 break;
         }
 
+        small.setOnMouseClicked(e -> subtitleSizeButtonAction(small, 0.8f));
         small.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (App.pressedSelect(event)){
-                videoPlayer.setSubtitleSize(0.8);
-
-                for (Node node : optionsContainer.getChildren()){
-                    Button button = (Button) node;
-                    button.getStyleClass().clear();
-                    button.getStyleClass().add("playerOptionsButton");
-                }
-
-                small.getStyleClass().clear();
-                small.getStyleClass().add("playerOptionsSelected");
-            }
+            if (App.pressedSelect(event))
+                subtitleSizeButtonAction(small, 0.8f);
         });
 
+        normal.setOnMouseClicked(e -> subtitleSizeButtonAction(normal, 0.9f));
         normal.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (App.pressedSelect(event)){
-                videoPlayer.setSubtitleSize(0.9);
-
-                for (Node node : optionsContainer.getChildren()){
-                    Button button = (Button) node;
-                    button.getStyleClass().clear();
-                    button.getStyleClass().add("playerOptionsButton");
-                }
-
-                normal.getStyleClass().clear();
-                normal.getStyleClass().add("playerOptionsSelected");
-            }
+            if (App.pressedSelect(event))
+                subtitleSizeButtonAction(normal, 0.9f);
         });
 
+        large.setOnMouseClicked(e -> subtitleSizeButtonAction(large, 1f));
         large.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (App.pressedSelect(event)){
-                videoPlayer.setSubtitleSize(1);
-
-                for (Node node : optionsContainer.getChildren()){
-                    Button button = (Button) node;
-                    button.getStyleClass().clear();
-                    button.getStyleClass().add("playerOptionsButton");
-                }
-
-                large.getStyleClass().clear();
-                large.getStyleClass().add("playerOptionsSelected");
-            }
+            if (App.pressedSelect(event))
+                subtitleSizeButtonAction(large, 1f);
         });
 
         optionsContainer.getChildren().add(small);
         optionsContainer.getChildren().add(normal);
         optionsContainer.getChildren().add(large);
     }
+    private void subtitleSizeButtonAction(Button small, float size) {
+        videoPlayer.setSubtitleSize(size);
 
+        for (Node node : optionsContainer.getChildren()){
+            Button button = (Button) node;
+            button.getStyleClass().clear();
+            button.getStyleClass().add("playerOptionsButton");
+        }
+
+        small.getStyleClass().clear();
+        small.getStyleClass().add("playerOptionsSelected");
+    }
+    private void addOptionCard(String title){
+        Button btn = addSimpleButton(title);
+        optionsContainer.getChildren().add(btn);
+    }
     private Button addSimpleButton(String name){
         Button btn = new Button(name);
         btn.setFont(new Font("Arial", 24));
@@ -1429,76 +1518,14 @@ public class VideoPlayerController {
         btn.setMaxWidth(Integer.MAX_VALUE);
         btn.setPrefWidth(Integer.MAX_VALUE);
         btn.setAlignment(Pos.BOTTOM_LEFT);
-        btn.setPadding(new Insets(10));
-        btn.getStyleClass().add("playerOptionsButton");
+        btn.setPadding(new Insets(11));
 
-        return btn;
-    }
-
-    /*private void setTrackButton(Track track, boolean isAudio) {
-        Button btn;
-        if (isAudio)
-            btn = (Button) optionsContainer.getChildren().get(audioTracks.indexOf(track));
-        else
-            btn = (Button) optionsContainer.getChildren().get(subtitleTracks.indexOf(track) + 1);
-
-        if (track.isSelected()) {
-            btn.getStyleClass().clear();
-            btn.getStyleClass().add("playerOptionsSelected");
-        }
-
-        btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (App.pressedSelect(event)){
-                if (isAudio) {
-                    for (Track aTrack : audioTracks){
-                        aTrack.setSelected(aTrack == track);
-                    }
-
-                    videoPlayer.setAudioTrack(audioTracks.get(optionsContainer.getChildren().indexOf(btn)).getId());
-                }else {
-                    for (Track sTrack : subtitleTracks){
-                        sTrack.setSelected(sTrack == track);
-                    }
-
-                    videoPlayer.setSubtitleTrack(subtitleTracks.get(optionsContainer.getChildren().indexOf(btn) - 1).getId());
-
-                    Series series = App.getSelectedSeries();
-                    if (series.getVideoZoom() == 0) {
-                        videoPlayer.setSubtitleSize(0.7);
-                        videoPlayer.setSubtitleVerticalPosition(100);
-                    }else{
-                        videoPlayer.setSubtitleSize(0.9);
-                        videoPlayer.setSubtitleVerticalPosition(90);
-                    }
-                }
-
-                for (Node node : optionsContainer.getChildren()){
-                    Button button = (Button) node;
-                    button.getStyleClass().clear();
-                    button.getStyleClass().add("playerOptionsButton");
-                }
-
-                btn.getStyleClass().clear();
-                btn.getStyleClass().add("playerOptionsSelected");
-            }
-        });
-    }*/
-
-    private void addOptionCard(String title){
-        Button btn = new Button();
-        btn.setText(title);
-        btn.setFont(new Font("Arial", 24));
-        btn.setTextFill(Color.WHITE);
-        btn.setMaxWidth(Integer.MAX_VALUE);
-        btn.setPrefWidth(Integer.MAX_VALUE);
-        btn.setAlignment(Pos.BOTTOM_LEFT);
-        btn.setPadding(new Insets(10));
-
+        btn.getStyleClass().clear();
         btn.getStyleClass().add("playerOptionsButton");
 
         addInteractionSound(btn);
 
-        optionsContainer.getChildren().add(btn);
+        return btn;
     }
     public void hideOptions(){
         optionsBox.setVisible(false);

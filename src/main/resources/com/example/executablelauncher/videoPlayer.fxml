@@ -168,7 +168,7 @@
                               </Label>
                               <HBox>
                                  <children>
-                                    <HBox alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="transparent" stylesheets="@styles.css">
+                                    <HBox fx:id="desktopVolumeSliderBox" alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="transparent" stylesheets="@styles.css">
                                        <children>
                                           <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
