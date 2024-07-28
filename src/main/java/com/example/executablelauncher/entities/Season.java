@@ -283,6 +283,13 @@ public class Season implements Serializable {
         return null;
     }
 
+    public int getCurrentlyWatchingEpisodeIndex(){
+        if (currentlyWatchingEpisode < episodes.size())
+            return currentlyWatchingEpisode;
+
+        return -1;
+    }
+
     public void setCurrentlyWatchingEpisode(int index){
         currentlyWatchingEpisode = index;
     }

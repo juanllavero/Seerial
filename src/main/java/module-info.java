@@ -28,6 +28,7 @@ module com.example.executablelauncher {
     requires org.bytedeco.ffmpeg;
     requires opencv;
     requires com.github.kokorin.jaffree;
+    requires color.thief;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

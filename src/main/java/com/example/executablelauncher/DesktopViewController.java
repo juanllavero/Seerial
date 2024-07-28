@@ -4042,7 +4042,7 @@ public class DesktopViewController {
         menuParentPane.setVisible(true);
         seriesMenu.setLayoutX(event.getSceneX());
 
-        if (seriesList.indexOf(selectedSeries) <= 1)
+        if (seriesList.indexOf(selectedSeries) <= 2)
             seriesMenu.setLayoutY(event.getSceneY());
         else
             seriesMenu.setLayoutY(event.getSceneY() - seriesMenu.getHeight());

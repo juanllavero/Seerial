@@ -204,6 +204,13 @@ public class Series implements Serializable {
         return null;
     }
 
+    public int getCurrentlyWatchingSeasonIndex(){
+        if (currentlyWatchingSeason < seasons.size())
+            return currentlyWatchingSeason;
+
+        return -1;
+    }
+
     public void setCurrentlyWatchingSeason(int index){
         currentlyWatchingSeason = index;
     }

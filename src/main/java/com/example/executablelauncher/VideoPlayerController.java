@@ -1045,7 +1045,7 @@ public class VideoPlayerController {
 
         videoStage.setFullScreen(false);
 
-        processCurrentlyWatching();
+        processCurrentlyWatching(App.getSelectedSeries(), season, episode);
 
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.7), controlsBox);
         fadeOut.setFromValue(1.0);
@@ -1126,32 +1126,6 @@ public class VideoPlayerController {
         });
 
         fadeIn.play();
-    }
-    private void processCurrentlyWatching(){
-        Series series = App.getSelectedSeries();
-        List<Season> seasons = series.getSeasons();
-
-        season.setCurrentlyWatchingEpisode(-1);
-        series.setCurrentlyWatchingSeason(-1);
-
-        if (episode.isWatched()){
-            if (episodeList.indexOf(episode) == episodeList.size() - 1){
-                if (seasons.indexOf(season) < seasons.size() - 1){
-                    Season nextSeason = seasons.get(seasons.indexOf(season) + 1);
-
-                    if (nextSeason != null){
-                        nextSeason.setCurrentlyWatchingEpisode(0);
-                        series.setCurrentlyWatchingSeason(seasons.indexOf(nextSeason));
-                    }
-                }
-            }else{
-                season.setCurrentlyWatchingEpisode(episodeList.indexOf(episode) + 1);
-                series.setCurrentlyWatchingSeason(seasons.indexOf(season));
-            }
-        }else{
-            season.setCurrentlyWatchingEpisode(episodeList.indexOf(episode));
-            series.setCurrentlyWatchingSeason(seasons.indexOf(season));
-        }
     }
     private void checkTimeWatched(){
         Episode episode = episodeList.get(currentDisc);

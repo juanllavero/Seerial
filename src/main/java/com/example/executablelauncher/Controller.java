@@ -6,8 +6,10 @@ import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import com.jfoenix.controls.JFXSlider;
+import de.androidpit.colorthief.ColorThief;
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,6 +24,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.BoxBlur;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -31,14 +34,15 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -61,7 +65,25 @@ public class Controller implements Initializable {
     private BorderPane mainPane;
 
     @FXML
+    private Pane fill;
+
+    @FXML
+    private Pane shade;
+
+    @FXML
+    private StackPane mainViewBundle;
+
+    @FXML
     private ImageView menuShadow;
+
+    @FXML
+    private ImageView currentlyWatchingImage;
+
+    @FXML
+    private ImageView mainViewShadow;
+
+    @FXML
+    private ImageView noise;
 
     @FXML
     private ImageView backgroundImage;
@@ -98,6 +120,27 @@ public class Controller implements Initializable {
 
     @FXML
     private Button mainViewButton;
+
+    @FXML
+    private Pane episodeMenuParent;
+
+    @FXML
+    private VBox episodeMenuBox;
+
+    @FXML
+    private Button playEpisodeButton;
+
+    @FXML
+    private Button goToLibraryButton;
+
+    @FXML
+    private Button goToEpisodeButton;
+
+    @FXML
+    private Button markWatchedButton;
+
+    @FXML
+    private Button closeEpisodeMenuButton;
 
     @FXML
     private StackPane mainStack;
@@ -186,17 +229,19 @@ public class Controller implements Initializable {
 
     List<Library> libraries = null;
     Library currentLibrary = null;
-    Series selectedSeries;
     List<Series> series = new ArrayList<>();
     List<Button> seriesButtons = new ArrayList<>();
     List<Episode> continueWatching = new ArrayList<>();
+    Series selectedSeries;
     Episode selectedEpisode;
+    Season selectedSeason;
     String libraryType = null;
     FadeTransition fadeTransition = null;
     PauseTransition delay = null;
     int rowSize = 0;
     int rowCount = 0;
     int buttonCount = 0;
+    boolean inMainView = false;
 
     @FXML
     void close() {
@@ -324,6 +369,8 @@ public class Controller implements Initializable {
             }
         });
 
+        //mainViewPane.setVisible(false);
+
         mainViewButton.setOnMouseClicked(e -> showContinueWatchingView());
         mainViewButton.setOnKeyPressed(e-> {
             if (App.pressedSelect(e))
@@ -334,9 +381,18 @@ public class Controller implements Initializable {
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
         topBorderPane.prefWidthProperty().bind(topBar.widthProperty());
+
         backgroundImage.setFitHeight(screenHeight);
         backgroundImage.setFitWidth(screenWidth);
-        backgroundImage.setPreserveRatio(false);
+        backgroundImage.setPreserveRatio(true);
+
+        currentlyWatchingImage.setFitHeight(screenHeight);
+        currentlyWatchingImage.setFitWidth(screenWidth);
+        currentlyWatchingImage.setPreserveRatio(true);
+
+        noise.setFitHeight(screenHeight);
+        noise.setFitWidth(screenWidth);
+        noise.setPreserveRatio(false);
 
         leftOptionsPane.setPrefWidth(screenWidth * 0.5);
 
@@ -357,6 +413,85 @@ public class Controller implements Initializable {
         globalShadow.setFitWidth(screenWidth);
         globalShadow.setFitHeight(screenHeight);
         globalShadow.setVisible(false);
+
+        mainViewShadow.setFitWidth(screenWidth);
+        mainViewShadow.setFitHeight(screenHeight);
+        mainViewShadow.setVisible(true);
+
+        mainViewBundle.setPrefWidth(screenWidth);
+        mainViewBundle.setPrefHeight(screenHeight);
+
+        double aspectRatio = screenWidth / screenHeight;
+
+        if (aspectRatio > (double) 16/9){
+            shade.setPrefWidth(((double) 16/9) * screenHeight);
+            shade.setPrefHeight(screenHeight);
+
+            fill.setPrefWidth(screenWidth - shade.getPrefWidth());
+            fill.setPrefHeight(screenHeight);
+        }else{
+            shade.setPrefWidth(screenWidth);
+            shade.setPrefHeight(screenHeight);
+
+            fill.setPrefWidth(0);
+        }
+
+        episodeMenuParent.setOnMouseClicked(e -> hideEpisodeMenu());
+        episodeMenuParent.setVisible(false);
+
+        playEpisodeButton.setOnKeyPressed(e -> {
+            playInteractionSound();
+            if (App.pressedSelect(e))
+                playEpisode();
+            else if (App.pressedDown(e))
+                goToLibraryButton.requestFocus();
+            else if (App.pressedBack(e))
+                hideEpisodeMenu();
+        });
+
+        goToLibraryButton.setOnKeyPressed(e -> {
+            playInteractionSound();
+            if (App.pressedSelect(e))
+                goToLibrary();
+            else if (App.pressedUp(e))
+                playEpisodeButton.requestFocus();
+            else if (App.pressedDown(e))
+                goToEpisodeButton.requestFocus();
+            else if (App.pressedBack(e))
+                hideEpisodeMenu();
+        });
+
+        goToEpisodeButton.setOnKeyPressed(e -> {
+            playInteractionSound();
+            if (App.pressedSelect(e))
+                goToEpisode();
+            else if (App.pressedUp(e))
+                goToLibraryButton.requestFocus();
+            else if (App.pressedDown(e))
+                markWatchedButton.requestFocus();
+            else if (App.pressedBack(e))
+                hideEpisodeMenu();
+        });
+
+        markWatchedButton.setOnKeyPressed(e -> {
+            playInteractionSound();
+            if (App.pressedSelect(e))
+                markAsWatched(selectedEpisode);
+            else if (App.pressedUp(e))
+                goToEpisodeButton.requestFocus();
+            else if (App.pressedDown(e))
+                closeEpisodeMenuButton.requestFocus();
+            else if (App.pressedBack(e))
+                hideEpisodeMenu();
+        });
+
+        closeEpisodeMenuButton.setOnKeyPressed(e -> {
+            playInteractionSound();
+            if (App.pressedUp(e))
+                markWatchedButton.requestFocus();
+            else if (App.pressedBack(e))
+                hideEpisodeMenu();
+        });
 
         menuButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
             playInteractionSound();
@@ -391,7 +526,10 @@ public class Controller implements Initializable {
                 if (App.pressedSelect(event)) {
                     selectLibraryButton(btn);
                 }else if (App.pressedLeft(event)){
-                    librariesBox.getChildren().get(Math.max(0, librariesBox.getChildren().indexOf(btn) - 1)).requestFocus();
+                    if (librariesBox.getChildren().indexOf(btn) > 0)
+                        librariesBox.getChildren().get(librariesBox.getChildren().indexOf(btn) - 1).requestFocus();
+                    else
+                        mainViewButton.requestFocus();
                 }else if (App.pressedRight(event)){
                     if (btn == librariesBox.getChildren().getLast()){
                         menuButton.requestFocus();
@@ -399,17 +537,27 @@ public class Controller implements Initializable {
                         librariesBox.getChildren().get(Math.min(librariesBox.getChildren().indexOf(btn) + 1, librariesBox.getChildren().size() - 1)).requestFocus();
                     }
                 }else if (App.pressedDown(event)){
-                    if (selectedSeries != null)
+                    if (!inMainView && selectedSeries != null)
                         seriesButtons.get(series.indexOf(selectedSeries)).requestFocus();
+                    else if (inMainView)
+                        continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode)).requestFocus();
                 }
             });
 
-            btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
-                playInteractionSound();
-            });
+            btn.focusedProperty().addListener((obs, oldVal, newVal) -> playInteractionSound());
 
             librariesBox.getChildren().add(btn);
         }
+
+        mainViewButton.setOnKeyPressed(e -> {
+            if (App.pressedDown(e) && !continueWatching.isEmpty())
+                continueWatchingBox.getChildren().getFirst().requestFocus();
+            else if (App.pressedSelect(e))
+                showContinueWatchingView();
+            else if (App.pressedRight(e))
+                librariesBox.getChildren().getFirst().requestFocus();
+
+        });
 
         //region CLOCK TIMELINE
         if (Boolean.parseBoolean(Configuration.loadConfig("showClock", "true"))){
@@ -440,8 +588,11 @@ public class Controller implements Initializable {
                         playInteractionSound();
                         showMenu();
                     }
-                }else if (App.pressedLB(event) && libraries.indexOf(currentLibrary) > 0){
-                    selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) - 1));
+                }else if (App.pressedLB(event)){
+                    if (libraries.indexOf(currentLibrary) > 0)
+                        selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) - 1));
+                    else
+                        showContinueWatchingView();
                 }else if (App.pressedRB(event) && libraries.indexOf(currentLibrary) < libraries.size() - 1){
                     selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) + 1));
                 }
@@ -457,50 +608,7 @@ public class Controller implements Initializable {
         }
     }
 
-    private void showContinueWatchingView(){
-        scrollPane.setVisible(false);
-        mainViewPane.setVisible(true);
 
-        for (Library library : libraries){
-            for (Series series : library.getSeries()){
-                if (!series.isBeingWatched())
-                    continue;
-
-                Season season = series.getCurrentlyWatchingSeason();
-                if (season == null)
-                    continue;
-
-                if (library.getType().equals("Shows")){
-                    Episode episode = season.getCurrentlyWatchingEpisode();
-                    if (episode != null) {
-                        continueWatching.add(episode);
-                        addEpisodeCard(series, season, episode);
-                    }
-                }else{
-                    for (Season s : series.getSeasons()){
-                        if (!s.isBeingWatched())
-                            continue;
-
-                        Episode episode = s.getCurrentlyWatchingEpisode();
-                        if (episode != null) {
-                            continueWatching.add(episode);
-                            addEpisodeCard(series, s, episode);
-                        }
-                    }
-                }
-            }
-        }
-
-        Platform.runLater(() -> {
-            if (!continueWatchingBox.getChildren().isEmpty()){
-                continueWatchingBox.getChildren().getFirst().requestFocus();
-            }else{
-                //SHOW A MESSAGE IN VIEW
-                System.out.println("NO HAY NADA");
-            }
-        });
-
-    }
     private void updateRowSize(int newSize){
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
@@ -528,9 +636,6 @@ public class Controller implements Initializable {
         btn.getStyleClass().clear();
         btn.getStyleClass().add("CatButtonSelected");
 
-        scrollPane.setVisible(true);
-        mainViewPane.setVisible(false);
-
         playCategoriesSound();
         showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)));
     }
@@ -555,6 +660,11 @@ public class Controller implements Initializable {
     public void showSeriesFrom(Library cat){
         if (cat != currentLibrary)
             DataManager.INSTANCE.currentLibrary = cat;
+
+        if (inMainView) {
+            showLibraryView();
+            inMainView = false;
+        }
 
         currentLibrary = cat;
 
@@ -583,12 +693,12 @@ public class Controller implements Initializable {
             src = "file:resources/img/backgroundDefault.png";
         }
 
-        Image image = new Image(src);
+        /*Image image = new Image(src);
         backgroundImage.setImage(image);
-        BackgroundImage myBI= new BackgroundImage(new Image(src,
-                Screen.getPrimary().getBounds().getWidth(),Screen.getPrimary().getBounds().getHeight(),false,true),
+        BackgroundImage myBI = new BackgroundImage(
+                Objects.requireNonNull(getCroppedImage(backgroundImage)),
                 BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                BackgroundSize.DEFAULT);
+                BackgroundSize.DEFAULT);*/
 
         Platform.runLater(() -> {
             updateRowSize(rowSize);
@@ -600,29 +710,35 @@ public class Controller implements Initializable {
                 cardContainer.setAlignment(Pos.TOP_LEFT);
             }*/
 
-            mainBox.setBackground(new Background(myBI));
+            /*mainBox.setBackground(new Background(myBI));
             //Fade in effect
             FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
             fadeIn.setFromValue(0);
             fadeIn.setToValue(1);
 
-            fadeIn.play();
+            fadeIn.play();*/
         });
     }
 
     private void restoreSelection(){
-        Series seriesToSelect = App.getSelectedSeries();
+        if (inMainView){
+            if (selectedEpisode != null)
+                continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode)).requestFocus();
+            else
+                continueWatchingBox.getChildren().getFirst().requestFocus();
+        }else{
+            Series seriesToSelect = App.getSelectedSeries();
 
-        if (seriesToSelect == null)
-            seriesToSelect = series.get(0);
+            if (seriesToSelect == null)
+                seriesToSelect = series.get(0);
 
-        int index = series.indexOf(seriesToSelect);
-        if (index == -1)
-            index = 0;
+            int index = series.indexOf(seriesToSelect);
+            if (index == -1)
+                index = 0;
 
-        App.setSelectedSeries(series.get(index));
-
-        cardContainer.getChildren().get(index).requestFocus();
+            selectedSeries = null;
+            seriesButtons.get(index).requestFocus();
+        }
     }
 
     public void selectSeries(Series s){
@@ -640,6 +756,12 @@ public class Controller implements Initializable {
                         File fullBlur = new File(imagePath + "/fullBlur.jpg");
                         String backgroundPath = fullBlur.exists() ? "fullBlur.jpg" : "background.jpg";
 
+                        File imageFile = new File(imagePath + "/" + backgroundPath);
+                        if (!imageFile.exists()) {
+                            imagePath = "resources/img";
+                            backgroundPath = "backgroundDefault.png";
+                        }
+
                         Image currentImage = backgroundImage.getImage();
 
                         ImageView background = new ImageView(new Image("file:" + imagePath + "/" + backgroundPath,
@@ -649,14 +771,12 @@ public class Controller implements Initializable {
 
                         if (image != null){
                             BackgroundImage myBI = new BackgroundImage(
-                                    Objects.requireNonNull(getCroppedImage(background)),
+                                    image,
                                     BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
                                     BackgroundSize.DEFAULT);
 
-                            Platform.runLater(() -> {
-                                fadeEffectComplete(currentImage, getCroppedImage(background));
-                                mainBox.setBackground(new Background(myBI));
-                            });
+                            mainBox.setBackground(new Background(myBI));
+                            fadeEffectComplete(backgroundImage, currentImage, image);
                         }
                     }
                 }
@@ -666,16 +786,16 @@ public class Controller implements Initializable {
         }
     }
 
-    public void fadeEffectComplete(Image first, Image second){
-        backgroundImage.setImage(first);
-        fadeTransition = new FadeTransition(Duration.seconds(0.3), backgroundImage);
+    public void fadeEffectComplete(ImageView imgView, Image first, Image second){
+        imgView.setImage(first);
+        fadeTransition = new FadeTransition(Duration.seconds(0.3), imgView);
         fadeTransition.setFromValue(1);
         fadeTransition.setToValue(0.1);
         fadeTransition.play();
 
         fadeTransition.setOnFinished(e -> {
-            backgroundImage.setImage(second);
-            fadeTransition = new FadeTransition(Duration.seconds(0.2), backgroundImage);
+            imgView.setImage(second);
+            fadeTransition = new FadeTransition(Duration.seconds(0.2), imgView);
             fadeTransition.setFromValue(0.1);
             fadeTransition.setToValue(1);
             fadeTransition.play();
@@ -851,15 +971,107 @@ public class Controller implements Initializable {
 
         btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (event.getButton().equals(MouseButton.PRIMARY)){
-
                 if (btn == seriesButtons.get(series.indexOf(selectedSeries)))
                     showSeason(selectedSeries);
                 else
-                    btn.requestFocus();
+                    seriesButtons.get(seriesButtons.indexOf(btn)).requestFocus();
             }
         });
 
         cardContainer.getChildren().add(btn);
+    }
+
+
+    private Rectangle setRoundedBorders(String imageSrc, double width, double height){
+        Rectangle rectangle = new Rectangle(0, 0, width, height);
+        rectangle.setArcWidth(20.0);
+        rectangle.setArcHeight(20.0);
+
+        ImagePattern pattern = new ImagePattern(
+                new Image("file:" + imageSrc, width, height, false, false)
+        );
+
+        rectangle.setFill(pattern);
+        rectangle.setEffect(new DropShadow(15, Color.BLACK));
+
+        return rectangle;
+    }
+    private void showLibraryView(){
+        Platform.runLater(() -> {
+            mainViewPane.setVisible(false);
+            scrollPane.setVisible(true);
+            ParallelTransition parallelTransition = createParallelTransition(mainViewBundle, mainViewPane,
+                    scrollPane, backgroundImage, 0.2f);
+            parallelTransition.play();
+        });
+    }
+    private void showMainView(){
+        Platform.runLater(() -> {
+            mainViewPane.setVisible(true);
+            scrollPane.setVisible(false);
+            ParallelTransition parallelTransition = createParallelTransition(backgroundImage, scrollPane,
+                    mainViewBundle, mainViewPane, 0.2f);
+            parallelTransition.play();
+        });
+    }
+
+    //region MAIN VIEW
+    private void showContinueWatchingView(){
+        if (inMainView)
+            return;
+
+        for (Node node : librariesBox.getChildren()){
+            Button btn = (Button) node;
+            btn.getStyleClass().clear();
+            btn.getStyleClass().add("CatButton");
+        }
+
+        inMainView = true;
+        showMainView();
+
+        continueWatching.clear();
+        continueWatchingBox.getChildren().clear();
+
+        for (Library library : libraries){
+            for (Series series : library.getSeries()){
+                if (!series.isBeingWatched())
+                    continue;
+
+                Season season = series.getCurrentlyWatchingSeason();
+                if (season == null)
+                    continue;
+
+                if (library.getType().equals("Shows")){
+                    Episode episode = season.getCurrentlyWatchingEpisode();
+                    if (episode != null) {
+                        continueWatching.add(episode);
+                        addEpisodeCard(series, season, episode);
+                    }
+                }else{
+                    for (Season s : series.getSeasons()){
+                        if (!s.isBeingWatched())
+                            continue;
+
+                        Episode episode = s.getCurrentlyWatchingEpisode();
+                        if (episode != null) {
+                            continueWatching.add(episode);
+                            addEpisodeCard(series, s, episode);
+                        }
+                    }
+                }
+            }
+        }
+
+        Platform.runLater(() -> {
+            mainViewPane.requestFocus();
+            if (!continueWatchingBox.getChildren().isEmpty()){
+                continueWatchingBox.getChildren().getFirst().requestFocus();
+            }else{
+                //SHOW A MESSAGE IN VIEW
+                System.out.println("NO HAY NADA");
+            }
+        });
+
     }
     private void addEpisodeCard(Series series, Season season, Episode episode){
         Button btn = addBaseCard(series, episode);
@@ -908,7 +1120,8 @@ public class Controller implements Initializable {
 
         btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (event.getButton().equals(MouseButton.PRIMARY)){
-                if (btn == continueWatchingBox.getChildren().get(continueWatching.indexOf(episode)))
+                if (btn == continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode))
+                        && btn.isFocused())
                     showEpisodeMenu(series, season, episode);
                 else
                     btn.requestFocus();
@@ -916,9 +1129,6 @@ public class Controller implements Initializable {
         });
 
         continueWatchingBox.getChildren().add(btn);
-    }
-    private void showEpisodeMenu(Series series, Season season, Episode episode){
-        System.out.println("Episode menu for: " + episode.getName());
     }
     private void selectEpisode(Series series, Season season, Episode episode){
         Platform.runLater(() -> {
@@ -969,38 +1179,109 @@ public class Controller implements Initializable {
                 else
                     overviewText.setText(App.textBundle.getString("defaultOverview"));
 
-                delay = new PauseTransition(Duration.millis(150));
+                delay = new PauseTransition(Duration.millis(100));
                 delay.setOnFinished(event -> Platform.runLater(() -> {
                     if (!series.getSeasons().isEmpty() &&
                             continueWatchingBox.getChildren().get(continueWatching.indexOf(episode)).isFocused()) {
                         String imagePath = "resources/img/backgrounds/" + season.getId();
-                        File fullBlur = new File(imagePath + "/fullBlur.jpg");
-                        String backgroundPath = fullBlur.exists() ? "fullBlur.jpg" : "background.jpg";
+                        String backgroundPath = "background.jpg";
 
-                        Image currentImage = backgroundImage.getImage();
+                        File imageFile = new File(imagePath + "/" + backgroundPath);
+                        if (!imageFile.exists()){
+                            imagePath = "resources/img";
+                            backgroundPath = "backgroundDefault.png";
+                        }
+
+                        Image currentImage = currentlyWatchingImage.getImage();
+                        BufferedImage bufferedImage = null;
 
                         ImageView background = new ImageView(new Image("file:" + imagePath + "/" + backgroundPath,
-                                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
+                                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), true, true));
 
-                        WritableImage image = getCroppedImage(background);
+                        double aspectRatio = background.getImage().getWidth() / background.getImage().getHeight();
 
-                        if (image != null){
-                            BackgroundImage myBI = new BackgroundImage(
-                                    Objects.requireNonNull(getCroppedImage(background)),
-                                    BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                                    BackgroundSize.DEFAULT);
+                        WritableImage croppedImage;
+                        if (aspectRatio < (double) 16/9){
+                            double originalWidth = background.getImage().getWidth();
+                            double originalHeight = background.getImage().getHeight();
 
-                            Platform.runLater(() -> {
-                                fadeEffectComplete(currentImage, getCroppedImage(background));
-                                mainBox.setBackground(new Background(myBI));
-                            });
+                            double targetAspectRatio = (double) 16/9;
+                            double newHeight = originalWidth / targetAspectRatio;
+
+                            int xOffset = 0;
+                            int yOffset = (int) ((background.getImage().getHeight() - originalHeight) / 2);
+
+                            PixelReader pixelReader = background.getImage().getPixelReader();
+                            croppedImage = new WritableImage(pixelReader, xOffset, 0, (int) originalWidth, (int) newHeight);
+
+                            background.setImage(croppedImage);
                         }
+
+                        Color dominantColor = Color.BLACK;
+                        try {
+                            bufferedImage = ImageIO.read(new File(imagePath + "/" + backgroundPath));
+
+                            int[] colorValues = ColorThief.getColor(bufferedImage, 10, true);
+
+
+                            if (colorValues != null)
+                                dominantColor = Color.rgb(colorValues[0], colorValues[1], colorValues[2]);
+
+                            bufferedImage.flush();
+                        } catch (IOException ex) {
+                            System.err.println("selectEpisode: background image could not be loaded");
+                        }
+
+                        applyGradient(dominantColor, background.getImage());
                     }
                 }));
 
                 delay.play();
             }
         });
+    }
+    private void applyGradient(Color dominantColor, Image postImage){
+        RadialGradient shadePaint = new RadialGradient(
+                0, 1, 0.5, 0.4, 0.8, true, CycleMethod.NO_CYCLE,
+                new Stop(0, Color.TRANSPARENT),
+                new Stop(0.5, Color.TRANSPARENT),
+                new Stop(0.8, dominantColor)
+        );
+
+        mainBox.setBackground(
+                new Background(
+                        new BackgroundFill(
+                                dominantColor, null, new Insets(-10)
+                        )
+                )
+        );
+
+        FadeTransition fadeOut = fadeOutEffect(mainViewBundle, 0.3f, 0.1f);
+        fadeOut.setOnFinished(e -> {
+            fill.setBackground(
+                    new Background(
+                            new BackgroundFill(
+                                    dominantColor, null, new Insets(-10)
+                            )
+                    )
+            );
+
+            shade.setBackground(
+                    new Background(
+                            new BackgroundFill(
+                                    shadePaint, null, new Insets(-10)
+                            )
+                    )
+            );
+
+            shade.setEffect(new BoxBlur(10, 10, 4));
+
+            currentlyWatchingImage.setImage(postImage);
+
+            fadeInEffect(mainViewBundle, 0.3f, 0.1f).play();
+        });
+
+        fadeOut.play();
     }
     private void handleButtonFocus(Button focusedButton) {
         double screenCenter, buttonCenterX, offset, finalPos;
@@ -1037,22 +1318,139 @@ public class Controller implements Initializable {
         transition.setToX(finalPos);
         transition.play();
     }
+    private void showEpisodeMenu(Series series, Season season, Episode episode){
+        playInteractionSound();
 
-    private Rectangle setRoundedBorders(String imageSrc, double width, double height){
-        Rectangle rectangle = new Rectangle(0, 0, width, height);
-        rectangle.setArcWidth(20.0);
-        rectangle.setArcHeight(20.0);
+        Button btn = (Button) continueWatchingBox.getChildren().get(continueWatching.indexOf(episode));
+        if (btn == null)
+            return;
 
-        ImagePattern pattern = new ImagePattern(
-                new Image("file:" + imageSrc, width, height, false, false)
-        );
+        App.setSelectedSeries(series);
+        selectedSeries = series;
+        selectedSeason = season;
+        selectedEpisode = episode;
 
-        rectangle.setFill(pattern);
-        rectangle.setEffect(new DropShadow(15, Color.BLACK));
+        Bounds bounds = btn.getBoundsInLocal();
+        Bounds buttonBounds = btn.localToScreen(bounds);
 
-        return rectangle;
+        episodeMenuParent.setVisible(true);
+        episodeMenuBox.setLayoutX(buttonBounds.getCenterX());
+        episodeMenuBox.setLayoutY(buttonBounds.getMinY());
+
+        playEpisodeButton.requestFocus();
     }
+    private void goToLibrary(){
+        hideEpisodeMenu();
 
+        for (Library library : libraries){
+            for (Series series : library.getSeries()){
+                if (selectedSeries == series){
+                    Button btn = (Button) librariesBox.getChildren().get(libraries.indexOf(library));
+
+                    if (btn == null)
+                        return;
+
+                    selectLibraryButton(btn);
+                    selectSeries(selectedSeries);
+                    return;
+                }
+            }
+        }
+    }
+    private void goToEpisode(){
+        hideEpisodeMenu();
+
+        playInteractionSound();
+
+        boolean libraryFound = false;
+        for (Library library : libraries){
+            for (Series series : library.getSeries()){
+                if (selectedSeries == series){
+                    libraryType = library.getType();
+                    libraryFound = true;
+                    break;
+                }
+            }
+
+            if (libraryFound)
+                break;
+        }
+
+        showSeason(selectedSeries);
+    }
+    private void playEpisode(){
+        hideEpisodeMenu();
+
+        playInteractionSound();
+
+        boolean libraryFound = false;
+        for (Library library : libraries){
+            for (Series series : library.getSeries()){
+                if (selectedSeries == series){
+                    libraryType = library.getType();
+                    libraryFound = true;
+                    break;
+                }
+            }
+
+            if (libraryFound)
+                break;
+        }
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
+            Parent root = fxmlLoader.load();
+            SeasonController seasonController = fxmlLoader.getController();
+            seasonController.setParent(this);
+            seasonController.setSeasons(selectedSeries, selectedSeries.isPlaySameMusic(), libraryType.equals("Shows"));
+            Stage stage = (Stage) mainPane.getScene().getWindow();
+            stage.setTitle(App.textBundle.getString("season"));
+            Scene scene = new Scene(root);
+            //scene.setCursor(Cursor.NONE);
+            scene.setFill(Color.BLACK);
+            stage.setScene(scene);
+            stage.setMaximized(true);
+            stage.setWidth(Screen.getPrimary().getBounds().getWidth());
+            stage.setHeight(Screen.getPrimary().getBounds().getHeight());
+            stage.show();
+
+            seasonController.playEpisode(selectedEpisode);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private void markAsWatched(Episode episode){
+        hideEpisodeMenu();
+
+        playInteractionSound();
+
+        episode.setWatched();
+        processCurrentlyWatching(selectedSeries, selectedSeason, episode);
+
+        int index = continueWatching.indexOf(episode);
+        continueWatchingBox.getChildren().remove(index);
+        continueWatching.remove(episode);
+
+        if (selectedSeries.isBeingWatched() && selectedSeries.getCurrentlyWatchingSeason().isBeingWatched()){
+            Season season = selectedSeries.getCurrentlyWatchingSeason();
+            Episode ep = season.getCurrentlyWatchingEpisode();
+
+            continueWatching.add(episode);
+            addEpisodeCard(selectedSeries, season, ep);
+        }
+
+        if (!continueWatchingBox.getChildren().isEmpty())
+            continueWatchingBox.getChildren().getFirst().requestFocus();
+        else
+            selectLibraryButton((Button) librariesBox.getChildren().getFirst());
+    }
+    @FXML
+    void hideEpisodeMenu(){
+        playInteractionSound();
+        episodeMenuParent.setVisible(false);
+        continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode)).requestFocus();
+    }
+    //endregion
     @FXML
     void hideContextMenu(){
         playInteractionSound();

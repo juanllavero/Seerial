@@ -235,9 +235,6 @@ public class SeasonController {
             }
         });
 
-        //Set buttons for next and last season
-        updateButtons();
-
         errorTitle.setText(App.textBundle.getString("playbackError"));
         errorMessage.setText(App.textBundle.getString("videoErrorMessage"));
         errorButton.setText(App.buttonsBundle.getString("ok"));
@@ -453,8 +450,13 @@ public class SeasonController {
             findAndPlaySong();
 
         currentSeason = 0;
+
+        //Find currently watching episode if exists
+        if (series.isBeingWatched() && series.getCurrentlyWatchingSeasonIndex() != -1)
+            currentSeason = series.getCurrentlyWatchingSeasonIndex();
+
         assert seasons != null;
-        updateInfo(seasons.get(0));
+        updateInfo(seasons.get(currentSeason));
     }
     private void updateInfo(Season season){
         if (mp != null && (isVideo || !playSameMusic))
@@ -467,6 +469,8 @@ public class SeasonController {
             cardContainer.setPrefHeight(0);
             cardContainer.setVisible(false);
         }
+
+        updateButtons();
 
         //Set Background Image
         Image background = new Image("file:" + season.getBackgroundSrc());
@@ -541,6 +545,9 @@ public class SeasonController {
 
         if (!episodes.isEmpty())
             selectedEpisode = episodes.get(0);
+
+        if (season.isBeingWatched() && season.getCurrentlyWatchingEpisodeIndex() != -1)
+            selectedEpisode = episodes.get(season.getCurrentlyWatchingEpisodeIndex());
 
         if (episodeButtons.size() <= 1 && !isShow)
             setTimeLeft(timeLeftBox, timeLeftField, episodes.get(0));
@@ -987,7 +994,7 @@ public class SeasonController {
     @FXML
     void openDetails(){
         playCategoriesSound();
-        fadeOutEffect(mainPane);
+        fadeOutEffect(mainPane, 0.6f, 0);
 
         if (isShow){
             detailsImage.setImage(new Image("file:" + selectedEpisode.getImgSrc()));
@@ -1011,8 +1018,8 @@ public class SeasonController {
 
     @FXML
     private void closeDetails(){
-        fadeOutEffect(menuShadow);
-        fadeOutEffect(detailsBox);
+        fadeOutEffect(menuShadow, 0.6f, 0).play();
+        fadeOutEffect(detailsBox, 0.6f, 0).play();
         fadeInEffect(mainPane);
 
         detailsButton.requestFocus();

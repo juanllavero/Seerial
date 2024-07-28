@@ -7,6 +7,7 @@ import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -25,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class Utils {
@@ -115,7 +117,41 @@ public class Utils {
     }
 
     //region EFFECTS
-    public static void fadeOutEffect(Pane pane){
+    public static ParallelTransition createParallelTransition(Node node1, Node node2, Node node3, Node node4, float seconds){
+        FadeTransition mainImages = fadeOutEffect(node1, seconds, 0);
+        FadeTransition mainPane = fadeOutEffect(node2, seconds, 0);
+
+        //mainImages.setOnFinished(e -> node1.setVisible(false));
+        //mainPane.setOnFinished(e -> node2.setVisible(false));
+
+        ParallelTransition mainTransition = new ParallelTransition(mainImages, mainPane);
+        mainTransition.setOnFinished(e -> {
+            //node3.setVisible(true);
+            //node4.setVisible(true);
+            FadeTransition scrollTransition = fadeInEffect(node3, seconds, 0);
+            FadeTransition backgroundTransition = fadeInEffect(node4, seconds, 0);
+
+            ParallelTransition showLibraries = new ParallelTransition(scrollTransition, backgroundTransition);
+            showLibraries.play();
+        });
+
+        return mainTransition;
+    }
+    public static FadeTransition fadeInEffect(Node node, float seconds, float fromValue){
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(seconds), node);
+        fadeIn.setFromValue(fromValue);
+        fadeIn.setToValue(1.0);
+
+        return fadeIn;
+    }
+    public static FadeTransition fadeOutEffect(Node node, float seconds, float toValue){
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(seconds), node);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(toValue);
+
+        return fadeOut;
+    }
+    public static void fadeOutEffect(ScrollPane pane){
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.6), pane);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0);
@@ -130,6 +166,13 @@ public class Utils {
         img.setVisible(false);
     }
     public static void fadeInEffect(Pane pane){
+        pane.setVisible(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.6), pane);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+    }
+    public static void fadeInEffect(ScrollPane pane){
         pane.setVisible(true);
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.6), pane);
         fadeIn.setFromValue(0);
@@ -249,6 +292,31 @@ public class Utils {
             timeLeftField.setText(timeLeft);
         }else{
             timeLeftBox.setVisible(false);
+        }
+    }
+    public static void processCurrentlyWatching(Series series, Season season, Episode episode){
+        List<Season> seasons = series.getSeasons();
+
+        season.setCurrentlyWatchingEpisode(-1);
+        series.setCurrentlyWatchingSeason(-1);
+
+        if (episode.isWatched()){
+            if (season.getEpisodes().indexOf(episode) == season.getEpisodes().size() - 1){
+                if (seasons.indexOf(season) < seasons.size() - 1){
+                    Season nextSeason = seasons.get(seasons.indexOf(season) + 1);
+
+                    if (nextSeason != null){
+                        nextSeason.setCurrentlyWatchingEpisode(0);
+                        series.setCurrentlyWatchingSeason(seasons.indexOf(nextSeason));
+                    }
+                }
+            }else{
+                season.setCurrentlyWatchingEpisode(season.getEpisodes().indexOf(episode) + 1);
+                series.setCurrentlyWatchingSeason(seasons.indexOf(season));
+            }
+        }else{
+            season.setCurrentlyWatchingEpisode(season.getEpisodes().indexOf(episode));
+            series.setCurrentlyWatchingSeason(seasons.indexOf(season));
         }
     }
     //endregion

@@ -103,9 +103,6 @@ public class DataManager {
             while (temporadaIterator.hasNext()) {
                 Season season = temporadaIterator.next();
 
-                if (season.getBackgroundSrc().isEmpty())
-                    season.setBackgroundSrc("resources/img/backgrounds/" + season.getId() + "/background.jpg");
-
                 Iterator<Episode> episodioIterator = season.getEpisodes().iterator();
                 while (episodioIterator.hasNext()) {
                     Episode episode = episodioIterator.next();

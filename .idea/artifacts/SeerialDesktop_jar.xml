@@ -73,6 +73,7 @@
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/guava/guava/32.1.3-jre/guava-32.1.3-jre.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/github/kokorin/jaffree/jaffree/2023.09.10/jaffree-2023.09.10.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/grack/nanojson/1.7/nanojson-1.7.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/de/androidpit/color-thief/1.1.2/color-thief-1.1.2.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
