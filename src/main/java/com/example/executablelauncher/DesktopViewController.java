@@ -994,10 +994,40 @@ public class DesktopViewController {
             s.setBackgroundSrc("resources/img/backgrounds/" + s.getId() + "/background.jpg");
 
             setTransparencyEffect(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/transparencyEffect.png");
-            processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg");
+            BufferedImage blurImage = processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg");
+
+            try {
+                String noiseImagePath = "resources/img/noise.png";
+                String shadowImagePath = "resources/img/desktopBackgroundShadow.png";
+
+                BufferedImage noiseImage = ImageIO.read(new File(noiseImagePath));
+                BufferedImage shadowImage = ImageIO.read(new File(shadowImagePath));
+
+                if (blurImage == null)
+                    return;
+
+                BufferedImage resultImage = mergeImages(blurImage, noiseImage, 0.06f);
+                BufferedImage result2 = mergeImages(resultImage, shadowImage, 0.4f);
+
+                try {
+                    Thumbnails.of(result2)
+                            .scale(1)
+                            .outputQuality(0.9)
+                            .toFile("resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg");
+                } catch (IOException e) {
+                    System.err.println("saveBackground: error compressing background image");
+                }
+
+                blurImage.flush();
+                noiseImage.flush();
+                shadowImage.flush();
+                resultImage.flush();
+                result2.flush();
+            } catch (Exception e) {
+                System.err.println("saveBackground: error processing image with blur");
+            }
         }
     }
-
     public void copyAndRenameImage(String srcImagePath, String destDirPath, String imageName) {
         Path srcPath = Paths.get(srcImagePath + imageName);
         Path destDir = Paths.get(destDirPath + imageName);
@@ -1008,7 +1038,6 @@ public class DesktopViewController {
             System.err.println("copyAndRenameImage: image " + srcImagePath + imageName + " could not be copied to " + destDirPath);
         }
     }
-
     private static void setTransparencyEffect(String src, String outputPath) {
         try {
             BufferedImage originalImage = ImageIO.read(new File(src));
@@ -1054,10 +1083,8 @@ public class DesktopViewController {
             System.err.println("setTransparencyEffect: error applying transparency effect to background");
         }
     }
-
-    public static void processBlurAndSave(String imagePath, String outputFilePath) {
+    public static BufferedImage processBlurAndSave(String imagePath, String outputFilePath) {
         try {
-
             // Load the image
             Mat originalImage = Imgcodecs.imread(imagePath);
 
@@ -1077,25 +1104,38 @@ public class DesktopViewController {
             // Save the cropped blurred image to cache
             Imgcodecs.imwrite(outputFilePath, croppedImage);
 
-            // Compress and save image file
-            try {
-                Thumbnails.of(outputFilePath)
-                        .scale(1)
-                        .outputQuality(0.9)
-                        .toFile(outputFilePath);
-            } catch (IOException e) {
-                System.err.println("saveBackground: error compressing background image");
-            }
-
             // Release resources
             originalImage.release();
             blurredImage.release();
             croppedImage.release();
+
+            return ImageIO.read(new File(outputFilePath));
         } catch (Exception e) {
             System.err.println("Image processing error: " + e.getMessage());
         }
-    }
 
+        return null;
+    }
+    private static BufferedImage mergeImages(BufferedImage originalImage, BufferedImage secondImage, float opacity){
+        java.awt.Image resizedNoiseImage = secondImage.getScaledInstance(originalImage.getWidth(), originalImage.getHeight(), java.awt.Image.SCALE_SMOOTH);
+        BufferedImage resizedNoiseBufferedImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2dResized = resizedNoiseBufferedImage.createGraphics();
+        g2dResized.drawImage(resizedNoiseImage, 0, 0, null);
+        g2dResized.dispose();
+
+        BufferedImage combinedImage = new BufferedImage(originalImage.getWidth(), originalImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2dCombined = combinedImage.createGraphics();
+        g2dCombined.drawImage(originalImage, 0, 0, null);
+        g2dCombined.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+        g2dCombined.drawImage(resizedNoiseBufferedImage, 0, 0, null);
+        g2dCombined.dispose();
+
+        resizedNoiseImage.flush();
+        resizedNoiseBufferedImage.flush();
+
+        return combinedImage;
+    }
     private void fadeInTransition(ImageView imageV) {
         //Fade In Transition
         FadeTransition fadeIn = new FadeTransition(Duration.seconds(1.5), imageV);

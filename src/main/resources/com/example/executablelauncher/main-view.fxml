@@ -22,7 +22,7 @@
       <ImageView fx:id="backgroundImage" fitHeight="1011.0" fitWidth="1688.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_RIGHT" />
       <StackPane fx:id="mainViewBundle" StackPane.alignment="CENTER">
          <children>
-            <ImageView fx:id="currentlyWatchingImage" fitHeight="1011.0" fitWidth="1688.0" opacity="0.6" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_RIGHT" />
+            <ImageView fx:id="currentlyWatchingImage" fitHeight="1011.0" fitWidth="1688.0" opacity="0.85" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_RIGHT" />
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
                   <Pane fx:id="fill" prefHeight="200.0" prefWidth="200.0" />
@@ -295,7 +295,7 @@
             <ColorAdjust contrast="1.0" />
          </effect>
       </ImageView>
-      <StackPane fx:id="mainMenu" styleClass="blurredBackground" stylesheets="@styles.css" visible="false" StackPane.alignment="CENTER">
+      <StackPane fx:id="mainMenu" styleClass="blurredBackground" stylesheets="@styles.css" StackPane.alignment="CENTER">
          <children>
             <VBox fx:id="menuOptions" alignment="TOP_CENTER" spacing="20.0" stylesheets="@styles.css">
                <children>
@@ -380,17 +380,14 @@
                         </Button>
                      </children>
                      <BorderPane.margin>
-                        <Insets />
+                        <Insets right="10.0" />
                      </BorderPane.margin>
-                     <padding>
-                        <Insets right="50.0" />
-                     </padding>
                   </VBox>
                </left>
                <center>
-                  <StackPane BorderPane.alignment="CENTER">
+                  <StackPane BorderPane.alignment="CENTER_LEFT">
                      <children>
-                        <VBox fx:id="cardSizeOptions" styleClass="translucent" stylesheets="@styles.css">
+                        <VBox fx:id="cardSizeOptions" fillWidth="false" styleClass="translucent" stylesheets="@styles.css" StackPane.alignment="TOP_LEFT">
                            <children>
                               <Button fx:id="tinyCardButton" alignment="TOP_LEFT" maxWidth="-Infinity" mnemonicParsing="false" prefWidth="500.0" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Tiny" textFill="WHITE">
                                  <font>
@@ -426,7 +423,7 @@
                               </Button>
                            </children>
                            <padding>
-                              <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+                              <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
                            </padding>
                         </VBox>
                      </children>
@@ -434,7 +431,7 @@
                         <Insets />
                      </BorderPane.margin>
                      <padding>
-                        <Insets bottom="200.0" left="50.0" right="200.0" />
+                        <Insets bottom="200.0" left="10.0" right="200.0" />
                      </padding>
                   </StackPane>
                </center>

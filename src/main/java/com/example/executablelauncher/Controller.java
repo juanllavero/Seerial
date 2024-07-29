@@ -30,6 +30,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -317,7 +318,8 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "11");
                 rowSize = 0;
                 updateRowSize(11);
-                showSeriesFrom(currentLibrary);
+                showSeriesFrom(currentLibrary, false);
+                tinyCardButton.requestFocus();
             }
         });
 
@@ -333,7 +335,8 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "9");
                 rowSize = 0;
                 updateRowSize(9);
-                showSeriesFrom(currentLibrary);
+                showSeriesFrom(currentLibrary, false);
+                smallCardButton.requestFocus();
             }
         });
 
@@ -349,7 +352,8 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "7");
                 rowSize = 0;
                 updateRowSize(7);
-                showSeriesFrom(currentLibrary);
+                showSeriesFrom(currentLibrary, false);
+                normalCardButton.requestFocus();
             }
         });
 
@@ -365,7 +369,8 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "5");
                 rowSize = 0;
                 updateRowSize(5);
-                showSeriesFrom(currentLibrary);
+                showSeriesFrom(currentLibrary, false);
+                largeCardButton.requestFocus();
             }
         });
 
@@ -395,6 +400,7 @@ public class Controller implements Initializable {
         noise.setPreserveRatio(false);
 
         leftOptionsPane.setPrefWidth(screenWidth * 0.5);
+        cardSizeOptions.setPrefWidth(450);
 
         //Set padding for the series container
         cardContainer.setPrefWidth(screenWidth);
@@ -445,8 +451,6 @@ public class Controller implements Initializable {
                 playEpisode();
             else if (App.pressedDown(e))
                 goToLibraryButton.requestFocus();
-            else if (App.pressedBack(e))
-                hideEpisodeMenu();
         });
 
         goToLibraryButton.setOnKeyPressed(e -> {
@@ -457,8 +461,6 @@ public class Controller implements Initializable {
                 playEpisodeButton.requestFocus();
             else if (App.pressedDown(e))
                 goToEpisodeButton.requestFocus();
-            else if (App.pressedBack(e))
-                hideEpisodeMenu();
         });
 
         goToEpisodeButton.setOnKeyPressed(e -> {
@@ -469,8 +471,6 @@ public class Controller implements Initializable {
                 goToLibraryButton.requestFocus();
             else if (App.pressedDown(e))
                 markWatchedButton.requestFocus();
-            else if (App.pressedBack(e))
-                hideEpisodeMenu();
         });
 
         markWatchedButton.setOnKeyPressed(e -> {
@@ -481,16 +481,12 @@ public class Controller implements Initializable {
                 goToEpisodeButton.requestFocus();
             else if (App.pressedDown(e))
                 closeEpisodeMenuButton.requestFocus();
-            else if (App.pressedBack(e))
-                hideEpisodeMenu();
         });
 
         closeEpisodeMenuButton.setOnKeyPressed(e -> {
             playInteractionSound();
             if (App.pressedUp(e))
                 markWatchedButton.requestFocus();
-            else if (App.pressedBack(e))
-                hideEpisodeMenu();
         });
 
         menuButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
@@ -584,7 +580,7 @@ public class Controller implements Initializable {
                 if (App.pressedBack(event)) {
                     if (mainMenu.isVisible()){
                         hideContextMenu();
-                    }else{
+                    }else if (!episodeMenuParent.isVisible()){
                         playInteractionSound();
                         showMenu();
                     }
@@ -637,7 +633,7 @@ public class Controller implements Initializable {
         btn.getStyleClass().add("CatButtonSelected");
 
         playCategoriesSound();
-        showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)));
+        showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)), true);
     }
 
     private void addInteractionSound(Button btn){
@@ -657,16 +653,16 @@ public class Controller implements Initializable {
         clock.setText(time);
     }
 
-    public void showSeriesFrom(Library cat){
-        if (cat != currentLibrary)
-            DataManager.INSTANCE.currentLibrary = cat;
+    public void showSeriesFrom(Library library, boolean selectSeries){
+        if (library != currentLibrary)
+            DataManager.INSTANCE.currentLibrary = library;
 
         if (inMainView) {
             showLibraryView();
             inMainView = false;
         }
 
-        currentLibrary = cat;
+        currentLibrary = library;
 
         //Create temp files to keep drives on
         for (String folder : currentLibrary.getFolders()){
@@ -679,44 +675,17 @@ public class Controller implements Initializable {
 
         series = currentLibrary.getSeries();
 
-        for (Series col : series) {
+        for (Series col : series)
             addCard(col);
-        }
 
-        selectedSeries = null;
-
-        String src;
-        if (!series.isEmpty() && !series.get(0).getSeasons().isEmpty()){
-            selectedSeries = series.get(0);
-            src = "file:resources/img/backgrounds/" + series.get(0).getSeasons().get(0).getId() + "/fullBlur.jpg";
-        }else{
-            src = "file:resources/img/backgroundDefault.png";
-        }
-
-        /*Image image = new Image(src);
-        backgroundImage.setImage(image);
-        BackgroundImage myBI = new BackgroundImage(
-                Objects.requireNonNull(getCroppedImage(backgroundImage)),
-                BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                BackgroundSize.DEFAULT);*/
+        if (selectSeries)
+            selectedSeries = null;
 
         Platform.runLater(() -> {
             updateRowSize(rowSize);
-            restoreSelection();
 
-            /*if (calculateRowCount(cardContainer) > 1) {
-                cardContainer.setAlignment(Pos.TOP_CENTER);
-            } else {
-                cardContainer.setAlignment(Pos.TOP_LEFT);
-            }*/
-
-            /*mainBox.setBackground(new Background(myBI));
-            //Fade in effect
-            FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundImage);
-            fadeIn.setFromValue(0);
-            fadeIn.setToValue(1);
-
-            fadeIn.play();*/
+            if (selectSeries)
+                restoreSelection();
         });
     }
 
@@ -998,6 +967,8 @@ public class Controller implements Initializable {
     }
     private void showLibraryView(){
         Platform.runLater(() -> {
+            backgroundImage.setVisible(true);
+            mainViewBundle.setVisible(false);
             mainViewPane.setVisible(false);
             scrollPane.setVisible(true);
             ParallelTransition parallelTransition = createParallelTransition(mainViewBundle, mainViewPane,
@@ -1007,6 +978,8 @@ public class Controller implements Initializable {
     }
     private void showMainView(){
         Platform.runLater(() -> {
+            backgroundImage.setVisible(false);
+            mainViewBundle.setVisible(true);
             mainViewPane.setVisible(true);
             scrollPane.setVisible(false);
             ParallelTransition parallelTransition = createParallelTransition(backgroundImage, scrollPane,
@@ -1067,8 +1040,7 @@ public class Controller implements Initializable {
             if (!continueWatchingBox.getChildren().isEmpty()){
                 continueWatchingBox.getChildren().getFirst().requestFocus();
             }else{
-                //SHOW A MESSAGE IN VIEW
-                System.out.println("NO HAY NADA");
+                selectLibraryButton((Button) librariesBox.getChildren().getFirst());
             }
         });
 
@@ -1335,7 +1307,7 @@ public class Controller implements Initializable {
 
         episodeMenuParent.setVisible(true);
         episodeMenuBox.setLayoutX(buttonBounds.getCenterX());
-        episodeMenuBox.setLayoutY(buttonBounds.getMinY());
+        episodeMenuBox.setLayoutY(buttonBounds.getMinY() - 200);
 
         playEpisodeButton.requestFocus();
     }

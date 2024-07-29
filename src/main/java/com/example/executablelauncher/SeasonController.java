@@ -278,6 +278,11 @@ public class SeasonController {
 
         episodeScroll.setPrefWidth(screenWidth);
 
+        episodeScroll.setOnMouseClicked(e -> {
+            if (!episodesFocussed)
+                episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+        });
+
         detailsText.setPrefWidth(screenWidth / 2);
         detailsBox.setVisible(false);
 
@@ -718,8 +723,7 @@ public class SeasonController {
 
             btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
                 if (event.getButton().equals(MouseButton.PRIMARY)){
-
-                    if (btn == episodeButtons.get(episodes.indexOf(selectedEpisode)))
+                    if (btn == episodeButtons.get(episodes.indexOf(selectedEpisode)) && episodesFocussed)
                         playEpisode(selectedEpisode);
                     else
                         btn.requestFocus();
@@ -994,7 +998,8 @@ public class SeasonController {
     @FXML
     void openDetails(){
         playCategoriesSound();
-        fadeOutEffect(mainPane, 0.6f, 0);
+        fadeOutEffect(mainPane, 0.6f, 0).play();
+        mainPane.setVisible(false);
 
         if (isShow){
             detailsImage.setImage(new Image("file:" + selectedEpisode.getImgSrc()));
@@ -1010,6 +1015,8 @@ public class SeasonController {
         File file = new File(selectedEpisode.getVideoSrc());
         fileNameField.setText(file.getName());
 
+        menuShadow.setVisible(true);
+        detailsBox.setVisible(true);
         fadeInEffect(menuShadow);
         fadeInEffect(detailsBox);
 
@@ -1021,6 +1028,9 @@ public class SeasonController {
         fadeOutEffect(menuShadow, 0.6f, 0).play();
         fadeOutEffect(detailsBox, 0.6f, 0).play();
         fadeInEffect(mainPane);
+
+        menuShadow.setVisible(false);
+        detailsBox.setVisible(false);
 
         detailsButton.requestFocus();
     }
