@@ -227,7 +227,7 @@
 }
 
 .playerOptionsButton:hover{
-    -fx-background-color: #b6b6b6;
+    -fx-background-color: #656565;
     -fx-background-radius: 5px;
     -fx-text-fill: black;
 }

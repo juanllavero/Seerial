@@ -2387,26 +2387,24 @@ public class DesktopViewController {
 
             //Save season background
             if (season.getBackgroundSrc().isEmpty() || season.getBackgroundSrc().equals("resources/img/DefaultBackground.png")) {
-                File f = new File("resources/img/DownloadCache/" + series.getThemdbID() + ".jpg");
-                if (f.exists()) {
-                    if (series.getSeasons().size() > 1) {
-                        Season s = null;
+                if (series.getSeasons().size() > 1) {
+                    Season s = null;
 
-                        for (Season seasonToFind : series.getSeasons()) {
-                            if (!seasonToFind.getBackgroundSrc().isEmpty()) {
-                                s = seasonToFind;
-                                break;
-                            }
+                    for (Season seasonToFind : series.getSeasons()) {
+                        if (!seasonToFind.getBackgroundSrc().isEmpty()) {
+                            s = seasonToFind;
+                            break;
                         }
-
-                        if (s != null)
-                            saveBackground(season, s.getBackgroundSrc(), true);
-                    } else {
-                        saveBackground(season, "resources/img/DownloadCache/" + series.getThemdbID() + ".jpg", false);
                     }
 
+                    if (s != null)
+                        saveBackground(season, s.getBackgroundSrc(), true);
                 } else {
-                    saveBackground(season, "resources/img/DefaultBackground.png", false);
+                    File f = new File("resources/img/DownloadCache/" + series.getThemdbID() + ".jpg");
+                    if (f.exists())
+                        saveBackground(season, "resources/img/DownloadCache/" + series.getThemdbID() + ".jpg", false);
+                    else
+                        saveBackground(season, "resources/img/DefaultBackground.png", false);
                 }
             }
 

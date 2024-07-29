@@ -200,11 +200,11 @@
                                           <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                        </padding>
                                     </Button>
-                                    <Button fx:id="videoButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showVideoOptions" styleClass="playerButton" stylesheets="@styles.css">
+                                    <Button fx:id="videoButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showOptions" styleClass="playerButton" stylesheets="@styles.css">
                                        <graphic>
                                           <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
-                                                <Image url="@../../../img/icons/dvdMenu.png" />
+                                                <Image url="@../../../img/icons/discOptions.png" />
                                              </image>
                                           </ImageView>
                                        </graphic>
@@ -353,58 +353,93 @@
          <top>
             <Label fx:id="optionsTitle" text="Label" textFill="WHITE" BorderPane.alignment="CENTER">
                <font>
-                  <Font size="50.0" />
+                  <Font size="55.0" />
                </font>
                <effect>
                   <DropShadow />
                </effect>
+               <BorderPane.margin>
+                  <Insets bottom="10.0" />
+               </BorderPane.margin>
             </Label>
          </top>
-         <center>
-            <VBox stylesheets="@styles.css" BorderPane.alignment="CENTER">
-               <children>
-                  <Button fx:id="button1" alignment="BOTTOM_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Button" textFill="WHITE">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                     <padding>
-                        <Insets bottom="11.0" left="11.0" right="11.0" top="11.0" />
-                     </padding>
-                  </Button>
-                  <Button fx:id="button2" alignment="BOTTOM_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Button" textFill="WHITE">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                     <padding>
-                        <Insets bottom="11.0" left="11.0" right="11.0" top="11.0" />
-                     </padding>
-                  </Button>
-               </children>
-               <padding>
-                  <Insets bottom="50.0" left="200.0" right="50.0" top="50.0" />
-               </padding>
-            </VBox>
-         </center>
-         <right>
-            <ScrollPane fx:id="rightOptions" hbarPolicy="NEVER" hmax="0.0" prefHeight="637.0" prefWidth="742.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
-               <content>
-                  <VBox fx:id="optionsContainer" fillWidth="false" minWidth="600.0" styleClass="transparent" stylesheets="@styles.css">
-                     <padding>
-                        <Insets bottom="50.0" top="50.0" />
-                     </padding>
-                  </VBox>
-               </content>
-               <BorderPane.margin>
-                  <Insets bottom="20.0" />
-               </BorderPane.margin>
-               <padding>
-                  <Insets left="50.0" right="200.0" />
-               </padding>
-            </ScrollPane>
-         </right>
          <padding>
             <Insets bottom="100.0" left="100.0" right="100.0" top="100.0" />
          </padding>
+         <center>
+            <StackPane maxHeight="-Infinity" maxWidth="-Infinity" BorderPane.alignment="TOP_CENTER">
+               <children>
+                  <ScrollPane fx:id="simpleMenuScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" StackPane.alignment="TOP_CENTER">
+                     <content>
+                        <VBox fx:id="simpleMenu" alignment="TOP_CENTER" spacing="10.0">
+                           <padding>
+                              <Insets left="20.0" right="20.0" />
+                           </padding>
+                        </VBox>
+                     </content>
+                  </ScrollPane>
+                  <ScrollPane fx:id="mainMenuScroll" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" StackPane.alignment="CENTER">
+                     <content>
+                        <HBox fx:id="mainMenu" alignment="CENTER">
+                           <children>
+                              <VBox fx:id="leftOptions" spacing="2.0" stylesheets="@styles.css">
+                                 <padding>
+                                    <Insets left="20.0" right="20.0" />
+                                 </padding>
+                              </VBox>
+                              <VBox fx:id="centerOptions" spacing="2.0">
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                                 <padding>
+                                    <Insets left="20.0" right="20.0" />
+                                 </padding>
+                              </VBox>
+                              <ScrollPane fx:id="rightOptions" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" hmax="0.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
+                                 <content>
+                                    <VBox fx:id="optionsContainer" spacing="2.0" stylesheets="@styles.css" />
+                                 </content>
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                                 <padding>
+                                    <Insets left="20.0" right="20.0" />
+                                 </padding>
+                              </ScrollPane>
+                           </children>
+                        </HBox>
+                     </content>
+                  </ScrollPane>
+                  <BorderPane StackPane.alignment="BOTTOM_CENTER">
+                     <left>
+                        <Button mnemonicParsing="false" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </Button>
+                     </left>
+                     <center>
+                        <Label text="Desplazamiento de audio: +1400 ms" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </Label>
+                     </center>
+                     <right>
+                        <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <Button mnemonicParsing="false" />
+                              <Button mnemonicParsing="false" text="Reiniciar" />
+                           </children>
+                        </HBox>
+                     </right>
+                  </BorderPane>
+               </children>
+               <BorderPane.margin>
+                  <Insets top="20.0" />
+               </BorderPane.margin>
+            </StackPane>
+         </center>
       </BorderPane>
    </children>
 </StackPane>

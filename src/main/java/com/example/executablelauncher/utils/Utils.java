@@ -6,8 +6,7 @@ import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
-import javafx.animation.FadeTransition;
-import javafx.animation.ParallelTransition;
+import javafx.animation.*;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -318,6 +317,22 @@ public class Utils {
             season.setCurrentlyWatchingEpisode(season.getEpisodes().indexOf(episode));
             series.setCurrentlyWatchingSeason(seasons.indexOf(season));
         }
+    }
+    public static void smoothScrollToHvalue(ScrollPane scrollPane, double targetHvalue) {
+        //Validate value
+        if (targetHvalue < 0.0) targetHvalue = 0.0;
+        if (targetHvalue > 1.0) targetHvalue = 1.0;
+
+        //Create animation
+        Timeline timeline = new Timeline();
+
+        KeyFrame keyFrame = new KeyFrame(
+                Duration.seconds(0.1),
+                new KeyValue(scrollPane.hvalueProperty(), targetHvalue)
+        );
+
+        timeline.getKeyFrames().add(keyFrame);
+        timeline.play();
     }
     //endregion
 }

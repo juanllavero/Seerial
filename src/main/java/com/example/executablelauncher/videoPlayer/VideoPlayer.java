@@ -138,7 +138,10 @@ public class VideoPlayer {
         isVideoLoaded = false;
         mpvCommand("stop");
     }
-    public void togglePause() {
+    public void togglePause(boolean pause) {
+        if (isPaused() == pause)
+            return;
+
         paused = !paused;
         mpvCommand("cycle", "pause");
     }
@@ -186,6 +189,9 @@ public class VideoPlayer {
     public String getChapters(){
         return mpvGetProperty("chapter-list");
     }
+    public String getGamma(){
+        return mpvGetProperty("gamma");
+    }
     public void setVideoTrack(int videoId) {
         mpvSetProperty("vid", Integer.toString(videoId));
     }
@@ -228,6 +234,12 @@ public class VideoPlayer {
     }
     public void setSubtitleSize(double size) {
         mpvSetProperty("sub-scale", Double.toString(size));
+    }
+    public void setGamma(double gammaValue) {
+        if (gammaValue < 0.1) gammaValue = 0.1;
+        if (gammaValue > 10.0) gammaValue = 10.0;
+
+        mpvCommand("set", "gamma", String.valueOf(gammaValue));
     }
     //endregion
 

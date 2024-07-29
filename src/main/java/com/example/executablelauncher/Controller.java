@@ -318,7 +318,7 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "11");
                 rowSize = 0;
                 updateRowSize(11);
-                showSeriesFrom(currentLibrary, false);
+                showSeriesFrom(currentLibrary, false, true);
                 tinyCardButton.requestFocus();
             }
         });
@@ -335,7 +335,7 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "9");
                 rowSize = 0;
                 updateRowSize(9);
-                showSeriesFrom(currentLibrary, false);
+                showSeriesFrom(currentLibrary, false, true);
                 smallCardButton.requestFocus();
             }
         });
@@ -352,7 +352,7 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "7");
                 rowSize = 0;
                 updateRowSize(7);
-                showSeriesFrom(currentLibrary, false);
+                showSeriesFrom(currentLibrary, false, true);
                 normalCardButton.requestFocus();
             }
         });
@@ -369,7 +369,7 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "5");
                 rowSize = 0;
                 updateRowSize(5);
-                showSeriesFrom(currentLibrary, false);
+                showSeriesFrom(currentLibrary, false, true);
                 largeCardButton.requestFocus();
             }
         });
@@ -445,12 +445,20 @@ public class Controller implements Initializable {
         episodeMenuParent.setOnMouseClicked(e -> hideEpisodeMenu());
         episodeMenuParent.setVisible(false);
 
+        playEpisodeButton.setText(App.buttonsBundle.getString("playButton"));
+        goToLibraryButton.setText(App.buttonsBundle.getString("goToLibraryButton"));
+        goToEpisodeButton.setText(App.buttonsBundle.getString("goToEpisodeButton"));
+        markWatchedButton.setText(App.buttonsBundle.getString("markWatched"));
+        closeEpisodeMenuButton.setText(App.buttonsBundle.getString("backButton"));
+
         playEpisodeButton.setOnKeyPressed(e -> {
             playInteractionSound();
             if (App.pressedSelect(e))
                 playEpisode();
             else if (App.pressedDown(e))
                 goToLibraryButton.requestFocus();
+            else if (App.pressedUp(e))
+                closeEpisodeMenuButton.requestFocus();
         });
 
         goToLibraryButton.setOnKeyPressed(e -> {
@@ -487,6 +495,8 @@ public class Controller implements Initializable {
             playInteractionSound();
             if (App.pressedUp(e))
                 markWatchedButton.requestFocus();
+            else if (App.pressedDown(e))
+                playEpisodeButton.requestFocus();
         });
 
         menuButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
@@ -633,7 +643,7 @@ public class Controller implements Initializable {
         btn.getStyleClass().add("CatButtonSelected");
 
         playCategoriesSound();
-        showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)), true);
+        showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)), true, !inMainView);
     }
 
     private void addInteractionSound(Button btn){
@@ -653,7 +663,7 @@ public class Controller implements Initializable {
         clock.setText(time);
     }
 
-    public void showSeriesFrom(Library library, boolean selectSeries){
+    public void showSeriesFrom(Library library, boolean selectSeries, boolean selectCurrentSeries){
         if (library != currentLibrary)
             DataManager.INSTANCE.currentLibrary = library;
 
@@ -685,7 +695,10 @@ public class Controller implements Initializable {
             updateRowSize(rowSize);
 
             if (selectSeries)
-                restoreSelection();
+                if (selectCurrentSeries)
+                    restoreSelection();
+                else
+                    seriesButtons.getFirst().requestFocus();
         });
     }
 
@@ -929,6 +942,8 @@ public class Controller implements Initializable {
             }else if (App.pressedDown(event)){
                 if (index + rowSize < seriesButtons.size())
                     seriesButtons.get(seriesButtons.indexOf(btn) + rowSize).requestFocus();
+                else
+                    seriesButtons.getLast().requestFocus();
             }else if (App.pressedLeft(event)){
                 if (index > 0)
                     seriesButtons.get(seriesButtons.indexOf(btn) - 1).requestFocus();
@@ -1425,7 +1440,6 @@ public class Controller implements Initializable {
     //endregion
     @FXML
     void hideContextMenu(){
-        playInteractionSound();
         selectedSeries = null;
         mainMenu.setVisible(false);
         globalShadow.setVisible(false);
