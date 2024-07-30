@@ -6,8 +6,10 @@ import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import io.github.palexdev.materialfx.controls.MFXProgressSpinner;
 import javafx.animation.*;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -27,6 +29,7 @@ import org.w3c.dom.NodeList;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
@@ -339,6 +342,28 @@ public class Utils {
 
         timeline.getKeyFrames().add(keyFrame);
         timeline.play();
+    }
+    public static MFXProgressSpinner getCircularProgress(int size){
+        MFXProgressSpinner loadingIndicator = new MFXProgressSpinner();
+        loadingIndicator.setPrefSize(size, size);
+        loadingIndicator.setPadding(new Insets(0, 5, 0, 0));
+        loadingIndicator.setColor1(Color.web("#8EDCE6"));
+        loadingIndicator.setColor2(Color.web("#8EDCE6"));
+        loadingIndicator.setColor3(Color.web("#8EDCE6"));
+        loadingIndicator.setColor4(Color.web("#8EDCE6"));
+
+        return loadingIndicator;
+    }
+    public static InputStream getFileAsIOStream(final String fileName)
+    {
+        InputStream ioStream = Utils.class
+                .getClassLoader()
+                .getResourceAsStream(fileName);
+
+        if (ioStream == null) {
+            throw new IllegalArgumentException(fileName + " is not found");
+        }
+        return ioStream;
     }
     //endregion
 }

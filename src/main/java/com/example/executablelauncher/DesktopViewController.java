@@ -31,6 +31,7 @@ import info.movito.themoviedbapi.TvResultsPage;
 import info.movito.themoviedbapi.model.Artwork;
 import info.movito.themoviedbapi.model.MovieImages;
 import info.movito.themoviedbapi.model.core.MovieResultsPage;
+import io.github.palexdev.materialfx.controls.MFXProgressSpinner;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -47,7 +48,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -104,8 +104,7 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import static com.example.executablelauncher.utils.Utils.fadeInEffect;
-import static com.example.executablelauncher.utils.Utils.fadeOutEffect;
+import static com.example.executablelauncher.utils.Utils.*;
 
 public class DesktopViewController {
     static class NameYearContainer {
@@ -420,6 +419,9 @@ public class DesktopViewController {
             }
         };
 
+        MFXProgressSpinner progress = getCircularProgress(50);
+        downloadingContentWindow.getChildren().add(progress);
+
         stage.widthProperty().addListener(widthListener);
         stage.heightProperty().addListener(heightListener);
         //endregion
@@ -447,7 +449,7 @@ public class DesktopViewController {
         seasonInfoPane.getChildren().add(0, seasonBackground);
         seasonInfoPane.getChildren().add(1, seasonBackgroundNoise);
 
-        ImageView seasonNoise = new ImageView(new Image("file:resources/img/noise.png"));
+        ImageView seasonNoise = new ImageView(new Image(getFileAsIOStream("img/noise.png")));
         seasonNoise.setPreserveRatio(false);
         seasonNoise.setOpacity(0.03);
         seasonBackgroundNoise.setImageView(seasonNoise);
@@ -455,7 +457,7 @@ public class DesktopViewController {
         seriesStack.prefHeightProperty().bind(seriesScrollPane.heightProperty());
         seriesStack.getChildren().add(0, seriesBackgroundNoise);
 
-        ImageView seriesNoise = new ImageView(new Image("file:resources/img/noise.png"));
+        ImageView seriesNoise = new ImageView(new Image(getFileAsIOStream("img/noise.png")));
         seriesNoise.setPreserveRatio(false);
         seriesNoise.setOpacity(0.03);
         seriesBackgroundNoise.setImageView(seriesNoise);
@@ -695,14 +697,14 @@ public class DesktopViewController {
 
     private void setCoverImage() {
         try {
-            File file;
+            Image image;
             if (!selectedSeries.getCoverSrc().isEmpty()) {
-                file = new File(selectedSeries.getCoverSrc());
+                File file = new File(selectedSeries.getCoverSrc());
+                image = new Image(file.toURI().toURL().toExternalForm(), 400, 500, true, true);
             } else {
-                file = new File("resources/img/DefaultPoster.png");
+                image = new Image(getFileAsIOStream("img/DefaultPoster.png"), 400, 500, true, true);
             }
 
-            Image image = new Image(file.toURI().toURL().toExternalForm(), 400, 500, true, true);
             seriesCover.setImage(image);
         } catch (MalformedURLException e) {
             System.err.println("Series cover not found");
@@ -797,7 +799,7 @@ public class DesktopViewController {
     public void blankSelection() {
         librarySelector.setText("");
         seasonScroll.setVisible(false);
-        globalBackground.setImage(new Image("file:resources/img/Background.png"));
+        globalBackground.setImage(new Image(getFileAsIOStream("img/Background.png")));
         editLibraryButton.setDisable(true);
         searchFilesButton.setDisable(true);
         removeLibraryButton.setDisable(false);
@@ -997,11 +999,8 @@ public class DesktopViewController {
             BufferedImage blurImage = processBlurAndSave(s.getBackgroundSrc(), "resources/img/backgrounds/" + s.getId() + "/fullBlur.jpg");
 
             try {
-                String noiseImagePath = "resources/img/noise.png";
-                String shadowImagePath = "resources/img/desktopBackgroundShadow.png";
-
-                BufferedImage noiseImage = ImageIO.read(new File(noiseImagePath));
-                BufferedImage shadowImage = ImageIO.read(new File(shadowImagePath));
+                BufferedImage noiseImage = ImageIO.read(getFileAsIOStream("img/noise.png"));
+                BufferedImage shadowImage = ImageIO.read(getFileAsIOStream("img/desktopBackgroundShadow.png"));
 
                 if (blurImage == null)
                     return;
@@ -1952,7 +1951,7 @@ public class DesktopViewController {
                 Button showButton = seriesButtons.get(seriesList.indexOf(series));
                 ;
 
-                ProgressIndicator loadingIndicator = (ProgressIndicator) ((BorderPane) showButton.getGraphic()).getRight();
+                MFXProgressSpinner loadingIndicator = (MFXProgressSpinner) ((BorderPane) showButton.getGraphic()).getRight();
                 loadingIndicator.setVisible(true);
             }
         } else {
@@ -2050,7 +2049,7 @@ public class DesktopViewController {
                 if (s == series) {
                     Button showButton = seriesButtons.get(seriesList.indexOf(s));
 
-                    ProgressIndicator loadingIndicator = (ProgressIndicator) ((BorderPane) showButton.getGraphic()).getRight();
+                    MFXProgressSpinner loadingIndicator = (MFXProgressSpinner) ((BorderPane) showButton.getGraphic()).getRight();
                     loadingIndicator.setVisible(false);
                     break;
                 }
@@ -2452,7 +2451,7 @@ public class DesktopViewController {
                     if (s == series) {
                         Button showButton = seriesButtons.get(seriesList.indexOf(s));
 
-                        ProgressIndicator loadingIndicator = (ProgressIndicator) ((BorderPane) showButton.getGraphic()).getRight();
+                        MFXProgressSpinner loadingIndicator = (MFXProgressSpinner) ((BorderPane) showButton.getGraphic()).getRight();
                         loadingIndicator.setVisible(true);
                         break;
                     }
@@ -3619,16 +3618,14 @@ public class DesktopViewController {
         buttonText.setAlignment(Pos.BASELINE_LEFT);
         buttonText.setWrapText(true);
 
-        ProgressIndicator loadingIndicator = new ProgressIndicator();
-        loadingIndicator.setPrefSize(25, 25);
-        loadingIndicator.setVisible(s.isAnalyzingFiles());
-        loadingIndicator.setPadding(new Insets(0, 5, 0, 0));
+        MFXProgressSpinner progressSpinner = getCircularProgress(25);
+        progressSpinner.setVisible(s.isAnalyzingFiles());
 
         BorderPane borderPane = new BorderPane();
         borderPane.setLeft(buttonText);
-        borderPane.setRight(loadingIndicator);
+        borderPane.setRight(progressSpinner);
         BorderPane.setAlignment(buttonText, Pos.CENTER_LEFT);
-        BorderPane.setAlignment(loadingIndicator, Pos.CENTER_RIGHT);
+        BorderPane.setAlignment(progressSpinner, Pos.CENTER_RIGHT);
         BorderPane.setMargin(buttonText, new Insets(0, 0, 0, 0));
 
         seriesButton.setGraphic(borderPane);
@@ -4000,7 +3997,7 @@ public class DesktopViewController {
             //controller.playIntroVideo();
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("fullscreenMode"));
-            stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
+            stage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
             Scene scene = new Scene(root);
             //scene.setCursor(Cursor.NONE);
             scene.setFill(Color.BLACK);
@@ -4068,7 +4065,7 @@ public class DesktopViewController {
 
         //Change libraries button icon
         ImageView icon = (ImageView) librarySelector.getGraphic();
-        icon.setImage(new Image("file:resources/img/icons/triangleInverted.png", 10, 10, true, true));
+        icon.setImage(new Image(getFileAsIOStream("img/icons/triangleInverted.png"), 10, 10, true, true));
         librarySelector.setGraphic(icon);
 
         libraryContainer.setVisible(true);
@@ -4137,7 +4134,7 @@ public class DesktopViewController {
 
         //Change libraries button icon
         ImageView icon = (ImageView) librarySelector.getGraphic();
-        icon.setImage(new Image("file:resources/img/icons/triangle.png", 10, 10, true, true));
+        icon.setImage(new Image(getFileAsIOStream("img/icons/triangle.png"), 10, 10, true, true));
         librarySelector.setGraphic(icon);
     }
     //endregion

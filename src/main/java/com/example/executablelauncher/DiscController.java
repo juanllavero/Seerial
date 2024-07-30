@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
+import static com.example.executablelauncher.utils.Utils.getFileAsIOStream;
+
 public class DiscController {
     @FXML
     private ImageView discMenu;
@@ -126,11 +128,11 @@ public class DiscController {
         });
 
         playButton.setOnMouseEntered(e -> {
-            playImage.setImage(new Image("file:resources/img/icons/playSelected.png"));
+            playImage.setImage(new Image(getFileAsIOStream("img/icons/playSelected.png")));
         });
 
         playButton.setOnMouseExited(e -> {
-            playImage.setImage(new Image("file:resources/img/icons/play.png"));
+            playImage.setImage(new Image(getFileAsIOStream("img/icons/play.png")));
         });
     }
     public void setWatched(){
@@ -172,7 +174,7 @@ public class DiscController {
             slider.setVisible(false);
             selectDiscButton.setVisible(true);
             thumbnailStackPane.getStyleClass().add("discSelected");
-            selectDiscButton.setImage(new Image("file:resources/img/icons/tick.png"));
+            selectDiscButton.setImage(new Image(getFileAsIOStream("img/icons/tick.png")));
         }
     }
     public void hoverDisc(){
@@ -199,7 +201,7 @@ public class DiscController {
         slider.setVisible(!episode.isWatched() && episode.getTimeWatched() != 0);
 
         thumbnailStackPane.getStyleClass().add("discButton");
-        selectDiscButton.setImage(new Image("file:resources/img/icons/circle.png"));
+        selectDiscButton.setImage(new Image(getFileAsIOStream("img/icons/circle.png")));
     }
     public void setThumbnail(){
         if (episode.getImgSrc().isEmpty() || oldThumbnailPath.equals(episode.getImgSrc()))

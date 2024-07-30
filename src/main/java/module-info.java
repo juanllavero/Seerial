@@ -29,6 +29,7 @@ module com.example.executablelauncher {
     requires opencv;
     requires com.github.kokorin.jaffree;
     requires color.thief;
+    requires MaterialFX;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

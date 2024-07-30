@@ -575,53 +575,53 @@ public class VideoPlayerController {
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
                 if (videoPlayer.isPaused())
-                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playSelected.png", 30, 30, true, true)));
+                    playButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/playSelected.png"), 30, 30, true, true)));
                 else
-                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/pauseSelected.png", 30, 30, true, true)));
+                    playButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/pauseSelected.png"), 30, 30, true, true)));
             }else{
                 if (videoPlayer.isPaused())
-                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/play.png", 30, 30, true, true)));
+                    playButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/play.png"), 30, 30, true, true)));
                 else
-                    playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/pause.png", 30, 30, true, true)));
+                    playButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/pause.png"), 30, 30, true, true)));
             }
         });
 
         nextButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                nextButton.setGraphic(new ImageView(new Image("file:resources/img/icons/nextTrackSelected.png", 30, 30, true, true)));
+                nextButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/nextTrackSelected.png"), 30, 30, true, true)));
             else
-                nextButton.setGraphic(new ImageView(new Image("file:resources/img/icons/nextTrack.png", 30, 30, true, true)));
+                nextButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/nextTrack.png"), 30, 30, true, true)));
         });
 
         prevButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                prevButton.setGraphic(new ImageView(new Image("file:resources/img/icons/prevTrackSelected.png", 30, 30, true, true)));
+                prevButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/prevTrackSelected.png"), 30, 30, true, true)));
             else
-                prevButton.setGraphic(new ImageView(new Image("file:resources/img/icons/prevTrack.png", 30, 30, true, true)));
+                prevButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/prevTrack.png"), 30, 30, true, true)));
         });
 
         audiosButton.setDisable(true);
         audiosButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                audiosButton.setGraphic(new ImageView(new Image("file:resources/img/icons/audioSelected.png", 35, 35, true, true)));
+                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audioSelected.png"), 35, 35, true, true)));
             else
-                audiosButton.setGraphic(new ImageView(new Image("file:resources/img/icons/audio.png", 35, 35, true, true)));
+                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audio.png"), 35, 35, true, true)));
         });
 
         subtitlesButton.setDisable(true);
         subtitlesButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                subtitlesButton.setGraphic(new ImageView(new Image("file:resources/img/icons/subsSelected.png", 35, 35, true, true)));
+                subtitlesButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/subsSelected.png"), 35, 35, true, true)));
             else
-                subtitlesButton.setGraphic(new ImageView(new Image("file:resources/img/icons/subs.png", 35, 35, true, true)));
+                subtitlesButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/subs.png"), 35, 35, true, true)));
         });
 
         videoButton.setDisable(true);
         videoButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                videoButton.setGraphic(new ImageView(new Image("file:resources/img/icons/dvdMenuSelected.png", 35, 35, true, true)));
+                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/dvdMenuSelected.png"), 35, 35, true, true)));
             else
-                videoButton.setGraphic(new ImageView(new Image("file:resources/img/icons/dvdMenu.png", 35, 35, true, true)));
+                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/dvdMenu.png"), 35, 35, true, true)));
         });
         //endregion
     }
@@ -1098,7 +1098,7 @@ public class VideoPlayerController {
         videoPlayer.togglePause(true);
 
         if (controlsShown)
-            playButton.setGraphic(new ImageView(new Image("file:resources/img/icons/playSelected.png", 30, 30, true, true)));
+            playButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/playSelected.png"), 30, 30, true, true)));
     }
     public void volumeUp(){
         volumeCount.playFromStart();
@@ -1857,12 +1857,12 @@ public class VideoPlayerController {
 
         ImageView img = new ImageView();
         if (isSimpleButton){
-            img.setImage(new Image("file:resources/img/icons/trackSelected.png", imgSize, imgSize, true, true));
+            img.setImage(new Image(getFileAsIOStream("img/icons/trackSelected.png"), imgSize, imgSize, true, true));
             img.setFitHeight(imgSize);
             img.setFitWidth(imgSize);
 
             ImageView imgHover = new ImageView();
-            imgHover.setImage(new Image("file:resources/img/icons/trackSelectedHover.png", imgSize, imgSize, true, true));
+            imgHover.setImage(new Image(getFileAsIOStream("img/icons/trackSelectedHover.png"), imgSize, imgSize, true, true));
             imgHover.setFitHeight(imgSize);
             imgHover.setFitWidth(imgSize);
 
@@ -1876,7 +1876,7 @@ public class VideoPlayerController {
             else
                 content.setLeft(text);
         }else{
-            img.setImage(new Image("file:resources/img/icons/rightArrowHover.png", imgSize, imgSize, true, true));
+            img.setImage(new Image(getFileAsIOStream("img/icons/rightArrowHover.png"), imgSize, imgSize, true, true));
             img.setFitHeight(imgSize);
             img.setFitWidth(imgSize);
             img.setVisible(false);

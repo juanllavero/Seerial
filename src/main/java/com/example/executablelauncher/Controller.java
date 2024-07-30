@@ -1497,7 +1497,7 @@ public class Controller implements Initializable {
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
             stage.setTitle(App.textBundle.getString("desktopMode"));
-            stage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
+            stage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
             stage.setScene(new Scene(root));
             stage.setMaximized(false);
             //stage.initStyle(StageStyle.UNDECORATED);

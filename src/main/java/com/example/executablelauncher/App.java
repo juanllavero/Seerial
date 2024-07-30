@@ -29,6 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.executablelauncher.utils.Utils.getFileAsIOStream;
+
 public class App extends Application {
     //region LOCALIZATION ATTRIBUTES
     public static List<Locale> languages = new ArrayList<>();
@@ -123,7 +125,7 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
         primaryStage.setTitle(App.textBundle.getString("desktopMode"));
-        primaryStage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
+        primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
         primaryStage.setScene(scene);
@@ -139,7 +141,7 @@ public class App extends Application {
         //controller.playIntroVideo();
         primaryStage = new Stage();
         primaryStage.setTitle(App.textBundle.getString("fullscreenMode"));
-        primaryStage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
+        primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
         Scene scene = new Scene(root);
         scene.setCursor(Cursor.NONE);
         scene.setFill(Color.BLACK);

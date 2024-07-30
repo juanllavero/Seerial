@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.example.executablelauncher.utils.Utils.getFileAsIOStream;
+
 public class AddLibraryController {
     //region FXML ATTRIBUTES
     @FXML
@@ -138,17 +140,12 @@ public class AddLibraryController {
             showsTypeButton.setDisable(true);
             showsTypeButton.setOpacity(0.5);
 
-            File file = new File("resources/img/icons/moviesSelected.png");
-            try{
-                moviesTypeButton.setGraphic(new ImageView(new Image(file.toURI().toURL().toExternalForm())));
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
+            moviesTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/moviesSelected.png"))));
         }else if (type.equals("Shows")){
             setShowsType();
             moviesTypeButton.setDisable(true);
             moviesTypeButton.setOpacity(0.5);
-            showsTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/showsSelected.png"))));
+            showsTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/showsSelected.png"))));
         }
 
         showGeneralView();
@@ -227,8 +224,8 @@ public class AddLibraryController {
         moviesTypeButton.getStyleClass().add("buttonSelected");
         if (libraryToEdit == null)
             nameField.setText(App.textBundle.getString("movies"));
-        moviesTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/moviesSelected.png"))));
-        showsTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/shows.png"))));
+        moviesTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/moviesSelected.png"))));
+        showsTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/shows.png"))));
     }
 
     @FXML
@@ -239,8 +236,8 @@ public class AddLibraryController {
         showsTypeButton.getStyleClass().add("buttonSelected");
         if (libraryToEdit == null)
             nameField.setText(App.textBundle.getString("shows"));
-        moviesTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/movies.png"))));
-        showsTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/showsSelected.png"))));
+        moviesTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/movies.png"))));
+        showsTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/showsSelected.png"))));
     }
 
     private void clearTypeSelection(){
@@ -304,7 +301,7 @@ public class AddLibraryController {
         HBox box = new HBox(folderSrc);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(0, 0, 0, 10));
-        Image img = new Image("file:resources/img/icons/close.png");
+        Image img = new Image(getFileAsIOStream("img/icons/close.png"));
         ImageView image = new ImageView(img);
         image.setFitWidth(20);
         image.setFitHeight(20);
