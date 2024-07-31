@@ -152,6 +152,7 @@ public class AddLibraryController {
     }
 
     private void setButtonsValues() {
+        typeText.setText(App.textBundle.getString("type") + ":");
         saveButton.setText(App.buttonsBundle.getString("next"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));

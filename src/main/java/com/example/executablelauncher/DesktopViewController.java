@@ -4065,7 +4065,7 @@ public class DesktopViewController {
 
         //Change libraries button icon
         ImageView icon = (ImageView) librarySelector.getGraphic();
-        icon.setImage(new Image(getFileAsIOStream("img/icons/triangleInverted.png"), 10, 10, true, true));
+        icon.setImage(new Image(getFileAsIOStream("img/icons/triangleInverted.png"), 25, 25, true, true));
         librarySelector.setGraphic(icon);
 
         libraryContainer.setVisible(true);
@@ -4134,7 +4134,7 @@ public class DesktopViewController {
 
         //Change libraries button icon
         ImageView icon = (ImageView) librarySelector.getGraphic();
-        icon.setImage(new Image(getFileAsIOStream("img/icons/triangle.png"), 10, 10, true, true));
+        icon.setImage(new Image(getFileAsIOStream("img/icons/triangle.png"), 25, 25, true, true));
         librarySelector.setGraphic(icon);
     }
     //endregion

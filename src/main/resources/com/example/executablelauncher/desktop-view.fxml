@@ -50,7 +50,7 @@
                      <children>
                         <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="25.0" fitWidth="20.0" pickOnBounds="true">
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true">
                                  <image>
                                     <Image url="@../../../img/icons/menu.png" />
                                  </image>
@@ -62,7 +62,7 @@
                               <Font name="System Bold" size="15.0" />
                            </font>
                            <graphic>
-                              <ImageView fitHeight="10.0" fitWidth="10.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/triangle.png" />
                                  </image>
@@ -74,7 +74,7 @@
                         </Button>
                         <Button fx:id="addLibraryButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#addLibrary" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/add.png" />
                                  </image>
@@ -582,7 +582,7 @@
             </VBox>
          </children>
       </Pane>
-      <VBox fx:id="downloadingContentWindowStatic" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 5;" styleClass="midSectionLightColor" stylesheets="@styles.css" StackPane.alignment="CENTER">
+      <VBox fx:id="downloadingContentWindowStatic" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 5;" styleClass="midSectionLightColor" stylesheets="@styles.css" visible="false" StackPane.alignment="CENTER">
          <children>
             <Label fx:id="downloadingContentTextStatic" text="Downloading metadata" textFill="WHITE">
                <font>

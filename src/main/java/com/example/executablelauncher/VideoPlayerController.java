@@ -47,119 +47,49 @@ import static com.example.executablelauncher.utils.Utils.*;
 
 public class VideoPlayerController {
     //region FXML ATTRIBUTES
-    @FXML
-    private Label chaptersTitle;
-
-    @FXML
-    private HBox chapterContainer;
-
-    @FXML
-    private HBox desktopVolumeSliderBox;
-
-    @FXML
-    private ScrollPane chapterScroll;
-
-    @FXML
-    private ScrollPane mainMenuScroll;
-
-    @FXML
-    private ScrollPane simpleMenuScroll;
-
-    @FXML
-    private VBox leftTouchArea;
-
-    @FXML
-    private VBox rightTouchArea;
-
-    @FXML
-    private StackPane mainPane;
-
-    @FXML
-    private ScrollPane rightOptions;
-
-    @FXML
-    private Label currentTime;
-
-    @FXML
-    private Label episodeInfo;
-
-    @FXML
-    private Button leftTouchButton;
-
-    @FXML
-    private Button rightTouchButton;
-
-    @FXML
-    private Button audiosButton;
-
-    @FXML
-    private Button videoButton;
-
-    @FXML
-    private Button nextButton;
-
-    @FXML
-    private Button fullScreenButton;
-
-    @FXML
-    private Button playButton;
-
-    @FXML
-    private Button prevButton;
-
-    @FXML
-    private Button closeButton;
-
-    @FXML
-    private Button subtitlesButton;
-
-    @FXML
-    private JFXSlider runtimeSlider;
-
-    @FXML
-    private JFXSlider volumeSlider;
-
-    @FXML
-    private JFXSlider volumeSlider2;
-
-    @FXML
-    private Label seriesTitle;
-
-    @FXML
-    private ImageView shadowImage;
-
-    @FXML
-    private Label toFinishTime;
-
-    @FXML
-    private VBox controlsBox;
-
-    @FXML
-    private BorderPane optionsBox;
-
-    @FXML
-    private BorderPane touchPane;
-
-    @FXML
-    private Label optionsTitle;
-
-    @FXML
-    private HBox volumeBox;
-
-    @FXML
-    private HBox mainMenu;
-
-    @FXML
-    private VBox leftOptions;
-
-    @FXML
-    private VBox centerOptions;
-
-    @FXML
-    private VBox optionsContainer;
-
-    @FXML
-    private VBox simpleMenu;
+    @FXML Button downAdjustment;
+    @FXML Button upAdjustment;
+    @FXML Button restartAdjustment;
+    @FXML Label adjustmentText;
+    @FXML BorderPane adjustmentPane;
+    @FXML Label chaptersTitle;
+    @FXML HBox chapterContainer;
+    @FXML HBox desktopVolumeSliderBox;
+    @FXML ScrollPane chapterScroll;
+    @FXML ScrollPane mainMenuScroll;
+    @FXML ScrollPane simpleMenuScroll;
+    @FXML VBox leftTouchArea;
+    @FXML VBox rightTouchArea;
+    @FXML StackPane mainPane;
+    @FXML ScrollPane rightOptions;
+    @FXML Label currentTime;
+    @FXML Label episodeInfo;
+    @FXML Button leftTouchButton;
+    @FXML Button rightTouchButton;
+    @FXML Button audiosButton;
+    @FXML Button videoButton;
+    @FXML Button nextButton;
+    @FXML Button fullScreenButton;
+    @FXML Button playButton;
+    @FXML Button prevButton;
+    @FXML Button closeButton;
+    @FXML Button subtitlesButton;
+    @FXML JFXSlider runtimeSlider;
+    @FXML JFXSlider volumeSlider;
+    @FXML JFXSlider volumeSlider2;
+    @FXML Label seriesTitle;
+    @FXML ImageView shadowImage;
+    @FXML Label toFinishTime;
+    @FXML VBox controlsBox;
+    @FXML BorderPane optionsBox;
+    @FXML BorderPane touchPane;
+    @FXML Label optionsTitle;
+    @FXML HBox volumeBox;
+    @FXML HBox mainMenu;
+    @FXML VBox leftOptions;
+    @FXML VBox centerOptions;
+    @FXML VBox optionsContainer;
+    @FXML VBox simpleMenu;
     //endregion
 
     Stage videoStage;
@@ -603,25 +533,25 @@ public class VideoPlayerController {
         audiosButton.setDisable(true);
         audiosButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audioSelected.png"), 35, 35, true, true)));
+                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audioSelected.png"), 30, 30, true, true)));
             else
-                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audio.png"), 35, 35, true, true)));
+                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audio.png"), 30, 30, true, true)));
         });
 
         subtitlesButton.setDisable(true);
         subtitlesButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                subtitlesButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/subsSelected.png"), 35, 35, true, true)));
+                subtitlesButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/subsSelected.png"), 30, 30, true, true)));
             else
-                subtitlesButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/subs.png"), 35, 35, true, true)));
+                subtitlesButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/subs.png"), 30, 30, true, true)));
         });
 
         videoButton.setDisable(true);
         videoButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/dvdMenuSelected.png"), 35, 35, true, true)));
+                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/dvdMenuSelected.png"), 30, 30, true, true)));
             else
-                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/dvdMenu.png"), 35, 35, true, true)));
+                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/dvdMenu.png"), 30, 30, true, true)));
         });
         //endregion
     }
@@ -1376,7 +1306,6 @@ public class VideoPlayerController {
                 zoomOptions.requestFocus();
         });
     }
-
     private void setCenterButtonFocusAction(Button btn) {
         btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
@@ -1389,9 +1318,58 @@ public class VideoPlayerController {
             }
         });
     }
-
     private void adjustGamma(){
+        fadeOutEffect(mainMenuScroll);
+        adjustmentPane.setVisible(true);
 
+        adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
+
+        downAdjustment.setOnMouseClicked(e -> {
+            videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) - 0.1);
+            adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
+        });
+        downAdjustment.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e)){
+                videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) - 0.1);
+                adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
+            }else if (App.pressedRight(e))
+                upAdjustment.requestFocus();
+            else if (App.pressedBack(e))
+                hideControls();
+        });
+
+        upAdjustment.setOnMouseClicked(e -> {
+            videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) + 0.1);
+            adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
+        });
+        upAdjustment.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e)){
+                videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) + 0.1);
+                adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
+            }else if (App.pressedRight(e))
+                restartAdjustment.requestFocus();
+            else if (App.pressedLeft(e))
+                downAdjustment.requestFocus();
+            else if (App.pressedBack(e))
+                hideControls();
+        });
+
+        restartAdjustment.setOnMouseClicked(e -> {
+            videoPlayer.setGamma(0);
+            adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
+        });
+        restartAdjustment.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e)){
+                videoPlayer.setGamma(0);
+                adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
+            }else if (App.pressedLeft(e))
+                upAdjustment.requestFocus();
+            else if (App.pressedBack(e))
+                hideControls();
+        });
+
+
+        upAdjustment.requestFocus();
     }
     private void showVideoTracks(Button videoButton, Label selectedVideoText){
         optionsContainer.getChildren().clear();
@@ -1853,18 +1831,14 @@ public class VideoPlayerController {
         text.setFont(Font.font("Arial", FontWeight.NORMAL, FontPosture.REGULAR, 30));
         text.setTextFill(Color.WHITE);
 
-        int imgSize = 40;
+        int imgSize = 30;
 
         ImageView img = new ImageView();
         if (isSimpleButton){
             img.setImage(new Image(getFileAsIOStream("img/icons/trackSelected.png"), imgSize, imgSize, true, true));
-            img.setFitHeight(imgSize);
-            img.setFitWidth(imgSize);
 
             ImageView imgHover = new ImageView();
             imgHover.setImage(new Image(getFileAsIOStream("img/icons/trackSelectedHover.png"), imgSize, imgSize, true, true));
-            imgHover.setFitHeight(imgSize);
-            imgHover.setFitWidth(imgSize);
 
             StackPane imageStack = new StackPane(img, imgHover);
             imageStack.setVisible(false);
@@ -1877,8 +1851,6 @@ public class VideoPlayerController {
                 content.setLeft(text);
         }else{
             img.setImage(new Image(getFileAsIOStream("img/icons/rightArrowHover.png"), imgSize, imgSize, true, true));
-            img.setFitHeight(imgSize);
-            img.setFitWidth(imgSize);
             img.setVisible(false);
 
             Label selectedText = new Label("");

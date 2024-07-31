@@ -577,10 +577,10 @@ public class SeasonController {
         episodeName.setText("");
 
         if (selectedEpisode.getImdbScore() != 0){
-            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/imdb.png"), 40, 40, true, true));
+            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/imdb.png"), 50, 50, true, true));
             scoreField.setText(String.valueOf(selectedEpisode.getImdbScore()));
         }else{
-            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/tmdb.png"), 40, 40, true, true));
+            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/tmdb.png"), 50, 50, true, true));
             scoreField.setText(String.valueOf(selectedEpisode.getScore()));
         }
 

@@ -122,7 +122,7 @@
                                  <children>
                                     <Button fx:id="subtitlesButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showSubtitleOptions" styleClass="playerButton" stylesheets="@styles.css">
                                        <graphic>
-                                          <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../../../img/icons/subs.png" />
                                              </image>
@@ -134,7 +134,7 @@
                                     </Button>
                                     <Button fx:id="audiosButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showAudioOptions" styleClass="playerButton" stylesheets="@styles.css">
                                        <graphic>
-                                          <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../../../img/icons/audio.png" />
                                              </image>
@@ -190,7 +190,7 @@
                                     </HBox>
                                     <Button fx:id="fullScreenButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playerButton" stylesheets="@styles.css">
                                        <graphic>
-                                          <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../../../img/icons/PantallaCompleta.png" />
                                              </image>
@@ -202,7 +202,7 @@
                                     </Button>
                                     <Button fx:id="videoButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showOptions" styleClass="playerButton" stylesheets="@styles.css">
                                        <graphic>
-                                          <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../../../img/icons/discOptions.png" />
                                              </image>
@@ -243,9 +243,6 @@
                                              <image>
                                                 <Image url="@../../../img/icons/pause.png" />
                                              </image>
-                                             <effect>
-                                                <DropShadow height="10.0" radius="4.5" width="10.0" />
-                                             </effect>
                                           </ImageView>
                                        </graphic>
                                        <padding>
@@ -410,26 +407,51 @@
                         </HBox>
                      </content>
                   </ScrollPane>
-                  <BorderPane StackPane.alignment="BOTTOM_CENTER">
+                  <BorderPane fx:id="adjustmentPane" StackPane.alignment="BOTTOM_CENTER">
                      <left>
-                        <Button mnemonicParsing="false" BorderPane.alignment="CENTER">
+                        <Button fx:id="downAdjustment" focusTraversable="false" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                            <BorderPane.margin>
-                              <Insets right="10.0" />
+                              <Insets />
                            </BorderPane.margin>
+                           <graphic>
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/flechaIzq.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
                         </Button>
                      </left>
                      <center>
-                        <Label text="Desplazamiento de audio: +1400 ms" BorderPane.alignment="CENTER">
+                        <Label fx:id="adjustmentText" text="Desplazamiento de audio: +1400 ms" textFill="WHITE" BorderPane.alignment="CENTER">
                            <BorderPane.margin>
-                              <Insets right="10.0" />
+                              <Insets left="20.0" right="20.0" />
                            </BorderPane.margin>
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                           <effect>
+                              <DropShadow />
+                           </effect>
                         </Label>
                      </center>
                      <right>
-                        <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+                        <HBox alignment="BOTTOM_CENTER" spacing="10.0" BorderPane.alignment="CENTER">
                            <children>
-                              <Button mnemonicParsing="false" />
-                              <Button mnemonicParsing="false" text="Reiniciar" />
+                              <Button fx:id="upAdjustment" focusTraversable="false" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css">
+                                 <graphic>
+                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../../img/icons/flechaDer.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                              </Button>
+                              <Button fx:id="restartAdjustment" focusTraversable="false" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Reiniciar">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Button>
                            </children>
                         </HBox>
                      </right>

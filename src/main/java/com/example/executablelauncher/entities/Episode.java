@@ -122,6 +122,9 @@ public class Episode implements Serializable {
     }
 
     public float getRuntimeInSeconds() {
+        if (runtimeInSeconds <= 0)
+            return runtime * 60;
+
         return runtimeInSeconds;
     }
 
