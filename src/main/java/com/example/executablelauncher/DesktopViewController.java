@@ -487,6 +487,10 @@ public class DesktopViewController {
         identificationShow.setDisable(true);
         changeEpisodesGroup.setDisable(true);
 
+        selectedSeries = null;
+        selectedEpisode = null;
+        selectedSeason = null;
+
         Platform.runLater(() -> {
             updateLibraries();
             updateLanguage();

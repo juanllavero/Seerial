@@ -219,16 +219,6 @@ public class VideoPlayer {
     public void fixZoom(double zoomValue) {
         mpvSetProperty("video-zoom", Double.toString(zoomValue));
     }
-    public void zoomIn() {
-        double currentZoom = Double.parseDouble(Objects.requireNonNull(mpvGetProperty("video-zoom")));
-        double newZoom = currentZoom + 0.05;
-        mpvSetProperty("video-zoom", Double.toString(newZoom));
-    }
-    public void zoomOut() {
-        double currentZoom = Double.parseDouble(Objects.requireNonNull(mpvGetProperty("video-zoom")));
-        double newZoom = Math.max(currentZoom - 0.05, 0.05);
-        mpvSetProperty("video-zoom", Double.toString(newZoom));
-    }
     public void setSubtitleVerticalPosition(double position) {
         mpvSetProperty("sub-pos", Double.toString(position));
     }
@@ -236,10 +226,10 @@ public class VideoPlayer {
         mpvSetProperty("sub-scale", Double.toString(size));
     }
     public void setGamma(double gammaValue) {
-        if (gammaValue < 0.1) gammaValue = 0.1;
-        if (gammaValue > 10.0) gammaValue = 10.0;
+        if (gammaValue < -100) gammaValue = -100;
+        if (gammaValue > 100) gammaValue = 100;
 
-        mpvCommand("set", "gamma", String.valueOf(gammaValue));
+        mpvSetProperty("gamma", String.valueOf(gammaValue));
     }
     //endregion
 

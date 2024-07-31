@@ -170,7 +170,7 @@
                                  <children>
                                     <HBox fx:id="desktopVolumeSliderBox" alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="transparent" stylesheets="@styles.css">
                                        <children>
-                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fx:id="volumeImage" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../../../img/icons/maxVolume.png" />
                                              </image>
@@ -366,6 +366,47 @@
          <center>
             <StackPane maxHeight="-Infinity" maxWidth="-Infinity" BorderPane.alignment="TOP_CENTER">
                <children>
+                  <HBox fx:id="adjustmentPane" alignment="BOTTOM_CENTER" spacing="30.0" StackPane.alignment="BOTTOM_CENTER">
+                     <children>
+                        <Button fx:id="downAdjustment" focusTraversable="false" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css">
+                           <graphic>
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/flechaIzq.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                        <Label fx:id="adjustmentText" text="Desplazamiento de audio: +1400 ms" textFill="WHITE" wrapText="true">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                           <effect>
+                              <DropShadow />
+                           </effect>
+                           <padding>
+                              <Insets bottom="2.0" />
+                           </padding>
+                        </Label>
+                        <Button fx:id="upAdjustment" focusTraversable="false" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css">
+                           <graphic>
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/flechaDer.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                        <Button fx:id="restartAdjustment" focusTraversable="false" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Reiniciar">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Button>
+                     </children>
+                     <StackPane.margin>
+                        <Insets />
+                     </StackPane.margin>
+                  </HBox>
                   <ScrollPane fx:id="simpleMenuScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" StackPane.alignment="TOP_CENTER">
                      <content>
                         <VBox fx:id="simpleMenu" alignment="TOP_CENTER" spacing="10.0">
@@ -407,55 +448,6 @@
                         </HBox>
                      </content>
                   </ScrollPane>
-                  <BorderPane fx:id="adjustmentPane" StackPane.alignment="BOTTOM_CENTER">
-                     <left>
-                        <Button fx:id="downAdjustment" focusTraversable="false" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" BorderPane.alignment="CENTER">
-                           <BorderPane.margin>
-                              <Insets />
-                           </BorderPane.margin>
-                           <graphic>
-                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../../../img/icons/flechaIzq.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                     </left>
-                     <center>
-                        <Label fx:id="adjustmentText" text="Desplazamiento de audio: +1400 ms" textFill="WHITE" BorderPane.alignment="CENTER">
-                           <BorderPane.margin>
-                              <Insets left="20.0" right="20.0" />
-                           </BorderPane.margin>
-                           <font>
-                              <Font size="20.0" />
-                           </font>
-                           <effect>
-                              <DropShadow />
-                           </effect>
-                        </Label>
-                     </center>
-                     <right>
-                        <HBox alignment="BOTTOM_CENTER" spacing="10.0" BorderPane.alignment="CENTER">
-                           <children>
-                              <Button fx:id="upAdjustment" focusTraversable="false" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css">
-                                 <graphic>
-                                    <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../../img/icons/flechaDer.png" />
-                                       </image>
-                                    </ImageView>
-                                 </graphic>
-                              </Button>
-                              <Button fx:id="restartAdjustment" focusTraversable="false" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Reiniciar">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Button>
-                           </children>
-                        </HBox>
-                     </right>
-                  </BorderPane>
                </children>
                <BorderPane.margin>
                   <Insets top="20.0" />

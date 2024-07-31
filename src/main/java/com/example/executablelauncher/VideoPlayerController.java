@@ -30,6 +30,7 @@ import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.scene.robot.Robot;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -47,11 +48,12 @@ import static com.example.executablelauncher.utils.Utils.*;
 
 public class VideoPlayerController {
     //region FXML ATTRIBUTES
+    @FXML ImageView volumeImage;
     @FXML Button downAdjustment;
     @FXML Button upAdjustment;
     @FXML Button restartAdjustment;
     @FXML Label adjustmentText;
-    @FXML BorderPane adjustmentPane;
+    @FXML HBox adjustmentPane;
     @FXML Label chaptersTitle;
     @FXML HBox chapterContainer;
     @FXML HBox desktopVolumeSliderBox;
@@ -92,6 +94,7 @@ public class VideoPlayerController {
     @FXML VBox simpleMenu;
     //endregion
 
+    //region ATTRIBUTES
     Stage videoStage;
     Stage controlsStage;
     VideoPlayer videoPlayer;
@@ -102,6 +105,7 @@ public class VideoPlayerController {
     Timeline touchTimeline = new Timeline();
     Timeline volumeCount = null;
     Timeline runtimeTimeline = new Timeline();
+    Timeline hideMouse = null;
     Season season = null;
     List<Episode> episodeList = new ArrayList<>();
     Episode episode = null;
@@ -115,6 +119,8 @@ public class VideoPlayerController {
     int buttonCount = 0;
     boolean movingSlider = false;
     int currentTimeSeconds = 0;
+    //endregion
+
     //region INITIALIZATION
     public void setDesktopPlayer(DesktopViewController parent, Stage stage){
         parentControllerDesktop = parent;
@@ -183,6 +189,11 @@ public class VideoPlayerController {
                 new javafx.animation.KeyFrame(Duration.seconds(2), event -> volumeBox.setVisible(false))
         );
 
+        hideMouse = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(Duration.seconds(6), event -> hideMouse())
+        );
+        timeline.play();
+
         mainPane.requestFocus();
 
         //Main menu size adjustments
@@ -202,22 +213,17 @@ public class VideoPlayerController {
         simpleMenu.prefWidthProperty().bind(videoStage.heightProperty().multiply(0.8));
         simpleMenu.setMaxWidth(Screen.getPrimary().getBounds().getHeight() * 0.8);
 
+        adjustmentPane.prefHeightProperty().bind(videoStage.heightProperty().multiply(0.7));
+
         //Configure the actions that take place when the mouse movement is detected for more than a second
-        controlsStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> onMouseMovement());
-        controlsStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> onMouseMovement());
-
-        videoStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> {
-            if (!controlsShown && videoPlayer.isVideoLoaded())
-                showControls();
-            timeline.playFromStart();
-
-            controlsStage.getScene().setCursor(Cursor.DEFAULT);
-            videoStage.getScene().setCursor(Cursor.DEFAULT);
-        });
+        controlsStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> showMouse());
+        videoStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> showMouse());
 
         videoStage.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (optionsBox.isVisible())
                 hideOptions();
+            else if (!controlsBox.isVisible())
+                showControls();
         });
 
         controlsStage.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
@@ -266,14 +272,17 @@ public class VideoPlayerController {
         seriesTitle.setText(seriesName);
         setDiscValues(episode);
     }
-    private void onMouseMovement(){
-        if (!controlsShown && videoPlayer.isVideoLoaded())
-            showControls();
-
+    private void showMouse(){
         controlsStage.getScene().setCursor(Cursor.DEFAULT);
         videoStage.getScene().setCursor(Cursor.DEFAULT);
 
-        timeline.playFromStart();
+        hideMouse.playFromStart();
+    }
+    private void hideMouse(){
+        controlsStage.getScene().setCursor(Cursor.NONE);
+        videoStage.getScene().setCursor(Cursor.NONE);
+
+        new Robot().mouseMove(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
     }
     private void syncStageSize(Stage primaryStage) {
         if (controlsStage != null) {
@@ -348,6 +357,17 @@ public class VideoPlayerController {
 
         fullScreenButton.setOnMouseClicked(e -> {
             fullscreen = !fullscreen;
+
+            if (fullscreen){
+                ((ImageView) fullScreenButton.getGraphic()).setImage(new Image(getFileAsIOStream(
+                        "img/icons/PantallaCompletaSalida.png"),
+                                30, 30, true, true));
+            }else{
+                ((ImageView) fullScreenButton.getGraphic()).setImage(new Image(getFileAsIOStream(
+                        "img/icons/PantallaCompleta.png"),
+                        30, 30, true, true));
+            }
+
             videoStage.setFullScreen(fullscreen);
         });
 
@@ -906,34 +926,31 @@ public class VideoPlayerController {
     private void showControls(){
         controlsShown = true;
         timeline.playFromStart();
-        fadeInEffect(controlsBox);
 
-        if (parentController != null)
-            fadeInEffect(shadowImage);
-        else if (videoPlayer != null)
-            videoPlayer.setVideoBrightness(-4);
+        //Hide Options Panel
+        optionsBox.setVisible(false);
+
+        //Show Controls Panel
+        fadeInEffect(controlsBox);
+        fadeInEffect(shadowImage);
 
         fadeInEffect(closeButton);
         playButton.requestFocus();
     }
     private void hideControls(){
-        controlsStage.getScene().setCursor(Cursor.NONE);
-        videoStage.getScene().setCursor(Cursor.NONE);
+        hideMouse();
 
         timeline.stop();
         fadeOutEffect(closeButton);
+        fadeOutEffect(shadowImage);
 
-        if (parentController != null)
-            fadeOutEffect(shadowImage);
-        else if (videoPlayer != null)
-            videoPlayer.setVideoBrightness(0);
-
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), controlsBox);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0);
+        //Hide Controls Panel
+        FadeTransition fadeOut = fadeOutEffect(controlsBox, 0.5f, 0);
+        fadeOut.setOnFinished(e -> {
+            controlsBox.setVisible(false);
+            controlsShown = false;
+        });
         fadeOut.play();
-        controlsBox.setVisible(false);
-        fadeOut.setOnFinished(e -> controlsShown = false);
     }
     private void showSlider(){
         if (parentController != null)
@@ -941,6 +958,7 @@ public class VideoPlayerController {
         else
             videoPlayer.setVideoBrightness(0);
 
+        adjustmentPane.setVisible(false);
         closeButton.setVisible(false);
         runtimeSlider.setVisible(true);
         currentTime.setVisible(true);
@@ -991,7 +1009,7 @@ public class VideoPlayerController {
     }
     //endregion
 
-    //region CONTROLS
+    //region VIDEO CONTROLS
     public void stop() {
         checkTimeWatched();
 
@@ -1021,11 +1039,13 @@ public class VideoPlayerController {
         fadeOut.play();
     }
     public void resume(){
-        hideControls();
         videoPlayer.togglePause(false);
+        runtimeTimeline.play();
+        hideControls();
     }
     public void pause(){
         videoPlayer.togglePause(true);
+        runtimeTimeline.pause();
 
         if (controlsShown)
             playButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/playSelected.png"), 30, 30, true, true)));
@@ -1049,6 +1069,19 @@ public class VideoPlayerController {
     public void videoVolume(double volume){
         videoPlayer.adjustVolume(volume);
         volumeSlider.setValue(videoPlayer.getVolume());
+
+        if (volume == 0)
+            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/audioMute.png"), 30,
+                    30, true, true));
+        else if (volume > 0 && volume < 40)
+            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/audio.png"), 30,
+                    30, true, true));
+        else if (volume > 40 && volume < 80)
+            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/audioMid.png"), 30,
+                    30, true, true));
+        else
+            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/maxVolume.png"), 30,
+                    30, true, true));
     }
     public void goAhead(){
         showControls();
@@ -1118,9 +1151,11 @@ public class VideoPlayerController {
                 runtimeSlider.setValue(0);
         }
     }
+    //endregion
 
+    //region OPTIONS MENU
     @FXML
-    public void showOptions(){
+    private void showOptions(){
         if (!videoPlayer.isPaused())
             pause();
         optionsBox.setVisible(true);
@@ -1322,15 +1357,17 @@ public class VideoPlayerController {
         fadeOutEffect(mainMenuScroll);
         adjustmentPane.setVisible(true);
 
+        videoPlayer.togglePause(false);
+
         adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
 
         downAdjustment.setOnMouseClicked(e -> {
-            videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) - 0.1);
+            videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) - 1);
             adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
         });
         downAdjustment.setOnKeyPressed(e -> {
             if (App.pressedSelect(e)){
-                videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) - 0.1);
+                videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) - 1);
                 adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
             }else if (App.pressedRight(e))
                 upAdjustment.requestFocus();
@@ -1339,12 +1376,12 @@ public class VideoPlayerController {
         });
 
         upAdjustment.setOnMouseClicked(e -> {
-            videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) + 0.1);
+            videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) + 1);
             adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
         });
         upAdjustment.setOnKeyPressed(e -> {
             if (App.pressedSelect(e)){
-                videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) + 0.1);
+                videoPlayer.setGamma(Double.parseDouble(videoPlayer.getGamma()) + 1);
                 adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
             }else if (App.pressedRight(e))
                 restartAdjustment.requestFocus();
@@ -1367,7 +1404,6 @@ public class VideoPlayerController {
             else if (App.pressedBack(e))
                 hideControls();
         });
-
 
         upAdjustment.requestFocus();
     }

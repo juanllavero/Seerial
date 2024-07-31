@@ -54,6 +54,9 @@
                      <image>
                         <Image url="@../../../img/icons/flechaDer.png" />
                      </image>
+                     <effect>
+                        <DropShadow />
+                     </effect>
                   </ImageView>
                </graphic>
                <BorderPane.margin>
@@ -71,6 +74,9 @@
                      <image>
                         <Image url="@../../../img/icons/flechaIzq.png" />
                      </image>
+                     <effect>
+                        <DropShadow />
+                     </effect>
                   </ImageView>
                </graphic>
                <BorderPane.margin>
@@ -96,7 +102,7 @@
                         </ImageView>
                         <Label fx:id="episodeName" text="Episode Name" textFill="WHITE">
                            <font>
-                              <Font name="System Bold" size="24.0" />
+                              <Font name="System Bold" size="28.0" />
                            </font>
                            <effect>
                               <DropShadow offsetY="2.5" spread="0.45" />
@@ -106,7 +112,7 @@
                            <children>
                               <Label fx:id="seasonEpisodeNumber" text="S1E1" textFill="WHITE">
                                  <font>
-                                    <Font name="System Bold" size="18.0" />
+                                    <Font name="System Bold" size="20.0" />
                                  </font>
                                  <effect>
                                     <DropShadow offsetY="2.5" spread="0.45" />
@@ -114,7 +120,7 @@
                               </Label>
                               <Label fx:id="yearField" text="Sep 28, 2023" textFill="WHITE">
                                  <font>
-                                    <Font name="System Bold" size="18.0" />
+                                    <Font name="System Bold" size="20.0" />
                                  </font>
                                  <effect>
                                     <DropShadow offsetY="2.5" spread="0.45" />
@@ -122,7 +128,7 @@
                               </Label>
                               <Label fx:id="durationField" text="25m" textFill="WHITE">
                                  <font>
-                                    <Font name="System Bold" size="18.0" />
+                                    <Font name="System Bold" size="20.0" />
                                  </font>
                                  <effect>
                                     <DropShadow offsetY="2.5" spread="0.45" />
@@ -147,26 +153,26 @@
                         </HBox>
                         <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
                            <children>
-                              <ImageView fx:id="scoreProviderImg" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="scoreProviderImg" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../../../../resources/img/icons/tmdb.png" />
                                  </image>
                               </ImageView>
                               <Label fx:id="scoreField" text="8.5" textFill="WHITE">
                                  <font>
-                                    <Font name="System Bold" size="13.0" />
+                                    <Font name="System Bold" size="18.0" />
                                  </font>
                               </Label>
                            </children>
                         </HBox>
-                        <Button fx:id="detailsButton" alignment="TOP_LEFT" graphicTextGap="0.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" prefWidth="649.0" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
+                        <Button fx:id="detailsButton" alignment="TOP_LEFT" graphicTextGap="0.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" prefHeight="118.0" prefWidth="699.0" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
                            <font>
                               <Font size="20.0" />
                            </font>
                            <graphic>
-                              <Label fx:id="overviewField" alignment="TOP_LEFT" prefHeight="89.0" prefWidth="839.0" text="Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, " textFill="WHITE" wrapText="true">
+                              <Label fx:id="overviewField" alignment="TOP_LEFT" prefHeight="135.0" prefWidth="689.0" text="Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, " textFill="WHITE" wrapText="true">
                                  <font>
-                                    <Font name="System Bold" size="16.0" />
+                                    <Font size="21.0" />
                                  </font>
                                  <padding>
                                     <Insets bottom="5.0" left="2.0" top="5.0" />
@@ -197,7 +203,7 @@
                         <Insets bottom="10.0" top="10.0" />
                      </VBox.margin>
                   </ScrollPane>
-                  <HBox fillHeight="false" spacing="20.0">
+                  <HBox alignment="BOTTOM_LEFT" fillHeight="false" spacing="20.0">
                      <children>
                         <Button fx:id="playButton" accessibleRole="IMAGE_VIEW" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onMouseClicked="#play" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
                            <font>
@@ -253,9 +259,47 @@
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Button>
+                        <Button fx:id="videoTrackButton" alignment="CENTER" focusTraversable="false" graphicTextGap="20.0" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Español (AAC)" textAlignment="CENTER" textFill="#2c2c2c">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets bottom="10.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="audioTrackButton" alignment="CENTER" focusTraversable="false" graphicTextGap="20.0" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Español (AAC)" textAlignment="CENTER" textFill="#2c2c2c">
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
+                                 <image>
+                                    <Image url="@../../../img/icons/audioMid.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets bottom="10.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="subsTrackButton" alignment="CENTER" focusTraversable="false" graphicTextGap="20.0" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Español (AAC)" textAlignment="CENTER" textFill="#2c2c2c">
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
+                                 <image>
+                                    <Image url="@../../../img/icons/subs.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets bottom="10.0" />
+                           </HBox.margin>
+                        </Button>
                      </children>
                      <VBox.margin>
-                        <Insets left="130.0" />
+                        <Insets left="130.0" top="20.0" />
                      </VBox.margin>
                   </HBox>
                </children>
@@ -270,6 +314,9 @@
                            <image>
                               <Image url="@../../../img/icons/flechaAtras.png" />
                            </image>
+                           <effect>
+                              <DropShadow />
+                           </effect>
                         </ImageView>
                      </graphic>
                      <padding>

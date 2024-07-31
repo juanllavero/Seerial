@@ -3,6 +3,9 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Episode;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
@@ -51,140 +54,54 @@ import static com.example.executablelauncher.utils.Utils.*;
 
 public class SeasonController {
     //region FXML ATTRIBUTES
-    @FXML
-    private BorderPane videoError;
-
-    @FXML
-    private Button goBackButton;
-
-    @FXML
-    private Label errorTitle;
-
-    @FXML
-    private Label errorMessage;
-
-    @FXML
-    private Button errorButton;
-
-    @FXML
-    private MediaView backgroundVideo;
-
-    @FXML
-    private ImageView backgroundImage;
-
-    @FXML
-    private ImageView backgroundShadow;
-
-    @FXML
-    private ImageView backgroundShadow2;
-
-    @FXML
-    private ImageView scoreProviderImg;
-
-    @FXML
-    private HBox cardContainer;
-
-    @FXML
-    private VBox detailsText;
-
-    @FXML
-    private HBox timeLeftBox;
-
-    @FXML
-    private Label timeLeftField;
-
-    @FXML
-    private BorderPane detailsBox;
-
-    @FXML
-    private ImageView detailsImage;
-
-    @FXML
-    private Pane videoPlayerPane;
-
-    @FXML
-    private HBox detailsInfo;
-
-    @FXML
-    private Label detailsOverview;
-
-    @FXML
-    private Label detailsTitle;
-
-    @FXML
-    private Label durationField;
-
-    @FXML
-    private Label episodeName;
-
-    @FXML
-    private Label fileDetailsText;
-
-    @FXML
-    private Label fileNameField;
-
-    @FXML
-    private Label fileNameText;
-
-    @FXML
-    private VBox infoBox;
-
-    @FXML
-    private Button lastSeasonButton;
-
-    @FXML
-    private ImageView logo;
-
-    @FXML
-    private StackPane mainBox;
-
-    @FXML
-    private BorderPane mainPane;
-
-    @FXML
-    private ImageView menuShadow;
-
-    @FXML
-    private Button nextSeasonButton;
-
-    @FXML
-    private Button watchedButton;
-
-    @FXML
-    private Button optionsButton;
-
-    @FXML
-    private Label overviewField;
-
-    @FXML
-    private Button playButton;
-
-    @FXML
-    private Button detailsButton;
-
-    @FXML
-    private Label scoreField;
-
-    @FXML
-    private Label seasonEpisodeNumber;
-
-    @FXML
-    private ScrollPane episodeScroll;
-
-    @FXML
-    private Label writtenByField;
-
-    @FXML
-    private Label writtenByText;
-
-    @FXML
-    private Label genresText;
-
-    @FXML
-    private Label genresField;
-
-    @FXML
-    private Label yearField;
+    @FXML BorderPane videoError;
+    @FXML Button goBackButton;
+    @FXML Button videoTrackButton;
+    @FXML Button audioTrackButton;
+    @FXML Button subsTrackButton;
+    @FXML Label errorTitle;
+    @FXML Label errorMessage;
+    @FXML Button errorButton;
+    @FXML MediaView backgroundVideo;
+    @FXML ImageView backgroundImage;
+    @FXML ImageView backgroundShadow;
+    @FXML ImageView backgroundShadow2;
+    @FXML ImageView scoreProviderImg;
+    @FXML HBox cardContainer;
+    @FXML VBox detailsText;
+    @FXML HBox timeLeftBox;
+    @FXML Label timeLeftField;
+    @FXML BorderPane detailsBox;
+    @FXML ImageView detailsImage;
+    @FXML Pane videoPlayerPane;
+    @FXML HBox detailsInfo;
+    @FXML Label detailsOverview;
+    @FXML Label detailsTitle;
+    @FXML Label durationField;
+    @FXML Label episodeName;
+    @FXML Label fileDetailsText;
+    @FXML Label fileNameField;
+    @FXML Label fileNameText;
+    @FXML VBox infoBox;
+    @FXML Button lastSeasonButton;
+    @FXML ImageView logo;
+    @FXML StackPane mainBox;
+    @FXML BorderPane mainPane;
+    @FXML ImageView menuShadow;
+    @FXML Button nextSeasonButton;
+    @FXML Button watchedButton;
+    @FXML Button optionsButton;
+    @FXML Label overviewField;
+    @FXML Button playButton;
+    @FXML Button detailsButton;
+    @FXML Label scoreField;
+    @FXML Label seasonEpisodeNumber;
+    @FXML ScrollPane episodeScroll;
+    @FXML Label writtenByField;
+    @FXML Label writtenByText;
+    @FXML Label genresText;
+    @FXML Label genresField;
+    @FXML Label yearField;
     //endregion
 
     //region ATTRIBUTES
@@ -577,10 +494,10 @@ public class SeasonController {
         episodeName.setText("");
 
         if (selectedEpisode.getImdbScore() != 0){
-            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/imdb.png"), 50, 50, true, true));
+            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/imdb.png"), 40, 40, true, true));
             scoreField.setText(String.valueOf(selectedEpisode.getImdbScore()));
         }else{
-            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/tmdb.png"), 50, 50, true, true));
+            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/tmdb.png"), 40, 40, true, true));
             scoreField.setText(String.valueOf(selectedEpisode.getScore()));
         }
 
@@ -1051,9 +968,55 @@ public class SeasonController {
 
         setTimeLeft(timeLeftBox, timeLeftField, episode);
 
+        //region UPDATE SELECTED TRACK BUTTONS
+        if (episode.getVideoTracks().isEmpty()){
+            videoTrackButton.setVisible(false);
+        }else{
+            videoTrackButton.setVisible(true);
+            VideoTrack selectedTrack = episode.getVideoTracks().getFirst();
+            for (VideoTrack track : episode.getVideoTracks()){
+                if (track.isSelected()){
+                    selectedTrack = track;
+                    break;
+                }
+            }
+
+            videoTrackButton.setText(selectedTrack.getDisplayTitle());
+        }
+
+        if (episode.getAudioTracks().isEmpty()){
+            audioTrackButton.setVisible(false);
+        }else{
+            audioTrackButton.setVisible(true);
+            AudioTrack selectedTrack = episode.getAudioTracks().getFirst();
+            for (AudioTrack track : episode.getAudioTracks()){
+                if (track.isSelected()){
+                    selectedTrack = track;
+                    break;
+                }
+            }
+
+            audioTrackButton.setText(selectedTrack.getDisplayTitle());
+        }
+
+        if (episode.getSubtitleTracks().isEmpty()){
+            subsTrackButton.setVisible(false);
+        }else{
+            subsTrackButton.setVisible(true);
+            SubtitleTrack selectedTrack = episode.getSubtitleTracks().getFirst();
+            for (SubtitleTrack track : episode.getSubtitleTracks()){
+                if (track.isSelected()){
+                    selectedTrack = track;
+                    break;
+                }
+            }
+
+            subsTrackButton.setText(selectedTrack.getDisplayTitle());
+        }
+        //endregion
+
         updateWatchedButton();
     }
-
     //endregion
 
     //region BACKGROUND VIDEO/MUSIC
