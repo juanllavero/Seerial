@@ -1,8 +1,6 @@
 package com.example.executablelauncher.entities;
 
 import javafx.application.Application;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -54,7 +52,11 @@ public class VideoMetadataExample extends Application {
         launch(args);
     }
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws IOException {
 
+    }
+
+    @Override
+    public void init() throws Exception {
     }
 }

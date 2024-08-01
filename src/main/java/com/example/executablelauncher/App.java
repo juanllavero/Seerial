@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +46,7 @@ public class App extends Application {
     public static String lastVideoDirectory = null;
     public static String lastMusicDirectory = null;
     public static boolean isConnectedToInternet = false;
+    public static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 4);
     static ScheduledExecutorService executorService;
     public static List<Task<Void>> tasks = new ArrayList<>();
     private static DesktopViewController desktopController;

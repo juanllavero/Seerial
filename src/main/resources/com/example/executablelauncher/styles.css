@@ -735,6 +735,14 @@
     -fx-border-color: linear-gradient(to top, rgba(176,176,176,1) 0%, rgba(186,186,186,1) 31%, rgba(65,65,65,1) 63%, rgba(65,65,65,1) 100%);
 }
 
+.scroll-pane .scroll-bar {
+    -fx-opacity: 0;
+}
+
+.scroll-pane .scroll-bar:hover {
+    -fx-opacity: 1;
+}
+
 .scroll-pane .viewport {
     -fx-background-color: transparent;
 }

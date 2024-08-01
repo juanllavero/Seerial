@@ -1,7 +1,6 @@
 module com.example.executablelauncher {
     requires javafx.controls;
     requires javafx.fxml;
-
     requires java.desktop;
     requires javafx.media;
     requires org.jsoup;

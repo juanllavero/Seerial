@@ -104,6 +104,7 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import static com.example.executablelauncher.App.executor;
 import static com.example.executablelauncher.utils.Utils.*;
 
 public class DesktopViewController {
@@ -350,7 +351,6 @@ public class DesktopViewController {
     private boolean acceptRemove = false;
     private static int numFilesToCheck = 0;
     private boolean searchingForFiles = false;
-    private final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 4);
     private static final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
