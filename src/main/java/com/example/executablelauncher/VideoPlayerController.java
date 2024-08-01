@@ -119,6 +119,7 @@ public class VideoPlayerController {
     int buttonCount = 0;
     boolean movingSlider = false;
     int currentTimeSeconds = 0;
+    boolean cursorHidden = false;
     //endregion
 
     //region INITIALIZATION
@@ -149,8 +150,8 @@ public class VideoPlayerController {
             controlsBox.getChildren().remove(chaptersTitle);
         }
 
-        mainPane.prefWidthProperty().bind(videoStage.widthProperty().multiply(0.99));
-        mainPane.prefHeightProperty().bind(videoStage.heightProperty().multiply(0.97));
+        mainPane.prefWidthProperty().bind(controlsStage.widthProperty());
+        mainPane.prefHeightProperty().bind(controlsStage.heightProperty());
         rightOptions.prefWidthProperty().bind(mainPane.prefWidthProperty().multiply(0.5));
 
         leftTouchArea.prefWidthProperty().bind(mainPane.prefWidthProperty().multiply(0.45));
@@ -162,8 +163,8 @@ public class VideoPlayerController {
         syncStageSize(videoStage);
         syncStagePosition(videoStage);
 
-        shadowImage.fitWidthProperty().bind(videoStage.widthProperty());
-        shadowImage.fitHeightProperty().bind(videoStage.heightProperty());
+        shadowImage.fitWidthProperty().bind(mainPane.widthProperty());
+        shadowImage.fitHeightProperty().bind(mainPane.heightProperty());
 
         //Window adjustment and movement behaviour
         videoStage.widthProperty().addListener((obs, oldVal, newVal) -> syncStageSize(videoStage));
@@ -192,7 +193,7 @@ public class VideoPlayerController {
         hideMouse = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(Duration.seconds(6), event -> hideMouse())
         );
-        timeline.play();
+        hideMouse.play();
 
         mainPane.requestFocus();
 
@@ -220,6 +221,13 @@ public class VideoPlayerController {
         videoStage.addEventHandler(MouseEvent.MOUSE_MOVED, event -> showMouse());
 
         videoStage.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (optionsBox.isVisible())
+                hideOptions();
+            else if (!controlsBox.isVisible())
+                showControls();
+        });
+
+        controlsStage.getScene().setOnMouseClicked(e -> {
             if (optionsBox.isVisible())
                 hideOptions();
             else if (!controlsBox.isVisible())
@@ -257,6 +265,12 @@ public class VideoPlayerController {
             }
         });
 
+        videoStage.getScene().setOnKeyReleased(e -> {
+            if (!controlsShown && !App.pressedLeft(e) && !App.pressedRight(e)
+                    && !App.pressedRB(e) && !App.pressedLB(e))
+                showControls();
+        });
+
         volumeSlider2.setValue(100);
         volumeSlider2.valueProperty().addListener((observable, oldValue, newValue) -> {
             videoVolume((Double) newValue);
@@ -273,22 +287,32 @@ public class VideoPlayerController {
         setDiscValues(episode);
     }
     private void showMouse(){
-        controlsStage.getScene().setCursor(Cursor.DEFAULT);
-        videoStage.getScene().setCursor(Cursor.DEFAULT);
+        if (cursorHidden){
+            controlsStage.getScene().setCursor(Cursor.DEFAULT);
+            videoStage.getScene().setCursor(Cursor.DEFAULT);
+            cursorHidden = false;
+        }
 
         hideMouse.playFromStart();
     }
     private void hideMouse(){
-        controlsStage.getScene().setCursor(Cursor.NONE);
-        videoStage.getScene().setCursor(Cursor.NONE);
-
-        new Robot().mouseMove(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
+        if (!cursorHidden){
+            controlsStage.getScene().setCursor(Cursor.NONE);
+            videoStage.getScene().setCursor(Cursor.NONE);
+            cursorHidden = true;
+        }
     }
     private void syncStageSize(Stage primaryStage) {
         if (controlsStage != null) {
             if (primaryStage.getWidth() > 0 && primaryStage.getHeight() > 0) {
-                controlsStage.setWidth(primaryStage.getWidth() * 0.99);
-                controlsStage.setHeight(primaryStage.getHeight() * 0.97);
+                if (fullscreen){
+                    controlsStage.setWidth(primaryStage.getWidth());
+                    controlsStage.setHeight(primaryStage.getHeight());
+                }else{
+                    controlsStage.setWidth(primaryStage.getWidth() * 0.99);
+                    controlsStage.setHeight(primaryStage.getHeight() * 0.98);
+                }
+
             }
         }
 
@@ -553,9 +577,9 @@ public class VideoPlayerController {
         audiosButton.setDisable(true);
         audiosButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audioSelected.png"), 30, 30, true, true)));
+                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audioSelected.png"), 33, 33, true, true)));
             else
-                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audio.png"), 30, 30, true, true)));
+                audiosButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/audio.png"), 33, 33, true, true)));
         });
 
         subtitlesButton.setDisable(true);
@@ -569,9 +593,9 @@ public class VideoPlayerController {
         videoButton.setDisable(true);
         videoButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/dvdMenuSelected.png"), 30, 30, true, true)));
+                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/playerOptionsSelected.png"), 30, 30, true, true)));
             else
-                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/dvdMenu.png"), 30, 30, true, true)));
+                videoButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/playerOptions.png"), 30, 30, true, true)));
         });
         //endregion
     }
@@ -932,7 +956,8 @@ public class VideoPlayerController {
 
         //Show Controls Panel
         fadeInEffect(controlsBox);
-        fadeInEffect(shadowImage);
+        shadowImage.setVisible(true);
+        fadeInEffect(shadowImage, 0.2f, 1).play();
 
         fadeInEffect(closeButton);
         playButton.requestFocus();
@@ -953,10 +978,7 @@ public class VideoPlayerController {
         fadeOut.play();
     }
     private void showSlider(){
-        if (parentController != null)
-            fadeOutEffect(shadowImage);
-        else
-            videoPlayer.setVideoBrightness(0);
+        fadeOutEffect(shadowImage);
 
         adjustmentPane.setVisible(false);
         closeButton.setVisible(false);
@@ -1071,17 +1093,17 @@ public class VideoPlayerController {
         volumeSlider.setValue(videoPlayer.getVolume());
 
         if (volume == 0)
-            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/audioMute.png"), 30,
-                    30, true, true));
+            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/audioMute.png"), 33,
+                    33, true, true));
         else if (volume > 0 && volume < 40)
-            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/audio.png"), 30,
-                    30, true, true));
+            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/audio.png"), 33,
+                    33, true, true));
         else if (volume > 40 && volume < 80)
-            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/audioMid.png"), 30,
-                    30, true, true));
+            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/audioMid.png"), 33,
+                    33, true, true));
         else
-            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/maxVolume.png"), 30,
-                    30, true, true));
+            volumeImage.setImage(new Image(getFileAsIOStream("img/icons/maxVolume.png"), 33,
+                    33, true, true));
     }
     public void goAhead(){
         showControls();
@@ -1163,11 +1185,10 @@ public class VideoPlayerController {
 
         simpleMenuScroll.setVisible(false);
         mainMenuScroll.setVisible(true);
+        adjustmentPane.setVisible(false);
 
-        if (parentController != null)
-            shadowImage.setVisible(true);
-        else if (videoPlayer != null)
-            videoPlayer.setVideoBrightness(-15);
+        shadowImage.setVisible(true);
+        fadeInEffect(shadowImage, 0.2f, 1).play();
 
         controlsBox.setVisible(false);
         optionsTitle.setText(App.buttonsBundle.getString("settings"));
@@ -1199,13 +1220,13 @@ public class VideoPlayerController {
 
             video.setOnMouseClicked(e -> {
                 loadVideoButtons(video);
-
                 centerOptions.getChildren().getFirst().requestFocus();
                 smoothScrollToHvalue(mainMenuScroll, 0);
             });
 
             audio.focusedProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal) {
+                    loadAudioButtons(audio);
                     setOnHover(audio, false, false);
                     setSelectedImage(audio, false);
                 }else {
@@ -1215,14 +1236,23 @@ public class VideoPlayerController {
             });
 
             audio.setOnKeyPressed(e -> {
-                if (App.pressedUp(e))
+                if (App.pressedSelect(e) || App.pressedRight(e))
+                    centerOptions.getChildren().getFirst().requestFocus();
+                else if (App.pressedUp(e))
                     video.requestFocus();
                 else if (App.pressedDown(e))
                     subs.requestFocus();
             });
 
+            audio.setOnMouseClicked(e -> {
+                loadAudioButtons(audio);
+                centerOptions.getChildren().getFirst().requestFocus();
+                smoothScrollToHvalue(mainMenuScroll, 0);
+            });
+
             subs.focusedProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal) {
+                    loadSubsButtons(subs);
                     setOnHover(subs, false, false);
                     setSelectedImage(subs, false);
                 }else {
@@ -1232,12 +1262,21 @@ public class VideoPlayerController {
             });
 
             subs.setOnKeyPressed(e -> {
-                if (App.pressedUp(e))
+                if (App.pressedSelect(e) || App.pressedRight(e))
+                    centerOptions.getChildren().getFirst().requestFocus();
+                else if (App.pressedUp(e))
                     audio.requestFocus();
+            });
+
+            subs.setOnMouseClicked(e -> {
+                loadSubsButtons(subs);
+                centerOptions.getChildren().getFirst().requestFocus();
+                smoothScrollToHvalue(mainMenuScroll, 0);
             });
         }
 
         leftOptions.getChildren().getFirst().requestFocus();
+        mainMenuScroll.setHvalue(0);
     }
     private void loadVideoButtons(Button video){
         centerOptions.getChildren().clear();
@@ -1433,15 +1472,7 @@ public class VideoPlayerController {
             btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
                 if (App.pressedSelect(event) || App.pressedRight(event) && !track.isSelected())
                     videoButtonAction(track, btn, selectedVideoText);
-                else if (App.pressedDown(event)){
-                    if (optionsContainer.getChildren().indexOf(btn) < optionsContainer.getChildren().size() - 1)
-                        optionsContainer.getChildren().get(optionsContainer.getChildren().indexOf(btn) + 1).requestFocus();
-                }else if (App.pressedUp(event)){
-                    if (optionsContainer.getChildren().indexOf(btn) > 0)
-                        optionsContainer.getChildren().get(optionsContainer.getChildren().indexOf(btn) - 1).requestFocus();
-                }else if (App.pressedLeft(event)) {
-                    videoButton.requestFocus();
-                }
+                else tracksInMenuMovement(btn, event, videoButton);
             });
         }
     }
@@ -1532,6 +1563,73 @@ public class VideoPlayerController {
         Button b1 = (Button) optionsContainer.getChildren().get(index);
         removeSelectedImage(b1, true);
     }
+    private void loadAudioButtons(Button audio){
+        centerOptions.getChildren().clear();
+
+        Button audioTracks = addSimpleButton(App.textBundle.getString("languageText"), false, false);
+        Button audioDelay = addSimpleButton(App.buttonsBundle.getString("audioDelay"), false, false);
+
+        centerOptions.getChildren().addAll(audioTracks, audioDelay);
+
+        Label selectedAudioText = (Label) ((HBox) ((BorderPane) audioTracks.getGraphic()).getRight()).getChildren().getFirst();
+        Label delayValueText = (Label) ((HBox) ((BorderPane) audioDelay.getGraphic()).getRight()).getChildren().getFirst();
+
+        if (episode.getAudioTracks().size() > 1){
+            for (AudioTrack track : episode.getAudioTracks()){
+                if (track.isSelected()){
+                    selectedAudioText.setText(track.getDisplayTitle());
+                    break;
+                }
+            }
+        }else if (!episode.getAudioTracks().isEmpty()){
+            selectedAudioText.setText(episode.getAudioTracks().getFirst().getDisplayTitle());
+        }
+
+        delayValueText.setText(Double.parseDouble(videoPlayer.getAudioDelay()) * 1000 + " ms");
+
+        setCenterButtonFocusAction(audioTracks);
+
+        audioTracks.setOnMouseClicked(e -> {
+            if (mainMenuScroll.getHvalue() == mainMenuScroll.getHmax()){
+                smoothScrollToHvalue(mainMenuScroll, 0);
+                audio.requestFocus();
+            }else{
+                showAudioTracks(audioTracks, selectedAudioText);
+                smoothScrollToHvalue(mainMenuScroll, mainMenuScroll.getHmax());
+                optionsContainer.getChildren().getFirst().requestFocus();
+            }
+        });
+
+        audioTracks.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e) || App.pressedRight(e)){
+                showAudioTracks(audioTracks, selectedAudioText);
+                smoothScrollToHvalue(mainMenuScroll, mainMenuScroll.getHmax());
+                optionsContainer.getChildren().getFirst().requestFocus();
+            }else if (App.pressedLeft(e)) {
+                audio.requestFocus();
+            }else if (App.pressedDown(e))
+                audioDelay.requestFocus();
+        });
+
+        audioDelay.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                setOnHover(audioDelay, false, false);
+            }else {
+                setOnExitHover(audioDelay, false, false);
+            }
+        });
+
+        audioDelay.setOnMouseClicked(e -> adjustAudioDelay());
+
+        audioDelay.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e) || App.pressedRight(e))
+                adjustAudioDelay();
+            else if (App.pressedLeft(e)) {
+                audio.requestFocus();
+            }else if (App.pressedUp(e))
+                audioTracks.requestFocus();
+        });
+    }
     public void showAudioOptions(){
         if (!videoPlayer.isPaused())
             pause();
@@ -1541,10 +1639,8 @@ public class VideoPlayerController {
         simpleMenuScroll.setVisible(true);
         mainMenuScroll.setVisible(false);
 
-        if (parentController != null)
-            shadowImage.setVisible(true);
-        else if (videoPlayer != null)
-            videoPlayer.setVideoBrightness(-15);
+        shadowImage.setVisible(true);
+        fadeInEffect(shadowImage, 0.2f, 1).play();
 
         controlsBox.setVisible(false);
         optionsTitle.setText(App.textBundle.getString("audio"));
@@ -1553,79 +1649,6 @@ public class VideoPlayerController {
         simpleMenuScroll.setVisible(true);
 
         showAudioTracks();
-    }
-    private void setOnHover(Button button, boolean isSimpleButton, boolean center){
-        Label text;
-
-        if (center)
-            text = (Label) ((BorderPane) button.getGraphic()).getCenter();
-        else
-            text = (Label) ((BorderPane) button.getGraphic()).getLeft();
-
-        text.setTextFill(Color.BLACK);
-
-        if (isSimpleButton){
-            StackPane stack = (StackPane) ((BorderPane) button.getGraphic()).getRight();
-
-            ImageView img = (ImageView) stack.getChildren().getFirst();
-            ImageView imgHover = (ImageView) stack.getChildren().getLast();
-
-            img.setVisible(false);
-            imgHover.setVisible(true);
-        }else{
-            HBox container = (HBox) ((BorderPane) button.getGraphic()).getRight();
-
-            Label selectedText = (Label) container.getChildren().getFirst();
-            selectedText.setTextFill(Color.BLACK);
-        }
-    }
-    private void setOnExitHover(Button button, boolean isSimpleButton, boolean center){
-        if (button.isFocused())
-            return;
-
-        Label text;
-
-        if (center)
-            text = (Label) ((BorderPane) button.getGraphic()).getCenter();
-        else
-            text = (Label) ((BorderPane) button.getGraphic()).getLeft();
-
-        text.setTextFill(Color.WHITE);
-
-        if (isSimpleButton){
-            StackPane stack = (StackPane) ((BorderPane) button.getGraphic()).getRight();
-
-            ImageView img = (ImageView) stack.getChildren().getFirst();
-            ImageView imgHover = (ImageView) stack.getChildren().getLast();
-
-            img.setVisible(true);
-            imgHover.setVisible(false);
-        }else{
-            HBox container = (HBox) ((BorderPane) button.getGraphic()).getRight();
-
-            Label selectedText = (Label) container.getChildren().getFirst();
-            selectedText.setTextFill(Color.WHITE);
-        }
-    }
-    private void setSelectedImage(Button button, boolean isSimpleButton){
-        if (isSimpleButton){
-            StackPane stack = (StackPane) ((BorderPane) button.getGraphic()).getRight();
-            stack.setVisible(true);
-        }else{
-            HBox container = (HBox) ((BorderPane) button.getGraphic()).getRight();
-            ImageView img = (ImageView) container.getChildren().getLast();
-            img.setVisible(true);
-        }
-    }
-    private void removeSelectedImage(Button button, boolean isSimpleButton){
-        if (isSimpleButton){
-            StackPane stack = (StackPane) ((BorderPane) button.getGraphic()).getRight();
-            stack.setVisible(false);
-        }else{
-            HBox container = (HBox) ((BorderPane) button.getGraphic()).getRight();
-            ImageView img = (ImageView) container.getChildren().getLast();
-            img.setVisible(false);
-        }
     }
     private void showAudioTracks(){
         simpleMenu.getChildren().clear();
@@ -1654,6 +1677,59 @@ public class VideoPlayerController {
             trackButton.setOnMouseExited(e -> setOnExitHover(trackButton, true, true));
         }
     }
+    private void showAudioTracks(Button audiosButton, Label text){
+        optionsContainer.getChildren().clear();
+        for (AudioTrack track : audioTracks){
+            Button btn = addSimpleButton(track.getDisplayTitle(), true, false);
+            btn.setFocusTraversable(false);
+            optionsContainer.getChildren().add(btn);
+
+            if (track.isSelected()) {
+                setSelectedImage(btn, true);
+                text.setText(track.getDisplayTitle());
+            }
+
+            btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    ensureNodeVisible(btn);
+                    setOnHover(btn, true, false);
+                }else
+                    setOnExitHover(btn, true, false);
+            });
+
+            btn.setOnMouseClicked(e -> {
+                if (!track.isSelected())
+                    audioButtonAction(track, btn, text);
+            });
+            btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
+                if (App.pressedSelect(event) || App.pressedRight(event) && !track.isSelected())
+                    audioButtonAction(track, btn, text);
+                else {
+                    tracksInMenuMovement(btn, event, audiosButton);
+                }
+            });
+        }
+    }
+    private void audioButtonAction(AudioTrack track, Button btn, Label selectedAudioText){
+        videoPlayer.setAudioTrack(audioTracks.indexOf(track) + 1);
+
+        for (Node node : optionsContainer.getChildren())
+            removeSelectedImage((Button) node, true);
+
+        setSelectedImage(btn, true);
+        selectedAudioText.setText(track.getDisplayTitle());
+    }
+    private void tracksInMenuMovement(Button btn, KeyEvent event, Button videoButton) {
+        if (App.pressedDown(event)){
+            if (optionsContainer.getChildren().indexOf(btn) < optionsContainer.getChildren().size() - 1)
+                optionsContainer.getChildren().get(optionsContainer.getChildren().indexOf(btn) + 1).requestFocus();
+        }else if (App.pressedUp(event)){
+            if (optionsContainer.getChildren().indexOf(btn) > 0)
+                optionsContainer.getChildren().get(optionsContainer.getChildren().indexOf(btn) - 1).requestFocus();
+        }else if (App.pressedLeft(event)) {
+            videoButton.requestFocus();
+        }
+    }
     private void addAudioButtonAction(AudioTrack track, Button trackButton) {
         playInteractionSound();
 
@@ -1669,6 +1745,223 @@ public class VideoPlayerController {
 
         setSelectedImage(trackButton, true);
     }
+    private void adjustAudioDelay(){
+        fadeOutEffect(mainMenuScroll);
+        adjustmentPane.setVisible(true);
+
+        videoPlayer.togglePause(false);
+
+        adjustmentText.setText(App.buttonsBundle.getString("audioDelay") + ": " + videoPlayer.getAudioDelay() + " ms");
+
+        downAdjustment.setOnMouseClicked(e -> {
+            videoPlayer.setAudioDelay(Double.parseDouble(videoPlayer.getAudioDelay()) - 0.001);
+            adjustmentText.setText(App.buttonsBundle.getString("audioDelay") + ": " + videoPlayer.getAudioDelay() + " ms");
+        });
+        downAdjustment.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e)){
+                videoPlayer.setAudioDelay(Double.parseDouble(videoPlayer.getAudioDelay()) - 0.001);
+                adjustmentText.setText(App.buttonsBundle.getString("audioDelay") + ": " + videoPlayer.getAudioDelay() + " ms");
+            }else if (App.pressedRight(e))
+                upAdjustment.requestFocus();
+            else if (App.pressedBack(e))
+                hideControls();
+        });
+
+        upAdjustment.setOnMouseClicked(e -> {
+            videoPlayer.setAudioDelay(Double.parseDouble(videoPlayer.getAudioDelay()) + 0.001);
+            adjustmentText.setText(App.buttonsBundle.getString("audioDelay") + ": " + videoPlayer.getAudioDelay() + " ms");
+        });
+        upAdjustment.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e)){
+                videoPlayer.setAudioDelay(Double.parseDouble(videoPlayer.getAudioDelay()) + 0.001);
+                adjustmentText.setText(App.buttonsBundle.getString("audioDelay") + ": " + videoPlayer.getAudioDelay() + " ms");
+            }else if (App.pressedRight(e))
+                restartAdjustment.requestFocus();
+            else if (App.pressedLeft(e))
+                downAdjustment.requestFocus();
+            else if (App.pressedBack(e))
+                hideControls();
+        });
+
+        restartAdjustment.setOnMouseClicked(e -> {
+            videoPlayer.setAudioDelay(0);
+            adjustmentText.setText(App.buttonsBundle.getString("audioDelay") + ": " + videoPlayer.getAudioDelay() + " ms");
+        });
+        restartAdjustment.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e)){
+                videoPlayer.setAudioDelay(0);
+                adjustmentText.setText(App.buttonsBundle.getString("audioDelay") + ": " + videoPlayer.getAudioDelay() + " ms");
+            }else if (App.pressedLeft(e))
+                upAdjustment.requestFocus();
+            else if (App.pressedBack(e))
+                hideControls();
+        });
+
+        upAdjustment.requestFocus();
+    }
+    private void loadSubsButtons(Button subs){
+        centerOptions.getChildren().clear();
+
+        Button subsTracks = addSimpleButton(App.textBundle.getString("languageText"), false, false);
+        Button subsDelay = addSimpleButton(App.buttonsBundle.getString("audioDelay"), false, false);
+
+        centerOptions.getChildren().addAll(subsTracks, subsDelay);
+
+        Label selectedSubsText = (Label) ((HBox) ((BorderPane) subsTracks.getGraphic()).getRight()).getChildren().getFirst();
+        Label delayValueText = (Label) ((HBox) ((BorderPane) subsDelay.getGraphic()).getRight()).getChildren().getFirst();
+
+        if (episode.getSubtitleTracks().size() > 1){
+            for (SubtitleTrack track : episode.getSubtitleTracks()){
+                if (track.isSelected()){
+                    selectedSubsText.setText(track.getDisplayTitle());
+                    break;
+                }
+            }
+        }else if (!episode.getSubtitleTracks().isEmpty()){
+            selectedSubsText.setText(episode.getSubtitleTracks().getFirst().getDisplayTitle());
+        }
+
+        delayValueText.setText(Double.parseDouble(videoPlayer.getSubsDelay()) * 1000 + " ms");
+
+        setCenterButtonFocusAction(subsTracks);
+
+        subsTracks.setOnMouseClicked(e -> {
+            if (mainMenuScroll.getHvalue() == mainMenuScroll.getHmax()){
+                smoothScrollToHvalue(mainMenuScroll, 0);
+                subs.requestFocus();
+            }else{
+                showSubtitleTracks(subsTracks, selectedSubsText);
+                smoothScrollToHvalue(mainMenuScroll, mainMenuScroll.getHmax());
+                optionsContainer.getChildren().getFirst().requestFocus();
+            }
+        });
+
+        subsTracks.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e) || App.pressedRight(e)){
+                showSubtitleTracks(subsTracks, selectedSubsText);
+                smoothScrollToHvalue(mainMenuScroll, mainMenuScroll.getHmax());
+                optionsContainer.getChildren().getFirst().requestFocus();
+            }else if (App.pressedLeft(e)) {
+                subs.requestFocus();
+            }else if (App.pressedDown(e))
+                subsDelay.requestFocus();
+        });
+
+        subsDelay.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                setOnHover(subsDelay, false, false);
+            }else {
+                setOnExitHover(subsDelay, false, false);
+            }
+        });
+
+        subsDelay.setOnMouseClicked(e -> adjustSubsDelay());
+
+        subsDelay.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e) || App.pressedRight(e))
+                adjustSubsDelay();
+            else if (App.pressedLeft(e)) {
+                subs.requestFocus();
+            }else if (App.pressedUp(e))
+                subsTracks.requestFocus();
+        });
+    }
+    private void showSubtitleTracks(Button subsButton, Label text){
+        optionsContainer.getChildren().clear();
+        for (SubtitleTrack track : subtitleTracks){
+            Button btn = addSimpleButton(track.getDisplayTitle(), true, false);
+            btn.setFocusTraversable(false);
+            optionsContainer.getChildren().add(btn);
+
+            if (track.isSelected()) {
+                setSelectedImage(btn, true);
+                text.setText(track.getDisplayTitle());
+            }
+
+            btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    ensureNodeVisible(btn);
+                    setOnHover(btn, true, false);
+                }else
+                    setOnExitHover(btn, true, false);
+            });
+
+            btn.setOnMouseClicked(e -> {
+                if (!track.isSelected())
+                    subsButtonAction(track, btn, text);
+            });
+            btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
+                if (App.pressedSelect(event) || App.pressedRight(event) && !track.isSelected())
+                    subsButtonAction(track, btn, text);
+                else {
+                    tracksInMenuMovement(btn, event, subsButton);
+                }
+            });
+        }
+    }
+    private void subsButtonAction(SubtitleTrack track, Button btn, Label text){
+        videoPlayer.setSubtitleTrack(subtitleTracks.indexOf(track) + 1);
+
+        for (Node node : optionsContainer.getChildren())
+            removeSelectedImage((Button) node, true);
+
+        setSelectedImage(btn, true);
+        text.setText(track.getDisplayTitle());
+    }
+    private void adjustSubsDelay(){
+        fadeOutEffect(mainMenuScroll);
+        adjustmentPane.setVisible(true);
+
+        videoPlayer.togglePause(false);
+
+        adjustmentText.setText(App.buttonsBundle.getString("subsDelay") + ": " + videoPlayer.getSubsDelay() + " ms");
+
+        downAdjustment.setOnMouseClicked(e -> {
+            videoPlayer.setSubsDelay(Double.parseDouble(videoPlayer.getSubsDelay()) - 0.001);
+            adjustmentText.setText(App.buttonsBundle.getString("subsDelay") + ": " + videoPlayer.getSubsDelay() + " ms");
+        });
+        downAdjustment.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e)){
+                videoPlayer.setSubsDelay(Double.parseDouble(videoPlayer.getSubsDelay()) - 0.001);
+                adjustmentText.setText(App.buttonsBundle.getString("subsDelay") + ": " + videoPlayer.getSubsDelay() + " ms");
+            }else if (App.pressedRight(e))
+                upAdjustment.requestFocus();
+            else if (App.pressedBack(e))
+                hideControls();
+        });
+
+        upAdjustment.setOnMouseClicked(e -> {
+            videoPlayer.setSubsDelay(Double.parseDouble(videoPlayer.getSubsDelay()) + 0.001);
+            adjustmentText.setText(App.buttonsBundle.getString("subsDelay") + ": " + videoPlayer.getSubsDelay() + " ms");
+        });
+        upAdjustment.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e)){
+                videoPlayer.setSubsDelay(Double.parseDouble(videoPlayer.getSubsDelay()) + 0.001);
+                adjustmentText.setText(App.buttonsBundle.getString("subsDelay") + ": " + videoPlayer.getSubsDelay() + " ms");
+            }else if (App.pressedRight(e))
+                restartAdjustment.requestFocus();
+            else if (App.pressedLeft(e))
+                downAdjustment.requestFocus();
+            else if (App.pressedBack(e))
+                hideControls();
+        });
+
+        restartAdjustment.setOnMouseClicked(e -> {
+            videoPlayer.setSubsDelay(0);
+            adjustmentText.setText(App.buttonsBundle.getString("subsDelay") + ": " + videoPlayer.getSubsDelay() + " ms");
+        });
+        restartAdjustment.setOnKeyPressed(e -> {
+            if (App.pressedSelect(e)){
+                videoPlayer.setSubsDelay(0);
+                adjustmentText.setText(App.buttonsBundle.getString("subsDelay") + ": " + videoPlayer.getSubsDelay() + " ms");
+            }else if (App.pressedLeft(e))
+                upAdjustment.requestFocus();
+            else if (App.pressedBack(e))
+                hideControls();
+        });
+
+        upAdjustment.requestFocus();
+    }
     public void showSubtitleOptions(){
         if (!videoPlayer.isPaused())
             pause();
@@ -1678,10 +1971,8 @@ public class VideoPlayerController {
         simpleMenuScroll.setVisible(true);
         mainMenuScroll.setVisible(false);
 
-        if (parentController != null)
-            shadowImage.setVisible(true);
-        else if (videoPlayer != null)
-            videoPlayer.setVideoBrightness(-15);
+        shadowImage.setVisible(true);
+        fadeInEffect(shadowImage, 0.2f, 1).play();
 
         controlsBox.setVisible(false);
         optionsTitle.setText(App.textBundle.getString("subs"));
@@ -1852,6 +2143,99 @@ public class VideoPlayerController {
         small.getStyleClass().clear();
         small.getStyleClass().add("playerOptionsSelected");
     }
+    public void ensureNodeVisible(Node node) {
+        VBox vbox = (VBox) rightOptions.getContent();
+
+        Bounds viewportBounds = rightOptions.getViewportBounds();
+        Bounds nodeBounds = node.localToScene(node.getBoundsInLocal());
+        Bounds vboxBounds = vbox.localToScene(vbox.getBoundsInLocal());
+
+        double nodeMinY = nodeBounds.getMinY() - vboxBounds.getMinY();
+        double nodeMaxY = nodeBounds.getMaxY() - vboxBounds.getMinY();
+
+        double viewportHeight = viewportBounds.getHeight();
+
+        if (nodeMinY < rightOptions.getVvalue() * (vbox.getHeight() - viewportHeight)) {
+            rightOptions.setVvalue(nodeMinY / (vbox.getHeight() - viewportHeight));
+        } else if (nodeMaxY > (rightOptions.getVvalue() * (vbox.getHeight() - viewportHeight)) + viewportHeight) {
+            rightOptions.setVvalue((nodeMaxY - viewportHeight) / (vbox.getHeight() - viewportHeight));
+        }
+    }
+    //endregion
+    //region OPTION BUTTONS
+    private void setOnHover(Button button, boolean isSimpleButton, boolean center){
+        Label text;
+
+        if (center)
+            text = (Label) ((BorderPane) button.getGraphic()).getCenter();
+        else
+            text = (Label) ((BorderPane) button.getGraphic()).getLeft();
+
+        text.setTextFill(Color.BLACK);
+
+        if (isSimpleButton){
+            StackPane stack = (StackPane) ((BorderPane) button.getGraphic()).getRight();
+
+            ImageView img = (ImageView) stack.getChildren().getFirst();
+            ImageView imgHover = (ImageView) stack.getChildren().getLast();
+
+            img.setVisible(false);
+            imgHover.setVisible(true);
+        }else{
+            HBox container = (HBox) ((BorderPane) button.getGraphic()).getRight();
+
+            Label selectedText = (Label) container.getChildren().getFirst();
+            selectedText.setTextFill(Color.BLACK);
+        }
+    }
+    private void setOnExitHover(Button button, boolean isSimpleButton, boolean center){
+        if (button.isFocused())
+            return;
+
+        Label text;
+
+        if (center)
+            text = (Label) ((BorderPane) button.getGraphic()).getCenter();
+        else
+            text = (Label) ((BorderPane) button.getGraphic()).getLeft();
+
+        text.setTextFill(Color.WHITE);
+
+        if (isSimpleButton){
+            StackPane stack = (StackPane) ((BorderPane) button.getGraphic()).getRight();
+
+            ImageView img = (ImageView) stack.getChildren().getFirst();
+            ImageView imgHover = (ImageView) stack.getChildren().getLast();
+
+            img.setVisible(true);
+            imgHover.setVisible(false);
+        }else{
+            HBox container = (HBox) ((BorderPane) button.getGraphic()).getRight();
+
+            Label selectedText = (Label) container.getChildren().getFirst();
+            selectedText.setTextFill(Color.WHITE);
+        }
+    }
+    private void setSelectedImage(Button button, boolean isSimpleButton){
+        if (isSimpleButton){
+            StackPane stack = (StackPane) ((BorderPane) button.getGraphic()).getRight();
+            stack.setVisible(true);
+        }else{
+            HBox container = (HBox) ((BorderPane) button.getGraphic()).getRight();
+            ImageView img = (ImageView) container.getChildren().getLast();
+            img.setVisible(true);
+        }
+    }
+    private void removeSelectedImage(Button button, boolean isSimpleButton){
+        if (isSimpleButton){
+            StackPane stack = (StackPane) ((BorderPane) button.getGraphic()).getRight();
+            stack.setVisible(false);
+        }else{
+            HBox container = (HBox) ((BorderPane) button.getGraphic()).getRight();
+            ImageView img = (ImageView) container.getChildren().getLast();
+            img.setVisible(false);
+        }
+    }
     private void addOptionCard(String title){
         Button btn = addSimpleButton(title, true, false);
         optionsContainer.getChildren().add(btn);
@@ -1875,6 +2259,7 @@ public class VideoPlayerController {
 
             ImageView imgHover = new ImageView();
             imgHover.setImage(new Image(getFileAsIOStream("img/icons/trackSelectedHover.png"), imgSize, imgSize, true, true));
+            imgHover.setVisible(false);
 
             StackPane imageStack = new StackPane(img, imgHover);
             imageStack.setVisible(false);
@@ -1892,11 +2277,11 @@ public class VideoPlayerController {
             Label selectedText = new Label("");
             selectedText.setFont(Font.font("Arial", FontWeight.NORMAL, FontPosture.REGULAR, 28));
             selectedText.setTextFill(Color.WHITE);
-            selectedText.setPadding(new Insets(3, 0, 0, 0));
 
             HBox pane = new HBox(selectedText, img);
             pane.setSpacing(10);
             content.setRight(pane);
+            pane.setPadding(new Insets(3, 0, 0, 0));
 
             pane.setTranslateX(pane.getLayoutX() + 20);
 

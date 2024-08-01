@@ -16,9 +16,9 @@
 
 <StackPane fx:id="mainPane" style="-fx-background-color: transparent;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.VideoPlayerController">
    <children>
-      <ImageView fx:id="shadowImage" fitHeight="406.0" fitWidth="916.0" opacity="0.6" pickOnBounds="true" visible="false">
+      <ImageView fx:id="shadowImage" fitHeight="555.0" fitWidth="1086.0" opacity="0.6" pickOnBounds="true">
          <image>
-            <Image url="@../../../img/desktopBackgroundShadow.png" />
+            <Image url="@../../../img/overlay.png" />
          </image>
       </ImageView>
       <BorderPane>
@@ -105,7 +105,7 @@
                   </JFXSlider>
                   <BorderPane>
                      <left>
-                        <VBox BorderPane.alignment="CENTER">
+                        <VBox fillWidth="false" BorderPane.alignment="CENTER">
                            <children>
                               <Label fx:id="currentTime" text="18:31" textFill="WHITE">
                                  <font>
@@ -134,7 +134,7 @@
                                     </Button>
                                     <Button fx:id="audiosButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showAudioOptions" styleClass="playerButton" stylesheets="@styles.css">
                                        <graphic>
-                                          <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fitHeight="33.0" fitWidth="33.0" pickOnBounds="true" preserveRatio="true" translateX="2.0">
                                              <image>
                                                 <Image url="@../../../img/icons/audio.png" />
                                              </image>
@@ -153,7 +153,7 @@
                         </VBox>
                      </left>
                      <right>
-                        <VBox alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
+                        <VBox alignment="TOP_RIGHT" fillWidth="false" BorderPane.alignment="CENTER">
                            <children>
                               <Label fx:id="toFinishTime" alignment="TOP_RIGHT" text="43:10" textFill="WHITE">
                                  <font>
@@ -221,7 +221,7 @@
                         </VBox>
                      </right>
                      <center>
-                        <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+                        <VBox alignment="TOP_CENTER" fillWidth="false" BorderPane.alignment="CENTER">
                            <children>
                               <HBox alignment="TOP_CENTER">
                                  <children>
@@ -326,7 +326,7 @@
       </BorderPane>
       <HBox fx:id="volumeBox" alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="volumeSliderBox" stylesheets="@styles.css" StackPane.alignment="CENTER">
          <children>
-            <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="33.0" fitWidth="33.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../../../img/icons/minVolume.png" />
                </image></ImageView>
@@ -416,7 +416,7 @@
                         </VBox>
                      </content>
                   </ScrollPane>
-                  <ScrollPane fx:id="mainMenuScroll" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" StackPane.alignment="CENTER">
+                  <ScrollPane fx:id="mainMenuScroll" fitToHeight="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" vmax="0.0" StackPane.alignment="CENTER">
                      <content>
                         <HBox fx:id="mainMenu" alignment="CENTER">
                            <children>

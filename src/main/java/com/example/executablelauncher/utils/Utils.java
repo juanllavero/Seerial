@@ -167,7 +167,7 @@ public class Utils {
         pane.setVisible(false);
     }
     public static void fadeOutEffect(ImageView img){
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.6), img);
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.3), img);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0);
         fadeOut.play();

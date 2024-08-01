@@ -192,6 +192,12 @@ public class VideoPlayer {
     public String getGamma(){
         return mpvGetProperty("gamma");
     }
+    public String getAudioDelay(){
+        return mpvGetProperty("audio-delay");
+    }
+    public String getSubsDelay(){
+        return mpvGetProperty("sub-delay");
+    }
     public void setVideoTrack(int videoId) {
         mpvSetProperty("vid", Integer.toString(videoId));
     }
@@ -230,6 +236,12 @@ public class VideoPlayer {
         if (gammaValue > 100) gammaValue = 100;
 
         mpvSetProperty("gamma", String.valueOf(gammaValue));
+    }
+    public void setAudioDelay(double delayMS) {
+        mpvSetProperty("audio-delay", String.valueOf(delayMS / 1000));
+    }
+    public void setSubsDelay(double delayMS) {
+        mpvSetProperty("sub-delay", String.valueOf(delayMS / 1000));
     }
     //endregion
 

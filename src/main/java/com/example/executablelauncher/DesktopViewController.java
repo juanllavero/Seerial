@@ -3584,7 +3584,8 @@ public class DesktopViewController {
     //region ADD SECTION
     public void updateSeries() {
         Button btn = seriesButtons.get(seriesList.indexOf(selectedSeries));
-        btn.setText(selectedSeries.getName());
+        BorderPane pane = (BorderPane) btn.getGraphic();
+        ((Label) pane.getLeft()).setText(selectedSeries.getName());
 
         setCoverImage();
 
