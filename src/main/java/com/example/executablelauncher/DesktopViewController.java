@@ -773,7 +773,9 @@ public class DesktopViewController {
     //region UPDATE DATA
     public void refreshSeries() {
         Platform.runLater(() -> {
-            seriesButtons.get(seriesList.indexOf(selectedSeries)).setText(selectedSeries.getName());
+            Button btn = seriesButtons.get(seriesList.indexOf(selectedSeries));
+            BorderPane pane = (BorderPane) btn.getGraphic();
+            ((Label) pane.getLeft()).setText(selectedSeries.getName());
 
             File[] files = new File("resources/img/seriesCovers/" + selectedSeries.getId() + "/").listFiles();
 
@@ -1704,9 +1706,8 @@ public class DesktopViewController {
                 // Scan Series
                 scanTVShow(currentLibrary, folder, filesInFolder, false);
 
-                if (selectedSeries.getSeasons().isEmpty()) {
+                if (selectedSeries.getSeasons().isEmpty())
                     return;
-                }
 
                 Season season = selectedSeries.getSeasons().get(0);
 
@@ -1952,11 +1953,12 @@ public class DesktopViewController {
 
             series.setAnalyzingFiles(true);
             if (selectedSeries == series) {
-                Button showButton = seriesButtons.get(seriesList.indexOf(series));
-                ;
+                Platform.runLater(() -> {
+                    Button showButton = seriesButtons.get(seriesList.indexOf(series));
 
-                MFXProgressSpinner loadingIndicator = (MFXProgressSpinner) ((BorderPane) showButton.getGraphic()).getRight();
-                loadingIndicator.setVisible(true);
+                    MFXProgressSpinner loadingIndicator = (MFXProgressSpinner) ((BorderPane) showButton.getGraphic()).getRight();
+                    loadingIndicator.setVisible(true);
+                });
             }
         } else {
             series = new Series();

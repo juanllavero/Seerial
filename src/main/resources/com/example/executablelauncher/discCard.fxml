@@ -25,7 +25,7 @@
             </ImageView>
             <Button fx:id="playButton" alignment="CENTER" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" styleClass="playButton" stylesheets="@styles.css" StackPane.alignment="CENTER">
                <graphic>
-                  <ImageView fx:id="playImage" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" translateX="2.0">
+                  <ImageView fx:id="playImage" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../../../img/icons/play.png" />
                      </image>
