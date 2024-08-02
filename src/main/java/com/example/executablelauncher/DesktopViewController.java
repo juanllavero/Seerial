@@ -2657,7 +2657,7 @@ public class DesktopViewController {
 
                     writersString.append(writer);
                 }
-                episode.setWritenBy(writersString.toString());
+                episode.setWrittenBy(writersString.toString());
             } else {
                 System.out.println("downloadEpisodeCrew: Response not successful: " + response.code());
             }

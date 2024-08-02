@@ -33,7 +33,7 @@ public class Episode implements Serializable {
     List<AudioTrack> audioTracks = new ArrayList<>();
     List<SubtitleTrack> subtitleTracks = new ArrayList<>();
     String directedBy = "";
-    String writenBy = "";
+    String writtenBy = "";
 
     public Episode() {
         id = UUID.randomUUID().toString();
@@ -216,11 +216,11 @@ public class Episode implements Serializable {
         this.directedBy = directedBy;
     }
 
-    public String getWritenBy() {
-        return writenBy;
+    public String getWrittenBy() {
+        return writtenBy;
     }
 
-    public void setWritenBy(String writenBy) {
-        this.writenBy = writenBy;
+    public void setWrittenBy(String writtenBy) {
+        this.writtenBy = writtenBy;
     }
 }

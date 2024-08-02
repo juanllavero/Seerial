@@ -359,17 +359,27 @@
                      <children>
                         <VBox prefWidth="250.0">
                            <children>
-                              <Label fx:id="genresText1" text="Dirigido por" textFill="WHITE">
+                              <Label fx:id="directedByText" text="Dirigido por" textFill="WHITE">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
-                              <Label fx:id="genresText2" text="Escrito por" textFill="WHITE">
+                              <Label fx:id="writtenByText" text="Escrito por" textFill="WHITE">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
-                              <Label fx:id="genresText21" text="Estudio" textFill="WHITE">
+                              <Label fx:id="createdByText" text="Creado por" textFill="WHITE">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="musicByText" text="Música compuesta por" textFill="WHITE">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="studioText" text="Estudio" textFill="WHITE">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
@@ -383,17 +393,32 @@
                         </VBox>
                         <VBox>
                            <children>
+                              <Label fx:id="directedByField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="writtenByField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="createdByField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="musicByField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="studioField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
                               <Label fx:id="genresField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="genresField1" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="genresField2" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
@@ -422,6 +447,16 @@
                                     <Font size="21.0" />
                                  </font>
                               </Label>
+                              <Label fx:id="fileSizeText" text="Tamaño" textFill="WHITE">
+                                 <font>
+                                    <Font size="21.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="bitrateText" text="Bitrate" textFill="WHITE">
+                                 <font>
+                                    <Font size="21.0" />
+                                 </font>
+                              </Label>
                            </children>
                         </VBox>
                         <VBox>
@@ -431,8 +466,32 @@
                                     <Font size="21.0" />
                                  </font>
                               </Label>
+                              <Label fx:id="fileSizeField" text="4.8 GB" textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="21.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="bitrateField" text="12.4 mbps" textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="21.0" />
+                                 </font>
+                              </Label>
                            </children>
                         </VBox>
+                     </children>
+                  </HBox>
+                  <Label fx:id="castText" text="Reparto" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="22.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Label>
+                  <HBox>
+                     <children>
+                        <VBox fx:id="castLeftBox" prefWidth="250.0" />
+                        <VBox fx:id="castRightBox" />
                      </children>
                   </HBox>
                </children>

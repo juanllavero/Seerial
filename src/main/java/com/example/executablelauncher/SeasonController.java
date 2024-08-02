@@ -54,6 +54,23 @@ import static com.example.executablelauncher.utils.Utils.*;
 
 public class SeasonController {
     //region FXML ATTRIBUTES
+    @FXML Label directedByText;
+    @FXML Label writtenByText;
+    @FXML Label createdByText;
+    @FXML Label musicByText;
+    @FXML Label studioText;
+    @FXML Label directedByField;
+    @FXML Label writtenByField;
+    @FXML Label createdByField;
+    @FXML Label musicByField;
+    @FXML Label studioField;
+    @FXML Label fileSizeText;
+    @FXML Label fileSizeField;
+    @FXML Label bitrateText;
+    @FXML Label bitrateField;
+    @FXML Label castText;
+    @FXML VBox castLeftBox;
+    @FXML VBox castRightBox;
     @FXML BorderPane videoError;
     @FXML Button goBackButton;
     @FXML Button videoTrackButton;
@@ -97,8 +114,6 @@ public class SeasonController {
     @FXML Label scoreField;
     @FXML Label seasonEpisodeNumber;
     @FXML ScrollPane episodeScroll;
-    @FXML Label writtenByField;
-    @FXML Label writtenByText;
     @FXML Label genresText;
     @FXML Label genresField;
     @FXML Label yearField;
@@ -155,6 +170,18 @@ public class SeasonController {
         errorTitle.setText(App.textBundle.getString("playbackError"));
         errorMessage.setText(App.textBundle.getString("videoErrorMessage"));
         errorButton.setText(App.buttonsBundle.getString("ok"));
+
+        fileDetailsText.setText(App.textBundle.getString("fileDetails"));
+        castText.setText(App.textBundle.getString("cast"));
+        directedByText.setText(App.textBundle.getString("directedBy"));
+        writtenByText.setText(App.textBundle.getString("writtenBy"));
+        createdByText.setText(App.textBundle.getString("createdBy"));
+        musicByText.setText(App.textBundle.getString("musicBy"));
+        studioText.setText(App.textBundle.getString("studios"));
+        genresText.setText(App.textBundle.getString("genres"));
+        fileNameText.setText(App.textBundle.getString("fileName"));
+        fileSizeText.setText(App.textBundle.getString("size"));
+        bitrateText.setText(App.textBundle.getString("bitrate"));
 
         errorButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedSelect(event)) {
@@ -929,6 +956,15 @@ public class SeasonController {
         detailsTitle.setText(selectedEpisode.getName());
         detailsOverview.setText(overviewField.getText());
 
+        directedByField.setText(selectedEpisode.getDirectedBy());
+        writtenByField.setText(selectedEpisode.getWrittenBy());
+        createdByField.setText(seasons.get(currentSeason).getCreator());
+        musicByField.setText(seasons.get(currentSeason).getMusicComposer());
+        studioField.setText(series.getProductionStudios());
+        fileNameField.setText(selectedEpisode.getMediaInfo().getFile());
+        fileSizeField.setText(selectedEpisode.getMediaInfo().getSize());
+        bitrateField.setText(selectedEpisode.getMediaInfo().getBitrate());
+
         File file = new File(selectedEpisode.getVideoSrc());
         fileNameField.setText(file.getName());
 
@@ -939,7 +975,6 @@ public class SeasonController {
 
         detailsBox.requestFocus();
     }
-
     @FXML
     private void closeDetails(){
         fadeOutEffect(menuShadow, 0.6f, 0).play();
