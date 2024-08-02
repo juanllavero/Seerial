@@ -5,12 +5,15 @@ import com.example.executablelauncher.fileMetadata.AudioTrack;
 import com.example.executablelauncher.fileMetadata.MediaInfo;
 import com.example.executablelauncher.fileMetadata.SubtitleTrack;
 import com.example.executablelauncher.fileMetadata.VideoTrack;
+import com.example.executablelauncher.tmdbMetadata.common.Crew;
 import com.example.executablelauncher.tmdbMetadata.common.Genre;
+import com.example.executablelauncher.tmdbMetadata.common.ProductionCompany;
 import com.example.executablelauncher.tmdbMetadata.groups.*;
 import com.example.executablelauncher.tmdbMetadata.images.Backdrop;
 import com.example.executablelauncher.tmdbMetadata.images.Images;
 import com.example.executablelauncher.tmdbMetadata.images.Logo;
 import com.example.executablelauncher.tmdbMetadata.images.Poster;
+import com.example.executablelauncher.tmdbMetadata.movieCredits.Credits;
 import com.example.executablelauncher.tmdbMetadata.movies.MovieMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.EpisodeMetadata;
 import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadata;
@@ -2153,6 +2156,23 @@ public class DesktopViewController {
         series.setNumberOfSeasons(seriesMetadata.number_of_seasons);
         series.setNumberOfEpisodes(seriesMetadata.number_of_episodes);
 
+        if (seriesMetadata.production_companies != null && !seriesMetadata.production_companies.isEmpty()){
+            String finalStr = "";
+            if (seriesMetadata.production_companies.size() > 3)
+                finalStr = "...";
+
+            StringBuilder productionCompanies = new StringBuilder();
+            for (ProductionCompany pC : seriesMetadata.production_companies){
+                if (seriesMetadata.production_companies.indexOf(pC) != 0)
+                    productionCompanies.append(", ");
+
+                productionCompanies.append(pC.name);
+            }
+
+            productionCompanies.append(finalStr);
+            series.setProductionStudios(productionCompanies.toString());
+        }
+
         List<Genre> genres = seriesMetadata.genres;
 
         if (genres != null) {
@@ -2488,6 +2508,8 @@ public class DesktopViewController {
                 }
             }
 
+            downloadSeasonCredits(season, seasonMetadata);
+
             if (series.getSeasons().size() == 1)
                 downloadLogos(library, series, season, series.getThemdbID());
 
@@ -2519,6 +2541,8 @@ public class DesktopViewController {
         setEpisodeData(library, episode, episodeMetadata, series, realEpisode);
 
         getMediaInfo(episode);
+
+        downloadEpisodeCrew(episode, episodeMetadata);
 
         library.getAnalyzedFiles().put(file.getAbsolutePath(), episode.getId());
 
@@ -2594,7 +2618,87 @@ public class DesktopViewController {
             episode.setImgSrc("resources/img/discCovers/" + episode.getId() + "/0.jpg");
         }
     }
+    private void downloadEpisodeCrew(Episode episode, EpisodeMetadata episodeMetadata){
+        Request requestGroups = new Request.Builder()
+                .url("https://api.themoviedb.org/3/tv/" + episodeMetadata.show_id + "/season/" + episodeMetadata.season_number + "/episode/" + episodeMetadata.episode_number + "credits?language=en-US")
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .build();
 
+        try (Response response = client.newCall(requestGroups).execute()) {
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                assert response.body() != null;
+                Credits credits = objectMapper.readValue(response.body().string(), Credits.class);
+
+                List<String> directors = new ArrayList<>();
+                List<String> writers = new ArrayList<>();
+                for (Crew person : credits.crew){
+                    if (person.job.equals("Director"))
+                        directors.add(person.name);
+                    else if (person.job.equals("Writer"))
+                        writers.add(person.name);
+                }
+
+                StringBuilder directorsString = new StringBuilder();
+                for (String director : directors){
+                    if (director.indexOf(director) != 0)
+                        directorsString.append(", ");
+
+                    directorsString.append(director);
+                }
+                episode.setDirectedBy(directorsString.toString());
+
+                StringBuilder writersString = new StringBuilder();
+                for (String writer : writers){
+                    if (writer.indexOf(writer) != 0)
+                        writersString.append(", ");
+
+                    writersString.append(writer);
+                }
+                episode.setWritenBy(writersString.toString());
+            } else {
+                System.out.println("downloadEpisodeCrew: Response not successful: " + response.code());
+            }
+        } catch (IOException e) {
+            System.out.println("downloadEpisodeCrew: Response not successful: " + e.getMessage());
+        }
+    }
+    private void downloadSeasonCredits(Season season, SeasonMetadata seasonMetadata){
+        Request requestGroups = new Request.Builder()
+                .url("https://api.themoviedb.org/3/tv/" + season.getSeriesID() + "/season/" + seasonMetadata.season_number + "/credits?language=en-US")
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .build();
+
+        try (Response response = client.newCall(requestGroups).execute()) {
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                assert response.body() != null;
+                Credits credits = objectMapper.readValue(response.body().string(), Credits.class);
+
+                season.getCast().addAll(credits.cast);
+
+                String originalSourceCreator = "";
+                String originalMusicComposer = "";
+                for (Crew person : credits.crew){
+                    if (person.job.equals("Author") || person.job.equals("Novel") || person.job.equals("Original Series Creator"))
+                        originalSourceCreator = person.name;
+                    else if (person.job.equals("Original Music Composer"))
+                        originalMusicComposer = person.name;
+                }
+
+                season.setCreator(originalSourceCreator);
+                season.setMusicComposer(originalMusicComposer);
+            } else {
+                System.out.println("downloadSeasonCredits: Response not successful: " + response.code());
+            }
+        } catch (IOException e) {
+            System.out.println("downloadSeasonCredits: Response not successful: " + e.getMessage());
+        }
+    }
     private void saveCover(String id, int i, String originalImage) {
         DataManager.INSTANCE.createFolder("resources/img/seriesCovers/" + id + "/");
 

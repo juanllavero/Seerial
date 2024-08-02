@@ -1,5 +1,6 @@
 package com.example.executablelauncher.entities;
 
+import com.example.executablelauncher.tmdbMetadata.movieCredits.Cast;
 import com.example.executablelauncher.utils.Utils;
 
 import java.io.Serializable;
@@ -34,6 +35,9 @@ public class Season implements Serializable {
     List<Episode> episodes = new CopyOnWriteArrayList<>();
     List<String> genres = new ArrayList<>();
     int currentlyWatchingEpisode = -1;
+    List<Cast> cast = new ArrayList<>();
+    String creator = "";
+    String musicComposer = "";
 
     public Season() {
         id = UUID.randomUUID().toString();
@@ -292,5 +296,29 @@ public class Season implements Serializable {
 
     public void setCurrentlyWatchingEpisode(int index){
         currentlyWatchingEpisode = index;
+    }
+
+    public List<Cast> getCast() {
+        return cast;
+    }
+
+    public void setCast(List<Cast> cast) {
+        this.cast = cast;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
+    public String getMusicComposer() {
+        return musicComposer;
+    }
+
+    public void setMusicComposer(String musicComposer) {
+        this.musicComposer = musicComposer;
     }
 }

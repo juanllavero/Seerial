@@ -32,6 +32,8 @@ public class Episode implements Serializable {
     List<VideoTrack> videoTracks = new ArrayList<>();
     List<AudioTrack> audioTracks = new ArrayList<>();
     List<SubtitleTrack> subtitleTracks = new ArrayList<>();
+    String directedBy = "";
+    String writenBy = "";
 
     public Episode() {
         id = UUID.randomUUID().toString();
@@ -204,5 +206,21 @@ public class Episode implements Serializable {
 
     public void setSubtitleTracks(List<SubtitleTrack> subtitleTracks) {
         this.subtitleTracks = subtitleTracks;
+    }
+
+    public String getDirectedBy() {
+        return directedBy;
+    }
+
+    public void setDirectedBy(String directedBy) {
+        this.directedBy = directedBy;
+    }
+
+    public String getWritenBy() {
+        return writenBy;
+    }
+
+    public void setWritenBy(String writenBy) {
+        this.writenBy = writenBy;
     }
 }

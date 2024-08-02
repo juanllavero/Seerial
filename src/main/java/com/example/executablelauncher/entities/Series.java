@@ -25,6 +25,7 @@ public class Series implements Serializable {
     boolean playSameMusic = false;
     boolean analyzingFiles = false;
     int currentlyWatchingSeason = -1;
+    String productionStudios = "";
 
     public Series() {
         id = UUID.randomUUID().toString();
@@ -213,5 +214,13 @@ public class Series implements Serializable {
 
     public void setCurrentlyWatchingSeason(int index){
         currentlyWatchingSeason = index;
+    }
+
+    public String getProductionStudios() {
+        return productionStudios;
+    }
+
+    public void setProductionStudios(String productionStudios) {
+        this.productionStudios = productionStudios;
     }
 }

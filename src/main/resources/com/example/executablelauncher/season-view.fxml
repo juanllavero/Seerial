@@ -349,7 +349,7 @@
                   </Label>
                   <Label fx:id="detailsOverview" alignment="TOP_LEFT" prefWidth="845.0" text="Overview of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show," textFill="WHITE" wrapText="true">
                      <font>
-                        <Font name="System Bold" size="21.0" />
+                        <Font size="21.0" />
                      </font>
                      <VBox.margin>
                         <Insets bottom="10.0" />
@@ -359,9 +359,24 @@
                      <children>
                         <VBox prefWidth="250.0">
                            <children>
+                              <Label fx:id="genresText1" text="Dirigido por" textFill="WHITE">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="genresText2" text="Escrito por" textFill="WHITE">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="genresText21" text="Estudio" textFill="WHITE">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
                               <Label fx:id="genresText" text="Géneros" textFill="WHITE">
                                  <font>
-                                    <Font name="System Bold" size="18.0" />
+                                    <Font size="20.0" />
                                  </font>
                               </Label>
                            </children>
@@ -370,7 +385,17 @@
                            <children>
                               <Label fx:id="genresField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
                                  <font>
-                                    <Font name="System Bold" size="18.0" />
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="genresField1" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="genresField2" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="20.0" />
                                  </font>
                               </Label>
                            </children>
@@ -382,7 +407,7 @@
                   </HBox>
                   <Label fx:id="fileDetailsText" text="Detalles del archivo" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="20.0" />
+                        <Font name="System Bold" size="22.0" />
                      </font>
                      <VBox.margin>
                         <Insets top="20.0" />
@@ -394,7 +419,7 @@
                            <children>
                               <Label fx:id="fileNameText" text="Nombre del archivo" textFill="WHITE">
                                  <font>
-                                    <Font name="System Bold" size="18.0" />
+                                    <Font size="21.0" />
                                  </font>
                               </Label>
                            </children>
@@ -403,7 +428,7 @@
                            <children>
                               <Label fx:id="fileNameField" text="Nombre del archivo.mkv" textFill="WHITE" wrapText="true">
                                  <font>
-                                    <Font name="System Bold" size="18.0" />
+                                    <Font size="21.0" />
                                  </font>
                               </Label>
                            </children>
