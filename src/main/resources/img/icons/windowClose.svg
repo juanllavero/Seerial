@@ -1,0 +1,3 @@
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" class="button-icon" width="24"  height="24" ><defs><symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="#24292E" stroke-width="2px" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="20" y1="6" x2="6" y2="20" stroke="#FFFFFF" fill="none" stroke-width="2px"></line><line x1="6" y1="6" x2="20" y2="20" stroke="#FFFFFF" fill="none" stroke-width="2px"></line>
+    </symbol></defs><use xlink:href="#icon-x"></use></svg>

@@ -373,7 +373,8 @@ public class DesktopViewController {
             .writeTimeout(30, TimeUnit.SECONDS)
             .build();
 
-    private volatile boolean interrupted = false;
+    volatile boolean interrupted = false;
+    WindowDecoration windowDecoration;
     MediaPlayer mp = null;
     ScheduledExecutorService musicExecutor = Executors.newScheduledThreadPool(1);
     double xOffset = 0;
@@ -388,34 +389,22 @@ public class DesktopViewController {
     boolean watchingVideo = false;
     //endregion
 
-    private void setDragWindow(BorderPane topBar) {
-        topBar.setOnMousePressed(e -> {
-            xOffset = e.getSceneX();
-            yOffset = e.getSceneY();
-        });
-        topBar.setOnMouseDragged(e -> {
-            Stage stage = (Stage) mainBox.getScene().getWindow();
-            stage.setX(e.getScreenX() - xOffset);
-            stage.setY(e.getScreenY() - yOffset);
-        });
-    }
-
     public void initValues(WindowDecoration windowDecoration) {
         Stage stage = (Stage) mainBox.getScene().getWindow();
 
         App.setDesktopController(this);
 
+        this.windowDecoration = windowDecoration;
         topBar.setCenter(windowDecoration);
         windowDecoration.setDesktopParent(this);
         windowDecoration.initialize(leftArea, rightArea);
 
         minButton.setOnAction(e -> windowDecoration.minimizeWindow());
         maxButton.setOnAction(e -> {
-            if (stage.isMaximized()){
+            if (stage.isMaximized())
                 windowDecoration.restoreWindow();
-            }else{
+            else
                 windowDecoration.maximizeWindow();
-            }
         });
         closeButton.setOnAction(e -> closeWindow());
 
@@ -423,8 +412,6 @@ public class DesktopViewController {
             tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
 
         selectionOptions.setVisible(false);
-
-        //setDragWindow(topBar);
 
         downloadingContentWindow.setVisible(false);
         downloadingContentWindowStatic.setVisible(false);
@@ -554,6 +541,14 @@ public class DesktopViewController {
             updateLibraries();
             updateLanguage();
         });
+    }
+
+    public void onRestoreWindow(){
+        ((ImageView) maxButton.getGraphic()).setImage(new Image(getFileAsIOStream("img/icons/windowMax.png")));
+    }
+
+    public void onMaximizeWindow(){
+        ((ImageView) maxButton.getGraphic()).setImage(new Image(getFileAsIOStream("img/icons/windowRestore.png")));
     }
 
     //region CONTENT

@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
+<StackPane fx:id="mainBox" styleClass="transparent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
    <children>
       <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="2027.0" pickOnBounds="true">
          <image>
@@ -43,8 +43,197 @@
          </image>
       </ImageView>
       <BorderPane fx:id="mainBorderPane">
-         <top>
-            <BorderPane fx:id="topBar" BorderPane.alignment="CENTER">
+         <left>
+            <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="250.0" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="70.0" />
+               </BorderPane.margin>
+               <content>
+                  <StackPane fx:id="seriesStack" prefHeight="150.0" prefWidth="200.0">
+                     <children>
+                        <VBox fx:id="seriesContainer" prefHeight="200.0" prefWidth="100.0">
+                           <padding>
+                              <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </StackPane>
+               </content>
+            </ScrollPane>
+         </left>
+         <center>
+            <StackPane prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" pannable="true" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
+                     <content>
+                        <StackPane fx:id="seasonInfoPane">
+                           <children>
+                              <VBox StackPane.alignment="TOP_LEFT">
+                                 <children>
+                                    <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" fillHeight="false" prefHeight="450.0" prefWidth="1195.0">
+                                       <children>
+                                          <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
+                                             <HBox.margin>
+                                                <Insets bottom="5.0" left="20.0" />
+                                             </HBox.margin>
+                                          </ImageView>
+                                       </children>
+                                       <padding>
+                                          <Insets bottom="30.0" />
+                                       </padding>
+                                    </HBox>
+                                    <HBox prefHeight="100.0" prefWidth="200.0">
+                                       <children>
+                                          <VBox fx:id="seasonsEpisodesBox" spacing="20.0" stylesheets="@styles.css">
+                                             <children>
+                                                <FlowPane fx:id="seasonContainer" />
+                                                <FlowPane fx:id="episodesContainer" hgap="20.0" nodeOrientation="LEFT_TO_RIGHT" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS" />
+                                             </children>
+                                             <padding>
+                                                <Insets bottom="10.0" />
+                                             </padding>
+                                          </VBox>
+                                          <VBox fx:id="detailsBox" fillWidth="false">
+                                             <children>
+                                                <Label fx:id="detailsText" prefHeight="28.0" prefWidth="140.0" styleClass="seasonButtonActive" stylesheets="@styles.css" text="Details" textFill="WHITE">
+                                                   <font>
+                                                      <Font size="26.0" />
+                                                   </font>
+                                                   <effect>
+                                                      <DropShadow />
+                                                   </effect>
+                                                </Label>
+                                                <HBox alignment="TOP_CENTER" fillHeight="false">
+                                                   <children>
+                                                      <VBox prefHeight="143.0" prefWidth="190.0">
+                                                         <children>
+                                                            <Label fx:id="yearText" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets top="5.0" />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="orderText" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets top="10.0" />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="episodesText" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets top="10.0" />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="seasonNumberText" text="Número de temporada" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets top="10.0" />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                         </children>
+                                                      </VBox>
+                                                      <VBox alignment="TOP_RIGHT" prefHeight="143.0" prefWidth="84.0">
+                                                         <children>
+                                                            <Label fx:id="yearField" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="#aeaeae">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets top="5.0" />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="orderField" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="#aeaeae">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets top="10.0" />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="episodesField" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="#aeaeae">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets top="10.0" />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="seasonNumberField" alignment="CENTER_RIGHT" prefHeight="27.0" prefWidth="239.0" text="Number" textFill="#aeaeae" wrapText="true">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets top="10.0" />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                         </children>
+                                                      </VBox>
+                                                   </children>
+                                                   <VBox.margin>
+                                                      <Insets bottom="10.0" top="10.0" />
+                                                   </VBox.margin>
+                                                </HBox>
+                                                <ImageView fx:id="seriesCover" fitHeight="416.0" fitWidth="401.0" pickOnBounds="true" preserveRatio="true">
+                                                   <VBox.margin>
+                                                      <Insets top="20.0" />
+                                                   </VBox.margin>
+                                                </ImageView>
+                                             </children>
+                                             <HBox.margin>
+                                                <Insets left="10.0" />
+                                             </HBox.margin>
+                                          </VBox>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="100.0" left="100.0" right="100.0" top="100.0" />
+                                 </padding>
+                              </VBox>
+                           </children>
+                        </StackPane>
+                     </content>
+                  </ScrollPane>
+               </children>
+            </StackPane>
+         </center>
+      </BorderPane>
+      <HBox fillHeight="false" maxHeight="-Infinity" StackPane.alignment="TOP_CENTER">
+         <children>
+            <BorderPane fx:id="topBar" HBox.hgrow="ALWAYS">
                <left>
                   <HBox fx:id="leftArea" alignment="CENTER" BorderPane.alignment="CENTER">
                      <children>
@@ -98,244 +287,67 @@
                         </Button>
                      </children>
                      <padding>
-                        <Insets left="10.0" />
+                        <Insets left="10.0" top="5.0" />
                      </padding>
                      <BorderPane.margin>
-                        <Insets top="5.0" />
+                        <Insets top="15.0" />
                      </BorderPane.margin>
                   </HBox>
                </left>
                <padding>
-                  <Insets right="10.0" top="5.0" />
+                  <Insets right="10.0" />
                </padding>
-               <BorderPane.margin>
-                  <Insets left="15.0" />
-               </BorderPane.margin>
                <right>
-                  <HBox fx:id="rightArea" BorderPane.alignment="CENTER">
+                  <HBox fx:id="rightArea" alignment="TOP_RIGHT" BorderPane.alignment="CENTER">
                      <BorderPane.margin>
-                        <Insets right="50.0" top="5.0" />
+                        <Insets right="20.0" top="20.0" />
                      </BorderPane.margin>
                      <children>
                         <Button fx:id="minButton" mnemonicParsing="false" styleClass="minimizeButton" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true">
+                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/windowMin.png" />
                                  </image>
                               </ImageView>
                            </graphic>
+                           <padding>
+                              <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                           </padding>
                         </Button>
                         <Button fx:id="maxButton" mnemonicParsing="false" styleClass="maximizeButton" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true">
+                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/windowMax.png" />
                                  </image>
                               </ImageView>
                            </graphic>
+                           <padding>
+                              <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                           </padding>
                         </Button>
                         <Button fx:id="closeButton" mnemonicParsing="false" styleClass="closeButton" stylesheets="@styles.css">
                            <graphic>
-                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true">
+                              <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/windowClose.png" />
                                  </image>
                               </ImageView>
                            </graphic>
+                           <padding>
+                              <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                           </padding>
                         </Button>
                      </children>
                   </HBox>
                </right>
             </BorderPane>
-         </top>
-         <center>
-            <ScrollPane fx:id="seasonScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
-               <BorderPane.margin>
-                  <Insets bottom="20.0" left="10.0" right="20.0" top="10.0" />
-               </BorderPane.margin>
-               <content>
-                  <StackPane fx:id="seasonInfoPane">
-                     <children>
-                        <VBox StackPane.alignment="TOP_LEFT">
-                           <children>
-                              <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" fillHeight="false" prefHeight="450.0" prefWidth="1195.0">
-                                 <children>
-                                    <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
-                                       <HBox.margin>
-                                          <Insets bottom="5.0" left="20.0" />
-                                       </HBox.margin>
-                                    </ImageView>
-                                 </children>
-                                 <padding>
-                                    <Insets bottom="30.0" />
-                                 </padding>
-                              </HBox>
-                              <HBox prefHeight="100.0" prefWidth="200.0">
-                                 <children>
-                                    <VBox fx:id="seasonsEpisodesBox" spacing="20.0" stylesheets="@styles.css">
-                                       <children>
-                                          <FlowPane fx:id="seasonContainer" />
-                                          <FlowPane fx:id="episodesContainer" hgap="20.0" nodeOrientation="LEFT_TO_RIGHT" rowValignment="TOP" vgap="20.0" VBox.vgrow="ALWAYS" />
-                                       </children>
-                                       <padding>
-                                          <Insets bottom="10.0" />
-                                       </padding>
-                                    </VBox>
-                                    <VBox fx:id="detailsBox" fillWidth="false">
-                                       <children>
-                                          <Label fx:id="detailsText" prefHeight="28.0" prefWidth="140.0" styleClass="seasonButtonActive" stylesheets="@styles.css" text="Details" textFill="WHITE">
-                                             <font>
-                                                <Font size="26.0" />
-                                             </font>
-                                             <effect>
-                                                <DropShadow />
-                                             </effect>
-                                          </Label>
-                                          <HBox alignment="TOP_CENTER" fillHeight="false">
-                                             <children>
-                                                <VBox prefHeight="143.0" prefWidth="190.0">
-                                                   <children>
-                                                      <Label fx:id="yearText" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets top="5.0" />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="orderText" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets top="10.0" />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="episodesText" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets top="10.0" />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="seasonNumberText" text="Número de temporada" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets top="10.0" />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                   </children>
-                                                </VBox>
-                                                <VBox alignment="TOP_RIGHT" prefHeight="143.0" prefWidth="84.0">
-                                                   <children>
-                                                      <Label fx:id="yearField" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="144.0" text="Year" textFill="#aeaeae">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets top="5.0" />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="orderField" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="144.0" text="Order" textFill="#aeaeae">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets top="10.0" />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="episodesField" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="144.0" text="Episodes" textFill="#aeaeae">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets top="10.0" />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="seasonNumberField" alignment="CENTER_RIGHT" prefHeight="27.0" prefWidth="239.0" text="Number" textFill="#aeaeae" wrapText="true">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets top="10.0" />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                   </children>
-                                                </VBox>
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets bottom="10.0" top="10.0" />
-                                             </VBox.margin>
-                                          </HBox>
-                                          <ImageView fx:id="seriesCover" fitHeight="416.0" fitWidth="401.0" pickOnBounds="true" preserveRatio="true">
-                                             <VBox.margin>
-                                                <Insets top="20.0" />
-                                             </VBox.margin>
-                                          </ImageView>
-                                       </children>
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin>
-                                    </VBox>
-                                 </children>
-                              </HBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="100.0" left="100.0" right="100.0" top="100.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </StackPane>
-               </content>
-            </ScrollPane>
-         </center>
-         <left>
-            <ScrollPane fx:id="seriesScrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" pannable="true" prefWidth="250.0" styleClass="transparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
-               <BorderPane.margin>
-                  <Insets bottom="20.0" left="20.0" right="10.0" top="10.0" />
-               </BorderPane.margin>
-               <content>
-                  <StackPane fx:id="seriesStack" prefHeight="150.0" prefWidth="200.0">
-                     <children>
-                        <VBox fx:id="seriesContainer" prefHeight="200.0" prefWidth="100.0">
-                           <padding>
-                              <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                  </StackPane>
-               </content>
-            </ScrollPane>
-         </left>
-      </BorderPane>
+         </children>
+         <StackPane.margin>
+            <Insets bottom="10.0" left="20.0" right="10.0" />
+         </StackPane.margin>
+      </HBox>
       <HBox alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="37.0" prefWidth="739.0" StackPane.alignment="TOP_CENTER">
          <children>
             <BorderPane fx:id="selectionOptions" prefHeight="37.0" prefWidth="1241.0" styleClass="selectionOptions" stylesheets="@styles.css">

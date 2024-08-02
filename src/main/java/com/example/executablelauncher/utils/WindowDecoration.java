@@ -63,6 +63,14 @@ public class WindowDecoration extends AbstractDecoration {
         AnchorPane.setTopAnchor(container, 0.0);
         getChildren().add(container);
 
+        windowStateProperty().addListener((observable, oldValue, state) -> {
+            // Update the maximize/restore button's icon based on the window state.
+            switch (state) {
+                case NORMAL -> parentDesktop.onRestoreWindow(); // Set to "maximize" icon.
+                case MAXIMIZED -> parentDesktop.onMaximizeWindow(); // Set to "restore" icon.
+            }
+        });
+
         // Build the HitSpot elements.
         buildHitSports(leftArea, rightArea);
     }

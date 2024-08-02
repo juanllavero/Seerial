@@ -48,7 +48,7 @@
 }
 
 .translucent{
-    -fx-background-color: rgba(0, 0, 0, 0.37);
+    -fx-background-color: rgba(0, 0, 0, 0.38);
 }
 
 .transparentTrick{
@@ -60,7 +60,7 @@
 }
 
 .minimizeButton:hover{
-    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-background-color: rgba(0, 0, 0, 0.38);
 }
 
 .maximizeButton{
@@ -68,7 +68,7 @@
 }
 
 .maximizeButton:hover{
-    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-background-color: rgba(37, 37, 37, 0.57);
 }
 
 .closeButton{
@@ -733,14 +733,6 @@
     -fx-background-color: transparent;
     -fx-border-width: 2 2 2 2;
     -fx-border-color: linear-gradient(to top, rgba(176,176,176,1) 0%, rgba(186,186,186,1) 31%, rgba(65,65,65,1) 63%, rgba(65,65,65,1) 100%);
-}
-
-.scroll-pane .scroll-bar {
-    -fx-opacity: 0;
-}
-
-.scroll-pane .scroll-bar:hover {
-    -fx-opacity: 1;
 }
 
 .scroll-pane .viewport {

@@ -20,6 +20,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import nu.pattern.OpenCV;
+import xss.it.fx.helpers.CornerPreference;
 
 import java.io.File;
 import java.io.IOException;
@@ -127,8 +128,7 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
         WindowDecoration windowDecoration = new WindowDecoration(primaryStage, true);
-        //windowDecoration.setCornerPreference(CornerPreference.ROUND);
-        //windowDecoration.getChildren().add(root);
+        windowDecoration.setCornerPreference(CornerPreference.ROUND);
 
         primaryStage.setTitle(App.textBundle.getString("desktopMode"));
         primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
