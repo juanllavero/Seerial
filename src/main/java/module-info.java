@@ -1,6 +1,7 @@
 module com.example.executablelauncher {
     requires javafx.controls;
     requires javafx.fxml;
+    requires fx.jni;
     requires java.desktop;
     requires javafx.media;
     requires org.jsoup;
@@ -45,8 +46,8 @@ module com.example.executablelauncher {
     exports com.example.executablelauncher.videoPlayer;
     opens com.example.executablelauncher.videoPlayer to javafx.fxml;
     exports com.example.executablelauncher.utils;
-    opens com.example.executablelauncher.utils to javafx.fxml;
     exports com.example.executablelauncher.tmdbMetadata.groups;
     opens com.example.executablelauncher.tmdbMetadata.groups to javafx.fxml;
     exports com.example.executablelauncher.fileMetadata;
+    opens com.example.executablelauncher.utils;
 }

@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
+<StackPane fx:id="mainBox" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
    <children>
       <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="2027.0" pickOnBounds="true">
          <image>
@@ -46,7 +46,7 @@
          <top>
             <BorderPane fx:id="topBar" BorderPane.alignment="CENTER">
                <left>
-                  <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+                  <HBox fx:id="leftArea" alignment="CENTER" BorderPane.alignment="CENTER">
                      <children>
                         <Button mnemonicParsing="false" onMouseClicked="#openMenu" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
@@ -98,19 +98,55 @@
                         </Button>
                      </children>
                      <padding>
-                        <Insets left="10.0" top="5.0" />
+                        <Insets left="10.0" />
                      </padding>
                      <BorderPane.margin>
-                        <Insets />
+                        <Insets top="5.0" />
                      </BorderPane.margin>
                   </HBox>
                </left>
                <padding>
-                  <Insets top="5.0" />
+                  <Insets right="10.0" top="5.0" />
                </padding>
                <BorderPane.margin>
                   <Insets left="15.0" />
                </BorderPane.margin>
+               <right>
+                  <HBox fx:id="rightArea" BorderPane.alignment="CENTER">
+                     <BorderPane.margin>
+                        <Insets right="50.0" top="5.0" />
+                     </BorderPane.margin>
+                     <children>
+                        <Button fx:id="minButton" mnemonicParsing="false" styleClass="minimizeButton" stylesheets="@styles.css">
+                           <graphic>
+                              <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/windowMin.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                        <Button fx:id="maxButton" mnemonicParsing="false" styleClass="maximizeButton" stylesheets="@styles.css">
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/windowMax.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                        <Button fx:id="closeButton" mnemonicParsing="false" styleClass="closeButton" stylesheets="@styles.css">
+                           <graphic>
+                              <ImageView fitHeight="22.0" fitWidth="22.0" pickOnBounds="true">
+                                 <image>
+                                    <Image url="@../../../img/icons/windowClose.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                        </Button>
+                     </children>
+                  </HBox>
+               </right>
             </BorderPane>
          </top>
          <center>

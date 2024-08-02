@@ -1,7 +1,7 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.utils.WindowDecoration;
 import com.example.executablelauncher.utils.Configuration;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -126,6 +126,10 @@ public class App extends Application {
     private void loadDesktopMode() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
+        WindowDecoration windowDecoration = new WindowDecoration(primaryStage, true);
+        //windowDecoration.setCornerPreference(CornerPreference.ROUND);
+        //windowDecoration.getChildren().add(root);
+
         primaryStage.setTitle(App.textBundle.getString("desktopMode"));
         primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
         Scene scene = new Scene(root);
@@ -134,7 +138,7 @@ public class App extends Application {
         primaryStage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
         primaryStage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
         DesktopViewController desktopViewController = fxmlLoader.getController();
-        desktopViewController.initValues();
+        desktopViewController.initValues(windowDecoration);
     }
     private void loadFullscreenMode() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));

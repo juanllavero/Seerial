@@ -18,6 +18,7 @@ import com.example.executablelauncher.tmdbMetadata.series.SeasonMetadataBasic;
 import com.example.executablelauncher.tmdbMetadata.series.SeriesMetadata;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
+import com.example.executablelauncher.utils.WindowDecoration;
 import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kokorin.jaffree.StreamType;
@@ -74,7 +75,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -88,7 +88,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -118,6 +117,21 @@ public class DesktopViewController {
         }
     }
     //region FXML ATTRIBUTES
+    @FXML
+    private HBox rightArea;
+
+    @FXML
+    private Button minButton;
+
+    @FXML
+    private Button maxButton;
+
+    @FXML
+    private Button closeButton;
+
+    @FXML
+    private HBox leftArea;
+
     @FXML
     private ImageView blackBackground;
 
@@ -333,7 +347,9 @@ public class DesktopViewController {
     private VideoPlayerController videoPlayerController;
     private final ImageViewPane seasonBackground = new ImageViewPane();
     private final ImageViewPane seasonBackgroundNoise = new ImageViewPane();
+    private final ImageViewPane seasonBackgroundClarity = new ImageViewPane();
     private final ImageViewPane seriesBackgroundNoise = new ImageViewPane();
+    private final ImageViewPane seriesBackgroundClarity = new ImageViewPane();
 
     private static List<Library> libraries = new ArrayList<>();
     private static List<Series> seriesList = new ArrayList<>();
@@ -360,6 +376,8 @@ public class DesktopViewController {
     private volatile boolean interrupted = false;
     MediaPlayer mp = null;
     ScheduledExecutorService musicExecutor = Executors.newScheduledThreadPool(1);
+    double xOffset = 0;
+    double yOffset = 0;
     //endregion
 
     //region THEMOVIEDB ATTRIBUTES
@@ -370,15 +388,43 @@ public class DesktopViewController {
     boolean watchingVideo = false;
     //endregion
 
-    public void initValues() {
+    private void setDragWindow(BorderPane topBar) {
+        topBar.setOnMousePressed(e -> {
+            xOffset = e.getSceneX();
+            yOffset = e.getSceneY();
+        });
+        topBar.setOnMouseDragged(e -> {
+            Stage stage = (Stage) mainBox.getScene().getWindow();
+            stage.setX(e.getScreenX() - xOffset);
+            stage.setY(e.getScreenY() - yOffset);
+        });
+    }
+
+    public void initValues(WindowDecoration windowDecoration) {
         Stage stage = (Stage) mainBox.getScene().getWindow();
 
         App.setDesktopController(this);
+
+        topBar.setCenter(windowDecoration);
+        windowDecoration.setDesktopParent(this);
+        windowDecoration.initialize(leftArea, rightArea);
+
+        minButton.setOnAction(e -> windowDecoration.minimizeWindow());
+        maxButton.setOnAction(e -> {
+            if (stage.isMaximized()){
+                windowDecoration.restoreWindow();
+            }else{
+                windowDecoration.maximizeWindow();
+            }
+        });
+        closeButton.setOnAction(e -> closeWindow());
 
         if (App.isConnectedToInternet)
             tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
 
         selectionOptions.setVisible(false);
+
+        //setDragWindow(topBar);
 
         downloadingContentWindow.setVisible(false);
         downloadingContentWindowStatic.setVisible(false);
@@ -448,19 +494,31 @@ public class DesktopViewController {
 
         seasonInfoPane.getChildren().add(0, seasonBackground);
         seasonInfoPane.getChildren().add(1, seasonBackgroundNoise);
+        seasonInfoPane.getChildren().add(2, seasonBackgroundClarity);
 
         ImageView seasonNoise = new ImageView(new Image(getFileAsIOStream("img/noise.png")));
         seasonNoise.setPreserveRatio(false);
         seasonNoise.setOpacity(0.03);
         seasonBackgroundNoise.setImageView(seasonNoise);
 
+        ImageView seasonClarity = new ImageView(new Image(getFileAsIOStream("img/white.png")));
+        seasonClarity.setPreserveRatio(false);
+        seasonClarity.setOpacity(0.03);
+        seasonBackgroundClarity.setImageView(seasonClarity);
+
         seriesStack.prefHeightProperty().bind(seriesScrollPane.heightProperty());
         seriesStack.getChildren().add(0, seriesBackgroundNoise);
+        seriesStack.getChildren().add(1, seriesBackgroundClarity);
 
         ImageView seriesNoise = new ImageView(new Image(getFileAsIOStream("img/noise.png")));
         seriesNoise.setPreserveRatio(false);
         seriesNoise.setOpacity(0.03);
         seriesBackgroundNoise.setImageView(seriesNoise);
+
+        ImageView seriesClarity = new ImageView(new Image(getFileAsIOStream("img/white.png")));
+        seriesClarity.setPreserveRatio(false);
+        seriesClarity.setOpacity(0.03);
+        seriesBackgroundClarity.setImageView(seriesClarity);
 
         globalBackground.setPreserveRatio(true);
 
@@ -470,6 +528,7 @@ public class DesktopViewController {
         globalBackgroundShadow2.fitWidthProperty().bind(mainBox.widthProperty());
         globalBackgroundShadow2.fitHeightProperty().bind(mainBox.heightProperty());
         globalBackgroundShadow2.setPreserveRatio(false);
+        globalBackgroundShadow2.setVisible(false);
 
         noiseImage.setFitWidth(screenWidth);
         noiseImage.setFitHeight(screenHeight);
@@ -1143,8 +1202,8 @@ public class DesktopViewController {
     }
     private void fadeInTransition(ImageView imageV) {
         //Fade In Transition
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1.5), imageV);
-        fadeIn.setFromValue(0.3);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), imageV);
+        fadeIn.setFromValue(0.5);
         fadeIn.setToValue(1.0);
         fadeIn.play();
     }

@@ -1505,7 +1505,7 @@ public class Controller implements Initializable {
             stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
 
             DesktopViewController desktopViewController = fxmlLoader.getController();
-            desktopViewController.initValues();
+            desktopViewController.initValues(null);
             //FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
             stage.show();
 

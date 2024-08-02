@@ -30,6 +30,13 @@
 
   <dependencies>
       <dependency>
+          <groupId>javafx.jni</groupId>
+          <artifactId>javafx-jini</artifactId>
+          <version>1.0.0</version>
+          <scope>system</scope>
+          <systemPath>${project.basedir}/lib/fx-jni-1.0.0.jar</systemPath>
+      </dependency>
+      <dependency>
           <groupId>io.github.palexdev</groupId>
           <artifactId>materialfx</artifactId>
           <version>11.17.0</version>
