@@ -5,6 +5,7 @@ import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
+import com.example.executablelauncher.utils.WindowDecoration;
 import com.jfoenix.controls.JFXSlider;
 import de.androidpit.colorthief.ColorThief;
 import javafx.animation.*;
@@ -41,6 +42,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import xss.it.fx.helpers.CornerPreference;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -1496,17 +1498,17 @@ public class Controller implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
+            WindowDecoration windowDecoration = new WindowDecoration(stage, true);
+            windowDecoration.setCornerPreference(CornerPreference.ROUND);
             stage.setTitle(App.textBundle.getString("desktopMode"));
             stage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
             stage.setScene(new Scene(root));
             stage.setMaximized(false);
-            //stage.initStyle(StageStyle.UNDECORATED);
             stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
             stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
 
             DesktopViewController desktopViewController = fxmlLoader.getController();
-            desktopViewController.initValues(null);
-            //FXResizeHelper rh = new FXResizeHelper(stage, 0, 5);
+            desktopViewController.initValues(windowDecoration);
             stage.show();
 
             Stage thisStage = (Stage) mainBox.getScene().getWindow();

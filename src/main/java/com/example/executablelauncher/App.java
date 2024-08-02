@@ -143,8 +143,6 @@ public class App extends Application {
     private void loadFullscreenMode() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
         Parent root = fxmlLoader.load();
-        //Controller controller = fxmlLoader.getController();
-        //controller.playIntroVideo();
         primaryStage = new Stage();
         primaryStage.setTitle(App.textBundle.getString("fullscreenMode"));
         primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));

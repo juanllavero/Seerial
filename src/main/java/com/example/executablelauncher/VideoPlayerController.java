@@ -312,7 +312,6 @@ public class VideoPlayerController {
                     controlsStage.setWidth(primaryStage.getWidth() * 0.99);
                     controlsStage.setHeight(primaryStage.getHeight() * 0.98);
                 }
-
             }
         }
 
@@ -328,7 +327,7 @@ public class VideoPlayerController {
             double controlsHeight = controlsStage.getHeight();
 
             double x = primaryX + (primaryWidth - controlsWidth) / 2;
-            double y = primaryY + (primaryHeight - controlsHeight);
+            double y = primaryY + ((primaryHeight - controlsHeight) / 2) + 7;
 
             controlsStage.setX(x);
             controlsStage.setY(y);

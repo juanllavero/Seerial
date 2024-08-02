@@ -39,6 +39,7 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -703,15 +704,27 @@ public class DesktopViewController {
         selectedEpisodes.clear();
         selectionOptions.setVisible(false);
 
-        Image i = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.jpg",
-                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), true, true);
-        ASPECT_RATIO = i.getWidth() / i.getHeight();
-        globalBackground.setImage(i);
-        ImageView img = new ImageView(new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "transparencyEffect.png"));
-        img.setPreserveRatio(true);
-        seasonBackground.setImageView(img);
-        fadeInTransition(globalBackground);
-        fadeInTransition(seasonBackground.getImageView());
+        Image secondImg = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.jpg",
+                globalBackground.getImage().getWidth(), globalBackground.getImage().getHeight(), true, true);
+        BufferedImage img1 = SwingFXUtils.fromFXImage(globalBackground.getImage(), null);
+        BufferedImage img2 = SwingFXUtils.fromFXImage(secondImg, null);
+
+        boolean sameImage = compareImages(img1, img2);
+
+        img1.flush();
+        img2.flush();
+
+        if (!sameImage){
+            Image i = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.jpg",
+                    Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), true, true);
+            ASPECT_RATIO = i.getWidth() / i.getHeight();
+            globalBackground.setImage(i);
+            ImageView img = new ImageView(new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "transparencyEffect.png"));
+            img.setPreserveRatio(true);
+            seasonBackground.setImageView(img);
+            fadeInTransition(globalBackground);
+            fadeInTransition(seasonBackground.getImageView());
+        }
 
         //Fill info
         detailsText.setText(App.textBundle.getString("details"));
@@ -2100,6 +2113,14 @@ public class DesktopViewController {
                     }
                 }
             }
+        }else if (series.getSeasons().size() > 1){
+            //If two seasons have the same name
+            if (series.getSeasons().getFirst().getName().equals(series.getSeasons().get(1).getName())){
+                for (Season season : series.getSeasons()){
+                    if (season.getSeasonNumber() != 0)
+                        season.setName(App.textBundle.getString("season") + " " + season.getSeasonNumber());
+                }
+            }
         }
 
         //Hide loading circle in view
@@ -2517,8 +2538,6 @@ public class DesktopViewController {
                     }
                 }
             });
-        } else if (season == selectedSeason) {
-            addEpisodeCardInOrder(episode);
         }
     }
 
@@ -3755,30 +3774,6 @@ public class DesktopViewController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void addEpisodeCardInOrder(Episode episode) {
-        Platform.runLater(() -> {
-            episodeList = selectedSeason.getEpisodes();
-            episodeList.sort(new Utils.EpisodeComparator());
-            int index = episodeList.indexOf(episode);
-
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader();
-                fxmlLoader.setLocation(getClass().getResource("discCard.fxml"));
-                Pane cardBox = fxmlLoader.load();
-                DiscController discController = fxmlLoader.getController();
-                discController.setDesktopParentParent(this);
-                discController.setData(episode);
-
-                if (index >= 0 && index <= episodesContainer.getChildren().size()) {
-                    episodesContainer.getChildren().add(index, cardBox);
-                    episodesControllers.add(index, discController);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
     public void updateDisc(Episode d) {

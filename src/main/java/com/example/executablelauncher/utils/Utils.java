@@ -28,6 +28,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -369,6 +370,20 @@ public class Utils {
             throw new IllegalArgumentException(fileName + " is not found");
         }
         return ioStream;
+    }
+    public static boolean compareImages(BufferedImage img1, BufferedImage img2) {
+        if (img1.getWidth() != img2.getWidth() || img1.getHeight() != img2.getHeight()) {
+            return false;
+        }
+
+        for (int y = 0; y < img1.getHeight(); y++) {
+            for (int x = 0; x < img1.getWidth(); x++) {
+                if (img1.getRGB(x, y) != img2.getRGB(x, y)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     //endregion
 }
