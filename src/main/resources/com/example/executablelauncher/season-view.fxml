@@ -374,17 +374,17 @@
                                     <Font size="20.0" />
                                  </font>
                               </Label>
-                              <Label fx:id="musicByText" text="Música compuesta por" textFill="WHITE">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
                               <Label fx:id="studioText" text="Estudio" textFill="WHITE">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
                               <Label fx:id="genresText" text="Géneros" textFill="WHITE">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="musicByText" text="Música compuesta por" textFill="WHITE">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
@@ -408,17 +408,17 @@
                                     <Font size="20.0" />
                                  </font>
                               </Label>
-                              <Label fx:id="musicByField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
-                                 <font>
-                                    <Font size="20.0" />
-                                 </font>
-                              </Label>
                               <Label fx:id="studioField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
                                  <font>
                                     <Font size="20.0" />
                                  </font>
                               </Label>
                               <Label fx:id="genresField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <font>
+                                    <Font size="20.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="musicByField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
                                  <font>
                                     <Font size="20.0" />
                                  </font>

@@ -121,230 +121,81 @@ public class DesktopViewController {
         }
     }
     //region FXML ATTRIBUTES
-    @FXML
-    private HBox rightArea;
-
-    @FXML
-    private Button minButton;
-
-    @FXML
-    private Button maxButton;
-
-    @FXML
-    private Button closeButton;
-
-    @FXML
-    private HBox leftArea;
-
-    @FXML
-    private ImageView blackBackground;
-
-    @FXML
-    private Button setWatchedSeries;
-
-    @FXML
-    private Button setWatchedSeason;
-
-    @FXML
-    private Button setWatchedEpisode;
-
-    @FXML
-    private Button setUnwatchedSeries;
-
-    @FXML
-    private Button setUnwatchedSeason;
-
-    @FXML
-    private Button setUnwatchedEpisode;
-
-    @FXML
-    private Button addLibraryButton;
-
-    @FXML
-    private Label elementsSelectedText;
-
-    @FXML
-    private VBox libraryMenu;
-
-    @FXML
-    private VBox libraryContainer;
-
-    @FXML
-    private Button editLibraryButton;
-
-    @FXML
-    private Button searchFilesButton;
-
-    @FXML
-    private Button removeLibraryButton;
-
-    @FXML
-    private Button deleteSelectedButton;
-
-    @FXML
-    private Button deselectAllButton;
-
-    @FXML
-    private Button selectAllButton;
-
-    @FXML
-    private Button identificationMovie;
-
-    @FXML
-    private Button identificationShow;
-
-    @FXML
-    private Button changeEpisodesGroup;
-
-    @FXML
-    private BorderPane selectionOptions;
-
-    @FXML
-    private ImageView backgroundShadow;
-
-    @FXML
-    private Button librarySelector;
-
-    @FXML
-    private VBox seasonsEpisodesBox;
-
-    @FXML
-    private FlowPane episodesContainer;
-
-    @FXML
-    private VBox episodeMenu;
-
-    @FXML
-    private Button editSeriesButton;
-
-    @FXML
-    private Button editEpisodeButton;
-
-    @FXML
-    private Button editSeasonButton;
-
-    @FXML
-    private Button exitButton;
-
-    @FXML
-    private ImageView globalBackground;
-
-    @FXML
-    private ImageView globalBackgroundShadow;
-
-    @FXML
-    private ImageView globalBackgroundShadow2;
-
-    @FXML
-    private BorderPane mainBorderPane;
-
-    @FXML
-    private StackPane mainBox;
-
-    @FXML
-    private VBox mainMenu;
-
-    @FXML
-    private ImageView maximizeRestoreImage;
-
-    @FXML
-    private Pane menuParentPane;
-
-    @FXML
-    private Button removeSeriesButton;
-
-    @FXML
-    private Button removeEpisodeButton;
-
-    @FXML
-    private Button removeSeasonButton;
-
-    @FXML
-    private FlowPane seasonContainer;
-
-    @FXML
-    private HBox seasonLogoBox;
-
-    @FXML
-    private StackPane seasonInfoPane;
-
-    @FXML
-    private ImageView seasonLogo;
-
-    @FXML
-    private VBox seasonMenu;
-
-    @FXML
-    private Label seasonNumberText;
-
-    @FXML
-    private Label seasonNumberField;
-
-    @FXML
-    private ScrollPane seasonScroll;
-
-    @FXML
-    private VBox seriesContainer;
-
-    @FXML
-    private ImageView seriesCover;
-
-    @FXML
-    private VBox seriesMenu;
-
-    @FXML
-    private ScrollPane seriesScrollPane;
-
-    @FXML
-    private Button settingsButton;
-
-    @FXML
-    private Button switchFSButton;
-
-    @FXML
-    private BorderPane topBar;
-
-    @FXML
-    private ImageView noiseImage;
-
-    @FXML
-    private StackPane seriesStack;
-
-    @FXML
-    private Label detailsText;
-
-    @FXML
-    private Label yearText;
-
-    @FXML
-    private Label orderText;
-
-    @FXML
-    private Label episodesText;
-
-    @FXML
-    private Label yearField;
-
-    @FXML
-    private Label orderField;
-
-    @FXML
-    private Label episodesField;
-
-    @FXML
-    private HBox downloadingContentWindow;
-
-    @FXML
-    private Label downloadingContentText;
-
-    @FXML
-    private VBox downloadingContentWindowStatic;
-
-    @FXML
-    private Label downloadingContentTextStatic;
-
-    @FXML
-    private BorderPane seasonBorderPane;
+    @FXML Label totalDurationText;
+    @FXML Label rootFolderText;
+    @FXML Label totalDurationField;
+    @FXML Label rootFolderField;
+    @FXML HBox rightArea;
+    @FXML Button minButton;
+    @FXML Button maxButton;
+    @FXML Button closeButton;
+    @FXML HBox leftArea;
+    @FXML ImageView blackBackground;
+    @FXML Button setWatchedSeries;
+    @FXML Button setWatchedSeason;
+    @FXML Button setWatchedEpisode;
+    @FXML Button setUnwatchedSeries;
+    @FXML Button setUnwatchedSeason;
+    @FXML Button setUnwatchedEpisode;
+    @FXML Button addLibraryButton;
+    @FXML Label elementsSelectedText;
+    @FXML VBox libraryMenu;
+    @FXML VBox libraryContainer;
+    @FXML Button editLibraryButton;
+    @FXML Button searchFilesButton;
+    @FXML Button removeLibraryButton;
+    @FXML Button deleteSelectedButton;
+    @FXML Button deselectAllButton;
+    @FXML Button selectAllButton;
+    @FXML Button identificationMovie;
+    @FXML Button identificationShow;
+    @FXML Button changeEpisodesGroup;
+    @FXML BorderPane selectionOptions;
+    @FXML ImageView backgroundShadow;
+    @FXML Button librarySelector;
+    @FXML VBox seasonsEpisodesBox;
+    @FXML FlowPane episodesContainer;
+    @FXML VBox episodeMenu;
+    @FXML Button editSeriesButton;
+    @FXML Button editEpisodeButton;
+    @FXML Button editSeasonButton;
+    @FXML Button exitButton;
+    @FXML ImageView globalBackground;
+    @FXML ImageView globalBackgroundShadow;
+    @FXML ImageView globalBackgroundShadow2;
+    @FXML BorderPane mainBorderPane;
+    @FXML StackPane mainBox;
+    @FXML VBox mainMenu;
+    @FXML Pane menuParentPane;
+    @FXML Button removeSeriesButton;
+    @FXML Button removeEpisodeButton;
+    @FXML Button removeSeasonButton;
+    @FXML FlowPane seasonContainer;
+    @FXML HBox seasonLogoBox;
+    @FXML StackPane seasonInfoPane;
+    @FXML ImageView seasonLogo;
+    @FXML VBox seasonMenu;
+    @FXML Label seasonNumberText;
+    @FXML Label seasonNumberField;
+    @FXML ScrollPane seasonScroll;
+    @FXML VBox seriesContainer;
+    @FXML ImageView seriesCover;
+    @FXML VBox seriesMenu;
+    @FXML ScrollPane seriesScrollPane;
+    @FXML Button settingsButton;
+    @FXML Button switchFSButton;
+    @FXML BorderPane topBar;
+    @FXML ImageView noiseImage;
+    @FXML StackPane seriesStack;
+    @FXML Label detailsText;
+    @FXML Label yearText;
+    @FXML Label episodesText;
+    @FXML Label yearField;
+    @FXML Label episodesField;
+    @FXML HBox downloadingContentWindow;
+    @FXML Label downloadingContentText;
+    @FXML VBox downloadingContentWindowStatic;
+    @FXML Label downloadingContentTextStatic;
     //endregion
 
     //region ATTRIBUTES
@@ -576,7 +427,8 @@ public class DesktopViewController {
         changeEpisodesGroup.setText(App.buttonsBundle.getString("changeEpisodesGroup"));
         detailsText.setText(App.textBundle.getString("details"));
         yearText.setText(App.textBundle.getString("year"));
-        orderText.setText(App.textBundle.getString("order"));
+        totalDurationText.setText(App.textBundle.getString("totalDuration"));
+        rootFolderText.setText(App.textBundle.getString("rootFolder"));
         setWatchedSeries.setText(App.buttonsBundle.getString("markWatched"));
         setWatchedSeason.setText(App.buttonsBundle.getString("markWatched"));
         setWatchedEpisode.setText(App.buttonsBundle.getString("markWatched"));
@@ -732,12 +584,23 @@ public class DesktopViewController {
         //Fill info
         detailsText.setText(App.textBundle.getString("details"));
         yearText.setText(App.textBundle.getString("year"));
-        orderText.setText(App.textBundle.getString("order"));
+
+        int duration = 0;
+        for (Episode episode : selectedSeason.getEpisodes()){
+            duration += episode.getRuntime();
+        }
+        totalDurationField.setText(duration + " min");
 
         if (currentLibrary.getType().equals("Shows")) {
             episodesText.setText(App.textBundle.getString("episodes"));
             seasonNumberText.setText(App.textBundle.getString("seasonNumber"));
             seasonNumberField.setText(String.valueOf(selectedSeason.getSeasonNumber()));
+            seasonNumberText.setVisible(true);
+            seasonNumberText.setManaged(true);
+            seasonNumberField.setVisible(true);
+            seasonNumberField.setManaged(true);
+
+            rootFolderField.setText(selectedSeries.getFolder());
 
             if (selectedSeries.getLogoSrc().isEmpty()) {
                 setTextNoLogo();
@@ -749,8 +612,12 @@ public class DesktopViewController {
             }
         } else {
             episodesText.setText(App.textBundle.getString("videos"));
-            seasonNumberText.setText("");
-            seasonNumberField.setText("");
+            seasonNumberText.setVisible(false);
+            seasonNumberText.setManaged(false);
+            seasonNumberField.setVisible(false);
+            seasonNumberField.setManaged(false);
+
+            rootFolderField.setText(selectedSeason.getFolder());
 
             if (selectedSeason.getLogoSrc().isEmpty()) {
                 setTextNoLogo();
@@ -762,8 +629,22 @@ public class DesktopViewController {
             }
         }
 
+        rootFolderField.setOnMouseClicked(e -> {
+            try {
+                File folder = new File(rootFolderField.getText());
+
+                if (Desktop.isDesktopSupported() && folder.exists()) {
+                    Desktop desktop = Desktop.getDesktop();
+                    desktop.open(folder);
+                } else {
+                    App.showErrorMessage(App.textBundle.getString("rootFolder"), "", App.textBundle.getString("rootFolderError"));
+                }
+            } catch (IOException err) {
+                App.showErrorMessage(App.textBundle.getString("rootFolder"), "", App.textBundle.getString("rootFolderError"));
+            }
+        });
+
         yearField.setText(selectedSeason.getYear());
-        orderField.setText(Integer.toString(selectedSeason.getOrder()));
         episodesField.setText(Integer.toString(selectedSeason.getEpisodes().size()));
 
         setCoverImage();
@@ -774,9 +655,9 @@ public class DesktopViewController {
             Image image;
             if (!selectedSeries.getCoverSrc().isEmpty()) {
                 File file = new File(selectedSeries.getCoverSrc());
-                image = new Image(file.toURI().toURL().toExternalForm(), 400, 500, true, true);
+                image = new Image(file.toURI().toURL().toExternalForm(), 450, 500, true, true);
             } else {
-                image = new Image(getFileAsIOStream("img/DefaultPoster.png"), 400, 500, true, true);
+                image = new Image(getFileAsIOStream("img/DefaultPoster.png"), 450, 500, true, true);
             }
 
             seriesCover.setImage(image);

@@ -619,8 +619,17 @@
     -fx-text-fill: rgba(210, 210, 210, 0.66);
 }
 
-.textButton:hover {
+.textButton:hover{
     -fx-text-fill: rgb(255, 255, 255);
+}
+
+.folderLink{
+    -fx-background-color: transparent;
+    -fx-text-fill: #8EDCE6;
+}
+
+.folderLink:hover{
+    -fx-text-fill: white;
 }
 
 .CatButton{
