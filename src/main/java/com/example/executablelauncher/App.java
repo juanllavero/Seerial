@@ -127,8 +127,12 @@ public class App extends Application {
     private void loadDesktopMode() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
-        WindowDecoration windowDecoration = new WindowDecoration(primaryStage, true);
-        windowDecoration.setCornerPreference(CornerPreference.ROUND);
+
+        WindowDecoration windowDecoration = null;
+        if (System.getProperty("os.name").toLowerCase().contains("win")){
+            windowDecoration = new WindowDecoration(primaryStage, true);
+            windowDecoration.setCornerPreference(CornerPreference.ROUND);
+        }
 
         primaryStage.setTitle(App.textBundle.getString("desktopMode"));
         primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));

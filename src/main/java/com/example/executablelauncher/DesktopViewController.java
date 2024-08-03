@@ -92,10 +92,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -249,19 +246,23 @@ public class DesktopViewController {
 
         App.setDesktopController(this);
 
-        this.windowDecoration = windowDecoration;
-        topBar.setCenter(windowDecoration);
-        windowDecoration.setDesktopParent(this);
-        windowDecoration.initialize(leftArea, rightArea);
+        if (windowDecoration != null){
+            this.windowDecoration = windowDecoration;
+            topBar.setCenter(windowDecoration);
+            windowDecoration.setDesktopParent(this);
+            windowDecoration.initialize(leftArea, rightArea);
 
-        minButton.setOnAction(e -> windowDecoration.minimizeWindow());
-        maxButton.setOnAction(e -> {
-            if (stage.isMaximized())
-                windowDecoration.restoreWindow();
-            else
-                windowDecoration.maximizeWindow();
-        });
-        closeButton.setOnAction(e -> closeWindow());
+            minButton.setOnAction(e -> windowDecoration.minimizeWindow());
+            maxButton.setOnAction(e -> {
+                if (stage.isMaximized())
+                    windowDecoration.restoreWindow();
+                else
+                    windowDecoration.maximizeWindow();
+            });
+            closeButton.setOnAction(e -> closeWindow());
+        }else{
+            rightArea.setVisible(false);
+        }
 
         if (App.isConnectedToInternet)
             tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
@@ -896,7 +897,7 @@ public class DesktopViewController {
             buttonText.getStyleClass().clear();
             buttonText.getStyleClass().add("desktopTextButton");
 
-            MFXProgressSpinner spinner = (MFXProgressSpinner) ((BorderPane) btn.getGraphic()).getRight();
+            MFXProgressSpinner spinner = (MFXProgressSpinner) ((BorderPane) b.getGraphic()).getRight();
             if (spinner.isVisible()){
                 spinner.setColor1(Color.web("8EDCE6"));
                 spinner.setColor2(Color.web("8EDCE6"));
@@ -1664,6 +1665,11 @@ public class DesktopViewController {
                 if (filesInFolder == null)
                     return;
 
+                Path srcPath = Paths.get(selectedSeries.getSeasons().getFirst().getBackgroundSrc());
+                Path destDir = Paths.get("resources/img/DownloadCache/" + selectedSeries.getThemdbID() + ".jpg");
+
+                Files.copy(srcPath, destDir, StandardCopyOption.REPLACE_EXISTING);
+
                 // Remove Seasons
                 for (Season season : selectedSeries.getSeasons())
                     DataManager.INSTANCE.deleteSeasonData(season);
@@ -1684,6 +1690,7 @@ public class DesktopViewController {
                     downloadMedia(season, results.get(0).watch_url);
 
                 Platform.runLater(() -> {
+                    clearImageCache();
                     downloadingContentWindowStatic.setVisible(false);
                     changeEpisodeGroup = false;
                     hideBackgroundShadow();
@@ -1692,6 +1699,7 @@ public class DesktopViewController {
 
             } catch (Exception e) {
                 Platform.runLater(() -> {
+                    clearImageCache();
                     downloadingContentWindowStatic.setVisible(false);
                     changeEpisodeGroup = false;
                     hideBackgroundShadow();

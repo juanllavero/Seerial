@@ -1,10 +1,7 @@
 package com.example.executablelauncher.entities;
 
-import com.example.executablelauncher.utils.WindowDecoration;
 import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
-import xss.it.fx.helpers.CornerPreference;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -50,7 +47,6 @@ public class VideoMetadataExample extends Application {
     //endregion
 
     public static void main(String[] args) throws IOException {
-
 
         launch(args);
     }

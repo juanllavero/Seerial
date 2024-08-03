@@ -30,6 +30,8 @@ module com.example.executablelauncher {
     requires com.github.kokorin.jaffree;
     requires color.thief;
     requires MaterialFX;
+    requires uk.co.caprica.vlcj;
+    requires uk.co.caprica.vlcj.javafx;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;

@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="329.0" prefWidth="533.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddLibraryController">
+<BorderPane prefHeight="400.0" prefWidth="597.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddLibraryController">
    <top>
       <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
@@ -54,11 +54,17 @@
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
+               <font>
+                  <Font size="18.0" />
+               </font>
             </Button>
             <Button fx:id="foldersViewButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showFoldersView" styleClass="editButton" stylesheets="@styles.css" text="Folders">
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
+               <font>
+                  <Font size="18.0" />
+               </font>
             </Button>
          </children>
       </VBox>
@@ -96,7 +102,7 @@
                      <children>
                         <Button fx:id="moviesTypeButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#setMoviesType" styleClass="editButton" stylesheets="@styles.css" text="Movies">
                            <graphic>
-                              <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true" smooth="false">
+                              <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true" smooth="false">
                                  <image>
                                     <Image url="@../../../../../../resources/img/icons/movies.png" />
                                  </image></ImageView>
@@ -104,10 +110,13 @@
                            <padding>
                               <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                            </padding>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
                         </Button>
                         <Button fx:id="showsTypeButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#setShowsType" styleClass="editButton" text="Shows">
                            <graphic>
-                              <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true" smooth="false">
+                              <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true" smooth="false">
                                  <image>
                                     <Image url="@../../../../../../resources/img/icons/shows.png" />
                                  </image></ImageView>
@@ -115,6 +124,9 @@
                            <padding>
                               <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                            </padding>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
                         </Button>
                      </children>
                      <VBox.margin>
@@ -132,6 +144,9 @@
                                  <VBox.margin>
                                     <Insets />
                                  </VBox.margin>
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
                               </Label>
                               <TextField fx:id="nameField" prefHeight="25.0" prefWidth="228.0">
                                  <VBox.margin>
@@ -146,6 +161,9 @@
                                  <opaqueInsets>
                                     <Insets />
                                  </opaqueInsets>
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
                               </Label>
                               <ChoiceBox fx:id="languageChoice" prefWidth="150.0">
                                  <VBox.margin>
@@ -163,6 +181,9 @@
                      <VBox.margin>
                         <Insets top="20.0" />
                      </VBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
                   </CheckBox>
                </children>
                <padding>

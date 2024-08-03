@@ -1492,14 +1492,19 @@ public class Controller implements Initializable {
     }
 
     @FXML
-    void switchToDesktop(ActionEvent event){
+    void switchToDesktop(){
         playInteractionSound();
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = new Stage();
-            WindowDecoration windowDecoration = new WindowDecoration(stage, true);
-            windowDecoration.setCornerPreference(CornerPreference.ROUND);
+
+            WindowDecoration windowDecoration = null;
+            if (System.getProperty("os.name").toLowerCase().contains("win")){
+                windowDecoration = new WindowDecoration(stage, true);
+                windowDecoration.setCornerPreference(CornerPreference.ROUND);
+            }
+
             stage.setTitle(App.textBundle.getString("desktopMode"));
             stage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
             stage.setScene(new Scene(root));

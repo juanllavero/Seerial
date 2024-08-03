@@ -30,6 +30,17 @@
 
   <dependencies>
       <dependency>
+          <groupId>uk.co.caprica</groupId>
+          <artifactId>vlcj</artifactId>
+          <version>4.8.3</version>
+      </dependency>
+
+      <dependency>
+          <groupId>uk.co.caprica</groupId>
+          <artifactId>vlcj-javafx</artifactId>
+          <version>1.2.0</version>
+      </dependency>
+      <dependency>
           <groupId>javafx.jni</groupId>
           <artifactId>javafx-jini</artifactId>
           <version>1.0.0</version>

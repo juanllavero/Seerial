@@ -25,6 +25,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import xss.it.fx.helpers.CornerPreference;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
