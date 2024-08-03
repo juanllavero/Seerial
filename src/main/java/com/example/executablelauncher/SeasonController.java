@@ -1,11 +1,13 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
+import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.fileMetadata.AudioTrack;
 import com.example.executablelauncher.fileMetadata.SubtitleTrack;
 import com.example.executablelauncher.fileMetadata.VideoTrack;
+import com.example.executablelauncher.tmdbMetadata.movieCredits.Cast;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
@@ -34,7 +36,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
+import javafx.scene.text.*;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -468,7 +470,7 @@ public class SeasonController {
         if (logoSrc.isEmpty()){
             infoBox.getChildren().remove(0);
             Label seriesTitle = new Label(series.getName());
-            seriesTitle.setFont(new Font("Arial", 58));
+            seriesTitle.setFont(new Font("Roboto", 58));
             seriesTitle.setStyle("-fx-font-weight: bold");
             seriesTitle.setTextFill(Color.color(1, 1, 1));
             seriesTitle.setEffect(new DropShadow());
@@ -956,14 +958,70 @@ public class SeasonController {
         detailsTitle.setText(selectedEpisode.getName());
         detailsOverview.setText(overviewField.getText());
 
+        directedByField.setVisible(!selectedEpisode.getDirectedBy().isEmpty());
+        directedByField.setManaged(!selectedEpisode.getDirectedBy().isEmpty());
+        directedByText.setVisible(!selectedEpisode.getDirectedBy().isEmpty());
+        directedByText.setManaged(!selectedEpisode.getDirectedBy().isEmpty());
+
+        writtenByField.setVisible(!selectedEpisode.getWrittenBy().isEmpty());
+        writtenByField.setManaged(!selectedEpisode.getWrittenBy().isEmpty());
+        writtenByText.setVisible(!selectedEpisode.getWrittenBy().isEmpty());
+        writtenByText.setManaged(!selectedEpisode.getWrittenBy().isEmpty());
+
+        createdByField.setVisible(!seasons.get(currentSeason).getCreator().isEmpty());
+        createdByField.setManaged(!seasons.get(currentSeason).getCreator().isEmpty());
+        createdByText.setVisible(!seasons.get(currentSeason).getCreator().isEmpty());
+        createdByText.setManaged(!seasons.get(currentSeason).getCreator().isEmpty());
+
+        musicByField.setVisible(!seasons.get(currentSeason).getMusicComposer().isEmpty());
+        musicByField.setManaged(!seasons.get(currentSeason).getMusicComposer().isEmpty());
+        musicByText.setVisible(!seasons.get(currentSeason).getMusicComposer().isEmpty());
+        musicByText.setManaged(!seasons.get(currentSeason).getMusicComposer().isEmpty());
+
+        studioField.setVisible(!seasons.get(currentSeason).getProductionStudios().isEmpty());
+        studioField.setManaged(!seasons.get(currentSeason).getProductionStudios().isEmpty());
+        studioText.setVisible(!seasons.get(currentSeason).getProductionStudios().isEmpty());
+        studioText.setManaged(!seasons.get(currentSeason).getProductionStudios().isEmpty());
+
         directedByField.setText(selectedEpisode.getDirectedBy());
         writtenByField.setText(selectedEpisode.getWrittenBy());
         createdByField.setText(seasons.get(currentSeason).getCreator());
         musicByField.setText(seasons.get(currentSeason).getMusicComposer());
-        studioField.setText(series.getProductionStudios());
+        studioField.setText(seasons.get(currentSeason).getProductionStudios());
         fileNameField.setText(selectedEpisode.getMediaInfo().getFile());
         fileSizeField.setText(selectedEpisode.getMediaInfo().getSize());
         bitrateField.setText(selectedEpisode.getMediaInfo().getBitrate());
+
+        castLeftBox.getChildren().clear();
+        castRightBox.getChildren().clear();
+        VBox box = castLeftBox;
+        boolean changed = false;
+        for (Cast member : seasons.get(currentSeason).getCast()){
+            if (box.getChildren().size() == 11 && !changed) {
+                box = castRightBox;
+                changed = true;
+            }else if (box.getChildren().size() == 10 && changed){
+                Label label = new Label("...");
+                label.setFont(new Font("Roboto", 21));
+                label.setTextFill(Color.WHITE);
+                label.setAlignment(Pos.CENTER_LEFT);
+                box.getChildren().add(label);
+                break;
+            }
+
+            box.getChildren().add(new TextFlow(
+                    new Text() {{
+                        setText(member.name);
+                        setFill(Color.WHITE);
+                        setFont(Font.font("System", FontWeight.BOLD, 21));
+                    }},
+                    new Text() {{
+                        setText(" " + App.textBundle.getString("as") + " '" + member.character + "'");
+                        setFill(Color.LIGHTGRAY);
+                        setFont(Font.font("System", FontWeight.NORMAL, 21));
+                    }}
+            ));
+        }
 
         File file = new File(selectedEpisode.getVideoSrc());
         fileNameField.setText(file.getName());
@@ -1085,6 +1143,8 @@ public class SeasonController {
         else
             delay = 0.5;
 
+        mediaExecutor.shutdownNow();
+        mediaExecutor = Executors.newScheduledThreadPool(1);
         mediaExecutor.schedule(() -> {
             int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
             mp.setVolume((double) volume / 100);

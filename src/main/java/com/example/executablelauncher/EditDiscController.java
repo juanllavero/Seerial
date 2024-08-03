@@ -366,7 +366,7 @@ public class EditDiscController {
                     new Text() {{
                         setText("Media Info");
                         setFill(Color.WHITE);
-                        setFont(Font.font("System", FontWeight.BOLD, 16));
+                        setFont(Font.font("Roboto", FontWeight.BOLD, 16));
                     }}
             );
             addTextLine(generalInfoBox, "Duration: ", mediaInfo.getDuration());
@@ -391,7 +391,7 @@ public class EditDiscController {
             generalInfoBox.getChildren().add(new Text() {{
                 setText("Media info could not be generated");
                 setFill(Color.WHITE);
-                setFont(Font.font("System", FontWeight.BOLD, 16));
+                setFont(Font.font("Roboto", FontWeight.BOLD, 16));
             }});
         });
 
@@ -409,7 +409,7 @@ public class EditDiscController {
                 new Text() {{
                     setText("Video");
                     setFill(Color.WHITE);
-                    setFont(Font.font("System", FontWeight.BOLD, 16));
+                    setFont(Font.font("Roboto", FontWeight.BOLD, 16));
                 }}
         );
 
@@ -461,7 +461,7 @@ public class EditDiscController {
                 new Text() {{
                     setText("Audio");
                     setFill(Color.WHITE);
-                    setFont(Font.font("System", FontWeight.BOLD, 16));
+                    setFont(Font.font("Roboto", FontWeight.BOLD, 16));
                 }}
         );
 
@@ -507,7 +507,7 @@ public class EditDiscController {
                 new Text() {{
                     setText("Subtitles");
                     setFill(Color.WHITE);
-                    setFont(Font.font("System", FontWeight.BOLD, 16));
+                    setFont(Font.font("Roboto", FontWeight.BOLD, 16));
                 }}
         );
 
@@ -535,12 +535,12 @@ public class EditDiscController {
                         new Text() {{
                             setText(header);
                             setFill(Color.GRAY);
-                            setFont(Font.font("System", FontWeight.NORMAL, 15));
+                            setFont(Font.font("Roboto", FontWeight.NORMAL, 15));
                         }},
                         new Text() {{
                             setText(content);
                             setFill(Color.WHITE);
-                            setFont(Font.font("System", FontWeight.BOLD, 14));
+                            setFont(Font.font("Roboto", FontWeight.BOLD, 14));
                         }}
                 )
         );

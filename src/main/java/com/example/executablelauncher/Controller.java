@@ -1156,7 +1156,7 @@ public class Controller implements Initializable {
                 episodeNameBox.getChildren().clear();
                 if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
                     Label episodeName = new Label(episode.getName());
-                    episodeName.setFont(new Font("Arial", 42));
+                    episodeName.setFont(new Font("Roboto", 42));
                     episodeName.setStyle("-fx-font-weight: bold");
                     episodeName.setTextFill(Color.color(1, 1, 1));
                     episodeName.setEffect(new DropShadow());

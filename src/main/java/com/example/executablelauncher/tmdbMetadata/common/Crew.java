@@ -1,5 +1,8 @@
 package com.example.executablelauncher.tmdbMetadata.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Crew {
     public boolean adult;
     public int gender;

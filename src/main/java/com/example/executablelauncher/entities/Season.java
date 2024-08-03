@@ -38,6 +38,9 @@ public class Season implements Serializable {
     List<Cast> cast = new ArrayList<>();
     String creator = "";
     String musicComposer = "";
+    String directedBy = "";
+    String writtenBy = "";
+    String productionStudios = "";
 
     public Season() {
         id = UUID.randomUUID().toString();
@@ -320,5 +323,29 @@ public class Season implements Serializable {
 
     public void setMusicComposer(String musicComposer) {
         this.musicComposer = musicComposer;
+    }
+
+    public String getDirectedBy() {
+        return directedBy;
+    }
+
+    public void setDirectedBy(String directedBy) {
+        this.directedBy = directedBy;
+    }
+
+    public String getWrittenBy() {
+        return writtenBy;
+    }
+
+    public void setWrittenBy(String writtenBy) {
+        this.writtenBy = writtenBy;
+    }
+
+    public String getProductionStudios() {
+        return productionStudios;
+    }
+
+    public void setProductionStudios(String productionStudios) {
+        this.productionStudios = productionStudios;
     }
 }

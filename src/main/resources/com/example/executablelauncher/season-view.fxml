@@ -352,12 +352,12 @@
                         <Font size="21.0" />
                      </font>
                      <VBox.margin>
-                        <Insets bottom="10.0" />
+                        <Insets />
                      </VBox.margin>
                   </Label>
                   <HBox>
                      <children>
-                        <VBox prefWidth="250.0">
+                        <VBox prefWidth="250.0" spacing="2.0">
                            <children>
                               <Label fx:id="directedByText" text="Dirigido por" textFill="WHITE">
                                  <font>
@@ -391,7 +391,7 @@
                               </Label>
                            </children>
                         </VBox>
-                        <VBox>
+                        <VBox spacing="2.0">
                            <children>
                               <Label fx:id="directedByField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
                                  <font>
@@ -435,12 +435,12 @@
                         <Font name="System Bold" size="22.0" />
                      </font>
                      <VBox.margin>
-                        <Insets top="20.0" />
+                        <Insets top="10.0" />
                      </VBox.margin>
                   </Label>
                   <HBox>
                      <children>
-                        <VBox prefWidth="250.0">
+                        <VBox prefWidth="250.0" spacing="2.0">
                            <children>
                               <Label fx:id="fileNameText" text="Nombre del archivo" textFill="WHITE">
                                  <font>
@@ -459,7 +459,7 @@
                               </Label>
                            </children>
                         </VBox>
-                        <VBox>
+                        <VBox spacing="2.0">
                            <children>
                               <Label fx:id="fileNameField" text="Nombre del archivo.mkv" textFill="WHITE" wrapText="true">
                                  <font>
@@ -485,13 +485,16 @@
                         <Font name="System Bold" size="22.0" />
                      </font>
                      <VBox.margin>
-                        <Insets top="10.0" />
+                        <Insets bottom="5.0" top="10.0" />
                      </VBox.margin>
                   </Label>
                   <HBox>
                      <children>
-                        <VBox fx:id="castLeftBox" prefWidth="250.0" />
-                        <VBox fx:id="castRightBox" />
+                        <VBox fx:id="castLeftBox" spacing="2.0" />
+                        <VBox fx:id="castRightBox" spacing="2.0">
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin></VBox>
                      </children>
                   </HBox>
                </children>

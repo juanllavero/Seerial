@@ -1,14 +1,9 @@
-/*
-    Icons used: heroicons made by Tailwind Labs for figma.com
-    url: https://www.figma.com/community/file/958423903283802665
-    Licensed under CC BY 4.0
- */
-
 .root {
+    -fx-font-family: "Roboto";
     -fx-background-color: transparent;
 
     /* TestMain colors */
-    -fx-main-color: #960F20;
+    -fx-main-color: #8EDCE6;
     -fx-light-color: #EDF2F4;
     -fx-dark-color: #0E0F19;
     -fx-dark-grey-color: #222222;
@@ -60,7 +55,7 @@
 }
 
 .minimizeButton:hover{
-    -fx-background-color: rgba(0, 0, 0, 0.38);
+    -fx-background-color: rgba(0, 0, 0, 0.65);
 }
 
 .maximizeButton{
@@ -68,7 +63,7 @@
 }
 
 .maximizeButton:hover{
-    -fx-background-color: rgba(37, 37, 37, 0.57);
+    -fx-background-color: rgba(0, 0, 0, 0.65);
 }
 
 .closeButton{

@@ -1,14 +1,8 @@
 package com.example.executablelauncher.utils;
 
 import com.example.executablelauncher.DesktopViewController;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import xss.it.fx.AbstractDecoration;
 import xss.it.fx.helpers.HitSpot;
@@ -16,9 +10,6 @@ import xss.it.fx.helpers.State;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.executablelauncher.utils.Utils.*;
-import static com.example.executablelauncher.utils.Utils.CLOSE_SHAPE;
 
 /**
  * @author XDSSWAR

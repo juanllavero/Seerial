@@ -309,6 +309,9 @@
                                  <image>
                                     <Image url="@../../../img/icons/windowMin.png" />
                                  </image>
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
                               </ImageView>
                            </graphic>
                            <padding>
@@ -321,6 +324,9 @@
                                  <image>
                                     <Image url="@../../../img/icons/windowMax.png" />
                                  </image>
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
                               </ImageView>
                            </graphic>
                            <padding>
@@ -333,6 +339,9 @@
                                  <image>
                                     <Image url="@../../../img/icons/windowClose.png" />
                                  </image>
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
                               </ImageView>
                            </graphic>
                            <padding>

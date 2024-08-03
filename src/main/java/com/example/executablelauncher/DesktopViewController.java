@@ -798,7 +798,7 @@ public class DesktopViewController {
     private void setTextNoLogo() {
         seasonLogoBox.getChildren().remove(0);
         Label seasonLogoText = new Label(selectedSeries.getName());
-        seasonLogoText.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 42));
+        seasonLogoText.setFont(Font.font("Roboto", FontWeight.BOLD, FontPosture.REGULAR, 42));
         seasonLogoText.setTextFill(Color.color(1, 1, 1));
         seasonLogoText.setEffect(new DropShadow());
         seasonLogoText.setPadding(new Insets(0, 0, 0, 15));
@@ -914,9 +914,8 @@ public class DesktopViewController {
     }
 
     public void selectSeries(Series selectedSeries) {
-        if (DesktopViewController.selectedSeries == selectedSeries) {
+        if (DesktopViewController.selectedSeries == selectedSeries)
             return;
-        }
 
         App.setSelectedSeries(selectedSeries);
         selectedEpisodes.clear();
@@ -1015,6 +1014,14 @@ public class DesktopViewController {
             Label buttonText = (Label) ((BorderPane) b.getGraphic()).getLeft();
             buttonText.getStyleClass().clear();
             buttonText.getStyleClass().add("desktopTextButton");
+
+            MFXProgressSpinner spinner = (MFXProgressSpinner) ((BorderPane) btn.getGraphic()).getRight();
+            if (spinner.isVisible()){
+                spinner.setColor1(Color.web("8EDCE6"));
+                spinner.setColor2(Color.web("8EDCE6"));
+                spinner.setColor3(Color.web("8EDCE6"));
+                spinner.setColor4(Color.web("8EDCE6"));
+            }
         }
         //Select current button
         btn.getStyleClass().clear();
@@ -1023,6 +1030,14 @@ public class DesktopViewController {
         Label buttonText = (Label) ((BorderPane) btn.getGraphic()).getLeft();
         buttonText.getStyleClass().clear();
         buttonText.getStyleClass().add("desktopButtonActive");
+
+        MFXProgressSpinner spinner = (MFXProgressSpinner) ((BorderPane) btn.getGraphic()).getRight();
+        if (spinner.isVisible()){
+            spinner.setColor1(Color.BLACK);
+            spinner.setColor2(Color.BLACK);
+            spinner.setColor3(Color.BLACK);
+            spinner.setColor4(Color.BLACK);
+        }
 
         if (seriesList.get(seriesButtons.indexOf(btn)) != selectedSeries)
             selectSeries(seriesList.get(seriesButtons.indexOf(btn)));
@@ -2476,6 +2491,7 @@ public class DesktopViewController {
             season.setName(seasonMetadata.name);
             season.setOverview(seasonMetadata.overview);
             season.setYear(seasonMetadata.episodes.get(0).air_date.substring(0, seasonMetadata.episodes.get(0).air_date.indexOf("-")));
+            season.setProductionStudios(series.getProductionStudios());
 
             if (realEpisode != -1)
                 season.setSeasonNumber(realSeason);
@@ -2508,7 +2524,7 @@ public class DesktopViewController {
                 }
             }
 
-            downloadSeasonCredits(season, seasonMetadata);
+            downloadSeasonCredits(series, season, seasonMetadata);
 
             if (series.getSeasons().size() == 1)
                 downloadLogos(library, series, season, series.getThemdbID());
@@ -2665,9 +2681,9 @@ public class DesktopViewController {
             System.out.println("downloadEpisodeCrew: Response not successful: " + e.getMessage());
         }
     }
-    private void downloadSeasonCredits(Season season, SeasonMetadata seasonMetadata){
+    private void downloadSeasonCredits(Series series, Season season, SeasonMetadata seasonMetadata){
         Request requestGroups = new Request.Builder()
-                .url("https://api.themoviedb.org/3/tv/" + season.getSeriesID() + "/season/" + seasonMetadata.season_number + "/credits?language=en-US")
+                .url("https://api.themoviedb.org/3/tv/" + series.getThemdbID() + "/season/" + seasonMetadata.season_number + "/credits?language=en-US")
                 .get()
                 .addHeader("accept", "application/json")
                 .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
@@ -2681,10 +2697,15 @@ public class DesktopViewController {
 
                 season.getCast().addAll(credits.cast);
 
+                if (credits.guest_stars != null)
+                    season.getCast().addAll(credits.guest_stars);
+
                 String originalSourceCreator = "";
                 String originalMusicComposer = "";
                 for (Crew person : credits.crew){
-                    if (person.job.equals("Author") || person.job.equals("Novel") || person.job.equals("Original Series Creator"))
+                    if (person.job.equals("Author") || person.job.equals("Novel") || person.job.equals("Original Series Creator")
+                            || person.job.equals("Comic Book") || person.job.equals("Idea") || person.job.equals("Original Story") || person.job.equals("Story")
+                            || person.job.equals("Story by") || person.job.equals("Book"))
                         originalSourceCreator = person.name;
                     else if (person.job.equals("Original Music Composer"))
                         originalMusicComposer = person.name;
@@ -2804,6 +2825,23 @@ public class DesktopViewController {
             season.setThemdbID(themdbID);
             season.setImdbID(movieMetadata.imdb_id);
 
+            if (movieMetadata.production_companies != null && !movieMetadata.production_companies.isEmpty()){
+                String finalStr = "";
+                if (movieMetadata.production_companies.size() > 3)
+                    finalStr = "...";
+
+                StringBuilder productionCompanies = new StringBuilder();
+                for (ProductionCompany pC : movieMetadata.production_companies){
+                    if (movieMetadata.production_companies.indexOf(pC) != 0)
+                        productionCompanies.append(", ");
+
+                    productionCompanies.append(pC.name);
+                }
+
+                productionCompanies.append(finalStr);
+                season.setProductionStudios(productionCompanies.toString());
+            }
+
             if (season.getImdbID() == null)
                 season.setImdbID("");
 
@@ -2845,6 +2883,7 @@ public class DesktopViewController {
 
             downloadLogos(library, series, season, season.getThemdbID());
             saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg", false);
+            downloadMovieCastAndCrew(season, movieMetadata);
 
             processMovie(library, f, season, movieMetadata.runtime);
 
@@ -2976,6 +3015,24 @@ public class DesktopViewController {
 
                         downloadLogos(library, series, season, season.getThemdbID());
                         saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg", false);
+                        downloadMovieCastAndCrew(season, movieMetadata);
+
+                        if (movieMetadata.production_companies != null && !movieMetadata.production_companies.isEmpty()){
+                            String finalStr = "";
+                            if (movieMetadata.production_companies.size() > 3)
+                                finalStr = "...";
+
+                            StringBuilder productionCompanies = new StringBuilder();
+                            for (ProductionCompany pC : movieMetadata.production_companies){
+                                if (movieMetadata.production_companies.indexOf(pC) != 0)
+                                    productionCompanies.append(", ");
+
+                                productionCompanies.append(pC.name);
+                            }
+
+                            productionCompanies.append(finalStr);
+                            season.setProductionStudios(productionCompanies.toString());
+                        }
                     }
 
                     for (File file : filesInFolder) {
@@ -3086,6 +3143,24 @@ public class DesktopViewController {
 
                     downloadLogos(library, series, season, season.getThemdbID());
                     saveBackground(season, "resources/img/DownloadCache/" + season.getThemdbID() + ".jpg", false);
+                    downloadMovieCastAndCrew(season, movieMetadata);
+
+                    if (movieMetadata.production_companies != null && !movieMetadata.production_companies.isEmpty()){
+                        String finalStr = "";
+                        if (movieMetadata.production_companies.size() > 3)
+                            finalStr = "...";
+
+                        StringBuilder productionCompanies = new StringBuilder();
+                        for (ProductionCompany pC : movieMetadata.production_companies){
+                            if (movieMetadata.production_companies.indexOf(pC) != 0)
+                                productionCompanies.append(", ");
+
+                            productionCompanies.append(pC.name);
+                        }
+
+                        productionCompanies.append(finalStr);
+                        season.setProductionStudios(productionCompanies.toString());
+                    }
                 }
 
                 for (File file : filesInRoot) {
@@ -3174,6 +3249,8 @@ public class DesktopViewController {
         episode.setRuntime(runtime);
         episode.setSeasonNumber(season.getSeasonNumber());
         episode.setVideoSrc(file.getAbsolutePath());
+        episode.setDirectedBy(season.getDirectedBy());
+        episode.setWrittenBy(season.getWrittenBy());
 
         if (!season.getImdbID().isEmpty())
             setIMDBScore(season.getImdbID(), episode);
@@ -3181,6 +3258,70 @@ public class DesktopViewController {
         setMovieThumbnail(episode, season.getThemdbID());
 
         getMediaInfo(episode);
+    }
+
+    private void downloadMovieCastAndCrew(Season season, MovieMetadata metadata){
+        Request requestGroups = new Request.Builder()
+                .url("https://api.themoviedb.org/3/movie/" + metadata.id + "/credits?language=en-US")
+                .get()
+                .addHeader("accept", "application/json")
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .build();
+
+        try (Response response = client.newCall(requestGroups).execute()) {
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                assert response.body() != null;
+                Credits credits = objectMapper.readValue(response.body().string(), Credits.class);
+
+                season.getCast().addAll(credits.cast);
+
+                if (credits.guest_stars != null)
+                    season.getCast().addAll(credits.guest_stars);
+
+                List<String> directors = new ArrayList<>();
+                List<String> writers = new ArrayList<>();
+                String originalSourceCreator = "";
+                String originalMusicComposer = "";
+                for (Crew person : credits.crew){
+                    if (person.job.equals("Author") || person.job.equals("Novel") || person.job.equals("Original Series Creator")
+                            || person.job.equals("Comic Book") || person.job.equals("Idea") || person.job.equals("Original Story") || person.job.equals("Story")
+                            || person.job.equals("Story by") || person.job.equals("Book"))
+                        originalSourceCreator = person.name;
+                    else if (person.job.equals("Original Music Composer"))
+                        originalMusicComposer = person.name;
+                    else if (person.job.equals("Writer") || person.job.equals("Screenplay"))
+                        writers.add(person.name);
+                    else if (person.job.equals("Director"))
+                        directors.add(person.name);
+                }
+
+                season.setCreator(originalSourceCreator);
+                season.setMusicComposer(originalMusicComposer);
+
+                StringBuilder directorsString = new StringBuilder();
+                for (String director : directors){
+                    if (directors.indexOf(director) != 0)
+                        directorsString.append(", ");
+
+                    directorsString.append(director);
+                }
+                season.setDirectedBy(directorsString.toString());
+
+                StringBuilder writersString = new StringBuilder();
+                for (String writer : writers){
+                    if (writers.indexOf(writer) != 0)
+                        writersString.append(", ");
+
+                    writersString.append(writer);
+                }
+                season.setWrittenBy(writersString.toString());
+            } else {
+                System.out.println("downloadMovieCastAndCrew: Response not successful: " + response.code());
+            }
+        } catch (IOException e) {
+            System.out.println("downloadMovieCastAndCrew: Response not successful: " + e.getMessage());
+        }
     }
 
     private void setIMDBScore(String imdbID, Episode episode) {
