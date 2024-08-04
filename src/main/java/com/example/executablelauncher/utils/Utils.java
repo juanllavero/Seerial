@@ -2,10 +2,16 @@ package com.example.executablelauncher.utils;
 
 import com.example.executablelauncher.App;
 import com.example.executablelauncher.DataManager;
-import com.example.executablelauncher.entities.Library;
-import com.example.executablelauncher.entities.Episode;
-import com.example.executablelauncher.entities.Season;
-import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.entities.*;
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.MediaInfo;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
+import com.github.kokorin.jaffree.StreamType;
+import com.github.kokorin.jaffree.ffprobe.FFprobe;
+import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
+import com.github.kokorin.jaffree.ffprobe.Format;
+import com.github.kokorin.jaffree.ffprobe.Stream;
 import io.github.palexdev.materialfx.controls.MFXProgressSpinner;
 import javafx.animation.*;
 import javafx.geometry.Bounds;
@@ -50,7 +56,6 @@ public class Utils {
             return s1.getName().compareTo(s2.getName());
         }
     }
-
     public static class SeasonComparator implements Comparator<Season> {
         @Override
         public int compare(Season s1, Season s2) {
@@ -79,7 +84,6 @@ public class Utils {
             return Integer.compare(year1, year2);
         }
     }
-
     public static class EpisodeComparator implements Comparator<Episode> {
         @Override
         public int compare(Episode a, Episode b) {
@@ -90,14 +94,12 @@ public class Utils {
             return Integer.compare(a.getEpisodeNumber(), b.getEpisodeNumber());
         }
     }
-
     public static class LibraryComparator implements Comparator<Library> {
         @Override
         public int compare(Library a, Library b) {
             return a.getName().compareTo(b.getName());
         }
     }
-
     public static String episodeDateFormat(String originalDate, String language) {
         SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat newFormat = new SimpleDateFormat("dd MMM yyyy", Locale.forLanguageTag(language));
@@ -110,7 +112,6 @@ public class Utils {
             return originalDate;
         }
     }
-
     public static class LocaleStringConverter extends javafx.util.StringConverter<Locale> {
         @Override
         public String toString(Locale object) {
@@ -380,6 +381,251 @@ public class Utils {
             }
         }
         return true;
+    }
+    public static void hideButton(Button btn){
+        btn.setVisible(false);
+        btn.setManaged(false);
+    }
+    public static void showButton(Button btn){
+        btn.setVisible(true);
+        btn.setManaged(true);
+    }
+    //endregion
+
+    //region MEDIA INFO EXTRACTION
+    public static void getMediaInfo(Episode episode) {
+        File video = new File(episode.getVideoSrc());
+
+        if (!video.exists())
+            return;
+
+        try {
+            FFprobeResult result = FFprobe.atPath()
+                    .setShowStreams(true)
+                    .setShowFormat(true)
+                    .setShowChapters(true)
+                    .setInput(episode.getVideoSrc())
+                    .execute();
+
+            Format format = result.getFormat();
+
+            //Media Info
+            MediaInfo mediaInfo = new MediaInfo(
+                    video.getName(),
+                    video.getAbsolutePath(),
+                    format.getBitRate() / Math.pow(10, 3),
+                    format.getDuration(),
+                    format.getSize(),
+                    video.getName().substring(video.getName().lastIndexOf(".") + 1).toUpperCase()
+            );
+
+            episode.setMediaInfo(mediaInfo);
+
+            //Set real runtime
+            if (format.getDuration() != null)
+                episode.setRuntimeInSeconds(format.getDuration());
+
+            //Remove previous tracks
+            episode.getVideoTracks().clear();
+            episode.getAudioTracks().clear();
+            episode.getSubtitleTracks().clear();
+
+            //Boolean to stop the loop after the last subtitle track
+            boolean subtitleSectionStarted = false;
+
+            //Tracks
+            List<Stream> streams = result.getStreams();
+            for (Stream stream : streams) {
+                if (stream.getCodecType().equals(StreamType.SUBTITLE))
+                    subtitleSectionStarted = true;
+                else if (subtitleSectionStarted)
+                    break;
+
+                if (stream.getCodecType().equals(StreamType.VIDEO))
+                    processVideoData(stream, episode);
+                else if (stream.getCodecType().equals(StreamType.AUDIO))
+                    processAudioData(stream, episode);
+                else if (stream.getCodecType().equals(StreamType.SUBTITLE))
+                    processSubtitleData(stream, episode);
+            }
+
+            //Chapters
+            List<com.github.kokorin.jaffree.ffprobe.Chapter> chapters = result.getChapters();
+            episode.getChapters().clear();
+            if (chapters != null && chapters.size() > 1) {
+                //DataManager.INSTANCE.createFolder("resources/img/chaptersCovers/" + episode.getId() + "/");
+                for (com.github.kokorin.jaffree.ffprobe.Chapter chapter : chapters) {
+                    double milliseconds = chapter.getStart() / 1_000_000.0;
+
+                    Chapter newChapter = new Chapter(chapter.getTag("title"), milliseconds);
+                    episode.addChapter(newChapter);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("getMediaInfo: could not get local metadata from file " + video.getAbsolutePath());
+        }
+    }
+
+    private static void processVideoData(Stream stream, Episode episode) {
+        String resolution = "", hdr = "", codec = "", profile = "";
+        VideoTrack videoTrack = new VideoTrack(stream.getIndex());
+
+        if (stream.getCodecName() != null) {
+            codec = stream.getCodecName().toUpperCase();
+            videoTrack.setCodec(stream.getCodecName().toUpperCase());
+        }
+
+        if (stream.getCodecLongName() != null)
+            videoTrack.setCodecExt(stream.getCodecLongName());
+
+        if (stream.getTag("BPS-eng") != null)
+            videoTrack.setBitrate(Math.round(Double.parseDouble(stream.getTag("BPS-eng")) / Math.pow(10, 3)));
+
+        if (stream.getAvgFrameRate() != null)
+            videoTrack.setFramerate(stream.getAvgFrameRate().floatValue());
+
+        if (stream.getCodedWidth() != null && stream.getCodedHeight() != null) {
+            resolution = formatResolution(stream.getCodedWidth(), stream.getCodedHeight());
+            videoTrack.setCodedHeight(stream.getCodedHeight());
+            videoTrack.setCodedWidth(stream.getCodedWidth());
+        }
+
+        if (stream.getChromaLocation() != null)
+            videoTrack.setChromaLocation(stream.getChromaLocation());
+
+        if (stream.getColorSpace() != null) {
+            if (stream.getColorSpace().equals("bt2020nc"))
+                hdr = " HDR10";
+            videoTrack.setColorSpace(stream.getColorSpace());
+        }
+
+        if (stream.getDisplayAspectRatio() != null)
+            videoTrack.setAspectRatio(stream.getDisplayAspectRatio().floatValue());
+
+        if (stream.getProfile() != null) {
+            profile = stream.getProfile();
+            videoTrack.setProfile(stream.getProfile());
+        }
+
+        if (stream.getRefs() != null)
+            videoTrack.setRefFrames(stream.getRefs());
+
+        if (stream.getColorRange() != null)
+            videoTrack.setColorRange(stream.getColorRange());
+
+        videoTrack.setDisplayTitle(resolution + hdr + " (" + codec + " " + profile + ")");
+        episode.getVideoTracks().add(videoTrack);
+    }
+
+    private static void processAudioData(Stream stream, Episode episode) {
+        String channels = "", language = "", codecDisplayName;
+        AudioTrack audioTrack = new AudioTrack(stream.getIndex());
+
+        if (stream.getCodecName() != null)
+            audioTrack.setCodec(stream.getCodecName().toUpperCase());
+
+        if (stream.getCodecLongName() != null)
+            audioTrack.setCodecExt(stream.getCodecLongName());
+
+        if (stream.getChannels() != null) {
+            channels = formatAudioChannels(stream.getChannels());
+            audioTrack.setChannels(channels);
+        }
+
+        if (stream.getChannelLayout() != null)
+            audioTrack.setChannelLayout(stream.getChannelLayout());
+
+        if (stream.getTag("BPS-eng") != null)
+            audioTrack.setBitrate(Math.round(Double.parseDouble(stream.getTag("BPS-eng")) / Math.pow(10, 3)));
+
+        if (stream.getTag("language") != null) {
+            language = Locale.of(stream.getTag("language")).getDisplayName();
+            audioTrack.setLanguageTag(stream.getTag("language"));
+            audioTrack.setLanguage(language);
+        }
+
+        if (stream.getBitsPerRawSample() != null)
+            audioTrack.setBitDepth(String.valueOf(stream.getBitsPerRawSample()));
+
+        if (stream.getProfile() != null) {
+            if (stream.getProfile().equals("DTS-HD MA"))
+                audioTrack.setProfile("ma");
+            else if (stream.getProfile().equals("LC"))
+                audioTrack.setProfile(("lc"));
+        }
+
+        if (stream.getSampleRate() != null)
+            audioTrack.setSamplingRate(String.valueOf(stream.getSampleRate()));
+
+        if (stream.getProfile() != null && stream.getProfile().equals("DTS-HD MA"))
+            codecDisplayName = stream.getProfile();
+        else
+            codecDisplayName = stream.getCodecName().toUpperCase();
+
+        audioTrack.setDisplayTitle(language + " (" + codecDisplayName + " " + channels + ")");
+        episode.getAudioTracks().add(audioTrack);
+    }
+
+    private static void processSubtitleData(Stream stream, Episode episode) {
+        String title = "", language = "", codecDisplayName = "";
+        SubtitleTrack subtitleTrack = new SubtitleTrack(stream.getIndex());
+
+        if (stream.getCodecName() != null) {
+            codecDisplayName = stream.getCodecName().toUpperCase();
+
+            if (codecDisplayName.equals("HDMV_PGS_SUBTITLE"))
+                codecDisplayName = "PGS";
+
+            subtitleTrack.setCodec(codecDisplayName);
+        }
+
+        if (stream.getCodecLongName() != null)
+            subtitleTrack.setCodecExt(stream.getCodecLongName());
+
+        if (stream.getTag("language") != null) {
+            language = Locale.of(stream.getTag("language")).getDisplayName();
+            subtitleTrack.setLanguageTag(stream.getTag("language"));
+            subtitleTrack.setLanguage(language);
+        }
+
+        if (stream.getTag("title") != null) {
+            title = stream.getTag("title");
+            subtitleTrack.setTitle(title);
+        }
+
+        subtitleTrack.setDisplayTitle(title + " (" + language + " " + codecDisplayName + ")");
+        episode.getSubtitleTracks().add(subtitleTrack);
+    }
+
+    private static String formatResolution(int width, int height) {
+        return switch (width) {
+            case 7680 -> "8K";
+            case 3840 -> "4K";
+            case 2560 -> "QHD";
+            case 1920 -> "1080p";
+            case 1280 -> "720p";
+            case 854 -> "480p";
+            case 640 -> "360p";
+            default -> height + "p";
+        };
+    }
+
+    private static String formatAudioChannels(int channels) {
+        return switch (channels) {
+            case 1 -> "MONO";
+            case 2 -> "STEREO";
+            case 3 -> "2.1";
+            case 4 -> "3.1";
+            case 5 -> "4.1";
+            case 6 -> "5.1";
+            case 7 -> "6.1";
+            case 8 -> "7.1";
+            case 9 -> "7.2";
+            case 10 -> "9.1";
+            case 11 -> "10.1";
+            case 12 -> "11.1";
+            default -> String.valueOf(channels);
+        };
     }
     //endregion
 }

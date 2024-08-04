@@ -191,7 +191,7 @@
                         <Insets left="130.0" />
                      </padding>
                   </VBox>
-                  <ScrollPane fx:id="episodeScroll" fitToWidth="true" hbarPolicy="NEVER" pannable="true" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
+                  <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
                      <content>
                         <HBox fx:id="cardContainer" alignment="CENTER_LEFT" fillHeight="false" spacing="50.0">
                            <padding>

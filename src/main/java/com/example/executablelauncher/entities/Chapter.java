@@ -20,7 +20,7 @@ public class Chapter {
     }
 
     public double getTime() {
-        return time;
+        return time / 1000;
     }
 
     public void setTime(double time) {

@@ -5,6 +5,7 @@ import com.example.executablelauncher.fileMetadata.AudioTrack;
 import com.example.executablelauncher.fileMetadata.MediaInfo;
 import com.example.executablelauncher.fileMetadata.SubtitleTrack;
 import com.example.executablelauncher.fileMetadata.VideoTrack;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+
+import static com.example.executablelauncher.utils.Utils.getMediaInfo;
 
 public class EditDiscController {
     //region FXML ATTRIBUTES
@@ -351,51 +354,55 @@ public class EditDiscController {
         Task<Void> generateMetadataTask = new Task<>() {
             @Override
             protected Void call() {
-                controllerParent.getMediaInfo(episodeToEdit);
+                getMediaInfo(episodeToEdit);
                 return null;
             }
         };
 
         generateMetadataTask.setOnSucceeded(e -> {
-            detailsBox.getChildren().remove(loadingIndicator);
+            Platform.runLater(() -> {
+                detailsBox.getChildren().remove(loadingIndicator);
 
-            MediaInfo mediaInfo = episodeToEdit.getMediaInfo();
+                MediaInfo mediaInfo = episodeToEdit.getMediaInfo();
 
-            //MEDIA INFO
-            generalInfoBox.getChildren().add(
-                    new Text() {{
-                        setText("Media Info");
-                        setFill(Color.WHITE);
-                        setFont(Font.font("Roboto", FontWeight.BOLD, 16));
-                    }}
-            );
-            addTextLine(generalInfoBox, "Duration: ", mediaInfo.getDuration());
-            addTextLine(generalInfoBox, "File: ", mediaInfo.getFile());
-            addTextLine(generalInfoBox, "Location: ", mediaInfo.getLocation());
-            addTextLine(generalInfoBox, "Bitrate: ", mediaInfo.getBitrate());
-            addTextLine(generalInfoBox, "Size: ", mediaInfo.getSize());
-            addTextLine(generalInfoBox, "Container: ", mediaInfo.getContainer());
+                //MEDIA INFO
+                generalInfoBox.getChildren().add(
+                        new Text() {{
+                            setText("Media Info");
+                            setFill(Color.WHITE);
+                            setFont(Font.font("Roboto", FontWeight.BOLD, 16));
+                        }}
+                );
+                addTextLine(generalInfoBox, "Duration: ", mediaInfo.getDuration());
+                addTextLine(generalInfoBox, "File: ", mediaInfo.getFile());
+                addTextLine(generalInfoBox, "Location: ", mediaInfo.getLocation());
+                addTextLine(generalInfoBox, "Bitrate: ", mediaInfo.getBitrate());
+                addTextLine(generalInfoBox, "Size: ", mediaInfo.getSize());
+                addTextLine(generalInfoBox, "Container: ", mediaInfo.getContainer());
 
-            for (VideoTrack track : episodeToEdit.getVideoTracks())
-                processVideoData(track);
+                for (VideoTrack track : episodeToEdit.getVideoTracks())
+                    processVideoData(track);
 
-            for (AudioTrack track : episodeToEdit.getAudioTracks())
-                processAudioData(track);
+                for (AudioTrack track : episodeToEdit.getAudioTracks())
+                    processAudioData(track);
 
-            for (SubtitleTrack track : episodeToEdit.getSubtitleTracks())
-                processSubtitleData(track);
+                for (SubtitleTrack track : episodeToEdit.getSubtitleTracks())
+                    processSubtitleData(track);
+            });
         });
 
         generateMetadataTask.setOnFailed(e -> {
-            detailsBox.getChildren().remove(loadingIndicator);
-            generalInfoBox.getChildren().add(new Text() {{
-                setText("Media info could not be generated");
-                setFill(Color.WHITE);
-                setFont(Font.font("Roboto", FontWeight.BOLD, 16));
-            }});
+            Platform.runLater(() -> {
+                detailsBox.getChildren().remove(loadingIndicator);
+                generalInfoBox.getChildren().add(new Text() {{
+                    setText("Media info could not be generated");
+                    setFill(Color.WHITE);
+                    setFont(Font.font("Roboto", FontWeight.BOLD, 16));
+                }});
+            });
         });
 
-        new Thread(generateMetadataTask).start();
+        App.executor.submit(generateMetadataTask);
     }
 
     private void processVideoData(VideoTrack track){

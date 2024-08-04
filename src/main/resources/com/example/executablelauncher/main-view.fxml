@@ -126,7 +126,7 @@
          <center>
             <StackPane fx:id="mainStack" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                <children>
-                  <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="ALWAYS">
+                  <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>

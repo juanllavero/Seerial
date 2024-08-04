@@ -3,6 +3,7 @@ package com.example.executablelauncher;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.WindowDecoration;
 import com.example.executablelauncher.utils.Configuration;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -19,6 +20,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import nu.pattern.OpenCV;
 import xss.it.fx.helpers.CornerPreference;
 
@@ -51,6 +53,7 @@ public class App extends Application {
     static ScheduledExecutorService executorService;
     public static List<Task<Void>> tasks = new ArrayList<>();
     private static DesktopViewController desktopController;
+    static String mode = "desktop";
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -101,11 +104,9 @@ public class App extends Application {
             Locale.forLanguageTag("fr-FR")
         });
 
-        String mode = Configuration.loadConfig("fullscreen", "off");
-
         primaryStage = stage;
 
-        if (mode.equals("off"))
+        if (mode.equals("desktop"))
             loadDesktopMode();
         else
             loadFullscreenMode();
@@ -294,9 +295,11 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
-
         //Load OpenCV library to apply blur effect to images
         OpenCV.loadLocally();
+
+        if (args.length > 0 && args[0].equals("fullscreen"))
+            mode = "fullscreen";
 
         launch(args);
     }

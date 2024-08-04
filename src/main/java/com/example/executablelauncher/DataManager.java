@@ -165,6 +165,16 @@ public class DataManager {
         return null;
     }
 
+    public Library getLibrary(Series series){
+        for (Library library : libraries){
+            for (Series s : library.getSeries()){
+                if (s == series)
+                    return library;
+            }
+        }
+        return currentLibrary;
+    }
+
     public boolean libraryExists(String name){
         for (Library library : libraries){
             if (library.getName().equals(name))

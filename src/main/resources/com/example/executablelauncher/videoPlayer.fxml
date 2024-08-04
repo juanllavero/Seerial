@@ -29,7 +29,7 @@
                      <left>
                         <VBox fx:id="leftTouchArea" alignment="CENTER_RIGHT" prefWidth="500.0" styleClass="transparentTrick" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                            <children>
-                              <Button fx:id="leftTouchButton" alignment="CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="5.0" mnemonicParsing="false" styleClass="transparent" stylesheets="@styles.css" text="-10" textFill="WHITE">
+                              <Button fx:id="leftTouchButton" alignment="CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="5.0" mnemonicParsing="false" styleClass="transparent" stylesheets="@styles.css" text="-5" textFill="WHITE">
                                  <graphic>
                                     <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -50,7 +50,7 @@
                      <right>
                         <VBox fx:id="rightTouchArea" alignment="CENTER_LEFT" prefWidth="500.0" styleClass="transparentTrick" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                            <children>
-                              <Button fx:id="rightTouchButton" alignment="CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="5.0" mnemonicParsing="false" styleClass="transparent" stylesheets="@styles.css" text="10" textFill="WHITE">
+                              <Button fx:id="rightTouchButton" alignment="CENTER" contentDisplay="TOP" focusTraversable="false" graphicTextGap="5.0" mnemonicParsing="false" styleClass="transparent" stylesheets="@styles.css" text="+10" textFill="WHITE">
                                  <graphic>
                                     <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -105,7 +105,7 @@
                   </JFXSlider>
                   <BorderPane>
                      <left>
-                        <VBox fillWidth="false" BorderPane.alignment="CENTER">
+                        <VBox fillWidth="false" maxWidth="350.0" minWidth="350.0" prefWidth="350.0" BorderPane.alignment="CENTER">
                            <children>
                               <Label fx:id="currentTime" text="18:31" textFill="WHITE">
                                  <font>
@@ -144,6 +144,18 @@
                                           <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                        </padding>
                                     </Button>
+                                    <Button fx:id="chaptersButton" contentDisplay="CENTER" focusTraversable="false" graphicTextGap="0.0" mnemonicParsing="false" onAction="#showChapters" styleClass="playerButton" stylesheets="@styles.css">
+                                       <graphic>
+                                          <ImageView fitHeight="33.0" fitWidth="33.0" pickOnBounds="true" preserveRatio="true" translateX="2.0">
+                                             <image>
+                                                <Image url="@../../../img/icons/chapters.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <padding>
+                                          <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                       </padding>
+                                    </Button>
                                  </children>
                                  <VBox.margin>
                                     <Insets top="10.0" />
@@ -153,7 +165,7 @@
                         </VBox>
                      </left>
                      <right>
-                        <VBox alignment="TOP_RIGHT" fillWidth="false" BorderPane.alignment="CENTER">
+                        <VBox alignment="TOP_RIGHT" fillWidth="false" maxWidth="350.0" minWidth="350.0" BorderPane.alignment="CENTER">
                            <children>
                               <Label fx:id="toFinishTime" alignment="TOP_RIGHT" text="43:10" textFill="WHITE">
                                  <font>
@@ -276,29 +288,6 @@
                         <Insets bottom="5.0" />
                      </padding>
                   </BorderPane>
-                  <Label fx:id="chaptersTitle" text="Chapters" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="28.0" />
-                     </font>
-                     <effect>
-                        <DropShadow />
-                     </effect>
-                     <VBox.margin>
-                        <Insets top="20.0" />
-                     </VBox.margin>
-                  </Label>
-                  <ScrollPane fx:id="chapterScroll" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
-                     <content>
-                        <HBox fx:id="chapterContainer" fillHeight="false" spacing="50.0">
-                           <padding>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </padding>
-                        </HBox>
-                     </content>
-                     <VBox.margin>
-                        <Insets top="40.0" />
-                     </VBox.margin>
-                  </ScrollPane>
                </children>
                <padding>
                   <Insets bottom="30.0" left="50.0" right="50.0" />
@@ -407,6 +396,30 @@
                         <Insets />
                      </StackPane.margin>
                   </HBox>
+                  <VBox fx:id="chapterPane" alignment="TOP_CENTER" spacing="20.0" styleClass="translucent" stylesheets="@styles.css" StackPane.alignment="TOP_RIGHT">
+                     <children>
+                        <Label fx:id="chapterTitle" text="Chapters" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="45.0" />
+                           </font>
+                           <effect>
+                              <DropShadow />
+                           </effect>
+                        </Label>
+                        <ScrollPane fx:id="chapterScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
+                           <content>
+                              <VBox fx:id="chapterContainer" alignment="TOP_RIGHT" spacing="10.0">
+                                 <padding>
+                                    <Insets left="20.0" right="20.0" />
+                                 </padding>
+                              </VBox>
+                           </content>
+                        </ScrollPane>
+                     </children>
+                     <padding>
+                        <Insets bottom="180.0" left="50.0" right="50.0" top="30.0" />
+                     </padding>
+                  </VBox>
                   <ScrollPane fx:id="simpleMenuScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" StackPane.alignment="TOP_CENTER">
                      <content>
                         <VBox fx:id="simpleMenu" alignment="TOP_CENTER" spacing="10.0">

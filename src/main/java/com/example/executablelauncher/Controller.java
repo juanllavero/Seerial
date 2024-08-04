@@ -1125,7 +1125,7 @@ public class Controller implements Initializable {
                 selectedEpisode = episode;
 
                 String logoSrc;
-                if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")) {
+                if (DataManager.INSTANCE.getLibrary(series).getType().equals("Shows")) {
                     logoSrc = series.getLogoSrc();
                     titleText.setText(series.getName());
                     info1.setText(App.textBundle.getString("seasonLetter") + season.getSeasonNumber() + " " + App.textBundle.getString("episodeLetter") + episode.getEpisodeNumber());
@@ -1154,7 +1154,7 @@ public class Controller implements Initializable {
                 }
 
                 episodeNameBox.getChildren().clear();
-                if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
+                if (DataManager.INSTANCE.getLibrary(series).getType().equals("Shows")){
                     Label episodeName = new Label(episode.getName());
                     episodeName.setFont(new Font("Roboto", 42));
                     episodeName.setStyle("-fx-font-weight: bold");
@@ -1168,7 +1168,7 @@ public class Controller implements Initializable {
                 else
                     overviewText.setText(App.textBundle.getString("defaultOverview"));
 
-                delay = new PauseTransition(Duration.millis(100));
+                delay = new PauseTransition(Duration.millis(150));
                 delay.setOnFinished(event -> Platform.runLater(() -> {
                     if (!series.getSeasons().isEmpty() &&
                             continueWatchingBox.getChildren().get(continueWatching.indexOf(episode)).isFocused()) {
@@ -1181,8 +1181,7 @@ public class Controller implements Initializable {
                             backgroundPath = "backgroundDefault.png";
                         }
 
-                        Image currentImage = currentlyWatchingImage.getImage();
-                        BufferedImage bufferedImage = null;
+                        BufferedImage bufferedImage;
 
                         ImageView background = new ImageView(new Image("file:" + imagePath + "/" + backgroundPath,
                                 Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), true, true));
@@ -1245,7 +1244,7 @@ public class Controller implements Initializable {
                 )
         );
 
-        FadeTransition fadeOut = fadeOutEffect(mainViewBundle, 0.3f, 0.1f);
+        FadeTransition fadeOut = fadeOutEffect(mainViewBundle, 0.4f, 0.1f);
         fadeOut.setOnFinished(e -> {
             fill.setBackground(
                     new Background(
@@ -1267,7 +1266,7 @@ public class Controller implements Initializable {
 
             currentlyWatchingImage.setImage(postImage);
 
-            fadeInEffect(mainViewBundle, 0.3f, 0.1f).play();
+            fadeInEffect(mainViewBundle, 0.4f, 0.1f).play();
         });
 
         fadeOut.play();
@@ -1326,65 +1325,30 @@ public class Controller implements Initializable {
         episodeMenuBox.setLayoutX(buttonBounds.getCenterX());
         episodeMenuBox.setLayoutY(buttonBounds.getMinY() - 200);
 
+        libraryType = DataManager.INSTANCE.getLibrary(series).getType();
+
         playEpisodeButton.requestFocus();
     }
     private void goToLibrary(){
         hideEpisodeMenu();
 
-        for (Library library : libraries){
-            for (Series series : library.getSeries()){
-                if (selectedSeries == series){
-                    Button btn = (Button) librariesBox.getChildren().get(libraries.indexOf(library));
+        Library library = DataManager.INSTANCE.getLibrary(selectedSeries);
+        Button btn = (Button) librariesBox.getChildren().get(libraries.indexOf(library));
 
-                    if (btn == null)
-                        return;
+        if (btn == null)
+            return;
 
-                    selectLibraryButton(btn);
-                    selectSeries(selectedSeries);
-                    return;
-                }
-            }
-        }
+        selectLibraryButton(btn);
+        selectSeries(selectedSeries);
     }
     private void goToEpisode(){
         hideEpisodeMenu();
-
         playInteractionSound();
-
-        boolean libraryFound = false;
-        for (Library library : libraries){
-            for (Series series : library.getSeries()){
-                if (selectedSeries == series){
-                    libraryType = library.getType();
-                    libraryFound = true;
-                    break;
-                }
-            }
-
-            if (libraryFound)
-                break;
-        }
-
         showSeason(selectedSeries);
     }
     private void playEpisode(){
         hideEpisodeMenu();
-
         playInteractionSound();
-
-        boolean libraryFound = false;
-        for (Library library : libraries){
-            for (Series series : library.getSeries()){
-                if (selectedSeries == series){
-                    libraryType = library.getType();
-                    libraryFound = true;
-                    break;
-                }
-            }
-
-            if (libraryFound)
-                break;
-        }
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
