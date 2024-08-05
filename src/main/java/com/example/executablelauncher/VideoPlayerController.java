@@ -12,6 +12,7 @@ import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import com.jfoenix.controls.JFXSlider;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -83,9 +84,11 @@ public class VideoPlayerController {
     @FXML Label seriesTitle;
     @FXML ImageView shadowImage;
     @FXML Label toFinishTime;
-    @FXML VBox controlsBox;
+    @FXML BorderPane controlsBox;
     @FXML BorderPane optionsBox;
     @FXML BorderPane touchPane;
+    @FXML BorderPane sliderBox;
+    @FXML BorderPane buttonsBox;
     @FXML Label optionsTitle;
     @FXML HBox volumeBox;
     @FXML HBox mainMenu;
@@ -113,6 +116,7 @@ public class VideoPlayerController {
     List<VideoTrack> videoTracks = new ArrayList<>();
     List<AudioTrack> audioTracks = new ArrayList<>();
     List<SubtitleTrack> subtitleTracks = new ArrayList<>();
+    PauseTransition hideSlider;
     boolean subsActivated = true;
     boolean fullscreen = false;
     int currentDisc = 0;
@@ -252,6 +256,8 @@ public class VideoPlayerController {
             if (App.pressedBack(e)){
                 if (optionsBox.isVisible())
                     hideOptions();
+                else if (controlsShown)
+                    hideControls();
                 else
                     stop();
             }
@@ -261,21 +267,19 @@ public class VideoPlayerController {
             if (App.pressedBack(e)){
                 if (optionsBox.isVisible())
                     hideOptions();
+                else if (controlsShown)
+                    hideControls();
                 else
                     stop();
             }
         });
 
         controlsStage.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
-            if (!controlsShown && videoPlayer.isVideoLoaded()){
+            if (videoPlayer.isVideoLoaded()){
                 if (App.pressedRight(e))
                     goAhead();
                 else if (App.pressedLeft(e))
                     goBack();
-                else if (App.pressedSelect(e)){
-                    showControls();
-                    pause();
-                }
                 else
                     showControls();
             }else if (!optionsBox.isVisible() && videoPlayer.isVideoLoaded()){
@@ -358,11 +362,22 @@ public class VideoPlayerController {
         leftTouchButton.setVisible(false);
         rightTouchButton.setVisible(false);
 
+        adjustmentPane.setVisible(false);
+        optionsBox.setVisible(false);
+
         if (parentController != null)
             hideButton(fullScreenButton);
 
         //region BUTTONS MOVEMENT
-        optionsBox.setOnMouseClicked(e -> hideOptions());
+        optionsBox.setOnMouseClicked(e -> {
+            if (chapterPane.isVisible()){
+                hideChaptersPane();
+            }else{
+                hideOptions();
+            }
+        });
+
+        adjustmentPane.setOnMouseClicked(e -> fadeOutEffect(adjustmentPane, 0.2f));
 
         rightTouchArea.setOnMouseClicked(e -> {
             if(e.getButton().equals(MouseButton.PRIMARY)){
@@ -410,7 +425,7 @@ public class VideoPlayerController {
             movingSlider = false;
             runtimeTimeline.playFromStart();
 
-            hideSlider();
+            hideControls();
         });
 
         playButton.setOnKeyPressed(e -> {
@@ -428,11 +443,11 @@ public class VideoPlayerController {
             }else if (App.pressedLeft(e)) {
                 if (!prevButton.isDisabled())
                     prevButton.requestFocus();
-                else if (chaptersButton.isManaged())
+                else if (!chaptersButton.isDisabled())
                     chaptersButton.requestFocus();
-                else if (audiosButton.isManaged())
+                else if (!audiosButton.isDisabled())
                     audiosButton.requestFocus();
-                else if (subtitlesButton.isManaged())
+                else if (!subtitlesButton.isDisabled())
                     subtitlesButton.requestFocus();
             }else if (App.pressedUp(e)) {
                 hideControls();
@@ -465,11 +480,11 @@ public class VideoPlayerController {
             if (App.pressedSelect(e))
                 prevEpisode();
             else if (App.pressedLeft(e)){
-                if (chaptersButton.isManaged())
+                if (!chaptersButton.isDisabled())
                     chaptersButton.requestFocus();
-                else if (audiosButton.isManaged())
+                else if (!audiosButton.isDisabled())
                     audiosButton.requestFocus();
-                else if (subtitlesButton.isManaged())
+                else if (!subtitlesButton.isDisabled())
                     subtitlesButton.requestFocus();
             }else if (App.pressedRight(e))
                 playButton.requestFocus();
@@ -493,10 +508,10 @@ public class VideoPlayerController {
         audiosButton.setOnKeyPressed(e -> {
             timeline.playFromStart();
             if (App.pressedLeft(e)){
-                if (subtitlesButton.isManaged())
+                if (!subtitlesButton.isDisabled())
                     subtitlesButton.requestFocus();
             }else if (App.pressedRight(e)){
-                if (chaptersButton.isManaged())
+                if (!chaptersButton.isDisabled())
                     chaptersButton.requestFocus();
                 else if (!prevButton.isDisabled())
                     prevButton.requestFocus();
@@ -509,7 +524,7 @@ public class VideoPlayerController {
         subtitlesButton.setOnKeyPressed(e -> {
             timeline.playFromStart();
             if (App.pressedRight(e)){
-                if (audiosButton.isManaged())
+                if (!audiosButton.isDisabled())
                     audiosButton.requestFocus();
                 else
                     chaptersButton.requestFocus();
@@ -527,7 +542,7 @@ public class VideoPlayerController {
             }else if (App.pressedUp(e))
                 hideControls();
             else if (App.pressedLeft(e)){
-                if (audiosButton.isManaged())
+                if (!audiosButton.isDisabled())
                     audiosButton.requestFocus();
                 else if (subtitlesButton.isDisabled())
                     subtitlesButton.requestFocus();
@@ -535,6 +550,7 @@ public class VideoPlayerController {
         });
 
         fullScreenButton.setOnMouseClicked(e -> toggleFullscreen());
+        closeButton.setVisible(false);
         //endregion
 
         //region BUTTON ICONS
@@ -737,10 +753,10 @@ public class VideoPlayerController {
         videoButton.setDisable(false);
 
         if (audioTracks.isEmpty())
-            hideButton(audiosButton);
+            audiosButton.setDisable(true);
 
         if (subtitleTracks.isEmpty())
-            hideButton(subtitlesButton);
+            subtitlesButton.setDisable(true);
     }
     private void addInteractionSound(Button btn){
         btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
@@ -763,11 +779,7 @@ public class VideoPlayerController {
                 audioTracks = episode.getAudioTracks();
                 subtitleTracks = episode.getSubtitleTracks();
 
-                if (episode.getChapters().isEmpty()) {
-                    hideButton(chaptersButton);
-                }else{
-                    showButton(chaptersButton);
-                }
+                chaptersButton.setDisable(episode.getChapters().isEmpty());
 
                 loadTracks();
 
@@ -809,14 +821,9 @@ public class VideoPlayerController {
             pause();
 
         movingSlider = true;
-
-        optionsBox.setVisible(true);
-        chapterPane.setVisible(true);
-
-        shadowImage.setVisible(false);
-        optionsTitle.setVisible(false);
-
         showSlider();
+
+        fadeInEffect(chapterPane, 0.2f);
         showChapterButtons();
     }
     private void showChapterButtons(){
@@ -861,10 +868,7 @@ public class VideoPlayerController {
 
             chapterButton.setOnMouseClicked(e -> {
                 if (chapterButton.isFocused()){
-                    long pos = (long) (episode.getChapters().get(chapterContainer.getChildren().indexOf(chapterButton)).getTime());
-                    long currentPos = (long) runtimeSlider.getValue();
-
-                    runtimeSlider.setValue(pos - currentPos);
+                    runtimeSlider.setValue((long) (episode.getChapters().get(chapterContainer.getChildren().indexOf(chapterButton)).getTime()));
                 }else{
                     chapterButton.requestFocus();
                 }
@@ -872,10 +876,7 @@ public class VideoPlayerController {
 
             chapterButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
                 if (App.pressedSelect(event)){
-                    long pos = (long) (episode.getChapters().get(chapterContainer.getChildren().indexOf(chapterButton)).getTime());
-                    long currentPos = (long) runtimeSlider.getValue();
-
-                    runtimeSlider.setValue(pos - currentPos);
+                    runtimeSlider.setValue((long) (episode.getChapters().get(chapterContainer.getChildren().indexOf(chapterButton)).getTime()));
                 }
             });
 
@@ -891,35 +892,19 @@ public class VideoPlayerController {
                     if (index < chapterContainer.getChildren().size() - 1)
                         chapterContainer.getChildren().get(index + 1).requestFocus();
                 }else if (App.pressedBack(event)){
-                    movingSlider = false;
-                    timeline.playFromStart();
-                    resume();
-
-                    hideSlider();
-
-                    FadeTransition fadeOut = fadeOutEffect(optionsBox, 0.2f, 0);
-                    fadeOut.setOnFinished(e -> optionsBox.setVisible(false));
+                    hideChaptersPane();
                 }
             });
         }
 
-        selectCurrentChapter();
+        chapterContainer.getChildren().getFirst().requestFocus();
+        chapterScroll.setVvalue(0);
     }
-    private void selectCurrentChapter(){
-        if (chapterContainer.getChildren().isEmpty())
-            return;
 
-        long currentTime = (long) runtimeSlider.getValue();
-
-        List<Chapter> chapters = episode.getChapters();
-        for (int i = 1; i < chapters.size(); i++){
-            if (chapters.get(i).getTime() > currentTime){
-                chapterContainer.getChildren().get(episode.getChapters().indexOf(chapters.get(i - 1))).requestFocus();
-                return;
-            }
-        }
-
-        chapterContainer.getChildren().get(0).requestFocus();
+    private void hideChaptersPane(){
+        movingSlider = false;
+        timeline.playFromStart();
+        resume();
     }
     //endregion
 
@@ -938,31 +923,34 @@ public class VideoPlayerController {
         }
 
         videoStage.setFullScreen(fullscreen);
+        controlsStage.requestFocus();
     }
     private void showControls(){
-        controlsShown = true;
         timeline.playFromStart();
 
-        //Hide Options Panel
         optionsBox.setVisible(false);
+        chapterPane.setVisible(false);
+        adjustmentPane.setVisible(false);
 
-        //Show Controls Panel
-        fadeInEffect(controlsBox);
-        shadowImage.setVisible(true);
-        fadeInEffect(shadowImage, 0.2f, 1).play();
+        buttonsBox.setVisible(true);
+        fadeInEffect(shadowImage, 0.2f).play();
 
-        fadeInEffect(closeButton);
+        FadeTransition fadeIn = fadeInEffect(controlsBox, 0.2f);
+        fadeIn.setOnFinished(e -> controlsShown = true);
+        fadeIn.play();
+
+        closeButton.setVisible(true);
         playButton.requestFocus();
     }
     private void hideControls(){
         hideMouse();
 
         timeline.stop();
-        fadeOutEffect(closeButton);
-        fadeOutEffect(shadowImage);
 
-        //Hide Controls Panel
-        FadeTransition fadeOut = fadeOutEffect(controlsBox, 0.5f, 0);
+        if (shadowImage.isVisible())
+            fadeOutEffect(shadowImage, 0.2f);
+
+        FadeTransition fadeOut = fadeOutEffect(controlsBox, 0.2f, 0);
         fadeOut.setOnFinished(e -> {
             controlsBox.setVisible(false);
             controlsShown = false;
@@ -970,31 +958,21 @@ public class VideoPlayerController {
         fadeOut.play();
     }
     private void showSlider(){
-        fadeOutEffect(shadowImage);
+        timeline.stop();
 
-        controlsBox.setVisible(true);
-        adjustmentPane.setVisible(false);
+        if (shadowImage.isVisible())
+            fadeOutEffect(shadowImage, 0.2f);
+
+        buttonsBox.setVisible(false);
         closeButton.setVisible(false);
-        runtimeSlider.setVisible(true);
-        currentTime.setVisible(true);
-        toFinishTime.setVisible(true);
-        seriesTitle.setVisible(false);
-        episodeInfo.setVisible(false);
-        fullScreenButton.setVisible(false);
-        videoButton.setVisible(false);
-        audiosButton.setVisible(false);
-        subtitlesButton.setVisible(false);
-        playButton.setVisible(false);
-        prevButton.setVisible(false);
-        nextButton.setVisible(false);
 
-        desktopVolumeSliderBox.setVisible(false);
+        if (!controlsBox.isVisible())
+            fadeInEffect(controlsBox, 0.2f);
 
-        if (!episode.getChapters().isEmpty()){
-            chaptersButton.setVisible(false);
-        }
+        adjustmentPane.setVisible(false);
+        optionsBox.setVisible(false);
     }
-    private void hideSlider(){
+    private void restoreControlsButtons(){
         runtimeSlider.setVisible(true);
         currentTime.setVisible(true);
         toFinishTime.setVisible(true);
@@ -1006,7 +984,7 @@ public class VideoPlayerController {
             desktopVolumeSliderBox.setVisible(true);
         }
 
-        closeButton.setVisible(true);
+        closeButton.setVisible(false);
         videoButton.setVisible(true);
         audiosButton.setVisible(true);
         subtitlesButton.setVisible(true);
@@ -1014,11 +992,8 @@ public class VideoPlayerController {
         prevButton.setVisible(true);
         nextButton.setVisible(true);
 
-        if (!episode.getChapters().isEmpty()){
-            showButton(chaptersButton);
-        }
-
-        hideControls();
+        if (!episode.getChapters().isEmpty())
+            chaptersButton.setVisible(true);
     }
     //endregion
 
@@ -1054,6 +1029,10 @@ public class VideoPlayerController {
     public void resume(){
         videoPlayer.togglePause(false);
         runtimeTimeline.play();
+
+        if (controlsShown)
+            playButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/play.png"), 30, 30, true, true)));
+
         hideControls();
     }
     public void pause(){
@@ -1097,24 +1076,46 @@ public class VideoPlayerController {
                     33, true, true));
     }
     public void goAhead(){
-        videoPlayer.seekForward();
+        if (hideSlider != null)
+            hideSlider.stop();
 
-        showSlider();
+        timeline.pause();
+        movingSlider = true;
+        runtimeSlider.setValue(runtimeSlider.getValue() + 10);
 
-        Timeline timeL = new Timeline();
-        timeL.setDelay(Duration.seconds(3));
-        timeL.setOnFinished(e -> hideSlider());
-        timeL.play();
+        if (!controlsShown){
+            showControls();
+            showSlider();
+        }
+
+        hideSlider = new PauseTransition(Duration.seconds(3));
+        hideSlider.setOnFinished(e -> {
+            timeline.playFromStart();
+            movingSlider = false;
+            hideControls();
+        });
+        hideSlider.play();
     }
     public void goBack(){
-        videoPlayer.seekBackward();
+        if (hideSlider != null)
+            hideSlider.stop();
 
-        showSlider();
+        timeline.pause();
+        movingSlider = true;
+        runtimeSlider.setValue(runtimeSlider.getValue() - 5);
 
-        Timeline timeL = new Timeline();
-        timeL.setDelay(Duration.seconds(3));
-        timeL.setOnFinished(e -> hideSlider());
-        timeL.play();
+        if (!controlsShown){
+            showControls();
+            showSlider();
+        }
+
+        hideSlider = new PauseTransition(Duration.seconds(3));
+        hideSlider.setOnFinished(e -> {
+            timeline.playFromStart();
+            movingSlider = false;
+            hideControls();
+        });
+        hideSlider.play();
     }
     public void seekForward(){
         videoPlayer.seekForward();
@@ -1182,22 +1183,7 @@ public class VideoPlayerController {
     //region OPTIONS MENU
     @FXML
     private void showOptions(){
-        if (!videoPlayer.isPaused())
-            pause();
-        optionsBox.setVisible(true);
-        timeline.stop();
-
-        simpleMenuScroll.setVisible(false);
-        mainMenuScroll.setVisible(true);
-        adjustmentPane.setVisible(false);
-        chapterPane.setVisible(false);
-
-        shadowImage.setVisible(true);
-        fadeInEffect(shadowImage, 0.2f, 1).play();
-
-        controlsBox.setVisible(false);
-        optionsTitle.setVisible(true);
-        optionsTitle.setText(App.buttonsBundle.getString("settings"));
+        showMenu(false, App.buttonsBundle.getString("settings"));
 
         if (leftOptions.getChildren().isEmpty()){
             Button video = addSimpleButton(App.textBundle.getString("video"), false, false);
@@ -1402,8 +1388,9 @@ public class VideoPlayerController {
         });
     }
     private void adjustGamma(){
-        fadeOutEffect(mainMenuScroll);
-        adjustmentPane.setVisible(true);
+        hideControls();
+        fadeOutEffect(optionsBox, 0.2f);
+        fadeInEffect(adjustmentPane, 0.2f);
 
         videoPlayer.togglePause(false);
 
@@ -1419,8 +1406,10 @@ public class VideoPlayerController {
                 adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
             }else if (App.pressedRight(e))
                 upAdjustment.requestFocus();
-            else if (App.pressedBack(e))
-                hideControls();
+        });
+        downAdjustment.setOnKeyReleased(e -> {
+            if (App.pressedBack(e))
+                fadeOutEffect(adjustmentPane, 0.2f);
         });
 
         upAdjustment.setOnMouseClicked(e -> {
@@ -1435,8 +1424,10 @@ public class VideoPlayerController {
                 restartAdjustment.requestFocus();
             else if (App.pressedLeft(e))
                 downAdjustment.requestFocus();
-            else if (App.pressedBack(e))
-                hideControls();
+        });
+        upAdjustment.setOnKeyReleased(e -> {
+            if (App.pressedBack(e))
+                fadeOutEffect(adjustmentPane, 0.2f);
         });
 
         restartAdjustment.setOnMouseClicked(e -> {
@@ -1449,8 +1440,10 @@ public class VideoPlayerController {
                 adjustmentText.setText(App.textBundle.getString("gammaAdjustment") + " " + videoPlayer.getGamma());
             }else if (App.pressedLeft(e))
                 upAdjustment.requestFocus();
-            else if (App.pressedBack(e))
-                hideControls();
+        });
+        restartAdjustment.setOnKeyReleased(e -> {
+            if (App.pressedBack(e))
+                fadeOutEffect(adjustmentPane, 0.2f);
         });
 
         upAdjustment.requestFocus();
@@ -1642,26 +1635,22 @@ public class VideoPlayerController {
                 audioTracks.requestFocus();
         });
     }
-    private void showSimpleMenu(String title){
+    private void showMenu(Boolean isSimple, String title){
         if (!videoPlayer.isPaused())
             pause();
-        optionsBox.setVisible(true);
+
         timeline.stop();
 
         adjustmentPane.setVisible(false);
-        simpleMenuScroll.setVisible(true);
-        mainMenuScroll.setVisible(false);
-        chapterPane.setVisible(false);
+        mainMenuScroll.setVisible(!isSimple);
+        simpleMenuScroll.setVisible(isSimple);
 
-        shadowImage.setVisible(true);
-        fadeInEffect(shadowImage, 0.2f, 1).play();
+        fadeInEffect(optionsBox, 0.2f);
 
-        controlsBox.setVisible(false);
-        optionsTitle.setVisible(true);
         optionsTitle.setText(title);
     }
     public void showAudioOptions(){
-        showSimpleMenu(App.textBundle.getString("audio"));
+        showMenu(true, App.textBundle.getString("audio"));
         showAudioTracks();
     }
     private void showAudioTracks(){
@@ -1690,6 +1679,8 @@ public class VideoPlayerController {
             trackButton.setOnMouseEntered(e -> setOnHover(trackButton, true, true));
             trackButton.setOnMouseExited(e -> setOnExitHover(trackButton, true, true));
         }
+
+        simpleMenu.getChildren().getFirst().requestFocus();
     }
     private void showAudioTracks(Button audiosButton, Label text){
         optionsContainer.getChildren().clear();
@@ -1760,8 +1751,9 @@ public class VideoPlayerController {
         setSelectedImage(trackButton, true);
     }
     private void adjustAudioDelay(){
-        fadeOutEffect(mainMenuScroll);
-        adjustmentPane.setVisible(true);
+        hideControls();
+        fadeOutEffect(optionsBox, 0.2f);
+        fadeInEffect(adjustmentPane, 0.2f);
 
         videoPlayer.togglePause(false);
 
@@ -1777,8 +1769,10 @@ public class VideoPlayerController {
                 adjustmentText.setText(App.buttonsBundle.getString("audioDelay") + ": " + videoPlayer.getAudioDelay() + " ms");
             }else if (App.pressedRight(e))
                 upAdjustment.requestFocus();
-            else if (App.pressedBack(e))
-                hideControls();
+        });
+        downAdjustment.setOnKeyReleased(e -> {
+            if (App.pressedBack(e))
+                fadeOutEffect(adjustmentPane, 0.2f);
         });
 
         upAdjustment.setOnMouseClicked(e -> {
@@ -1793,8 +1787,10 @@ public class VideoPlayerController {
                 restartAdjustment.requestFocus();
             else if (App.pressedLeft(e))
                 downAdjustment.requestFocus();
-            else if (App.pressedBack(e))
-                hideControls();
+        });
+        upAdjustment.setOnKeyReleased(e -> {
+            if (App.pressedBack(e))
+                fadeOutEffect(adjustmentPane, 0.2f);
         });
 
         restartAdjustment.setOnMouseClicked(e -> {
@@ -1807,8 +1803,10 @@ public class VideoPlayerController {
                 adjustmentText.setText(App.buttonsBundle.getString("audioDelay") + ": " + videoPlayer.getAudioDelay() + " ms");
             }else if (App.pressedLeft(e))
                 upAdjustment.requestFocus();
-            else if (App.pressedBack(e))
-                hideControls();
+        });
+        restartAdjustment.setOnKeyReleased(e -> {
+            if (App.pressedBack(e))
+                fadeOutEffect(adjustmentPane, 0.2f);
         });
 
         upAdjustment.requestFocus();
@@ -1915,6 +1913,8 @@ public class VideoPlayerController {
                 }
             });
         }
+
+        simpleMenu.getChildren().getFirst().requestFocus();
     }
     private void subsButtonAction(SubtitleTrack track, Button btn, Label text){
         videoPlayer.setSubtitleTrack(subtitleTracks.indexOf(track) + 1);
@@ -1926,8 +1926,9 @@ public class VideoPlayerController {
         text.setText(track.getDisplayTitle());
     }
     private void adjustSubsDelay(){
-        fadeOutEffect(mainMenuScroll);
-        adjustmentPane.setVisible(true);
+        hideControls();
+        fadeOutEffect(optionsBox, 0.2f);
+        fadeInEffect(adjustmentPane, 0.2f);
 
         videoPlayer.togglePause(false);
 
@@ -1944,7 +1945,7 @@ public class VideoPlayerController {
             }else if (App.pressedRight(e))
                 upAdjustment.requestFocus();
             else if (App.pressedBack(e))
-                hideControls();
+                fadeOutEffect(adjustmentPane, 0.2f);
         });
 
         upAdjustment.setOnMouseClicked(e -> {
@@ -1960,7 +1961,7 @@ public class VideoPlayerController {
             else if (App.pressedLeft(e))
                 downAdjustment.requestFocus();
             else if (App.pressedBack(e))
-                hideControls();
+                fadeOutEffect(adjustmentPane, 0.2f);
         });
 
         restartAdjustment.setOnMouseClicked(e -> {
@@ -1974,13 +1975,13 @@ public class VideoPlayerController {
             }else if (App.pressedLeft(e))
                 upAdjustment.requestFocus();
             else if (App.pressedBack(e))
-                hideControls();
+                fadeOutEffect(adjustmentPane, 0.2f);
         });
 
         upAdjustment.requestFocus();
     }
     public void showSubtitleOptions(){
-        showSimpleMenu(App.textBundle.getString("subs"));
+        showMenu(true, App.textBundle.getString("subs"));
         showSubtitleTracks();
     }
     private void showSubtitleTracks(){

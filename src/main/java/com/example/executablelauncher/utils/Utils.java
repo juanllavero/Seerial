@@ -155,6 +155,14 @@ public class Utils {
 
         return fadeIn;
     }
+    public static FadeTransition fadeInEffect(Node node, float seconds){
+        node.setVisible(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(seconds), node);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1.0);
+
+        return fadeIn;
+    }
     public static FadeTransition fadeOutEffect(Node node, float seconds, float toValue){
         FadeTransition fadeOut = new FadeTransition(Duration.seconds(seconds), node);
         fadeOut.setFromValue(1.0);
@@ -175,6 +183,14 @@ public class Utils {
         fadeOut.setToValue(0);
         fadeOut.play();
         img.setVisible(false);
+    }
+
+    public static void fadeOutEffect(Node node, float delay){
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(delay), node);
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0);
+        fadeOut.play();
+        node.setVisible(false);
     }
     public static void fadeInEffect(Pane pane){
         pane.setVisible(true);
@@ -226,9 +242,9 @@ public class Utils {
         fadeIn.play();
     }
     public static String formatTime(int time){
-        int h = (int) (time / 3600);
-        int m = (int) ((time % 3600) / 60);
-        int s = (int) (time % 60);
+        int h = time / 3600;
+        int m = (time % 3600) / 60;
+        int s = time % 60;
 
         if (h > 0)
             return String.format("%02d:%02d:%02d", h, m, s);
