@@ -123,6 +123,7 @@ public class SeasonController {
 
     //region ATTRIBUTES
     Controller controllerParent;
+    Library library;
     List<Season> seasons = new ArrayList<>();
     List<Episode> episodes = new ArrayList<>();
     List<Button> episodeButtons = new ArrayList<>();
@@ -143,7 +144,8 @@ public class SeasonController {
     public void setParent(Controller c){
         controllerParent = c;
     }
-    public void setSeasons(Series series, boolean playSameMusic, boolean isShow){
+    public void setSeasons(Library library, Series series, boolean playSameMusic, boolean isShow){
+        this.library = library;
         this.isShow = isShow;
         this.series = series;
         this.playSameMusic = playSameMusic;
@@ -910,7 +912,7 @@ public class SeasonController {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = (Stage) mainBox.getScene().getWindow();
-            stage.setTitle("ExecutableLauncher");
+            stage.setTitle(App.textBundle.getString("fullscreenMode"));
             Scene scene = new Scene(root);
             //scene.setCursor(Cursor.NONE);
             scene.setFill(Color.BLACK);

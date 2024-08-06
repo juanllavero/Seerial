@@ -146,6 +146,8 @@ public class App extends Application {
         desktopViewController.initValues(windowDecoration);
     }
     private void loadFullscreenMode() throws IOException {
+        DataManager.INSTANCE.currentLibrary = null;
+
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
         Parent root = fxmlLoader.load();
         primaryStage = new Stage();

@@ -320,7 +320,7 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "11");
                 rowSize = 0;
                 updateRowSize(11);
-                showSeriesFrom(currentLibrary, false, true);
+                showSeriesFrom(currentLibrary, false);
                 tinyCardButton.requestFocus();
             }
         });
@@ -337,7 +337,7 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "9");
                 rowSize = 0;
                 updateRowSize(9);
-                showSeriesFrom(currentLibrary, false, true);
+                showSeriesFrom(currentLibrary, false);
                 smallCardButton.requestFocus();
             }
         });
@@ -354,7 +354,7 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "7");
                 rowSize = 0;
                 updateRowSize(7);
-                showSeriesFrom(currentLibrary, false, true);
+                showSeriesFrom(currentLibrary, false);
                 normalCardButton.requestFocus();
             }
         });
@@ -371,7 +371,7 @@ public class Controller implements Initializable {
                 Configuration.saveConfig("cardSize", "5");
                 rowSize = 0;
                 updateRowSize(5);
-                showSeriesFrom(currentLibrary, false, true);
+                showSeriesFrom(currentLibrary, false);
                 largeCardButton.requestFocus();
             }
         });
@@ -583,9 +583,13 @@ public class Controller implements Initializable {
         //endregion
 
         currentLibrary = DataManager.INSTANCE.currentLibrary;
+        selectedSeries = App.getSelectedSeries();
 
+        boolean selectMainView = true;
         if (currentLibrary == null && !libraries.isEmpty())
             currentLibrary = libraries.get(0);
+        else
+            selectMainView = false;
 
         if (currentLibrary != null){
             mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
@@ -606,7 +610,15 @@ public class Controller implements Initializable {
                 }
             });
 
-            showContinueWatchingView();
+            if (selectMainView)
+                showContinueWatchingView();
+            else {
+                backgroundImage.setVisible(true);
+                mainViewBundle.setVisible(false);
+                mainViewPane.setVisible(false);
+                scrollPane.setVisible(true);
+                selectLibrary(currentLibrary, selectedSeries);
+            }
         }else{
             showMenu();
             settingsButton.setDisable(true);
@@ -615,7 +627,6 @@ public class Controller implements Initializable {
             switchToDesktopButton.requestFocus();
         }
     }
-
 
     private void updateRowSize(int newSize){
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
@@ -634,6 +645,11 @@ public class Controller implements Initializable {
         });
     }
 
+    public void selectLibrary(Library library, Series series){
+        selectedSeries = series;
+        selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(library)));
+    }
+
     private void selectLibraryButton(Button btn){
         for (Node node : librariesBox.getChildren()) {
             Button catButton = (Button) node;
@@ -645,7 +661,7 @@ public class Controller implements Initializable {
         btn.getStyleClass().add("CatButtonSelected");
 
         playCategoriesSound();
-        showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)), true, !inMainView);
+        showSeriesFrom(libraries.get(librariesBox.getChildren().indexOf(btn)), true);
     }
 
     private void addInteractionSound(Button btn){
@@ -665,7 +681,7 @@ public class Controller implements Initializable {
         clock.setText(time);
     }
 
-    public void showSeriesFrom(Library library, boolean selectSeries, boolean selectCurrentSeries){
+    public void showSeriesFrom(Library library, boolean selectSeries){
         if (library != currentLibrary)
             DataManager.INSTANCE.currentLibrary = library;
 
@@ -690,8 +706,28 @@ public class Controller implements Initializable {
         for (Series col : series)
             addCard(col);
 
+        boolean selectCurrentSeries = series.contains(selectedSeries);
+
         if (selectSeries)
             selectedSeries = null;
+
+        String imagePath = "resources/img/backgroundDefault.png";
+
+        ImageView background = new ImageView(new Image("file:" + imagePath,
+                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
+
+        WritableImage image = getCroppedImage(background);
+
+        if (image != null){
+            BackgroundImage myBI = new BackgroundImage(
+                    image,
+                    BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                    BackgroundSize.DEFAULT);
+
+            mainBox.setBackground(new Background(myBI));
+            backgroundImage.setImage(image);
+            backgroundImage.setVisible(false);
+        }
 
         Platform.runLater(() -> {
             updateRowSize(rowSize);
@@ -736,32 +772,7 @@ public class Controller implements Initializable {
                 if (!s.getSeasons().isEmpty() && seriesButtons.get(series.indexOf(s)).isFocused()) {
                     Season season = s.getSeasons().get(0);
                     if (season != null) {
-                        String imagePath = "resources/img/backgrounds/" + season.getId();
-                        File fullBlur = new File(imagePath + "/fullBlur.jpg");
-                        String backgroundPath = fullBlur.exists() ? "fullBlur.jpg" : "background.jpg";
-
-                        File imageFile = new File(imagePath + "/" + backgroundPath);
-                        if (!imageFile.exists()) {
-                            imagePath = "resources/img";
-                            backgroundPath = "backgroundDefault.png";
-                        }
-
-                        Image currentImage = backgroundImage.getImage();
-
-                        ImageView background = new ImageView(new Image("file:" + imagePath + "/" + backgroundPath,
-                                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
-
-                        WritableImage image = getCroppedImage(background);
-
-                        if (image != null){
-                            BackgroundImage myBI = new BackgroundImage(
-                                    image,
-                                    BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                                    BackgroundSize.DEFAULT);
-
-                            mainBox.setBackground(new Background(myBI));
-                            fadeEffectComplete(backgroundImage, currentImage, image);
-                        }
+                        seriesBackgroundEffect(season);
                     }
                 }
             }));
@@ -770,8 +781,35 @@ public class Controller implements Initializable {
         }
     }
 
-    public void fadeEffectComplete(ImageView imgView, Image first, Image second){
-        imgView.setImage(first);
+    private void seriesBackgroundEffect(Season season){
+        String imagePath = "resources/img/backgrounds/" + season.getId();
+        File fullBlur = new File(imagePath + "/fullBlur.jpg");
+        String backgroundPath = fullBlur.exists() ? "fullBlur.jpg" : "background.jpg";
+
+        File imageFile = new File(imagePath + "/" + backgroundPath);
+        if (!imageFile.exists()) {
+            imagePath = "resources/img";
+            backgroundPath = "backgroundDefault.png";
+        }
+
+        ImageView background = new ImageView(new Image("file:" + imagePath + "/" + backgroundPath,
+                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
+
+        WritableImage image = getCroppedImage(background);
+
+        if (image != null){
+            BackgroundImage myBI = new BackgroundImage(
+                    image,
+                    BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                    BackgroundSize.DEFAULT);
+
+            mainBox.setBackground(new Background(myBI));
+            fadeEffectComplete(backgroundImage, image);
+        }
+    }
+
+    public void fadeEffectComplete(ImageView imgView, Image second){
+        backgroundImage.setVisible(true);
         fadeTransition = new FadeTransition(Duration.seconds(0.3), imgView);
         fadeTransition.setFromValue(1);
         fadeTransition.setToValue(0.1);
@@ -782,6 +820,7 @@ public class Controller implements Initializable {
             fadeTransition = new FadeTransition(Duration.seconds(0.2), imgView);
             fadeTransition.setFromValue(0.1);
             fadeTransition.setToValue(1);
+            fadeTransition.setOnFinished(event -> imgView.setVisible(false));
             fadeTransition.play();
         });
     }
@@ -1002,6 +1041,17 @@ public class Controller implements Initializable {
             ParallelTransition parallelTransition = createParallelTransition(backgroundImage, scrollPane,
                     mainViewBundle, mainViewPane, 0.2f);
             parallelTransition.play();
+
+            RadialGradient shadePaint = new RadialGradient(
+                    0, 1, 0.5, 0.4, 0.8, true, CycleMethod.NO_CYCLE,
+                    new Stop(0, Color.TRANSPARENT),
+                    new Stop(0.5, Color.TRANSPARENT),
+                    new Stop(0.8, Color.BLACK)
+            );
+
+            mainBox.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
+            fill.setBackground(new Background(new BackgroundFill(Color.BLACK, null, new Insets(-10))));
+            shade.setBackground(new Background(new BackgroundFill(shadePaint, null, new Insets(-10))));
         });
     }
 
@@ -1055,6 +1105,7 @@ public class Controller implements Initializable {
         Platform.runLater(() -> {
             mainViewPane.requestFocus();
             if (!continueWatchingBox.getChildren().isEmpty()){
+                selectedEpisode = null;
                 continueWatchingBox.getChildren().getFirst().requestFocus();
             }else{
                 selectLibraryButton((Button) librariesBox.getChildren().getFirst());
@@ -1124,6 +1175,8 @@ public class Controller implements Initializable {
             if (selectedEpisode != episode){
                 selectedEpisode = episode;
 
+                fadeOutEffect(currentlyWatchingImage, 0.6f);
+
                 String logoSrc;
                 if (DataManager.INSTANCE.getLibrary(series).getType().equals("Shows")) {
                     logoSrc = series.getLogoSrc();
@@ -1168,7 +1221,7 @@ public class Controller implements Initializable {
                 else
                     overviewText.setText(App.textBundle.getString("defaultOverview"));
 
-                delay = new PauseTransition(Duration.millis(150));
+                delay = new PauseTransition(Duration.millis(250));
                 delay.setOnFinished(event -> Platform.runLater(() -> {
                     if (!series.getSeasons().isEmpty() &&
                             continueWatchingBox.getChildren().get(continueWatching.indexOf(episode)).isFocused()) {
@@ -1229,6 +1282,9 @@ public class Controller implements Initializable {
         });
     }
     private void applyGradient(Color dominantColor, Image postImage){
+        currentlyWatchingImage.setImage(postImage);
+        currentlyWatchingImage.setVisible(true);
+
         RadialGradient shadePaint = new RadialGradient(
                 0, 1, 0.5, 0.4, 0.8, true, CycleMethod.NO_CYCLE,
                 new Stop(0, Color.TRANSPARENT),
@@ -1236,40 +1292,47 @@ public class Controller implements Initializable {
                 new Stop(0.8, dominantColor)
         );
 
-        mainBox.setBackground(
-                new Background(
-                        new BackgroundFill(
-                                dominantColor, null, new Insets(-10)
-                        )
-                )
-        );
+        Color oldColor = (Color) mainBox.getBackground().getFills().getFirst().getFill();
 
-        FadeTransition fadeOut = fadeOutEffect(mainViewBundle, 0.4f, 0.1f);
-        fadeOut.setOnFinished(e -> {
-            fill.setBackground(
-                    new Background(
-                            new BackgroundFill(
-                                    dominantColor, null, new Insets(-10)
-                            )
-                    )
+        Timeline timeline = new Timeline();
+
+        // Define the number of steps for the transition
+        int steps = 30;
+        float duration = 1.4f;
+        double stepDuration = (duration * 1000) / steps;
+
+        for (int i = 0; i <= steps; i++) {
+            double progress = (double) i / steps;
+            Color intermediateColor = oldColor.interpolate(dominantColor, progress);
+
+            RadialGradient intermediateShade = new RadialGradient(
+                    0, 1, 0.5, 0.4, 0.8, true, CycleMethod.NO_CYCLE,
+                    new Stop(0, Color.TRANSPARENT),
+                    new Stop(0.5, Color.TRANSPARENT),
+                    new Stop(0.8, intermediateColor)
             );
 
-            shade.setBackground(
-                    new Background(
-                            new BackgroundFill(
-                                    shadePaint, null, new Insets(-10)
-                            )
-                    )
+            KeyFrame keyFrame = new KeyFrame(
+                    Duration.millis(i * stepDuration),
+                    new KeyValue(mainBox.backgroundProperty(), new Background(new BackgroundFill(intermediateColor, null, null))),
+                    new KeyValue(fill.backgroundProperty(), new Background(new BackgroundFill(intermediateColor, null, new Insets(-10)))),
+                    new KeyValue(shade.backgroundProperty(), new Background(new BackgroundFill(intermediateShade, null, new Insets(-10)))),
+                    new KeyValue(currentlyWatchingImage.opacityProperty(), progress)
             );
+            timeline.getKeyFrames().add(keyFrame);
+        }
 
-            shade.setEffect(new BoxBlur(10, 10, 4));
-
-            currentlyWatchingImage.setImage(postImage);
-
-            fadeInEffect(mainViewBundle, 0.4f, 0.1f).play();
+        timeline.setOnFinished(e -> {
+            // Ensure the final color is set
+            mainBox.setBackground(new Background(new BackgroundFill(dominantColor, null, null)));
+            fill.setBackground(new Background(new BackgroundFill(dominantColor, null, new Insets(-10))));
+            shade.setBackground(new Background(new BackgroundFill(shadePaint, null, new Insets(-10))));
+            currentlyWatchingImage.setOpacity(1.0);
         });
 
-        fadeOut.play();
+        timeline.play();
+
+        shade.setEffect(new BoxBlur(10, 10, 4));
     }
     private void handleButtonFocus(Button focusedButton) {
         double screenCenter, buttonCenterX, offset, finalPos;
@@ -1350,12 +1413,15 @@ public class Controller implements Initializable {
         hideEpisodeMenu();
         playInteractionSound();
 
+        currentLibrary = DataManager.INSTANCE.getLibrary(selectedSeries);
+        DataManager.INSTANCE.currentLibrary = currentLibrary;
+
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
             Parent root = fxmlLoader.load();
             SeasonController seasonController = fxmlLoader.getController();
             seasonController.setParent(this);
-            seasonController.setSeasons(selectedSeries, selectedSeries.isPlaySameMusic(), libraryType.equals("Shows"));
+            seasonController.setSeasons(currentLibrary, selectedSeries, selectedSeries.isPlaySameMusic(), libraryType.equals("Shows"));
             Stage stage = (Stage) mainPane.getScene().getWindow();
             stage.setTitle(App.textBundle.getString("season"));
             Scene scene = new Scene(root);
@@ -1433,12 +1499,15 @@ public class Controller implements Initializable {
     public void showSeason(Series s){
         playCategoriesSound();
         if (s != null && !s.getSeasons().isEmpty()) {
+            currentLibrary = DataManager.INSTANCE.getLibrary(selectedSeries);
+            DataManager.INSTANCE.currentLibrary = currentLibrary;
+
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
                 Parent root = fxmlLoader.load();
                 SeasonController seasonController = fxmlLoader.getController();
                 seasonController.setParent(this);
-                seasonController.setSeasons(s, s.isPlaySameMusic(), libraryType.equals("Shows"));
+                seasonController.setSeasons(currentLibrary, s, s.isPlaySameMusic(), libraryType.equals("Shows"));
                 Stage stage = (Stage) mainPane.getScene().getWindow();
                 stage.setTitle(App.textBundle.getString("season"));
                 Scene scene = new Scene(root);
