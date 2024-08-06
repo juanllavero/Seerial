@@ -154,7 +154,7 @@ public class App extends Application {
         primaryStage.setTitle(App.textBundle.getString("fullscreenMode"));
         primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
         Scene scene = new Scene(root);
-        scene.setCursor(Cursor.NONE);
+        //scene.setCursor(Cursor.NONE);
         scene.setFill(Color.BLACK);
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);

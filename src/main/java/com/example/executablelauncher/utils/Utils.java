@@ -79,8 +79,15 @@ public class Utils {
             }
 
             //If the current library is for movies, then we compare the year of each season (movie)
-            int year1 = Integer.parseInt(s1.getYear());
-            int year2 = Integer.parseInt(s2.getYear());
+            int year1 = 0;
+            int year2 = 0;
+
+            if (!s1.getYear().isEmpty())
+                year1 = Integer.parseInt(s1.getYear());
+
+            if (!s2.getYear().isEmpty())
+                year2 = Integer.parseInt(s2.getYear());
+
             return Integer.compare(year1, year2);
         }
     }

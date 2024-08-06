@@ -93,7 +93,7 @@ public class DataManager {
     }
     //endregion
 
-    private void scanForMissingFiles(Library library){
+    public void scanForMissingFiles(Library library){
         Iterator<Series> seriesIterator = library.getSeries().iterator();
         while (seriesIterator.hasNext()) {
             Series show = seriesIterator.next();
@@ -220,6 +220,8 @@ public class DataManager {
 
         for (Season season : series.getSeasons())
             deleteSeasonData(season);
+
+        currentLibrary.getAnalyzedFolders().remove(series.getFolder());
     }
     public void deleteSeasonData(Season season){
         try{

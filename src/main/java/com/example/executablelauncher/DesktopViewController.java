@@ -565,18 +565,38 @@ public class DesktopViewController {
         BufferedImage img1 = SwingFXUtils.fromFXImage(globalBackground.getImage(), null);
         BufferedImage img2 = SwingFXUtils.fromFXImage(secondImg, null);
 
+        boolean nullImage = false;
+        if (img2 == null) {
+            img2 = SwingFXUtils.fromFXImage(new Image("file:" + "resources/img/backgroundDefault.png",
+                    globalBackground.getImage().getWidth(), globalBackground.getImage().getHeight(), true, true), null);
+            nullImage = true;
+        }
+
         boolean sameImage = compareImages(img1, img2);
 
         img1.flush();
         img2.flush();
 
         if (!sameImage){
-            Image i = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.jpg",
-                    Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), true, true);
+            Image i;
+
+            if (nullImage)
+                i = new Image("file:" + "resources/img/backgroundDefault.png",
+                        Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), true, true);
+            else
+                i = new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "background.jpg",
+                        Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), true, true);
+
+
             ASPECT_RATIO = i.getWidth() / i.getHeight();
             globalBackground.setImage(i);
-            ImageView img = new ImageView(new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "transparencyEffect.png"));
-            img.setPreserveRatio(true);
+            ImageView img = null;
+
+            if (!nullImage) {
+                img = new ImageView(new Image("file:" + "resources/img/backgrounds/" + selectedSeason.getId() + "/" + "transparencyEffect.png"));
+                img.setPreserveRatio(true);
+            }
+
             seasonBackground.setImageView(img);
             fadeInTransition(globalBackground);
             fadeInTransition(seasonBackground.getImageView());
@@ -1766,40 +1786,58 @@ public class DesktopViewController {
 
         numFilesToCheck = files.size();
 
-        //Execute a new thread for each file
-        for (File file : files) {
-            executor.submit(() -> {
-                try {
-                    if (!interrupted) {
-                        if (library.getType().equals("Shows")) {
-                            if (file.isFile())
-                                return;
+        Task<Void> searchMissingTask = new Task<>() {
+            @Override
+            protected Void call() {
+                //Scan missing files
+                DataManager.INSTANCE.scanForMissingFiles(currentLibrary);
 
-                            File[] filesInDir = file.listFiles();
-                            if (filesInDir == null)
-                                return;
+                Platform.runLater(() -> {
+                    if (selectedSeries != null)
+                        selectSeriesButton(seriesButtons.get(seriesList.indexOf(selectedSeries)));
+                });
+                return null;
+            }
+        };
 
-                            scanTVShow(library, file, filesInDir, false);
-                        } else {
-                            scanMovie(library, file);
+        searchMissingTask.setOnSucceeded(e -> {
+            //Execute a new thread for each file
+            for (File file : files) {
+                executor.submit(() -> {
+                    try {
+                        if (!interrupted) {
+                            if (library.getType().equals("Shows")) {
+                                if (file.isFile())
+                                    return;
+
+                                File[] filesInDir = file.listFiles();
+                                if (filesInDir == null)
+                                    return;
+
+                                scanTVShow(library, file, filesInDir, false);
+                            } else {
+                                scanMovie(library, file);
+                            }
+                        }
+
+                        synchronized (DesktopViewController.class) {
+                            numFilesToCheck--;
+                            if (numFilesToCheck == 0)
+                                Platform.runLater(() -> postFileSearch(library));
+                        }
+                    } catch (Exception err) {
+                        synchronized (DesktopViewController.class) {
+                            numFilesToCheck--;
+                            System.out.println("\nThread " + Thread.currentThread().getName() + " encountered an exception" + err.getMessage());
+                            if (numFilesToCheck == 0)
+                                Platform.runLater(() -> postFileSearch(library));
                         }
                     }
+                });
+            }
+        });
 
-                    synchronized (DesktopViewController.class) {
-                        numFilesToCheck--;
-                        if (numFilesToCheck == 0)
-                            Platform.runLater(() -> postFileSearch(library));
-                    }
-                } catch (Exception e) {
-                    synchronized (DesktopViewController.class) {
-                        numFilesToCheck--;
-                        System.out.println("\nThread " + Thread.currentThread().getName() + " encountered an exception" + e.getMessage());
-                        if (numFilesToCheck == 0)
-                            Platform.runLater(() -> postFileSearch(library));
-                    }
-                }
-            });
-        }
+        executor.submit(searchMissingTask);
     }
 
     private static List<File> getFiles(Library library) {
@@ -2695,6 +2733,7 @@ public class DesktopViewController {
                 newSeason.setName(movieName);
                 newSeason.setYear(year);
                 newSeason.setSeriesID(series.getId());
+                newSeason.setFolder(f.getAbsolutePath());
                 newSeason.setSeasonNumber(series.getSeasons().size());
 
                 library.getAnalyzedFolders().put(f.getAbsolutePath(), series.getId());
@@ -3942,6 +3981,8 @@ public class DesktopViewController {
 
     private void fullScreen() {
         hideMenu();
+
+        DataManager.INSTANCE.currentLibrary = null;
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));

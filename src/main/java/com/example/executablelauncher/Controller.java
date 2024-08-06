@@ -1544,6 +1544,7 @@ public class Controller implements Initializable {
             stage.setMaximized(false);
             stage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
             stage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
+            stage.getScene().setFill(Color.BLACK);
 
             DesktopViewController desktopViewController = fxmlLoader.getController();
             desktopViewController.initValues(windowDecoration);
