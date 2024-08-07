@@ -2037,7 +2037,7 @@ public class DesktopViewController {
                 });
             }
         } else {
-            series = new Series();
+            series = new Series(library.getSeries().size());
             series.setFolder(directory.getAbsolutePath());
             library.getAnalyzedFolders().put(directory.getAbsolutePath(), series.getId());
         }
@@ -2775,7 +2775,7 @@ public class DesktopViewController {
                 return;
 
             //region CREATE/EDIT SERIES
-            Series series = new Series();
+            Series series = new Series(library.getSeries().size());
             series.setFolder(f.getAbsolutePath());
             library.getAnalyzedFolders().put(f.getAbsolutePath(), series.getId());
 
@@ -2903,7 +2903,7 @@ public class DesktopViewController {
                 if (series == null)
                     return;
             } else {
-                series = new Series();
+                series = new Series(library.getSeries().size());
                 series.setName(f.getName());
                 series.setFolder(f.getAbsolutePath());
                 library.getAnalyzedFolders().put(f.getAbsolutePath(), series.getId());

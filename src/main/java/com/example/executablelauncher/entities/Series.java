@@ -11,8 +11,8 @@ public class Series implements Serializable {
     String name = "";
     String overview = "";
     String year = "";
-    int order = 0;
     float score = 0;
+    int order;
     int numberOfEpisodes = 0;
     int numberOfSeasons = 0;
     String coverSrc = "";
@@ -27,8 +27,9 @@ public class Series implements Serializable {
     int currentlyWatchingSeason = -1;
     String productionStudios = "";
 
-    public Series() {
+    public Series(int order) {
         id = UUID.randomUUID().toString();
+        this.order = order;
     }
 
     public String getId() {

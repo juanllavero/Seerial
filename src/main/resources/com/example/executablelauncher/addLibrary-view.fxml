@@ -55,7 +55,7 @@
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
                <font>
-                  <Font size="18.0" />
+                  <Font size="16.0" />
                </font>
             </Button>
             <Button fx:id="foldersViewButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showFoldersView" styleClass="editButton" stylesheets="@styles.css" text="Folders">
@@ -63,7 +63,7 @@
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
                <font>
-                  <Font size="18.0" />
+                  <Font size="16.0" />
                </font>
             </Button>
          </children>
@@ -97,6 +97,9 @@
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
                   </Label>
                   <HBox>
                      <children>

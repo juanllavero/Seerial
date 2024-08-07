@@ -522,6 +522,9 @@ public class SeasonController {
         if (!episodes.isEmpty())
             selectedEpisode = episodes.get(0);
 
+        if (episodes.size() == 1)
+            updateSelectedTrackButtons(selectedEpisode);
+
         if (season.isBeingWatched() && season.getCurrentlyWatchingEpisodeIndex() != -1)
             selectedEpisode = episodes.get(season.getCurrentlyWatchingEpisodeIndex());
 
@@ -1084,7 +1087,12 @@ public class SeasonController {
 
         setTimeLeft(timeLeftBox, timeLeftField, episode);
 
-        //region UPDATE SELECTED TRACK BUTTONS
+        updateSelectedTrackButtons(episode);
+
+        updateWatchedButton();
+    }
+
+    private void updateSelectedTrackButtons(Episode episode){
         if (episode.getVideoTracks().isEmpty()){
             videoTrackButton.setVisible(false);
         }else{
@@ -1129,9 +1137,6 @@ public class SeasonController {
 
             subsTrackButton.setText(selectedTrack.getDisplayTitle());
         }
-        //endregion
-
-        updateWatchedButton();
     }
     //endregion
 

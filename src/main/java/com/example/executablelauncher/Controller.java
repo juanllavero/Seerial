@@ -258,6 +258,7 @@ public class Controller implements Initializable {
         exitButton.setText(App.buttonsBundle.getString("exitFullscreen"));
         switchToDesktopButton.setText(App.buttonsBundle.getString("switchToDesktop"));
         backButton.setText(App.buttonsBundle.getString("backButton"));
+        continueWatchingTitle.setText(App.textBundle.getString("continueWatching"));
 
         settingsTitle.setText(App.buttonsBundle.getString("settings"));
 

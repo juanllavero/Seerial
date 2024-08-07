@@ -49,11 +49,7 @@ public class Utils {
     public static class SeriesComparator implements Comparator<Series> {
         @Override
         public int compare(Series s1, Series s2) {
-            if (s1.getOrder() != 0 && s2.getOrder() != 0) {
-                return Integer.compare(s1.getOrder(), s2.getOrder());
-            }
-
-            return s1.getName().compareTo(s2.getName());
+            return Integer.compare(s1.getOrder(), s2.getOrder());
         }
     }
     public static class SeasonComparator implements Comparator<Season> {
@@ -104,7 +100,7 @@ public class Utils {
     public static class LibraryComparator implements Comparator<Library> {
         @Override
         public int compare(Library a, Library b) {
-            return a.getName().compareTo(b.getName());
+            return Integer.compare(a.getOrder(), b.getOrder());
         }
     }
     public static String episodeDateFormat(String originalDate, String language) {
