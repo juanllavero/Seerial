@@ -1,11 +1,13 @@
 package com.example.executablelauncher.entities;
 
+import com.github.kokorin.jaffree.ffmpeg.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class VideoMetadataExample extends Application {
     //region TEST
@@ -47,6 +49,28 @@ public class VideoMetadataExample extends Application {
     //endregion
 
     public static void main(String[] args) throws IOException {
+        String pathToSrc = "F:\\Fullmetal Alchemist Brotherhood - Creditless OP-ED\\[A&C] Fullmetal Alchemist Brotherhood - NCOP 01 [BDRip 1080p] [V2] [66687D1D].mkv";
+        String pathToDst = "F:\\Fullmetal Alchemist Brotherhood - Creditless OP-ED\\test.mp4";
+
+        final AtomicLong duration = new AtomicLong();
+        FFmpeg.atPath()
+                .addInput(UrlInput.fromUrl(pathToSrc))
+                .setOverwriteOutput(true)
+                .addOutput(new NullOutput())
+                .setProgressListener(progress -> duration.set(progress.getTimeMillis()))
+                .execute();
+
+        FFmpeg.atPath()
+                .addInput(UrlInput.fromUrl(pathToSrc))
+                .setOverwriteOutput(true)
+                .addArguments("-movflags", "faststart")
+                .addArguments("-preset", "ultrafast")
+                .addOutput(UrlOutput.toUrl(pathToDst))
+                .setProgressListener(progress -> {
+                    double percents = 100. * progress.getTimeMillis() / duration.get();
+                    System.out.printf("Progress: %.2f%%%n", percents);
+                })
+                .execute();
 
         launch(args);
     }

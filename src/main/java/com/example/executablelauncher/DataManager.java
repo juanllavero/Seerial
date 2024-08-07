@@ -23,7 +23,6 @@ public class DataManager {
     public static final DataManager INSTANCE = new DataManager();
     final String LOCAL_FILE = "data.json";
     List<Library> libraries = new ArrayList<>();
-    List<Series> seriesToRemove = new ArrayList<>();
     public Library currentLibrary = null;
 
     //region LOAD/SAVE DATA
@@ -66,6 +65,13 @@ public class DataManager {
         }
     }
     public void saveData(){
+        for (Library library : libraries){
+            System.out.println(library.getName());
+            for (Series series : library.getSeries()){
+                System.out.println(series.getName());
+            }
+        }
+
         try (Writer writer = new FileWriter(LOCAL_FILE)) {
             Gson gson = new GsonBuilder().create();
             gson.toJson(libraries, writer);
@@ -103,20 +109,23 @@ public class DataManager {
             while (temporadaIterator.hasNext()) {
                 Season season = temporadaIterator.next();
 
-                Iterator<Episode> episodioIterator = season.getEpisodes().iterator();
-                while (episodioIterator.hasNext()) {
-                    Episode episode = episodioIterator.next();
+                //Mark episodes to remove
+                List<Episode> episodesToRemove = new ArrayList<>();
+
+                for (Episode episode : season.getEpisodes()) {
                     File file = new File(episode.getVideoSrc());
 
                     //Check if drive is connected and the file is missing
                     if (App.checkIfDriveIsConnected(episode.getVideoSrc()) && !file.exists()) {
-                        episodioIterator.remove();
-                        deleteEpisodeData(episode);
-                    }else if (episode.getImgSrc().isEmpty()){
+                        System.out.println("A borrar");
+                        episodesToRemove.add(episode);
+                    } else if (episode.getImgSrc().isEmpty()) {
                         File imageFolder = new File("resources/img/discCovers/" + episode.getId() + "/");
 
-                        if (!imageFolder.exists())
+                        if (!imageFolder.exists()) {
+                            System.out.println("Image folder does not exist for episode: " + episode.getId());
                             continue;
+                        }
 
                         File[] images = imageFolder.listFiles();
 
@@ -125,6 +134,12 @@ public class DataManager {
 
                         episode.setImgSrc("resources/img/discCovers/" + episode.getId() + "/" + images[0].getName());
                     }
+                }
+
+                //Remove episodes
+                for (Episode episode : episodesToRemove) {
+                    season.getEpisodes().remove(episode);
+                    deleteEpisodeData(episode);
                 }
 
                 //Remove season if it has no episodes
@@ -181,23 +196,6 @@ public class DataManager {
                 return true;
         }
         return false;
-    }
-
-    public void checkEmptySeasons(Library library, Series s, boolean removeHere){
-        List<Season> seasonsToDelete = new ArrayList<>();
-        for (Season season : s.getSeasons()){
-            if (season.getEpisodes().isEmpty())
-                seasonsToDelete.add(season);
-        }
-
-        for (Season season : seasonsToDelete)
-            s.removeSeason(season);
-
-        if (removeHere && s.getSeasons().isEmpty()) {
-            deleteSeriesData(s);
-            library.removeSeries(s);
-        }else if (s.getSeasons().isEmpty())
-            seriesToRemove.add(s);
     }
 
     //region DELETE

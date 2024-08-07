@@ -104,6 +104,7 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
+import static com.example.executablelauncher.App.analysisExecutor;
 import static com.example.executablelauncher.App.executor;
 import static com.example.executablelauncher.utils.Utils.*;
 
@@ -1405,20 +1406,20 @@ public class DesktopViewController {
             protected Void call() {
                 interrupted = true;
 
-                executor.close();
+                analysisExecutor.close();
                 try {
-                    if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    if (!analysisExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
                         System.out.println("Executor did not terminate in the specified time. Attempting to shutdown now.");
-                        List<Runnable> notExecutedTasks = executor.shutdownNow();
+                        List<Runnable> notExecutedTasks = analysisExecutor.shutdownNow();
                         System.out.println("Not executed tasks: " + notExecutedTasks.size());
 
-                        if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                        if (!analysisExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
                             System.err.println("Executor did not terminate after being forced to shut down.");
                         }
                     }
                 } catch (InterruptedException e) {
                     System.err.println("Interrupted while waiting for termination.");
-                    executor.shutdownNow();
+                    analysisExecutor.shutdownNow();
                     Thread.currentThread().interrupt();
                 }
 
@@ -1492,7 +1493,8 @@ public class DesktopViewController {
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
 
-        executor.submit(() -> {
+        App.initializeAnalysisExecutor();
+        analysisExecutor.submit(() -> {
             try {
                 File folder = new File(selectedSeries.getFolder());
                 File[] filesInFolder = folder.listFiles();
@@ -1531,6 +1533,7 @@ public class DesktopViewController {
                 });
             }
         });
+        analysisExecutor.shutdown();
     }
 
     public void correctIdentificationMovie() {
@@ -1538,7 +1541,8 @@ public class DesktopViewController {
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
 
-        executor.submit(() -> {
+        App.initializeAnalysisExecutor();
+        analysisExecutor.submit(() -> {
             try {
                 MovieMetadata metadata = downloadMovieMetadata(currentLibrary, selectedSeason.getThemdbID());
 
@@ -1626,6 +1630,7 @@ public class DesktopViewController {
                 });
             }
         });
+        analysisExecutor.shutdown();
     }
 
     public void setCorrectIdentificationShow(int newID) {
@@ -1677,7 +1682,8 @@ public class DesktopViewController {
         downloadingContentTextStatic.setText(App.textBundle.getString("downloadingMessage"));
         downloadingContentWindowStatic.setVisible(true);
 
-        executor.submit(() -> {
+        App.initializeAnalysisExecutor();
+        analysisExecutor.submit(() -> {
             try {
                 File folder = new File(selectedSeries.getFolder());
                 File[] filesInFolder = folder.listFiles();
@@ -1727,6 +1733,7 @@ public class DesktopViewController {
                 });
             }
         });
+        analysisExecutor.shutdown();
     }
     //endregion
 
@@ -1781,11 +1788,28 @@ public class DesktopViewController {
         //Get every file and folder from within the root folders
         List<File> files = getFiles(library);
 
-        if (files.isEmpty())
+        if (files.isEmpty()) {
+            acceptRemove = true;
+            hardRemoveLibrary();
+
+            downloadingContentWindow.setVisible(false);
+            searchingForFiles = false;
+
+            DataManager.INSTANCE.saveData();
+
+            //Restore library buttons
+            editLibraryButton.setDisable(false);
+            removeLibraryButton.setDisable(false);
+            removeLibraryButton.setDisable(false);
+            searchFilesButton.setDisable(false);
+            addLibraryButton.setDisable(false);
+
             return;
+        }
 
         numFilesToCheck = files.size();
 
+        App.initializeAnalysisExecutor();
         Task<Void> searchMissingTask = new Task<>() {
             @Override
             protected Void call() {
@@ -1793,7 +1817,29 @@ public class DesktopViewController {
                 DataManager.INSTANCE.scanForMissingFiles(currentLibrary);
 
                 Platform.runLater(() -> {
-                    if (selectedSeries != null)
+                    seriesList = currentLibrary.getSeries();
+
+                    if (!seriesList.contains(selectedSeries)) {
+                        int index = -1;
+                        for (Button btn : seriesButtons){
+                            if (btn.getStyleClass().getFirst().equals("desktopButtonActive")){
+                                index = seriesButtons.indexOf(btn);
+                                break;
+                            }
+                        }
+
+                        if (index != -1){
+                            seriesButtons.remove(index);
+                            seriesContainer.getChildren().remove(index);
+                        }
+
+                        selectedSeries = null;
+                        if (!seriesList.isEmpty()) {
+                            selectSeriesButton(seriesButtons.get(0));
+                        } else {
+                            seasonScroll.setVisible(false);
+                        }
+                    }else if (selectedSeries != null)
                         selectSeriesButton(seriesButtons.get(seriesList.indexOf(selectedSeries)));
                 });
                 return null;
@@ -1803,7 +1849,7 @@ public class DesktopViewController {
         searchMissingTask.setOnSucceeded(e -> {
             //Execute a new thread for each file
             for (File file : files) {
-                executor.submit(() -> {
+                analysisExecutor.submit(() -> {
                     try {
                         if (!interrupted) {
                             if (library.getType().equals("Shows")) {
@@ -1837,7 +1883,7 @@ public class DesktopViewController {
             }
         });
 
-        executor.submit(searchMissingTask);
+        analysisExecutor.submit(searchMissingTask);
     }
 
     private static List<File> getFiles(Library library) {
@@ -1861,6 +1907,21 @@ public class DesktopViewController {
     }
 
     private void postFileSearch(Library library) {
+        if (library.getSeries().isEmpty()){
+            acceptRemove = true;
+            hardRemoveLibrary();
+
+            downloadingContentWindow.setVisible(false);
+            searchingForFiles = false;
+
+            //Restore library buttons
+            editLibraryButton.setDisable(false);
+            removeLibraryButton.setDisable(false);
+            removeLibraryButton.setDisable(false);
+            searchFilesButton.setDisable(false);
+            addLibraryButton.setDisable(false);
+        }
+
         DataManager.INSTANCE.saveData();
 
         //Restore library buttons
@@ -1889,7 +1950,7 @@ public class DesktopViewController {
             if (interrupted)
                 break;
 
-            executor.submit(() -> {
+            analysisExecutor.submit(() -> {
                 try {
 
                     if (library.getType().equals("Shows")) {
@@ -1923,6 +1984,7 @@ public class DesktopViewController {
             });
         }
 
+        analysisExecutor.shutdown();
     }
 
     public void postDownloadDefaultMusic() {
@@ -2150,7 +2212,7 @@ public class DesktopViewController {
         if (posterList != null && !posterList.isEmpty()) {
             saveCover(id, 0, imageBaseURL + posterList.get(0).file_path);
 
-            executor.submit(() -> {
+            analysisExecutor.submit(() -> {
                 try {
                     int processedFiles = 1;
                     for (int i = processedFiles; i < posterList.size(); i++) {
@@ -2539,7 +2601,7 @@ public class DesktopViewController {
         if (!thumbnailsUrls.isEmpty()) {
             saveThumbnail(episode, thumbnailsUrls.get(0), 0);
 
-            executor.submit(() -> {
+            analysisExecutor.submit(() -> {
                 try {
                     for (int i = 1; i < thumbnailsUrls.size(); i++) {
                         if (i == 10)
@@ -2733,7 +2795,6 @@ public class DesktopViewController {
                 newSeason.setName(movieName);
                 newSeason.setYear(year);
                 newSeason.setSeriesID(series.getId());
-                newSeason.setFolder(f.getAbsolutePath());
                 newSeason.setSeasonNumber(series.getSeasons().size());
 
                 library.getAnalyzedFolders().put(f.getAbsolutePath(), series.getId());
@@ -2901,7 +2962,6 @@ public class DesktopViewController {
                     }
 
                     if (updateMetadata) {
-                        season.setFolder(f.getAbsolutePath());
                         season.setSeriesID(series.getId());
 
                         season.setName(movieMetadata.title);
@@ -3027,7 +3087,6 @@ public class DesktopViewController {
                 }
 
                 if (updateMetadata) {
-                    season.setFolder(f.getAbsolutePath());
                     season.setSeriesID(series.getId());
 
                     season.setName(movieMetadata.title);
@@ -3285,7 +3344,7 @@ public class DesktopViewController {
         if (!thumbnailsUrls.isEmpty()) {
             saveThumbnail(episode, thumbnailsUrls.get(0), 0);
 
-            executor.submit(() -> {
+            analysisExecutor.submit(() -> {
                 try {
                     for (int i = 1; i < thumbnailsUrls.size(); i++) {
                         if (i == 10)
@@ -3474,7 +3533,7 @@ public class DesktopViewController {
                 if (!logosList.isEmpty()) {
                     saveLogo(id, 0, imageBaseURL + logosList.get(0).file_path);
 
-                    executor.submit(() -> {
+                    analysisExecutor.submit(() -> {
                         try {
                             int processedFiles = 1;
                             for (int i = processedFiles; i < logosList.size(); i++) {
@@ -3862,6 +3921,12 @@ public class DesktopViewController {
         Stage stage = showConfirmationWindow(App.textBundle.getString("removeLibrary"), App.textBundle.getString("removeLibraryMessage"));
         stage.showAndWait();
 
+        hardRemoveLibrary();
+
+        hideBackgroundShadow();
+    }
+
+    private void hardRemoveLibrary(){
         if (acceptRemove) {
             acceptRemove = false;
             DataManager.INSTANCE.deleteLibrary(currentLibrary);
@@ -3872,8 +3937,6 @@ public class DesktopViewController {
 
         if (libraryContainer.getChildren().isEmpty())
             blankSelection();
-
-        hideBackgroundShadow();
     }
 
     @FXML

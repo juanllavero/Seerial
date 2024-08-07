@@ -2,6 +2,12 @@ package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import com.github.kokorin.jaffree.ffmpeg.FFmpeg;
+import com.github.kokorin.jaffree.ffmpeg.NullOutput;
+import com.github.kokorin.jaffree.ffmpeg.UrlInput;
+import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +20,7 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -30,11 +37,18 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.example.executablelauncher.App.*;
 
 public class EditSeasonController {
     //region FXML ATTRIBUTES
+    @FXML
+    private BorderPane downloadingPane;
+
+    @FXML
+    private Label downloadingText;
+
     @FXML
     private ImageView backgroundImageView;
 
@@ -205,6 +219,7 @@ public class EditSeasonController {
         showGeneralView();
     }
     private void initValues(){
+        downloadingPane.setVisible(false);
         nameText.setText(App.textBundle.getString("name"));
         yearText.setText(App.textBundle.getString("year"));
         saveButton.setText(buttonsBundle.getString("saveButton"));
@@ -587,7 +602,8 @@ public class EditSeasonController {
             fileChooser.setInitialDirectory(new File(lastVideoDirectory));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allVideos"), "*.mp4"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allVideos"), "*.mp4", "*.mkv", "*.avi"
+                , "*.mov", "*.wmv", "*.mpeg", "*.m2ts"));
         selectedVideo = fileChooser.showOpenDialog(((Button) event.getSource()).getScene().getWindow());
         if (selectedVideo != null){
             videoField.setText(selectedVideo.getPath());
@@ -670,10 +686,11 @@ public class EditSeasonController {
                 App.showErrorMessage("Invalid data", "", App.textBundle.getString("videoNotFound"));
                 return;
             }else if (video.exists()){
-                String videoExtension = videoField.getText().substring(videoField.getText().length() - 3);
+                String videoExtension = videoField.getText().substring(videoField.getText().lastIndexOf("."));
                 videoExtension = videoExtension.toLowerCase();
 
-                if (!videoExtension.equals("mkv") && !videoExtension.equals("mp4")){
+                if (!videoExtension.equals(".mkv") && !videoExtension.equals(".mp4") && !videoExtension.equals(".avi") && !videoExtension.equals(".mov")
+                        && !videoExtension.equals(".wmv") && !videoExtension.equals(".mpeg") && !videoExtension.equals(".m2ts")){
                     App.showErrorMessage("Invalid data", "", App.textBundle.getString("videoErrorFormat"));
                     return;
                 }
@@ -768,31 +785,82 @@ public class EditSeasonController {
         if (selectedPoster != null)
             seasonToEdit.setCoverSrc("resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + selectedPoster.getName());
 
-        parentController.hideBackgroundShadow();
-        parentController.refreshSeason(seasonToEdit);
-        parentController.clearImageCache();
+        if (!downloadingPane.isVisible()){
+            parentController.hideBackgroundShadow();
+            parentController.refreshSeason(seasonToEdit);
+            parentController.clearImageCache();
 
-        Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
-        stage.close();
+            Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
+            stage.close();
+        }
     }
     private void saveVideo(Season s){
         if (!videoField.getText().isEmpty()){
             if (selectedVideo == null)
                 selectedVideo = new File(videoField.getText());
 
-            int i = selectedVideo.getName().lastIndexOf('.');
-            String extension = "mp4";
-            if (i > 0) {
-                extension = selectedVideo.getName().substring(i+1);
-            }
-            File newVideo = new File("resources/video/" + s.getId() + "_sv." + extension);
+            String inputPath = selectedVideo.getAbsolutePath();
+            if (inputPath.endsWith(".mp4")) {
+                File newVideo = new File("resources/video/" + s.getId() + "_sv.mp4");
 
-            try{
-                Files.copy(selectedVideo.toPath(), newVideo.toPath());
-            }catch (IOException e){
-                System.err.println("Video not copied");
+                try{
+                    Files.copy(selectedVideo.toPath(), newVideo.toPath());
+                }catch (IOException e){
+                    System.err.println("Video not copied");
+                }
+            }else{
+                downloadingPane.setVisible(true);
+                downloadingText.setText(textBundle.getString("convertingVideoFile") + ": 0%");
+                Task<Void> convertVideoTask = new Task<>() {
+                    @Override
+                    protected Void call() {
+                        final AtomicLong duration = new AtomicLong();
+                        FFmpeg.atPath()
+                                .addInput(UrlInput.fromUrl(selectedVideo.getAbsolutePath()))
+                                .setOverwriteOutput(true)
+                                .addOutput(new NullOutput())
+                                .setProgressListener(progress -> duration.set(progress.getTimeMillis()))
+                                .execute();
+
+                        FFmpeg.atPath()
+                                .addInput(UrlInput.fromUrl(selectedVideo.getAbsolutePath()))
+                                .setOverwriteOutput(true)
+                                .addArguments("-movflags", "faststart")
+                                .addArguments("-preset", "ultrafast")
+                                .addOutput(UrlOutput.toUrl("resources/video/" + s.getId() + "_sv.mp4"))
+                                .setProgressListener(progress -> {
+                                    double percents = 100. * progress.getTimeMillis() / duration.get();
+                                    Platform.runLater(() -> downloadingText.setText(textBundle.getString("convertingVideoFile") + ": " + Math.round(percents) + "%"));
+                                })
+                                .execute();
+                        return null;
+                    }
+                };
+
+                convertVideoTask.setOnSucceeded(e -> {
+                    downloadingPane.setVisible(false);
+                    parentController.hideBackgroundShadow();
+                    parentController.refreshSeason(seasonToEdit);
+                    parentController.clearImageCache();
+
+                    Stage stage = (Stage) downloadingPane.getScene().getWindow();
+                    stage.close();
+                });
+
+                convertVideoTask.setOnFailed(e -> {
+                    downloadingPane.setVisible(false);
+                    parentController.hideBackgroundShadow();
+                    parentController.refreshSeason(seasonToEdit);
+                    parentController.clearImageCache();
+
+                    Stage stage = (Stage) downloadingPane.getScene().getWindow();
+                    stage.close();
+                });
+
+                executor.submit(convertVideoTask);
             }
-            s.setVideoSrc("resources/video/" + newVideo.getName());
+
+            s.setVideoSrc("resources/video/" + s.getId() + "_sv.mp4");
         }else{
             s.setVideoSrc("");
         }

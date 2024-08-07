@@ -13,6 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -49,7 +50,8 @@ public class App extends Application {
     public static String lastVideoDirectory = null;
     public static String lastMusicDirectory = null;
     public static boolean isConnectedToInternet = false;
-    public static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 4);
+    public static ExecutorService analysisExecutor;
+    public static final ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     static ScheduledExecutorService executorService;
     public static List<Task<Void>> tasks = new ArrayList<>();
     private static DesktopViewController desktopController;
@@ -87,6 +89,8 @@ public class App extends Application {
         //Check every minute if there is Internet connection
         executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(App::isInternetAvailable, 0, 5, TimeUnit.MINUTES);
+
+        initializeAnalysisExecutor();
 
         //Set resource bundles
         File file = new File("resources/");
@@ -284,7 +288,7 @@ public class App extends Application {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
-        alert.setGraphic(null);
+        alert.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/error.png"), 18, 18, true, true)));
 
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getScene().getStylesheets().add(Objects.requireNonNull(App.class.getResource("styles.css")).toExternalForm());
@@ -294,6 +298,10 @@ public class App extends Application {
                 .forEach(button -> button.getStyleClass().add("desktopButton"));
 
         alert.showAndWait();
+    }
+
+    public static void initializeAnalysisExecutor(){
+        analysisExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 4);
     }
 
     public static void main(String[] args) {
