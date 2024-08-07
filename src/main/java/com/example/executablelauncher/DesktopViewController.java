@@ -624,15 +624,16 @@ public class DesktopViewController {
 
             rootFolderField.setText(selectedSeries.getFolder());
 
-            if (selectedSeries.getLogoSrc().isEmpty()) {
+            File logoFile = new File(selectedSeries.getLogoSrc());
+            if (!logoFile.exists() || !logoFile.isFile()){
                 setTextNoLogo();
-            } else {
+            }else {
                 seasonLogoBox.getChildren().remove(0);
                 seasonLogo = new ImageView();
                 File file = new File(selectedSeries.getLogoSrc());
                 setLogoNoText(file);
             }
-        } else {
+        }else {
             episodesText.setText(App.textBundle.getString("videos"));
             seasonNumberText.setVisible(false);
             seasonNumberText.setManaged(false);
@@ -641,9 +642,10 @@ public class DesktopViewController {
 
             rootFolderField.setText(selectedSeason.getFolder());
 
-            if (selectedSeason.getLogoSrc().isEmpty()) {
+            File logoFile = new File(selectedSeason.getLogoSrc());
+            if (!logoFile.exists() || !logoFile.isFile()) {
                 setTextNoLogo();
-            } else {
+            }else {
                 seasonLogoBox.getChildren().remove(0);
                 seasonLogo = new ImageView();
                 File file = new File(selectedSeason.getLogoSrc());

@@ -72,15 +72,11 @@
                                  <children>
                                     <HBox fx:id="seasonLogoBox" alignment="BOTTOM_LEFT" fillHeight="false" prefHeight="450.0" prefWidth="1195.0">
                                        <children>
-                                          <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
-                                             <HBox.margin>
-                                                <Insets bottom="5.0" left="20.0" />
-                                             </HBox.margin>
-                                          </ImageView>
+                                          <ImageView fx:id="seasonLogo" fitHeight="122.0" fitWidth="428.0" pickOnBounds="true" preserveRatio="true" />
                                        </children>
-                                       <padding>
+                                       <VBox.margin>
                                           <Insets bottom="30.0" />
-                                       </padding>
+                                       </VBox.margin>
                                     </HBox>
                                     <HBox prefHeight="100.0" prefWidth="200.0">
                                        <children>

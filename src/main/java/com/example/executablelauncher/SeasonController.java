@@ -23,11 +23,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.BoxBlur;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -36,6 +38,9 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.text.*;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -56,6 +61,8 @@ import static com.example.executablelauncher.utils.Utils.*;
 
 public class SeasonController {
     //region FXML ATTRIBUTES
+    @FXML Pane fill;
+    @FXML Pane shade;
     @FXML Label directedByText;
     @FXML Label writtenByText;
     @FXML Label createdByText;
@@ -92,7 +99,6 @@ public class SeasonController {
     @FXML Label timeLeftField;
     @FXML BorderPane detailsBox;
     @FXML ImageView detailsImage;
-    @FXML Pane videoPlayerPane;
     @FXML HBox detailsInfo;
     @FXML Label detailsOverview;
     @FXML Label detailsTitle;
@@ -154,11 +160,12 @@ public class SeasonController {
         assert seasons != null;
         seasons.sort(new Utils.SeasonComparator());
 
+        shade.setVisible(false);
+        fill.setVisible(false);
+
         menuShadow.setFitWidth(Screen.getPrimary().getBounds().getWidth());
         menuShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
         menuShadow.setVisible(false);
-
-        videoPlayerPane.setVisible(false);
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedBack(event)){
@@ -233,6 +240,20 @@ public class SeasonController {
 
         detailsText.setPrefWidth(screenWidth / 2);
         detailsBox.setVisible(false);
+
+        double aspectRatio = screenWidth / screenHeight;
+        if (aspectRatio > (double) 16/9){
+            shade.setPrefWidth(((double) 16/9) * screenHeight);
+            shade.setPrefHeight(screenHeight);
+
+            fill.setPrefWidth(screenWidth - shade.getPrefWidth());
+            fill.setPrefHeight(screenHeight);
+        }else{
+            shade.setPrefWidth(screenWidth);
+            shade.setPrefHeight(screenHeight);
+
+            fill.setPrefWidth(0);
+        }
 
         detailsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
@@ -457,7 +478,7 @@ public class SeasonController {
         WritableImage croppedImage = new WritableImage(pixelReader, xOffset, 0, (int) newWidth, (int) newHeight);
 
         backgroundImage.setImage(croppedImage);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.8), backgroundImage);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.6), backgroundImage);
         fadeIn.setFromValue(0);
         fadeIn.setToValue(1);
         fadeIn.play();
@@ -469,7 +490,9 @@ public class SeasonController {
         else
             logoSrc = season.getLogoSrc();
 
-        if (logoSrc.isEmpty()){
+        File logoFile = new File(logoSrc);
+
+        if (!logoFile.exists() || !logoFile.isFile()){
             infoBox.getChildren().remove(0);
             Label seriesTitle = new Label(series.getName());
             seriesTitle.setFont(new Font("Roboto", 58));
@@ -535,8 +558,6 @@ public class SeasonController {
         if (!isShow){
             detailsInfo.getChildren().remove(seasonEpisodeNumber);
         }
-
-        fadeInEffect(backgroundImage);
     }
     public Controller getParent(){
         return controllerParent;
@@ -1162,7 +1183,27 @@ public class SeasonController {
                     if (screenRatio > 1.8f && mediaRatio > 1.8f)
                         backgroundVideo.setPreserveRatio(false);
 
-                    fadeInEffect(backgroundVideo);
+                    double videoWidth = mediaRatio * backgroundVideo.getFitHeight();
+                    fill.setPrefWidth(Screen.getPrimary().getBounds().getWidth() - videoWidth);
+
+                    RadialGradient shadePaint = new RadialGradient(
+                            0, 1, 0.5, 0.5, 2.4, true, CycleMethod.NO_CYCLE,
+                            new Stop(0, Color.TRANSPARENT),
+                            new Stop(0.5, Color.TRANSPARENT),
+                            new Stop(0.6, Color.BLACK)
+                    );
+
+                    fill.setBackground(new Background(new BackgroundFill(Color.BLACK, null, new Insets(-10))));
+                    shade.setBackground(new Background(new BackgroundFill(shadePaint, null, new Insets(-10))));
+
+                    shade.setEffect(new BoxBlur(10, 10, 4));
+
+                    fadeInEffect(backgroundVideo, 1).play();
+
+                    if (mediaRatio <= screenRatio){
+                        fadeInEffect(shade, 0.3f).play();
+                        fadeInEffect(fill, 0.3f).play();
+                    }
                 }
 
                 mp.seek(mp.getStartTime());
@@ -1172,6 +1213,8 @@ public class SeasonController {
     }
     private void stopPlayer() {
         fadeOutEffect(backgroundVideo);
+        fadeOutEffect(shade, 0.3f);
+        fadeOutEffect(fill, 0.3f);
 
         double increment = mp.getVolume() * 0.05;
         Timeline timeline = new Timeline(

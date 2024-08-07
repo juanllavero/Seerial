@@ -26,6 +26,10 @@
             <ColorAdjust brightness="-0.28" />
          </effect>
       </ImageView>
+      <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
+         <effect>
+            <DropShadow height="255.0" radius="127.0" spread="0.44" width="255.0" />
+         </effect></MediaView>
       <ImageView fx:id="backgroundShadow" fitHeight="1080.0" fitWidth="2572.0" pickOnBounds="true" StackPane.alignment="CENTER_RIGHT">
          <effect>
             <ColorAdjust contrast="0.21" />
@@ -42,10 +46,14 @@
             <Image url="@../../../img/backgroundShadow.png" />
          </image>
       </ImageView>
-      <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
-         <effect>
-            <DropShadow height="255.0" radius="127.0" spread="0.44" width="255.0" />
-         </effect></MediaView>
+      <BorderPane prefHeight="200.0" prefWidth="200.0">
+         <left>
+            <Pane fx:id="fill" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+         </left>
+         <center>
+            <Pane fx:id="shade" prefHeight="1030.0" prefWidth="331.0" BorderPane.alignment="CENTER" />
+         </center>
+      </BorderPane>
       <BorderPane fx:id="mainPane" prefWidth="1280.0">
          <right>
             <Button fx:id="nextSeasonButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#nextSeason" styleClass="fullscreenButtonTransparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
@@ -511,7 +519,6 @@
             </ImageView>
          </center>
       </BorderPane>
-      <Pane fx:id="videoPlayerPane" style="-fx-background-color: black;" visible="false" />
       <BorderPane fx:id="videoError" style="-fx-background-color: black;" visible="false">
          <top>
             <Label fx:id="errorTitle" text="Error al reproducir el archivo" textFill="WHITE" BorderPane.alignment="CENTER">

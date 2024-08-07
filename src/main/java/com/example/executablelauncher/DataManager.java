@@ -65,13 +65,6 @@ public class DataManager {
         }
     }
     public void saveData(){
-        for (Library library : libraries){
-            System.out.println(library.getName());
-            for (Series series : library.getSeries()){
-                System.out.println(series.getName());
-            }
-        }
-
         try (Writer writer = new FileWriter(LOCAL_FILE)) {
             Gson gson = new GsonBuilder().create();
             gson.toJson(libraries, writer);
@@ -117,7 +110,6 @@ public class DataManager {
 
                     //Check if drive is connected and the file is missing
                     if (App.checkIfDriveIsConnected(episode.getVideoSrc()) && !file.exists()) {
-                        System.out.println("A borrar");
                         episodesToRemove.add(episode);
                     } else if (episode.getImgSrc().isEmpty()) {
                         File imageFolder = new File("resources/img/discCovers/" + episode.getId() + "/");
