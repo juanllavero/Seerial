@@ -256,8 +256,8 @@ public class VideoPlayerController {
             if (App.pressedBack(e)){
                 if (optionsBox.isVisible())
                     hideOptions();
-                else if (controlsShown)
-                    hideControls();
+                else if (!controlsShown)
+                    showControls();
                 else
                     stop();
             }
@@ -267,8 +267,8 @@ public class VideoPlayerController {
             if (App.pressedBack(e)){
                 if (optionsBox.isVisible())
                     hideOptions();
-                else if (controlsShown)
-                    hideControls();
+                else if (!controlsShown)
+                    showControls();
                 else
                     stop();
             }
@@ -640,7 +640,7 @@ public class VideoPlayerController {
 
         //Set video and start
         if (parentControllerDesktop == null)
-            videoPlayer.playVideo(episode.getVideoSrc(), App.textBundle.getString("season"));
+            videoPlayer.playVideo(episode.getVideoSrc(), App.textBundle.getString("fullscreenMode"));
         else
             videoPlayer.playVideo(episode.getVideoSrc(), App.textBundle.getString("desktopMode"));
 

@@ -247,6 +247,7 @@ public class Controller implements Initializable {
     boolean inMainView = false;
     boolean inSeasonView = false;
     SeasonController seasonController;
+    boolean editMode = false;
 
     @FXML
     void close() {
@@ -614,7 +615,8 @@ public class Controller implements Initializable {
                             showContinueWatchingView();
                     }else if (App.pressedRB(event) && libraries.indexOf(currentLibrary) < libraries.size() - 1){
                         selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) + 1));
-                    }
+                    }else if (App.pressedEdit(event) && !inMainView)
+                        toggleEditMode();
                 }
             });
 
@@ -633,6 +635,62 @@ public class Controller implements Initializable {
             appName.setText(App.textBundle.getString("noLibraries"));
 
             switchToDesktopButton.requestFocus();
+        }
+    }
+
+    private void toggleEditMode(){
+        editMode = !editMode;
+
+        Button btn = seriesButtons.get(series.indexOf(selectedSeries));
+
+        if (editMode){
+            Rectangle img = (Rectangle) btn.getGraphic();
+            StackPane pane = new StackPane();
+
+            BorderPane borderPane = new BorderPane();
+
+            DropShadow dropShadow = new DropShadow();
+            dropShadow.setRadius(8.0);
+            dropShadow.setOffsetX(2.0);
+            dropShadow.setOffsetY(2.0);
+            dropShadow.setColor(Color.BLACK);
+
+            // Imágenes para los diferentes lados con DropShadow aplicado
+            ImageView rightImage = new ImageView(new Image(getFileAsIOStream("img/icons/flechaDer.png"), 35, 35, true, true));
+            rightImage.setEffect(dropShadow);
+
+            ImageView leftImage = new ImageView(new Image(getFileAsIOStream("img/icons/flechaIzq.png"), 35, 35, true, true));
+            leftImage.setEffect(dropShadow);
+
+            ImageView topImage = new ImageView(new Image(getFileAsIOStream("img/icons/arrowUp.png"), 35, 35, true, true));
+            topImage.setEffect(dropShadow);
+
+            ImageView bottomImage = new ImageView(new Image(getFileAsIOStream("img/icons/arrowDown.png"), 35, 35, true, true));
+            bottomImage.setEffect(dropShadow);
+
+            // StackPane para alinear las imágenes al centro de su lado
+            StackPane rightPane = new StackPane(rightImage);
+            rightPane.setAlignment(Pos.CENTER);  // Centrado en el lado derecho
+            borderPane.setRight(rightPane);
+
+            StackPane leftPane = new StackPane(leftImage);
+            leftPane.setAlignment(Pos.CENTER);  // Centrado en el lado izquierdo
+            borderPane.setLeft(leftPane);
+
+            StackPane topPane = new StackPane(topImage);
+            topPane.setAlignment(Pos.CENTER);  // Centrado en la parte superior
+            borderPane.setTop(topPane);
+
+            StackPane bottomPane = new StackPane(bottomImage);
+            bottomPane.setAlignment(Pos.CENTER);  // Centrado en la parte inferior
+            borderPane.setBottom(bottomPane);
+
+            pane.getChildren().addAll(img, borderPane);
+            btn.setGraphic(pane);
+        }else{
+            StackPane pane = (StackPane) btn.getGraphic();
+            Rectangle img = (Rectangle) pane.getChildren().getFirst();
+            btn.setGraphic(img);
         }
     }
 
@@ -694,8 +752,8 @@ public class Controller implements Initializable {
             DataManager.INSTANCE.currentLibrary = library;
 
         if (inMainView) {
-            showLibraryView();
             inMainView = false;
+            showLibraryView();
         }
 
         currentLibrary = library;
@@ -772,7 +830,7 @@ public class Controller implements Initializable {
 
             App.setSelectedSeries(selectedSeries);
 
-            delay = new PauseTransition(Duration.millis(150));
+            delay = new PauseTransition(Duration.millis(250));
             delay.setOnFinished(event -> Platform.runLater(() -> {
                 if (!s.getSeasons().isEmpty() && seriesButtons.get(series.indexOf(s)).isFocused()) {
                     Season season = s.getSeasons().get(0);
@@ -815,7 +873,7 @@ public class Controller implements Initializable {
 
     public void fadeEffectComplete(ImageView imgView, Image second){
         backgroundImage.setVisible(true);
-        fadeTransition = new FadeTransition(Duration.seconds(0.3), imgView);
+        fadeTransition = new FadeTransition(Duration.seconds(0.2), imgView);
         fadeTransition.setFromValue(1);
         fadeTransition.setToValue(0.1);
         fadeTransition.play();
@@ -983,8 +1041,6 @@ public class Controller implements Initializable {
 
         cardContainer.getChildren().add(btn);
     }
-
-
     private Rectangle setRoundedBorders(String imageSrc, double width, double height){
         Rectangle rectangle = new Rectangle(0, 0, width, height);
         rectangle.setArcWidth(20.0);
@@ -1012,24 +1068,46 @@ public class Controller implements Initializable {
     }
     private void showMainView(){
         Platform.runLater(() -> {
-            backgroundImage.setVisible(false);
-            mainViewBundle.setVisible(true);
-            mainViewPane.setVisible(true);
-            scrollPane.setVisible(false);
-            ParallelTransition parallelTransition = createParallelTransition(backgroundImage, scrollPane,
-                    mainViewBundle, mainViewPane, 0.2f);
-            parallelTransition.play();
-
             RadialGradient shadePaint = new RadialGradient(
                     0, 1, 0.5, 0.4, 0.8, true, CycleMethod.NO_CYCLE,
                     new Stop(0, Color.TRANSPARENT),
                     new Stop(0.5, Color.TRANSPARENT),
-                    new Stop(0.8, Color.BLACK)
+                    new Stop(0.8, Color.GRAY)
             );
 
-            mainBox.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
-            fill.setBackground(new Background(new BackgroundFill(Color.BLACK, null, new Insets(-10))));
+            mainBox.setBackground(new Background(new BackgroundFill(Color.GRAY, null, null)));
+            fill.setBackground(new Background(new BackgroundFill(Color.GRAY, null, new Insets(-10))));
             shade.setBackground(new Background(new BackgroundFill(shadePaint, null, new Insets(-10))));
+
+            backgroundImage.setVisible(false);
+            mainViewBundle.setVisible(true);
+            mainViewPane.setVisible(true);
+            scrollPane.setVisible(false);
+
+            ParallelTransition parallelTransition = createParallelTransition(backgroundImage, scrollPane,
+                    mainViewBundle, mainViewPane, 0.2f);
+            parallelTransition.play();
+
+            /*backgroundImage.setVisible(true);
+            scrollPane.setVisible(true);
+
+            if (backgroundImage.isVisible()){
+                FadeTransition fadeOut1 = fadeOutEffect(backgroundImage, 0.4f, 0);
+                fadeOut1.setOnFinished(e -> {
+                    backgroundImage.setVisible(false);
+                    fadeInEffect(mainViewBundle, 0.4f).play();
+                });
+                fadeOut1.play();
+            }
+
+            if (scrollPane.isVisible()){
+                FadeTransition fadeOut2 = fadeOutEffect(scrollPane, 0.4f, 0);
+                fadeOut2.setOnFinished(e -> {
+                    scrollPane.setVisible(false);
+                    fadeInEffect(mainViewPane, 0.4f).play();
+                });
+                fadeOut2.play();
+            }*/
         });
     }
 
@@ -1044,9 +1122,23 @@ public class Controller implements Initializable {
             btn.getStyleClass().add("CatButton");
         }
 
+        loadContinueWatchingEpisodes();
+
         inMainView = true;
         showMainView();
 
+        Platform.runLater(() -> {
+            mainViewPane.requestFocus();
+            if (!continueWatchingBox.getChildren().isEmpty()){
+                selectedEpisode = null;
+                continueWatchingBox.getChildren().getFirst().requestFocus();
+            }else{
+                selectLibraryButton((Button) librariesBox.getChildren().getFirst());
+            }
+        });
+
+    }
+    private void loadContinueWatchingEpisodes(){
         continueWatching.clear();
         continueWatchingBox.getChildren().clear();
 
@@ -1079,17 +1171,6 @@ public class Controller implements Initializable {
                 }
             }
         }
-
-        Platform.runLater(() -> {
-            mainViewPane.requestFocus();
-            if (!continueWatchingBox.getChildren().isEmpty()){
-                selectedEpisode = null;
-                continueWatchingBox.getChildren().getFirst().requestFocus();
-            }else{
-                selectLibraryButton((Button) librariesBox.getChildren().getFirst());
-            }
-        });
-
     }
     private void addEpisodeCard(Series series, Season season, Episode episode){
         Button btn = addBaseCard(series, episode);
@@ -1140,7 +1221,7 @@ public class Controller implements Initializable {
 
         btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (event.getButton().equals(MouseButton.PRIMARY)){
-                if (btn == continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode))
+                if (continueWatching.contains(selectedEpisode) && btn == continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode))
                         && btn.isFocused())
                     showEpisodeMenu(series, season, episode);
                 else
@@ -1277,8 +1358,8 @@ public class Controller implements Initializable {
         Timeline timeline = new Timeline();
 
         // Define the number of steps for the transition
-        int steps = 30;
-        float duration = 1.4f;
+        int steps = 20;
+        float duration = 1f;
         double stepDuration = (duration * 1000) / steps;
 
         for (int i = 0; i <= steps; i++) {
@@ -1450,7 +1531,6 @@ public class Controller implements Initializable {
         mainPane.setDisable(false);
         restoreSelection();
     }
-
     @FXML
     void showMenu(){
         globalShadow.setVisible(true);
@@ -1459,7 +1539,6 @@ public class Controller implements Initializable {
         settingsWindow.setVisible(false);
         settingsButton.requestFocus();
     }
-
     @FXML
     void openSettings(){
         globalShadow.setVisible(false);
@@ -1467,7 +1546,6 @@ public class Controller implements Initializable {
         settingsWindow.setVisible(true);
         cardSizeButton.requestFocus();
     }
-
     public void showSeason(Series s){
         playCategoriesSound();
         if (s != null && !s.getSeasons().isEmpty() && !inSeasonView) {
@@ -1481,7 +1559,6 @@ public class Controller implements Initializable {
             }
         }
     }
-
     private FadeTransition generateSeasonView(Series s) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
         Parent root = fxmlLoader.load();
@@ -1494,24 +1571,29 @@ public class Controller implements Initializable {
         root.setVisible(false);
         mainBox.getChildren().add(root);
 
-        return fadeInEffect(root, 0.6f);
+        return fadeInEffect(root, 1f);
     }
-
     public void closeSeasonView(){
-        FadeTransition fadeOut = fadeOutEffect(mainBox.getChildren().getLast(), 0.6f, 0);
+        if (inMainView){
+            loadContinueWatchingEpisodes();
+        }
+
+        FadeTransition fadeOut = fadeOutEffect(mainBox.getChildren().getLast(), 1f, 0);
         fadeOut.setOnFinished(e -> {
             inSeasonView = false;
             mainBox.getChildren().removeLast();
 
             if (inMainView){
-                selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary)));
+                if (continueWatching.contains(selectedEpisode))
+                    continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode)).requestFocus();
+                else
+                    continueWatchingBox.getChildren().getFirst().requestFocus();
             }else{
                 seriesButtons.get(series.indexOf(selectedSeries)).requestFocus();
             }
         });
         fadeOut.play();
     }
-
     @FXML
     void switchToDesktop(){
         playInteractionSound();

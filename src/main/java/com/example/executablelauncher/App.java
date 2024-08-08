@@ -193,6 +193,9 @@ public class App extends Application {
     public static boolean pressedLB(KeyEvent event){
         return event.getCode().equals(KeyCode.SUBTRACT) || event.getCode().equals(KeyCode.MINUS);
     }
+    public static boolean pressedEdit(KeyEvent event){
+        return event.getCode().equals(KeyCode.E);
+    }
 
     public static void close(){
         executorService.shutdown();

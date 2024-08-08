@@ -1163,12 +1163,13 @@ public class SeasonController {
 
                     shade.setEffect(new BoxBlur(10, 10, 4));
 
+                    if (mediaRatio <= screenRatio){
+                        fadeInEffect(shade, 0.2f).play();
+                        fadeInEffect(fill, 0.2f).play();
+                    }
+
                     fadeInEffect(backgroundVideo, 1).play();
 
-                    if (mediaRatio <= screenRatio){
-                        fadeInEffect(shade, 0.3f).play();
-                        fadeInEffect(fill, 0.3f).play();
-                    }
                 }
 
                 mp.seek(mp.getStartTime());
