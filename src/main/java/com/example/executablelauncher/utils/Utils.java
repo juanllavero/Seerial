@@ -21,6 +21,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
@@ -28,6 +30,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+import javafx.stage.Screen;
 import javafx.util.Duration;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -128,6 +131,34 @@ public class Utils {
         public Locale fromString(String string) {
             return Locale.forLanguageTag(string);
         }
+    }
+    public static WritableImage getCroppedImage(ImageView img){
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        double targetAspectRatio = screenWidth / screenHeight;
+
+        double originalWidth = img.getImage().getWidth();
+        double originalHeight = img.getImage().getHeight();
+        double originalAspectRatio = originalWidth / originalHeight;
+
+        double newWidth, newHeight;
+        if (originalAspectRatio > targetAspectRatio) {
+            newWidth = originalHeight * targetAspectRatio;
+            newHeight = originalHeight;
+        } else {
+            newWidth = originalWidth;
+            newHeight = originalWidth / targetAspectRatio;
+        }
+
+        double xOffset = 0;
+        double yOffset = 0;
+
+        PixelReader pixelReader = img.getImage().getPixelReader();
+
+        if (newWidth == 0 || newHeight == 0)
+            return null;
+
+        return new WritableImage(pixelReader, 0, 0, (int) newWidth, (int) newHeight);
     }
 
     public static void markPreviousAndNextEpisodes(Series selectedSeries, Season selectedSeason, Episode selectedEpisode){

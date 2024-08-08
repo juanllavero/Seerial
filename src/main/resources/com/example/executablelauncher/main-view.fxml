@@ -20,7 +20,7 @@
 <StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1030.0" prefWidth="1719.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.Controller">
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="1011.0" fitWidth="1688.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_RIGHT" />
-      <StackPane fx:id="mainViewBundle" StackPane.alignment="CENTER">
+      <StackPane fx:id="mainViewBundle" visible="false" StackPane.alignment="CENTER">
          <children>
             <ImageView fx:id="currentlyWatchingImage" fitHeight="1011.0" fitWidth="1688.0" opacity="0.85" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_RIGHT" />
             <HBox prefHeight="100.0" prefWidth="200.0">
@@ -138,7 +138,7 @@
                         </FlowPane>
                      </content>
                   </ScrollPane>
-                  <BorderPane fx:id="mainViewPane">
+                  <BorderPane fx:id="mainViewPane" visible="false">
                      <center>
                         <VBox fx:id="infoBox" alignment="BOTTOM_LEFT" spacing="10.0" BorderPane.alignment="CENTER">
                            <children>

@@ -245,6 +245,8 @@ public class Controller implements Initializable {
     int rowCount = 0;
     int buttonCount = 0;
     boolean inMainView = false;
+    boolean inSeasonView = false;
+    SeasonController seasonController;
 
     @FXML
     void close() {
@@ -507,8 +509,9 @@ public class Controller implements Initializable {
 
             if (App.pressedLeft(event))
                 librariesBox.getChildren().getLast().requestFocus();
-            else if (App.pressedSelect(event))
+            else if (App.pressedSelect(event)) {
                 showMenu();
+            }
         });
 
         menuButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
@@ -532,24 +535,26 @@ public class Controller implements Initializable {
             });
 
             btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
-                if (App.pressedSelect(event)) {
-                    selectLibraryButton(btn);
-                }else if (App.pressedLeft(event)){
-                    if (librariesBox.getChildren().indexOf(btn) > 0)
-                        librariesBox.getChildren().get(librariesBox.getChildren().indexOf(btn) - 1).requestFocus();
-                    else
-                        mainViewButton.requestFocus();
-                }else if (App.pressedRight(event)){
-                    if (btn == librariesBox.getChildren().getLast()){
-                        menuButton.requestFocus();
-                    }else{
-                        librariesBox.getChildren().get(Math.min(librariesBox.getChildren().indexOf(btn) + 1, librariesBox.getChildren().size() - 1)).requestFocus();
+                if (!inSeasonView){
+                    if (App.pressedSelect(event)) {
+                        selectLibraryButton(btn);
+                    }else if (App.pressedLeft(event)){
+                        if (librariesBox.getChildren().indexOf(btn) > 0)
+                            librariesBox.getChildren().get(librariesBox.getChildren().indexOf(btn) - 1).requestFocus();
+                        else
+                            mainViewButton.requestFocus();
+                    }else if (App.pressedRight(event)){
+                        if (btn == librariesBox.getChildren().getLast()){
+                            menuButton.requestFocus();
+                        }else{
+                            librariesBox.getChildren().get(Math.min(librariesBox.getChildren().indexOf(btn) + 1, librariesBox.getChildren().size() - 1)).requestFocus();
+                        }
+                    }else if (App.pressedDown(event)){
+                        if (!inMainView && selectedSeries != null)
+                            seriesButtons.get(series.indexOf(selectedSeries)).requestFocus();
+                        else if (inMainView)
+                            continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode)).requestFocus();
                     }
-                }else if (App.pressedDown(event)){
-                    if (!inMainView && selectedSeries != null)
-                        seriesButtons.get(series.indexOf(selectedSeries)).requestFocus();
-                    else if (inMainView)
-                        continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode)).requestFocus();
                 }
             });
 
@@ -594,20 +599,22 @@ public class Controller implements Initializable {
 
         if (currentLibrary != null){
             mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
-                if (App.pressedBack(event)) {
-                    if (mainMenu.isVisible()){
-                        hideContextMenu();
-                    }else if (!episodeMenuParent.isVisible()){
-                        playInteractionSound();
-                        showMenu();
+                if (!inSeasonView){
+                    if (App.pressedBack(event)) {
+                        if (mainMenu.isVisible()){
+                            hideContextMenu();
+                        }else if (!episodeMenuParent.isVisible()){
+                            playInteractionSound();
+                            showMenu();
+                        }
+                    }else if (App.pressedLB(event)){
+                        if (libraries.indexOf(currentLibrary) > 0)
+                            selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) - 1));
+                        else
+                            showContinueWatchingView();
+                    }else if (App.pressedRB(event) && libraries.indexOf(currentLibrary) < libraries.size() - 1){
+                        selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) + 1));
                     }
-                }else if (App.pressedLB(event)){
-                    if (libraries.indexOf(currentLibrary) > 0)
-                        selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) - 1));
-                    else
-                        showContinueWatchingView();
-                }else if (App.pressedRB(event) && libraries.indexOf(currentLibrary) < libraries.size() - 1){
-                    selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) + 1));
                 }
             });
 
@@ -712,21 +719,23 @@ public class Controller implements Initializable {
         if (selectSeries)
             selectedSeries = null;
 
+        /*String imagePath = "resources/img/backgroundDefault.png";
+
+        BackgroundImage myBI = new BackgroundImage(
+                new Image("file:" + imagePath,
+                        Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true),
+                BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
+                BackgroundSize.DEFAULT);
+
+        mainBox.setBackground(new Background(myBI));
+        backgroundImage.setImage(new Image("file:" + imagePath,
+                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
+        backgroundImage.setVisible(false);*/
+
+        seriesBackgroundEffect(library.getSeries().getFirst().getSeasons().getFirst());
+
         Platform.runLater(() -> {
             updateRowSize(rowSize);
-
-            /*String imagePath = "resources/img/backgroundDefault.png";
-
-            BackgroundImage myBI = new BackgroundImage(
-                    new Image("file:" + imagePath,
-                            Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true),
-                    BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                    BackgroundSize.DEFAULT);
-
-            mainBox.setBackground(new Background(myBI));
-            backgroundImage.setImage(new Image("file:" + imagePath,
-                    Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
-            backgroundImage.setVisible(false);*/
 
             if (selectSeries)
                 if (selectCurrentSeries)
@@ -819,35 +828,6 @@ public class Controller implements Initializable {
             fadeTransition.setOnFinished(event -> imgView.setVisible(false));
             fadeTransition.play();
         });
-    }
-
-    private WritableImage getCroppedImage(ImageView img){
-        double screenWidth = Screen.getPrimary().getBounds().getWidth();
-        double screenHeight = Screen.getPrimary().getBounds().getHeight();
-        double targetAspectRatio = screenWidth / screenHeight;
-
-        double originalWidth = img.getImage().getWidth();
-        double originalHeight = img.getImage().getHeight();
-        double originalAspectRatio = originalWidth / originalHeight;
-
-        double newWidth, newHeight;
-        if (originalAspectRatio > targetAspectRatio) {
-            newWidth = originalHeight * targetAspectRatio;
-            newHeight = originalHeight;
-        } else {
-            newWidth = originalWidth;
-            newHeight = originalWidth / targetAspectRatio;
-        }
-
-        double xOffset = 0;
-        double yOffset = 0;
-
-        PixelReader pixelReader = img.getImage().getPixelReader();
-
-        if (newWidth == 0 || newHeight == 0)
-            return null;
-
-        return new WritableImage(pixelReader, 0, 0, (int) newWidth, (int) newHeight);
     }
 
     private Button addBaseCard(Series s, Episode episode){
@@ -963,30 +943,32 @@ public class Controller implements Initializable {
         });
 
         btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
-            if (App.pressedSelect(event)){
-                if (selectedSeries != null) {
-                    showSeason(selectedSeries);
+            if (!inSeasonView){
+                if (App.pressedSelect(event)){
+                    if (selectedSeries != null) {
+                        showSeason(selectedSeries);
+                    }
                 }
-            }
 
-            int index = seriesButtons.indexOf(btn);
+                int index = seriesButtons.indexOf(btn);
 
-            if (App.pressedUp(event)){
-                if (index < rowSize)
-                    librariesBox.getChildren().get(libraries.indexOf(currentLibrary)).requestFocus();
-                else
-                    seriesButtons.get(seriesButtons.indexOf(btn) - rowSize).requestFocus();
-            }else if (App.pressedDown(event)){
-                if (index + rowSize < seriesButtons.size())
-                    seriesButtons.get(seriesButtons.indexOf(btn) + rowSize).requestFocus();
-                else
-                    seriesButtons.getLast().requestFocus();
-            }else if (App.pressedLeft(event)){
-                if (index > 0)
-                    seriesButtons.get(seriesButtons.indexOf(btn) - 1).requestFocus();
-            }else if (App.pressedRight(event)){
-                if (index < seriesButtons.size() - 1)
-                    seriesButtons.get(seriesButtons.indexOf(btn) + 1).requestFocus();
+                if (App.pressedUp(event)){
+                    if (index < rowSize)
+                        librariesBox.getChildren().get(libraries.indexOf(currentLibrary)).requestFocus();
+                    else
+                        seriesButtons.get(seriesButtons.indexOf(btn) - rowSize).requestFocus();
+                }else if (App.pressedDown(event)){
+                    if (index + rowSize < seriesButtons.size())
+                        seriesButtons.get(seriesButtons.indexOf(btn) + rowSize).requestFocus();
+                    else
+                        seriesButtons.getLast().requestFocus();
+                }else if (App.pressedLeft(event)){
+                    if (index > 0)
+                        seriesButtons.get(seriesButtons.indexOf(btn) - 1).requestFocus();
+                }else if (App.pressedRight(event)){
+                    if (index < seriesButtons.size() - 1)
+                        seriesButtons.get(seriesButtons.indexOf(btn) + 1).requestFocus();
+                }
             }
         });
 
@@ -1136,21 +1118,23 @@ public class Controller implements Initializable {
         });
 
         btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
-            if (App.pressedSelect(event)){
-                if (selectedEpisode != null)
-                    showEpisodeMenu(series, season, episode);
-            }
+            if (!inSeasonView){
+                if (App.pressedSelect(event)){
+                    if (selectedEpisode != null)
+                        showEpisodeMenu(series, season, episode);
+                }
 
-            int index = continueWatchingBox.getChildren().indexOf(btn);
+                int index = continueWatchingBox.getChildren().indexOf(btn);
 
-            if (App.pressedUp(event)){
-                librariesBox.getChildren().get(0).requestFocus();
-            }else if (App.pressedLeft(event)){
-                if (index > 0)
-                    continueWatchingBox.getChildren().get(continueWatchingBox.getChildren().indexOf(btn) - 1).requestFocus();
-            }else if (App.pressedRight(event)){
-                if (index < continueWatchingBox.getChildren().size() - 1)
-                    continueWatchingBox.getChildren().get(continueWatchingBox.getChildren().indexOf(btn) + 1).requestFocus();
+                if (App.pressedUp(event)){
+                    librariesBox.getChildren().get(0).requestFocus();
+                }else if (App.pressedLeft(event)){
+                    if (index > 0)
+                        continueWatchingBox.getChildren().get(continueWatchingBox.getChildren().indexOf(btn) - 1).requestFocus();
+                }else if (App.pressedRight(event)){
+                    if (index < continueWatchingBox.getChildren().size() - 1)
+                        continueWatchingBox.getChildren().get(continueWatchingBox.getChildren().indexOf(btn) + 1).requestFocus();
+                }
             }
         });
 
@@ -1413,23 +1397,9 @@ public class Controller implements Initializable {
         DataManager.INSTANCE.currentLibrary = currentLibrary;
 
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
-            Parent root = fxmlLoader.load();
-            SeasonController seasonController = fxmlLoader.getController();
-            seasonController.setParent(this);
-            seasonController.setSeasons(currentLibrary, selectedSeries, selectedSeries.isPlaySameMusic(), libraryType.equals("Shows"));
-            Stage stage = (Stage) mainPane.getScene().getWindow();
-            stage.setTitle(App.textBundle.getString("season"));
-            Scene scene = new Scene(root);
-            //scene.setCursor(Cursor.NONE);
-            scene.setFill(Color.BLACK);
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.setWidth(Screen.getPrimary().getBounds().getWidth());
-            stage.setHeight(Screen.getPrimary().getBounds().getHeight());
-            stage.show();
-
-            seasonController.playEpisode(selectedEpisode);
+            FadeTransition fade = generateSeasonView(selectedSeries);
+            fade.setOnFinished(e -> seasonController.playEpisode(selectedEpisode));
+            fade.play();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -1500,30 +1470,46 @@ public class Controller implements Initializable {
 
     public void showSeason(Series s){
         playCategoriesSound();
-        if (s != null && !s.getSeasons().isEmpty()) {
+        if (s != null && !s.getSeasons().isEmpty() && !inSeasonView) {
             currentLibrary = DataManager.INSTANCE.getLibrary(selectedSeries);
             DataManager.INSTANCE.currentLibrary = currentLibrary;
 
             try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
-                Parent root = fxmlLoader.load();
-                SeasonController seasonController = fxmlLoader.getController();
-                seasonController.setParent(this);
-                seasonController.setSeasons(currentLibrary, s, s.isPlaySameMusic(), libraryType.equals("Shows"));
-                Stage stage = (Stage) mainPane.getScene().getWindow();
-                stage.setTitle(App.textBundle.getString("season"));
-                Scene scene = new Scene(root);
-                //scene.setCursor(Cursor.NONE);
-                scene.setFill(Color.BLACK);
-                stage.setScene(scene);
-                stage.setMaximized(true);
-                stage.setWidth(Screen.getPrimary().getBounds().getWidth());
-                stage.setHeight(Screen.getPrimary().getBounds().getHeight());
-                stage.show();
+                generateSeasonView(s).play();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private FadeTransition generateSeasonView(Series s) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
+        Parent root = fxmlLoader.load();
+        seasonController = fxmlLoader.getController();
+        seasonController.setParent(this);
+        seasonController.setSeasons(currentLibrary, s, s.isPlaySameMusic(), libraryType.equals("Shows"));
+
+        inSeasonView = true;
+
+        root.setVisible(false);
+        mainBox.getChildren().add(root);
+
+        return fadeInEffect(root, 0.6f);
+    }
+
+    public void closeSeasonView(){
+        FadeTransition fadeOut = fadeOutEffect(mainBox.getChildren().getLast(), 0.6f, 0);
+        fadeOut.setOnFinished(e -> {
+            inSeasonView = false;
+            mainBox.getChildren().removeLast();
+
+            if (inMainView){
+                selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary)));
+            }else{
+                seriesButtons.get(series.indexOf(selectedSeries)).requestFocus();
+            }
+        });
+        fadeOut.play();
     }
 
     @FXML

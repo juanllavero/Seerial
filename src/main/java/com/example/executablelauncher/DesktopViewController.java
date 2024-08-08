@@ -57,14 +57,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -220,8 +218,10 @@ public class DesktopViewController {
     public static Episode selectedEpisode = null;
     private static List<Episode> selectedEpisodes = new ArrayList<>();
     private static List<DiscController> episodesControllers = new ArrayList<>();
+    private Series draggedSeries;
     private double ASPECT_RATIO = 16.0 / 9.0;
     private boolean acceptRemove = false;
+    private boolean canDragSeries = true;
     private static int numFilesToCheck = 0;
     private static int imageDownloadProcesses = 0;
     private boolean searchingForFiles = false;
@@ -235,8 +235,6 @@ public class DesktopViewController {
     WindowDecoration windowDecoration;
     MediaPlayer mp = null;
     ScheduledExecutorService musicExecutor = Executors.newScheduledThreadPool(1);
-    double xOffset = 0;
-    double yOffset = 0;
     //endregion
 
     //region THEMOVIEDB ATTRIBUTES
@@ -3806,9 +3804,23 @@ public class DesktopViewController {
     }
 
     private void addSeriesCard(Series s) {
-        Button seriesButton = new Button();
+        Button seriesButton = addSeriesButton(s);
         seriesButton.getStyleClass().add("desktopTextButtonParent");
 
+        setDragAndDropButton(seriesButton);
+
+        seriesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+            selectSeriesButton(seriesButton);
+            if (event.getButton() == MouseButton.SECONDARY) {
+                openSeriesMenu(event);
+            }
+        });
+
+        seriesContainer.getChildren().add(seriesButton);
+        seriesButtons.add(seriesButton);
+    }
+    private Button addSeriesButton(Series s){
+        Button seriesButton = new Button();
         Label buttonText = new Label(s.getName());
         buttonText.getStyleClass().add("desktopTextButton");
         buttonText.setMaxWidth(seriesScrollPane.getPrefWidth() - 50);
@@ -3830,15 +3842,7 @@ public class DesktopViewController {
         seriesButton.setMaxWidth(Double.MAX_VALUE);
         seriesButton.setPadding(new Insets(5, 5, 5, 5));
 
-        seriesButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
-            selectSeriesButton(seriesButton);
-            if (event.getButton() == MouseButton.SECONDARY) {
-                openSeriesMenu(event);
-            }
-        });
-
-        seriesContainer.getChildren().add(seriesButton);
-        seriesButtons.add(seriesButton);
+        return seriesButton;
     }
 
     @FXML
@@ -3902,6 +3906,75 @@ public class DesktopViewController {
                 return;
             }
         }
+    }
+    //endregion
+
+    //region DRAG AND DROP SERIES
+    private void setDragAndDropButton(Button button) {
+        // Start the drag event
+        button.setOnDragDetected(event -> {
+            if (canDragSeries){
+                draggedSeries = seriesList.get(seriesContainer.getChildren().indexOf(button));
+                Dragboard db = button.startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent content = new ClipboardContent();
+                content.putString(button.getText());
+                db.setContent(content);
+            }
+
+            event.consume();
+        });
+
+        // Allow the VBox to accept the drop
+        seriesContainer.setOnDragOver(event -> {
+            if (event.getGestureSource() != seriesContainer && event.getDragboard().hasString()) {
+                event.acceptTransferModes(TransferMode.MOVE);
+            }
+            event.consume();
+        });
+
+        // Handle the drop event
+        seriesContainer.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            boolean success = false;
+            if (db.hasString()) {
+                Button draggedButton = (Button) event.getGestureSource();
+                int draggedIndex = seriesContainer.getChildren().indexOf(draggedButton);
+
+                int dropIndex = getDropIndex(event.getY());
+
+                if (dropIndex >= 0 && dropIndex < seriesContainer.getChildren().size()) {
+                    // Avoid reordering if the button is dropped at the same position
+                    if (dropIndex != draggedIndex) {
+                        seriesContainer.getChildren().remove(draggedButton);
+                        seriesContainer.getChildren().add(dropIndex, draggedButton);
+
+                        // Update the ArrayList to reflect the new order
+                        seriesList.remove(draggedSeries);
+                        seriesList.add(dropIndex, draggedSeries);
+
+                        seriesButtons.remove(draggedButton);
+                        seriesButtons.add(dropIndex, draggedButton);
+
+                        for (int i = 0; i < seriesList.size(); i++){
+                            seriesList.get(i).setOrder(i);
+                        }
+                    }
+                }
+
+                success = true;
+            }
+            event.setDropCompleted(success);
+            event.consume();
+        });
+    }
+    // Method to determine the drop position based on the Y coordinate
+    private int getDropIndex(double y) {
+        for (int i = 0; i < seriesContainer.getChildren().size(); i++) {
+            if (y < seriesContainer.getChildren().get(i).getBoundsInParent().getMaxY()) {
+                return i;
+            }
+        }
+        return seriesContainer.getChildren().size(); // Add to the end if no position is found
     }
     //endregion
 

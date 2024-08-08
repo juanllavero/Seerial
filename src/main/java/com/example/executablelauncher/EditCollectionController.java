@@ -121,7 +121,7 @@ public class EditCollectionController {
 
         setImageFile(s.getCoverSrc());
 
-        if (s.getOrder() > 0)
+        if (s.getOrder() >= 0)
             orderField.setText(Integer.toString(s.getOrder()));
 
         //Initial values
@@ -521,7 +521,7 @@ public class EditCollectionController {
         seriesToEdit.setName(nameField.getText());
         seriesToEdit.setPlaySameMusic(playSameMusic.isSelected());
 
-        if (!orderField.getText().isEmpty() && !orderField.getText().equals("0"))
+        if (!orderField.getText().isEmpty())
             seriesToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
         if (selectedCover != null)

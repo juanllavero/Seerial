@@ -426,7 +426,7 @@ public class SeasonController {
         currentSeason = 0;
 
         //Find currently watching episode if exists
-        if (series.isBeingWatched() && series.getCurrentlyWatchingSeasonIndex() != -1)
+        if (series.isBeingWatched())
             currentSeason = series.getCurrentlyWatchingSeasonIndex();
 
         assert seasons != null;
@@ -525,7 +525,7 @@ public class SeasonController {
         if (episodes.size() == 1)
             updateSelectedTrackButtons(selectedEpisode);
 
-        if (season.isBeingWatched() && season.getCurrentlyWatchingEpisodeIndex() != -1)
+        if (season.isBeingWatched())
             selectedEpisode = episodes.get(season.getCurrentlyWatchingEpisodeIndex());
 
         if (episodeButtons.size() <= 1 && !isShow)
@@ -535,9 +535,12 @@ public class SeasonController {
             cardContainer.setTranslateX(0);
             buttonCount = getVisibleButtonCountGlobal(episodeScroll, cardContainer);
 
-            if (episodeButtons.size() > 1 || isShow)
-                episodeButtons.get(season.getLastDisc()).requestFocus();
-            else
+            if (episodeButtons.size() > 1 || isShow) {
+                if (season.isBeingWatched())
+                    episodeButtons.get(season.getCurrentlyWatchingEpisodeIndex()).requestFocus();
+                else
+                    episodeButtons.get(season.getLastDisc()).requestFocus();
+            }else
                 playButton.requestFocus();
         });
 
@@ -905,22 +908,7 @@ public class SeasonController {
             stopPlayer();
         }
 
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = (Stage) mainBox.getScene().getWindow();
-            stage.setTitle(App.textBundle.getString("fullscreenMode"));
-            Scene scene = new Scene(root);
-            //scene.setCursor(Cursor.NONE);
-            scene.setFill(Color.BLACK);
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.setWidth(Screen.getPrimary().getBounds().getWidth());
-            stage.setHeight(Screen.getPrimary().getBounds().getHeight());
-            stage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        controllerParent.closeSeasonView();
     }
     @FXML
     void lastSeason(){
