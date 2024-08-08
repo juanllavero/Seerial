@@ -57,6 +57,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.executablelauncher.App.mediaExecutor;
 import static com.example.executablelauncher.utils.Utils.*;
 
 public class SeasonController {
@@ -143,7 +144,6 @@ public class SeasonController {
     boolean playingVideo = false;
     boolean playSameMusic = false;
     boolean episodesFocussed = true;
-    ScheduledExecutorService mediaExecutor = Executors.newScheduledThreadPool(1);
     //endregion
 
     //region INITIALIZATION
@@ -495,7 +495,7 @@ public class SeasonController {
         if (!logoFile.exists() || !logoFile.isFile()){
             infoBox.getChildren().remove(0);
             Label seriesTitle = new Label(series.getName());
-            seriesTitle.setFont(new Font("Roboto", 58));
+            seriesTitle.setFont(new Font("Roboto", 65));
             seriesTitle.setStyle("-fx-font-weight: bold");
             seriesTitle.setTextFill(Color.color(1, 1, 1));
             seriesTitle.setEffect(new DropShadow());
@@ -561,6 +561,8 @@ public class SeasonController {
         if (!isShow){
             detailsInfo.getChildren().remove(seasonEpisodeNumber);
         }
+
+        updateWatchedButton();
     }
     public Controller getParent(){
         return controllerParent;
@@ -583,40 +585,7 @@ public class SeasonController {
 
         Series selectedSeries = App.getSelectedSeries();
         Season selectedSeason = seasons.get(currentSeason);
-        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
-            //Mark as watched every episode before the current one
-            for (Season season : selectedSeries.getSeasons()){
-                if (season == selectedSeason){
-                    for (Episode episode : season.getEpisodes()){
-                        if (episode == selectedEpisode)
-                            break;
-
-                        episode.setWatched();
-                    }
-                    break;
-                }
-
-                if (season.getSeasonNumber() != 0)
-                    for (Episode episode : season.getEpisodes())
-                        episode.setWatched();
-            }
-
-            //Mark as unwatched every episode after the current one
-            for (int i = selectedSeason.getEpisodes().indexOf(selectedEpisode); i < selectedSeason.getEpisodes().size(); i++){
-                Episode episode = selectedSeason.getEpisodes().get(i);
-
-                if (episode != selectedEpisode)
-                    episode.setUnWatched();
-            }
-            for (int i = selectedSeries.getSeasons().indexOf(selectedSeason); i < selectedSeries.getSeasons().size(); i++){
-                Season season = selectedSeries.getSeasons().get(i);
-
-                if (season.getSeasonNumber() != 0 && season != selectedSeason){
-                    for (Episode episode : season.getEpisodes())
-                        episode.setUnWatched();
-                }
-            }
-        }
+        markPreviousAndNextEpisodes(selectedSeries, selectedSeason, selectedEpisode);
 
         setTimeLeft(timeLeftBox, timeLeftField, selectedEpisode);
         updateWatchedButton();
@@ -827,14 +796,15 @@ public class SeasonController {
         else
             selectedEpisode.setWatched();
 
-        reloadEpisodeCard(selectedEpisode);
-        updateWatchedButton();
-    }
+        Series selectedSeries = App.getSelectedSeries();
+        Season selectedSeason = seasons.get(currentSeason);
+        markPreviousAndNextEpisodes(selectedSeries, selectedSeason, selectedEpisode);
 
-    public void setWatched(){
-        selectedEpisode.setWatched();
-        reloadEpisodeCard(selectedEpisode);
+        setTimeLeft(timeLeftBox, timeLeftField, selectedEpisode);
         updateWatchedButton();
+
+        for (Episode episode : selectedSeason.getEpisodes())
+            reloadEpisodeCard(episode);
     }
     private void updateWatchedButton(){
         ImageView img = (ImageView) watchedButton.getGraphic();
@@ -843,7 +813,7 @@ public class SeasonController {
             if (selectedEpisode.isWatched()){
                 img.setImage(new Image(getFileAsIOStream("img/icons/watchedSelected.png"), 30, 30, true, true));
             }else{
-                img.setImage(new Image(getFileAsIOStream("img/icons/toWatchedSelected.png"), 30, 30, true, true));
+                img.setImage(new Image(getFileAsIOStream("img/icons/toWatchSelected.png"), 30, 30, true, true));
             }
         }else{
             if (selectedEpisode.isWatched()){
@@ -854,6 +824,9 @@ public class SeasonController {
         }
     }
     private void reloadEpisodeCard(Episode episode){
+        if (episodeButtons.isEmpty())
+            return;
+
         Button btn = episodeButtons.get(episodes.indexOf(episode));
         btn.setGraphic(null);
 
@@ -912,7 +885,7 @@ public class SeasonController {
 
         if (selectedEpisode.isWatched()){
             ImageView watched = new ImageView(
-                    new Image(getFileAsIOStream("img/icons/tick.png"), 25, 25, true, true));
+                    new Image(getFileAsIOStream("img/icons/episodeTick.png"), 25, 25, true, true));
             videoInfo.getChildren().add(watched);
             watched.setTranslateY(5);
         }
@@ -1171,8 +1144,7 @@ public class SeasonController {
         else
             delay = 0.5;
 
-        mediaExecutor.shutdownNow();
-        mediaExecutor = Executors.newScheduledThreadPool(1);
+        App.initializeMediaExecutor();
         mediaExecutor.schedule(() -> {
             int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
             mp.setVolume((double) volume / 100);
@@ -1215,6 +1187,8 @@ public class SeasonController {
                 mp.play();
             });
         }, (long) delay * 1000, TimeUnit.MILLISECONDS);
+
+        mediaExecutor.shutdown();
     }
     private void stopPlayer() {
         fadeOutEffect(backgroundVideo);
@@ -1230,7 +1204,7 @@ public class SeasonController {
 
         timeline.setOnFinished(event -> {
             mp.stop();
-            mediaExecutor.shutdown();
+            mediaExecutor.shutdownNow();
         });
     }
     private void findAndPlaySong(){

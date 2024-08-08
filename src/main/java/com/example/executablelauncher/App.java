@@ -52,6 +52,7 @@ public class App extends Application {
     public static boolean isConnectedToInternet = false;
     public static ExecutorService analysisExecutor;
     public static final ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    public static ScheduledExecutorService mediaExecutor = Executors.newSingleThreadScheduledExecutor();
     static ScheduledExecutorService executorService;
     public static List<Task<Void>> tasks = new ArrayList<>();
     private static DesktopViewController desktopController;
@@ -195,6 +196,10 @@ public class App extends Application {
 
     public static void close(){
         executorService.shutdown();
+        mediaExecutor.shutdownNow();
+
+        if (analysisExecutor != null)
+            analysisExecutor.shutdownNow();
 
         for (Task<Void> task : tasks)
             if (task.isRunning())
@@ -302,6 +307,10 @@ public class App extends Application {
 
     public static void initializeAnalysisExecutor(){
         analysisExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 4);
+    }
+
+    public static void initializeMediaExecutor(){
+        mediaExecutor = Executors.newSingleThreadScheduledExecutor();
     }
 
     public static void main(String[] args) {

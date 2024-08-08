@@ -741,8 +741,6 @@ public class EditSeasonController {
             oldName = "";
             if (!oldVideoPath.isEmpty())
                 oldName = oldVideoPath.substring(oldVideoPath.lastIndexOf("/") + 1);
-            System.out.println(oldName);
-            System.out.println(newName);
             if (oldVideoPath.isEmpty() || !newName.equals(oldName)){
                 try{
                     if (!seasonToEdit.getVideoSrc().isEmpty())

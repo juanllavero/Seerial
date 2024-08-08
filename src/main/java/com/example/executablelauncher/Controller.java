@@ -712,26 +712,21 @@ public class Controller implements Initializable {
         if (selectSeries)
             selectedSeries = null;
 
-        String imagePath = "resources/img/backgroundDefault.png";
+        Platform.runLater(() -> {
+            updateRowSize(rowSize);
 
-        ImageView background = new ImageView(new Image("file:" + imagePath,
-                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
+            /*String imagePath = "resources/img/backgroundDefault.png";
 
-        WritableImage image = getCroppedImage(background);
-
-        if (image != null){
             BackgroundImage myBI = new BackgroundImage(
-                    image,
+                    new Image("file:" + imagePath,
+                            Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true),
                     BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
                     BackgroundSize.DEFAULT);
 
             mainBox.setBackground(new Background(myBI));
-            backgroundImage.setImage(image);
-            backgroundImage.setVisible(false);
-        }
-
-        Platform.runLater(() -> {
-            updateRowSize(rowSize);
+            backgroundImage.setImage(new Image("file:" + imagePath,
+                    Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
+            backgroundImage.setVisible(false);*/
 
             if (selectSeries)
                 if (selectCurrentSeries)
@@ -1224,7 +1219,7 @@ public class Controller implements Initializable {
 
                 delay = new PauseTransition(Duration.millis(250));
                 delay.setOnFinished(event -> Platform.runLater(() -> {
-                    if (!series.getSeasons().isEmpty() &&
+                    if (!series.getSeasons().isEmpty() && continueWatching.contains(episode) &&
                             continueWatchingBox.getChildren().get(continueWatching.indexOf(episode)).isFocused()) {
                         String imagePath = "resources/img/backgrounds/" + season.getId();
                         String backgroundPath = "background.jpg";
@@ -1451,17 +1446,23 @@ public class Controller implements Initializable {
         continueWatchingBox.getChildren().remove(index);
         continueWatching.remove(episode);
 
-        if (selectedSeries.isBeingWatched() && selectedSeries.getCurrentlyWatchingSeason().isBeingWatched()){
+        if (selectedSeries.isBeingWatched() && selectedSeries.getCurrentlyWatchingSeason() != null
+                && selectedSeries.getCurrentlyWatchingSeason().isBeingWatched()){
             Season season = selectedSeries.getCurrentlyWatchingSeason();
+
             Episode ep = season.getCurrentlyWatchingEpisode();
 
-            continueWatching.add(episode);
-            addEpisodeCard(selectedSeries, season, ep);
+            if (ep != null){
+                continueWatching.add(ep);
+                addEpisodeCard(selectedSeries, season, ep);
+            }
         }
 
-        if (!continueWatchingBox.getChildren().isEmpty())
+        selectedEpisode = null;
+
+        if (!continueWatchingBox.getChildren().isEmpty()) {
             continueWatchingBox.getChildren().getFirst().requestFocus();
-        else
+        }else
             selectLibraryButton((Button) librariesBox.getChildren().getFirst());
     }
     @FXML

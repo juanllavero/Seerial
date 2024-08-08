@@ -130,6 +130,61 @@ public class Utils {
         }
     }
 
+    public static void markPreviousAndNextEpisodes(Series selectedSeries, Season selectedSeason, Episode selectedEpisode){
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
+            //Mark as watched every episode before the current one
+            for (Season season : selectedSeries.getSeasons()){
+                if (season == selectedSeason){
+                    for (Episode episode : season.getEpisodes()){
+                        if (episode == selectedEpisode)
+                            break;
+
+                        episode.setWatched();
+                    }
+                    break;
+                }
+
+                if (season.getSeasonNumber() != 0)
+                    for (Episode episode : season.getEpisodes())
+                        episode.setWatched();
+            }
+
+            //Mark as unwatched every episode after the current one
+            for (int i = selectedSeason.getEpisodes().indexOf(selectedEpisode); i < selectedSeason.getEpisodes().size(); i++){
+                Episode episode = selectedSeason.getEpisodes().get(i);
+
+                if (episode != selectedEpisode)
+                    episode.setUnWatched();
+            }
+            for (int i = selectedSeries.getSeasons().indexOf(selectedSeason); i < selectedSeries.getSeasons().size(); i++){
+                Season season = selectedSeries.getSeasons().get(i);
+
+                if (season.getSeasonNumber() != 0 && season != selectedSeason){
+                    for (Episode episode : season.getEpisodes())
+                        episode.setUnWatched();
+                }
+            }
+        }
+
+        //Set currently watching episode
+        int currentSeason = selectedSeries.getSeasons().indexOf(selectedSeason);
+        if (selectedEpisode.isWatched()){
+            if (selectedSeason.getEpisodes().indexOf(selectedEpisode) < selectedSeason.getEpisodes().size() - 1){
+                selectedSeason.setCurrentlyWatchingEpisode(selectedSeason.getEpisodes().indexOf(selectedEpisode) + 1);
+            }else if (currentSeason + 1 < selectedSeries.getSeasons().size() - 1){
+                selectedSeason.setCurrentlyWatchingEpisode(-1);
+                selectedSeries.setCurrentlyWatchingSeason(currentSeason + 1);
+                selectedSeries.getSeasons().get(currentSeason + 1).setCurrentlyWatchingEpisode(0);
+            }else{
+                selectedSeries.setCurrentlyWatchingSeason(-1);
+                selectedSeason.setCurrentlyWatchingEpisode(-1);
+            }
+        }else{
+            selectedSeries.setCurrentlyWatchingSeason(currentSeason);
+            selectedSeason.setCurrentlyWatchingEpisode(selectedSeason.getEpisodes().indexOf(selectedEpisode));
+        }
+    }
+
     //region EFFECTS
     public static ParallelTransition createParallelTransition(Node node1, Node node2, Node node3, Node node4, float seconds){
         FadeTransition mainImages = fadeOutEffect(node1, seconds, 0);

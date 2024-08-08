@@ -1254,40 +1254,7 @@ public class DesktopViewController {
         if (selectedEpisode == null)
             return;
 
-        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
-            //Mark as watched every episode before the current one
-            for (Season season : selectedSeries.getSeasons()){
-                if (season == selectedSeason){
-                    for (Episode episode : season.getEpisodes()){
-                        if (episode == selectedEpisode)
-                            break;
-
-                        episode.setWatched();
-                    }
-                    break;
-                }
-
-                if (season.getSeasonNumber() != 0)
-                    for (Episode episode : season.getEpisodes())
-                        episode.setWatched();
-            }
-
-            //Mark as unwatched every episode after the current one
-            for (int i = selectedSeason.getEpisodes().indexOf(selectedEpisode); i < selectedSeason.getEpisodes().size(); i++){
-                Episode episode = selectedSeason.getEpisodes().get(i);
-
-                if (episode != selectedEpisode)
-                    episode.setUnWatched();
-            }
-            for (int i = selectedSeries.getSeasons().indexOf(selectedSeason); i < selectedSeries.getSeasons().size(); i++){
-                Season season = selectedSeries.getSeasons().get(i);
-
-                if (season.getSeasonNumber() != 0 && season != selectedSeason){
-                    for (Episode episode : season.getEpisodes())
-                        episode.setUnWatched();
-                }
-            }
-        }
+        markPreviousAndNextEpisodes(selectedSeries, selectedSeason, selectedEpisode);
 
         for (Episode episode : selectedSeason.getEpisodes())
             updateDisc(episode);
@@ -1302,74 +1269,110 @@ public class DesktopViewController {
 
         return (h + "h " + m + "m");
     }
+    //endregion
 
-    @FXML
-    void setWatchedSeries() {
-        hideMenu();
-        for (Season season : selectedSeries.getSeasons()) {
-            setWatchedSeasonEpisodes(season);
-        }
+    //region SET WATCHED/UNWATCHED
+    private void setWatchedEpisode(Season season, Episode episode){
+        episode.setWatched();
+        markPreviousAndNextEpisodes(selectedSeries, season, episode);
+
+        for (Episode e : selectedSeason.getEpisodes())
+            updateDisc(e);
     }
+    private void setUnwatchedEpisode(Season season, Episode episode){
+        episode.setUnWatched();
+        markPreviousAndNextEpisodes(selectedSeries, season, episode);
 
-    @FXML
-    void setWatchedSeason() {
-        hideMenu();
-        setWatchedSeasonEpisodes(selectedSeason);
+        for (Episode e : selectedSeason.getEpisodes())
+            updateDisc(e);
     }
-
     @FXML
     void setWatchedEpisode() {
         hideMenu();
-        selectedEpisode.setWatched();
-        episodesControllers.get(episodeList.indexOf(selectedEpisode)).setWatched();
+        //episodesControllers.get(episodeList.indexOf(selectedEpisode)).setWatched();
 
-        updateDisc(selectedEpisode);
+        setWatchedEpisode(selectedSeason, selectedEpisode);
     }
-
     @FXML
     void setUnwatchedEpisode() {
         hideMenu();
-        selectedEpisode.setUnWatched();
-        episodesControllers.get(episodeList.indexOf(selectedEpisode)).setWatched();
-
-        updateDisc(selectedEpisode);
+        setUnwatchedEpisode(selectedSeason, selectedEpisode);
     }
+    @FXML
+    void setWatchedSeries() {
+        hideMenu();
 
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
+            setWatchedEpisode(selectedSeries.getSeasons().getLast()
+                    , selectedSeries.getSeasons().getLast().getEpisodes().getLast());
+        }else{
+            for (Season season : selectedSeries.getSeasons()){
+                season.setCurrentlyWatchingEpisode(-1);
+                for (Episode episode : season.getEpisodes())
+                    episode.setWatched();
+            }
+
+            selectedSeries.setCurrentlyWatchingSeason(-1);
+
+            for (Episode e : selectedSeason.getEpisodes())
+                updateDisc(e);
+        }
+    }
     @FXML
     void setUnwatchedSeries() {
         hideMenu();
-        for (Season season : selectedSeries.getSeasons()) {
-            setUnWatchedSeasonEpisodes(season);
+
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
+            setUnwatchedEpisode(selectedSeries.getSeasons().getFirst()
+                    , selectedSeries.getSeasons().getLast().getEpisodes().getFirst());
+        }else{
+            for (Season season : selectedSeries.getSeasons()){
+                season.setCurrentlyWatchingEpisode(-1);
+                for (Episode episode : season.getEpisodes())
+                    episode.setUnWatched();
+            }
+
+            selectedSeries.setCurrentlyWatchingSeason(-1);
+
+            for (Episode e : selectedSeason.getEpisodes())
+                updateDisc(e);
         }
     }
+    @FXML
+    void setWatchedSeason() {
+        hideMenu();
 
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
+            setWatchedEpisode(selectedSeason
+                    , selectedSeason.getEpisodes().getLast());
+        }else{
+            selectedSeason.setCurrentlyWatchingEpisode(-1);
+            for (Episode episode : selectedSeason.getEpisodes())
+                episode.setWatched();
+
+            selectedSeries.setCurrentlyWatchingSeason(-1);
+
+            for (Episode e : selectedSeason.getEpisodes())
+                updateDisc(e);
+        }
+
+    }
     @FXML
     void setUnwatchedSeason() {
         hideMenu();
-        setUnWatchedSeasonEpisodes(selectedSeason);
-    }
 
-    private void setWatchedSeasonEpisodes(Season season) {
-        hideMenu();
-        for (Episode ep : season.getEpisodes()) {
-            ep.setWatched();
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
+            setUnwatchedEpisode(selectedSeason
+                    , selectedSeason.getEpisodes().getFirst());
+        }else{
+            selectedSeason.setCurrentlyWatchingEpisode(-1);
+            for (Episode episode : selectedSeason.getEpisodes())
+                episode.setUnWatched();
 
-            if (selectedSeason == season)
-                episodesControllers.get(episodeList.indexOf(ep)).setWatched();
+            selectedSeries.setCurrentlyWatchingSeason(-1);
 
-            updateDisc(ep);
-        }
-    }
-
-    private void setUnWatchedSeasonEpisodes(Season season) {
-        hideMenu();
-        for (Episode ep : season.getEpisodes()) {
-            ep.setUnWatched();
-
-            if (selectedSeason == season)
-                episodesControllers.get(episodeList.indexOf(ep)).setWatched();
-
-            updateDisc(ep);
+            for (Episode e : selectedSeason.getEpisodes())
+                updateDisc(e);
         }
     }
     //endregion
