@@ -1,23 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.effect.DropShadow?>
-<?import javafx.scene.effect.GaussianBlur?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<StackPane fx:id="mainBox" styleClass="transparent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
+<StackPane fx:id="mainBox" styleClass="transparent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
    <children>
       <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="2027.0" pickOnBounds="true">
          <image>
@@ -169,7 +159,7 @@
                                                 </VBox>
                                              </left>
                                              <center>
-                                                <VBox alignment="TOP_RIGHT" spacing="2.0" BorderPane.alignment="CENTER">
+                                                <VBox alignment="TOP_RIGHT" minWidth="240.0" spacing="2.0" BorderPane.alignment="CENTER">
                                                    <children>
                                                       <Label fx:id="yearField" alignment="CENTER_RIGHT" text="Year" textFill="#aeaeae" wrapText="true">
                                                          <font>
@@ -209,7 +199,7 @@
                                                             <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
                                                          </effect>
                                                       </Label>
-                                                      <Label fx:id="rootFolderField" alignment="CENTER_RIGHT" styleClass="folderLink" stylesheets="@styles.css" text="C:\User\Folder\Folde\Folder" textFill="WHITE" wrapText="true">
+                                                      <Label fx:id="rootFolderField" alignment="CENTER_RIGHT" prefHeight="71.0" prefWidth="222.0" styleClass="folderLink" stylesheets="@styles.css" text="C:\User\Folder\Folde\Folder" textFill="WHITE" wrapText="true">
                                                          <font>
                                                             <Font size="18.0" />
                                                          </font>
@@ -436,24 +426,87 @@
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
-      <HBox fx:id="downloadingContentWindow" alignment="CENTER_RIGHT" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" style="-fx-background-radius: 5;" styleClass="midSectionLightColor" stylesheets="@styles.css" StackPane.alignment="BOTTOM_RIGHT">
+      <VBox fx:id="activityBox" maxHeight="-Infinity" maxWidth="-Infinity" spacing="20.0" StackPane.alignment="BOTTOM_RIGHT">
          <children>
-            <Label fx:id="downloadingContentText" text="Downloading metadata" textFill="WHITE">
-               <HBox.margin>
-                  <Insets />
-               </HBox.margin>
-            </Label>
+            <VBox fx:id="activityMessageBox" style="-fx-background-radius: 10;" styleClass="midSectionDarkColor" stylesheets="@styles.css" visible="false">
+               <children>
+                  <BorderPane>
+                     <left>
+                        <Label fx:id="downloadingMetadataText" text="Descargando metadatos" textFill="WHITE" BorderPane.alignment="CENTER_LEFT">
+                           <font>
+                              <Font name="Roboto" size="15.0" />
+                           </font>
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </Label>
+                     </left>
+                     <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </BorderPane>
+                  <BorderPane>
+                     <left>
+                        <Label fx:id="downloadingImagesText" text="Descargando imágenes" textFill="WHITE" BorderPane.alignment="CENTER_LEFT">
+                           <font>
+                              <Font name="Roboto" size="15.0" />
+                           </font>
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </Label>
+                     </left>
+                     <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </BorderPane>
+                  <BorderPane>
+                     <left>
+                        <Label fx:id="downloadingSongsText" text="Descargando canciones" textFill="WHITE" BorderPane.alignment="CENTER_LEFT">
+                           <font>
+                              <Font name="Roboto" size="15.0" />
+                           </font>
+                           <BorderPane.margin>
+                              <Insets right="10.0" />
+                           </BorderPane.margin>
+                        </Label>
+                     </left>
+                     <VBox.margin>
+                        <Insets left="5.0" right="5.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </BorderPane>
+               </children>
+            </VBox>
+            <StackPane>
+               <children>
+                  <Button fx:id="activityButton" mnemonicParsing="false" styleClass="activityButton" stylesheets="@styles.css">
+                     <graphic>
+                        <ImageView fitHeight="48.0" fitWidth="48.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../img/icons/activity.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding>
+                  </Button>
+               </children>
+            </StackPane>
          </children>
          <StackPane.margin>
-            <Insets bottom="40.0" right="80.0" />
+            <Insets bottom="50.0" right="50.0" />
          </StackPane.margin>
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
-         <effect>
-            <DropShadow />
-         </effect>
-      </HBox>
+      </VBox>
       <Pane fx:id="menuParentPane" prefHeight="200.0" prefWidth="1280.0">
          <children>
             <VBox fx:id="mainMenu" layoutX="42.0" layoutY="124.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
@@ -504,6 +557,9 @@
                <padding>
                   <Insets bottom="2.0" top="2.0" />
                </padding>
+               <effect>
+                  <DropShadow height="6.34" radius="2.37" width="5.14" />
+               </effect>
             </VBox>
             <VBox fx:id="libraryMenu" layoutX="319.0" layoutY="95.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
@@ -532,6 +588,9 @@
                <padding>
                   <Insets bottom="2.0" top="2.0" />
                </padding>
+               <effect>
+                  <DropShadow height="6.34" radius="2.37" width="5.14" />
+               </effect>
             </VBox>
             <VBox fx:id="seriesMenu" layoutX="61.0" layoutY="434.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
@@ -575,6 +634,9 @@
                <padding>
                   <Insets bottom="2.0" top="2.0" />
                </padding>
+               <effect>
+                  <DropShadow height="6.34" radius="2.37" width="5.14" />
+               </effect>
             </VBox>
             <VBox fx:id="seasonMenu" layoutX="493.0" layoutY="479.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
@@ -613,6 +675,9 @@
                <padding>
                   <Insets bottom="2.0" top="2.0" />
                </padding>
+               <effect>
+                  <DropShadow height="6.34" radius="2.37" width="5.14" />
+               </effect>
             </VBox>
             <VBox fx:id="episodeMenu" layoutX="960.0" layoutY="332.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
@@ -646,11 +711,17 @@
                <padding>
                   <Insets bottom="2.0" top="2.0" />
                </padding>
+               <effect>
+                  <DropShadow height="6.34" radius="2.37" width="5.14" />
+               </effect>
             </VBox>
             <VBox fx:id="libraryContainer" layoutX="329.0" layoutY="105.0" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <padding>
                   <Insets bottom="2.0" top="2.0" />
                </padding>
+               <effect>
+                  <DropShadow height="6.34" radius="2.37" width="5.14" />
+               </effect>
             </VBox>
          </children>
       </Pane>

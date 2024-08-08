@@ -38,6 +38,18 @@
     -fx-text-fill: #5e5e5e;
 }
 
+.textAreaColor {
+    -fx-background-color: #5e5e5e;
+    -fx-control-inner-background: #5e5e5e;
+    -fx-text-fill: #EDF2F4;
+}
+
+.textAreaColor:focused {
+    -fx-background-color: #EDF2F4;
+    -fx-control-inner-background: #EDF2F4;
+    -fx-text-fill: #5e5e5e;
+}
+
 .transparent{
     -fx-background-color: transparent;
 }
@@ -198,6 +210,16 @@
     -fx-border-width: 2px;
     -fx-border-radius: 50px;
     -fx-border-color: #8EDCE6;
+}
+
+.activityButton{
+    -fx-background-color: rgba(0, 0, 0, 0.32);
+    -fx-background-radius: 50px;
+}
+
+.activityButton:hover{
+    -fx-background-color: rgba(0, 0, 0, 0.32);
+    -fx-background-radius: 50px;
 }
 
 .selected{
@@ -790,4 +812,12 @@
     -fx-background-color :derive(#4D4C4F,10.0%);
     -fx-background-insets : 2.0, 0.0, 0.0;
     -fx-background-radius : 2.0em;
+}
+
+.jfx-spinner .spinner-fill {
+    -fx-background-color: #5e5e5e;
+}
+
+.jfx-spinner .arc {
+    -fx-stroke: #EDF2F4;
 }

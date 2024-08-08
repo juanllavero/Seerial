@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -153,16 +154,6 @@
                         <Font size="14.0" />
                      </font>
                   </TextField>
-                  <Label fx:id="orderText" text="Sorting Order" textFill="#fcfcfc">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Label>
-                  <TextField fx:id="orderField" styleClass="textFieldColor" stylesheets="@styles.css">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </TextField>
                   <Label fx:id="fileText" text="File" textFill="#fcfcfc">
                      <font>
                         <Font size="14.0" />
@@ -176,6 +167,41 @@
                         <Font size="14.0" />
                      </font>
                   </TextField>
+                  <HBox spacing="20.0">
+                     <children>
+                        <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+                           <children>
+                              <Label fx:id="orderText" text="Sorting Order" textFill="#fcfcfc">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="orderField" styleClass="textFieldColor" stylesheets="@styles.css">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </TextField>
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="296.0" prefWidth="722.0" spacing="10.0">
+                           <children>
+                              <Label fx:id="overviewText" text="Overview" textFill="#fcfcfc">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextArea fx:id="overviewField" prefHeight="265.0" prefWidth="722.0" styleClass="textAreaColor" stylesheets="@styles.css" wrapText="true">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </TextArea>
+                           </children>
+                        </VBox>
+                     </children>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </HBox>
                </children>
                <padding>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

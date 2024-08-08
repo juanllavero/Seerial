@@ -119,6 +119,12 @@ public class DesktopViewController {
         }
     }
     //region FXML ATTRIBUTES
+    @FXML VBox activityBox;
+    @FXML VBox activityMessageBox;
+    @FXML Button activityButton;
+    @FXML Label downloadingMetadataText;
+    @FXML Label downloadingImagesText;
+    @FXML Label downloadingSongsText;
     @FXML Label totalDurationText;
     @FXML Label rootFolderText;
     @FXML Label totalDurationField;
@@ -190,8 +196,6 @@ public class DesktopViewController {
     @FXML Label episodesText;
     @FXML Label yearField;
     @FXML Label episodesField;
-    @FXML HBox downloadingContentWindow;
-    @FXML Label downloadingContentText;
     @FXML VBox downloadingContentWindowStatic;
     @FXML Label downloadingContentTextStatic;
     //endregion
@@ -219,6 +223,7 @@ public class DesktopViewController {
     private double ASPECT_RATIO = 16.0 / 9.0;
     private boolean acceptRemove = false;
     private static int numFilesToCheck = 0;
+    private static int imageDownloadProcesses = 0;
     private boolean searchingForFiles = false;
     private static final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
@@ -270,8 +275,7 @@ public class DesktopViewController {
 
         selectionOptions.setVisible(false);
 
-        downloadingContentWindow.setVisible(false);
-        downloadingContentWindowStatic.setVisible(false);
+        activityBox.setVisible(false);
 
         menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> hideMenu());
 
@@ -308,9 +312,6 @@ public class DesktopViewController {
                 globalBackground.setFitWidth(globalBackground.getImage().getWidth() * scaleFactor);
             }
         };
-
-        MFXProgressSpinner progress = getCircularProgress(50);
-        downloadingContentWindow.getChildren().add(progress);
 
         stage.widthProperty().addListener(widthListener);
         stage.heightProperty().addListener(heightListener);
@@ -390,6 +391,28 @@ public class DesktopViewController {
         identificationShow.setDisable(true);
         changeEpisodesGroup.setDisable(true);
 
+        MFXProgressSpinner metadataSpinner = getCircularProgress(25);
+        MFXProgressSpinner imagesSpinner = getCircularProgress(25);
+        MFXProgressSpinner songsSpinner = getCircularProgress(25);
+        MFXProgressSpinner mainSpinner = getCircularProgress(60);
+
+        ((StackPane) activityButton.getParent()).getChildren().add(mainSpinner);
+
+        downloadingMetadataText.setDisable(true);
+        ((BorderPane) downloadingMetadataText.getParent()).setRight(metadataSpinner);
+        ((BorderPane) downloadingMetadataText.getParent()).getRight().setVisible(false);
+
+        downloadingImagesText.setDisable(true);
+        ((BorderPane) downloadingImagesText.getParent()).setRight(imagesSpinner);
+        ((BorderPane) downloadingImagesText.getParent()).getRight().setVisible(false);
+
+        downloadingSongsText.setDisable(true);
+        ((BorderPane) downloadingSongsText.getParent()).setRight(songsSpinner);
+        ((BorderPane) downloadingSongsText.getParent()).getRight().setVisible(false);
+
+        mainSpinner.setOnMouseEntered(e -> fadeInEffect(activityMessageBox, 0.2f).play());
+        mainSpinner.setOnMouseExited(e -> fadeOutEffect(activityMessageBox, 0.2f));
+
         selectedSeries = null;
         selectedEpisode = null;
         selectedSeason = null;
@@ -437,6 +460,10 @@ public class DesktopViewController {
         setUnwatchedSeries.setText(App.buttonsBundle.getString("markUnwatched"));
         setUnwatchedSeason.setText(App.buttonsBundle.getString("markUnwatched"));
         setUnwatchedEpisode.setText(App.buttonsBundle.getString("markUnwatched"));
+
+        downloadingSongsText.setText(App.textBundle.getString("downloadingMusicMessage"));
+        downloadingMetadataText.setText(App.textBundle.getString("downloadingMessage"));
+        downloadingImagesText.setText(App.textBundle.getString("downloadingImages"));
 
         if (currentLibrary != null && currentLibrary.getType().equals("Shows"))
             episodesText.setText(App.textBundle.getString("episodes"));
@@ -622,7 +649,7 @@ public class DesktopViewController {
             seasonNumberField.setVisible(true);
             seasonNumberField.setManaged(true);
 
-            rootFolderField.setText(selectedSeries.getFolder());
+            rootFolderField.setText(getFolderSrc(selectedSeries.getFolder()));
 
             File logoFile = new File(selectedSeries.getLogoSrc());
             if (!logoFile.exists() || !logoFile.isFile()){
@@ -640,7 +667,7 @@ public class DesktopViewController {
             seasonNumberField.setVisible(false);
             seasonNumberField.setManaged(false);
 
-            rootFolderField.setText(selectedSeason.getFolder());
+            rootFolderField.setText(getFolderSrc(selectedSeason.getFolder()));
 
             File logoFile = new File(selectedSeason.getLogoSrc());
             if (!logoFile.exists() || !logoFile.isFile()) {
@@ -1209,9 +1236,9 @@ public class DesktopViewController {
             if (!currentLibrary.getType().equals("Shows"))
                 name = selectedSeason.getName();
 
-            VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setDesktopPlayer(this, controlsStage);
-            playerController.setVideo(selectedSeason, episode, name, videoStage);
+            videoPlayerController = fxmlLoader.getController();
+            videoPlayerController.setDesktopPlayer(this, controlsStage);
+            videoPlayerController.setVideo(selectedSeason, episode, name, videoStage);
 
             controlsStage.show();
         } catch (IOException e) {
@@ -1769,8 +1796,6 @@ public class DesktopViewController {
 
     private void searchFiles(Library library) {
         hideMenu();
-        downloadingContentText.setText(App.textBundle.getString("analyzingLocalFiles"));
-        downloadingContentWindow.setVisible(true);
 
         searchingForFiles = true;
 
@@ -1785,8 +1810,6 @@ public class DesktopViewController {
     }
 
     private void searchFilesTask(Library library) {
-        downloadingContentText.setText(App.textBundle.getString("downloadingMessage"));
-
         //Get every file and folder from within the root folders
         List<File> files = getFiles(library);
 
@@ -1794,7 +1817,6 @@ public class DesktopViewController {
             acceptRemove = true;
             hardRemoveLibrary();
 
-            downloadingContentWindow.setVisible(false);
             searchingForFiles = false;
 
             DataManager.INSTANCE.saveData();
@@ -1810,6 +1832,11 @@ public class DesktopViewController {
         }
 
         numFilesToCheck = files.size();
+
+        //Toggle Activity
+        downloadingMetadataText.setDisable(false);
+        ((BorderPane) downloadingMetadataText.getParent()).getRight().setVisible(true);
+        showActivityBox();
 
         App.initializeAnalysisExecutor();
         Task<Void> searchMissingTask = new Task<>() {
@@ -1912,19 +1939,9 @@ public class DesktopViewController {
         if (library.getSeries().isEmpty()){
             acceptRemove = true;
             hardRemoveLibrary();
-
-            downloadingContentWindow.setVisible(false);
-            searchingForFiles = false;
-
-            //Restore library buttons
-            editLibraryButton.setDisable(false);
-            removeLibraryButton.setDisable(false);
-            removeLibraryButton.setDisable(false);
-            searchFilesButton.setDisable(false);
-            addLibraryButton.setDisable(false);
         }
 
-        DataManager.INSTANCE.saveData();
+        searchingForFiles = false;
 
         //Restore library buttons
         editLibraryButton.setDisable(false);
@@ -1933,16 +1950,21 @@ public class DesktopViewController {
         searchFilesButton.setDisable(false);
         addLibraryButton.setDisable(false);
 
-        clearImageCache();
+        //Update Activity
+        downloadingMetadataText.setDisable(true);
+        ((BorderPane) downloadingMetadataText.getParent()).getRight().setVisible(false);
+        hideActivityBox();
 
-        downloadingContentWindow.setVisible(false);
+        clearImageCache();
+        DataManager.INSTANCE.saveData();
         downloadDefaultMusic(library);
     }
 
     public void downloadDefaultMusic(Library library) {
         Platform.runLater(() -> {
-            downloadingContentText.setText(App.textBundle.getString("downloadingMusicMessage"));
-            downloadingContentWindow.setVisible(true);
+            downloadingSongsText.setDisable(false);
+            ((BorderPane) downloadingSongsText.getParent()).getRight().setVisible(true);
+            showActivityBox();
         });
 
         for (Series series : library.getSeries()) {
@@ -1990,7 +2012,11 @@ public class DesktopViewController {
     }
 
     public void postDownloadDefaultMusic() {
-        downloadingContentWindow.setVisible(false);
+        //Update Activity
+        downloadingSongsText.setDisable(true);
+        ((BorderPane) downloadingSongsText.getParent()).getRight().setVisible(false);
+        hideActivityBox();
+
         searchingForFiles = false;
     }
 
@@ -2144,6 +2170,9 @@ public class DesktopViewController {
                     break;
                 }
             }
+
+            if (series == selectedSeries)
+                refreshSeries();
         });
     }
 
@@ -2214,6 +2243,13 @@ public class DesktopViewController {
         if (posterList != null && !posterList.isEmpty()) {
             saveCover(id, 0, imageBaseURL + posterList.get(0).file_path);
 
+            Platform.runLater(() -> {
+                imageDownloadProcesses++;
+                downloadingImagesText.setDisable(false);
+                ((BorderPane) downloadingImagesText.getParent()).getRight().setVisible(true);
+                showActivityBox();
+            });
+
             analysisExecutor.submit(() -> {
                 try {
                     int processedFiles = 1;
@@ -2226,6 +2262,15 @@ public class DesktopViewController {
                         processedFiles++;
                     }
 
+                    Platform.runLater(() -> {
+                        imageDownloadProcesses--;
+
+                        if (imageDownloadProcesses == 0){
+                            downloadingImagesText.setDisable(true);
+                            ((BorderPane) downloadingImagesText.getParent()).getRight().setVisible(false);
+                            hideActivityBox();
+                        }
+                    });
                 } catch (Exception e) {
                     System.err.println("loadImages: thread task cancelled " + e.getMessage());
                 }
@@ -2603,6 +2648,13 @@ public class DesktopViewController {
         if (!thumbnailsUrls.isEmpty()) {
             saveThumbnail(episode, thumbnailsUrls.get(0), 0);
 
+            Platform.runLater(() -> {
+                imageDownloadProcesses++;
+                downloadingImagesText.setDisable(false);
+                ((BorderPane) downloadingImagesText.getParent()).getRight().setVisible(true);
+                showActivityBox();
+            });
+
             analysisExecutor.submit(() -> {
                 try {
                     for (int i = 1; i < thumbnailsUrls.size(); i++) {
@@ -2611,6 +2663,16 @@ public class DesktopViewController {
 
                         saveThumbnail(episode, thumbnailsUrls.get(i), i);
                     }
+
+                    Platform.runLater(() -> {
+                        imageDownloadProcesses--;
+
+                        if (imageDownloadProcesses == 0){
+                            downloadingImagesText.setDisable(true);
+                            ((BorderPane) downloadingImagesText.getParent()).getRight().setVisible(false);
+                            hideActivityBox();
+                        }
+                    });
                 } catch (Exception e) {
                     System.err.println("setEpisodeData: thread task cancelled " + e.getMessage());
                 }
@@ -3033,6 +3095,8 @@ public class DesktopViewController {
 
                 if (!exists)
                     addSeries(library, series);
+                else if (series == selectedSeries)
+                    refreshSeries();
                 //endregion
             } else if (!filesInRoot.isEmpty()) {
                 //region MOVIE FILE/CONCERT FILES INSIDE FOLDER
@@ -3085,6 +3149,8 @@ public class DesktopViewController {
 
                     if (!exists)
                         addSeries(library, series);
+                    else if (series == selectedSeries)
+                        refreshSeries();
                     return;
                 }
 
@@ -3159,6 +3225,8 @@ public class DesktopViewController {
 
                 if (!exists)
                     addSeries(library, series);
+                else if (series == selectedSeries)
+                    refreshSeries();
                 //endregion
             }
         }
@@ -3346,6 +3414,13 @@ public class DesktopViewController {
         if (!thumbnailsUrls.isEmpty()) {
             saveThumbnail(episode, thumbnailsUrls.get(0), 0);
 
+            Platform.runLater(() -> {
+                imageDownloadProcesses++;
+                downloadingImagesText.setDisable(false);
+                ((BorderPane) downloadingImagesText.getParent()).getRight().setVisible(true);
+                showActivityBox();
+            });
+
             analysisExecutor.submit(() -> {
                 try {
                     for (int i = 1; i < thumbnailsUrls.size(); i++) {
@@ -3354,6 +3429,16 @@ public class DesktopViewController {
 
                         saveThumbnail(episode, thumbnailsUrls.get(i), i);
                     }
+
+                    Platform.runLater(() -> {
+                        imageDownloadProcesses--;
+
+                        if (imageDownloadProcesses == 0){
+                            downloadingImagesText.setDisable(true);
+                            ((BorderPane) downloadingImagesText.getParent()).getRight().setVisible(false);
+                            hideActivityBox();
+                        }
+                    });
                 } catch (Exception e) {
                     System.err.println("setMovieThumbnail: thread task cancelled " + e.getMessage());
                 }
@@ -3535,6 +3620,13 @@ public class DesktopViewController {
                 if (!logosList.isEmpty()) {
                     saveLogo(id, 0, imageBaseURL + logosList.get(0).file_path);
 
+                    Platform.runLater(() -> {
+                        imageDownloadProcesses++;
+                        downloadingImagesText.setDisable(false);
+                        ((BorderPane) downloadingImagesText.getParent()).getRight().setVisible(true);
+                        showActivityBox();
+                    });
+
                     analysisExecutor.submit(() -> {
                         try {
                             int processedFiles = 1;
@@ -3545,6 +3637,16 @@ public class DesktopViewController {
                                 saveLogo(id, processedFiles, imageBaseURL + logosList.get(i).file_path);
                                 processedFiles++;
                             }
+
+                            Platform.runLater(() -> {
+                                imageDownloadProcesses--;
+
+                                if (imageDownloadProcesses == 0){
+                                    downloadingImagesText.setDisable(true);
+                                    ((BorderPane) downloadingImagesText.getParent()).getRight().setVisible(false);
+                                    hideActivityBox();
+                                }
+                            });
                         } catch (Exception e) {
                             System.err.println("downloadLogos: thread task cancelled " + e.getMessage());
                         }
@@ -3574,6 +3676,21 @@ public class DesktopViewController {
         } catch (IOException e) {
             System.err.println("clearImageCache: cannot clean directory");
         }
+    }
+
+    private void showActivityBox(){
+        if (activityBox.isVisible())
+            return;
+
+        activityMessageBox.setVisible(false);
+        fadeInEffect(activityBox, 0.2f).play();
+    }
+
+    private void hideActivityBox(){
+        if (!downloadingMetadataText.isDisabled() || !downloadingSongsText.isDisabled() || !downloadingImagesText.isDisabled())
+            return;
+
+        fadeOutEffect(activityBox, 0.2f);
     }
     //endregion
 

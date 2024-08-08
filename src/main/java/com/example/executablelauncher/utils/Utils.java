@@ -409,6 +409,16 @@ public class Utils {
         btn.setVisible(true);
         btn.setManaged(true);
     }
+    public static String getFolderSrc(String src) {
+        String[] parts = src.split("[/\\\\]");
+
+        String lastPart = parts[parts.length - 1];
+
+        if (lastPart.contains("."))
+            return src.substring(0, src.lastIndexOf(lastPart));
+
+        return src;
+    }
     //endregion
 
     //region MEDIA INFO EXTRACTION

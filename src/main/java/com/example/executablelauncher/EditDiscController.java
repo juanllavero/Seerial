@@ -45,6 +45,12 @@ public class EditDiscController {
     private Button cancelButton;
 
     @FXML
+    private TextArea overviewField;
+
+    @FXML
+    private Label overviewText;
+
+    @FXML
     private TextField fileField;
 
     @FXML
@@ -122,11 +128,18 @@ public class EditDiscController {
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         saveButton.setText(App.buttonsBundle.getString("saveButton"));
         orderText.setText(App.textBundle.getString("sortingOrder"));
+        overviewText.setText(App.textBundle.getString("overview"));
         fileText.setText(App.textBundle.getString("file"));
         nameText.setText(App.textBundle.getString("name"));
 
         selectedImage = new File(d.getImgSrc());
         nameField.setText(d.getName());
+        orderField.setText(String.valueOf(d.getOrder()));
+
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows"))
+            orderField.setDisable(true);
+
+        overviewField.setText(d.getOverview());
 
         fileText.setDisable(true);
 
@@ -567,8 +580,9 @@ public class EditDiscController {
         }
 
         episodeToEdit.setName(nameField.getText());
+        episodeToEdit.setOverview(overviewField.getText());
 
-        if (!orderField.getText().isEmpty() && !orderField.getText().equals("0"))
+        if (!orderField.getText().isEmpty() && !orderField.isDisable())
             episodeToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
         if (selectedImage != null)
