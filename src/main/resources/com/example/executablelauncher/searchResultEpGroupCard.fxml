@@ -15,7 +15,7 @@
                <children>
                   <Label fx:id="titleText" text="All Episodes" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="16.0" />
+                        <Font name="System Bold" size="18.0" />
                      </font>
                   </Label>
                </children>
@@ -24,7 +24,7 @@
                <children>
                   <Label fx:id="groupsText" text="1 group" textFill="WHITE">
                      <font>
-                        <Font size="16.0" />
+                        <Font size="18.0" />
                      </font>
                   </Label>
                   <Label fx:id="middleComma" text=", " textFill="WHITE">
@@ -34,7 +34,7 @@
                   </Label>
                   <Label fx:id="episodesText" text="89 episodes" textFill="WHITE">
                      <font>
-                        <Font size="16.0" />
+                        <Font size="18.0" />
                      </font>
                   </Label>
                </children>
@@ -44,7 +44,7 @@
                   <Insets top="5.0" />
                </VBox.margin>
                <font>
-                  <Font size="13.0" />
+                  <Font size="15.0" />
                </font>
             </Label>
          </children>

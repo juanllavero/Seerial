@@ -17,7 +17,7 @@
 
 <StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" style="-fx-border-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageDownloaderController">
    <children>
-      <BorderPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="686.0" prefWidth="1096.0" styleClass="midSectionDarkColor" stylesheets="@styles.css">
+      <BorderPane fx:id="mainPane" maxHeight="686.0" maxWidth="1096.0" minHeight="600.0" minWidth="750.0" styleClass="midSectionDarkColor" stylesheets="@styles.css">
          <center>
             <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" hmax="0.0" prefHeight="200.0" prefWidth="200.0" styleClass="midSectionDarkColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <content>
@@ -36,18 +36,30 @@
                      <VBox.margin>
                         <Insets bottom="10.0" />
                      </VBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
                   </Button>
                   <BorderPane>
                      <left>
                         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                            <children>
-                              <Label fx:id="resolutionText" text="Resolution: " textFill="WHITE" />
+                              <Label fx:id="resolutionText" text="Resolution: " textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></Label>
                               <TextField fx:id="widthField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1920">
                                  <HBox.margin>
                                     <Insets left="5.0" />
-                                 </HBox.margin></TextField>
+                                 </HBox.margin>
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></TextField>
                               <Label text="X" />
-                              <TextField fx:id="heightField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1080" />
+                              <TextField fx:id="heightField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1080">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></TextField>
                            </children>
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -59,6 +71,9 @@
                            <BorderPane.margin>
                               <Insets right="5.0" />
                            </BorderPane.margin>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
                         </TextField>
                      </center>
                      <right>
@@ -66,6 +81,9 @@
                            <BorderPane.margin>
                               <Insets right="5.0" />
                            </BorderPane.margin>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
                         </Button>
                      </right>
                   </BorderPane>
@@ -73,7 +91,10 @@
                      <left>
                         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                            <children>
-                              <CheckBox fx:id="transparentCheck" mnemonicParsing="false" text="Transparent" textFill="WHITE" />
+                              <CheckBox fx:id="transparentCheck" mnemonicParsing="false" text="Transparent" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></CheckBox>
                            </children>
                         </HBox>
                      </left>
@@ -84,8 +105,14 @@
                                  <HBox.margin>
                                     <Insets right="10.0" />
                                  </HBox.margin>
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
                               </Button>
-                              <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancel" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE" />
+                              <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancel" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></Button>
                            </children>
                         </HBox>
                      </right>
@@ -107,7 +134,7 @@
                <left>
                   <Label fx:id="title" text="Image Downloader" textFill="WHITE" BorderPane.alignment="CENTER">
                      <font>
-                        <Font size="18.0" />
+                        <Font name="System Bold" size="20.0" />
                      </font>
                   </Label>
                </left>

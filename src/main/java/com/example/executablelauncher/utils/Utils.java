@@ -216,6 +216,35 @@ public class Utils {
         }
     }
 
+    /**
+     * Takes an image and crops it to match the aspect ratio given as parameter.
+     * @param originalImage Original image as a BufferedImage
+     * @param targetWidth Width of the target aspect ratio
+     * @param targetHeight Height of the target aspect ratio
+     * @return
+     */
+    public static BufferedImage cropToAspectRatio(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        int originalWidth = originalImage.getWidth();
+        int originalHeight = originalImage.getHeight();
+
+        double targetAspectRatio = (double) targetWidth / targetHeight;
+        double originalAspectRatio = (double) originalWidth / originalHeight;
+
+        int newWidth = originalWidth;
+        int newHeight = originalHeight;
+
+        if (originalAspectRatio > targetAspectRatio) {
+            newWidth = (int) (originalHeight * targetAspectRatio);
+        } else {
+            newHeight = (int) (originalWidth / targetAspectRatio);
+        }
+
+        int x = (originalWidth - newWidth) / 2;
+        int y = (originalHeight - newHeight) / 2;
+
+        return originalImage.getSubimage(x, y, newWidth, newHeight);
+    }
+
     //region EFFECTS
     public static ParallelTransition createParallelTransition(Node node1, Node node2, Node node3, Node node4, float seconds){
         FadeTransition mainImages = fadeOutEffect(node1, seconds, 0);

@@ -17,6 +17,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -28,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.example.executablelauncher.App.buttonsBundle;
+import static com.example.executablelauncher.utils.Utils.cropToAspectRatio;
 
 public class EditCollectionController {
     //region FXML ATTRIBUTES
@@ -121,6 +124,7 @@ public class EditCollectionController {
 
         setImageFile(s.getCoverSrc());
 
+        orderField.setDisable(true);
         if (s.getOrder() >= 0)
             orderField.setText(Integer.toString(s.getOrder()));
 
@@ -295,7 +299,12 @@ public class EditCollectionController {
             File newFile = new File("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + (number + 1) + ".jpg");
 
             try{
-                Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                BufferedImage originalImage = ImageIO.read(file);
+                BufferedImage croppedImage = cropToAspectRatio(originalImage, 300, 450);
+
+                ImageIO.write(croppedImage, "jpg", newFile);
+                originalImage.flush();
+                croppedImage.flush();
             }catch (IOException e){
                 System.err.println("Poster not copied");
             }
@@ -507,22 +516,13 @@ public class EditCollectionController {
 
     @FXML
     void save(MouseEvent event) {
-
         if (nameField.getText().isEmpty()){
             App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("emptyField"));
             return;
         }
 
-        if (!orderField.getText().isEmpty() && orderField.getText().matches("\\d{3,}")){
-            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("sortingError"));
-            return;
-        }
-
         seriesToEdit.setName(nameField.getText());
         seriesToEdit.setPlaySameMusic(playSameMusic.isSelected());
-
-        if (!orderField.getText().isEmpty())
-            seriesToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
         if (selectedCover != null)
             seriesToEdit.setCoverSrc("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + selectedCover.getName());

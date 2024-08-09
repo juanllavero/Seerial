@@ -102,8 +102,7 @@ import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import static com.example.executablelauncher.App.analysisExecutor;
-import static com.example.executablelauncher.App.executor;
+import static com.example.executablelauncher.App.*;
 import static com.example.executablelauncher.utils.Utils.*;
 
 public class DesktopViewController {
@@ -704,9 +703,9 @@ public class DesktopViewController {
             Image image;
             if (!selectedSeries.getCoverSrc().isEmpty()) {
                 File file = new File(selectedSeries.getCoverSrc());
-                image = new Image(file.toURI().toURL().toExternalForm(), 450, 500, true, true);
+                image = new Image(file.toURI().toURL().toExternalForm(), 300, 450, true, true);
             } else {
-                image = new Image(getFileAsIOStream("img/DefaultPoster.png"), 450, 500, true, true);
+                image = new Image(getFileAsIOStream("img/DefaultPoster.png"), 300, 450, true, true);
             }
 
             seriesCover.setImage(image);
@@ -1217,6 +1216,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
             Parent root = fxmlLoader.load();
+            root.setStyle(getBaseFontSize());
 
             Stage videoStage = (Stage) mainBox.getScene().getWindow();
 
@@ -1473,6 +1473,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("searchSeries.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             SearchSeriesController controller = fxmlLoader.getController();
             controller.initiValues(this, selectedSeries.getName(), true, tmdbApi, currentLibrary.getLanguage());
             Stage stage = new Stage();
@@ -1500,6 +1501,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("searchSeries.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             SearchSeriesController controller = fxmlLoader.getController();
             controller.initiValues(this, selectedSeason.getName(), false, tmdbApi, currentLibrary.getLanguage());
             Stage stage = new Stage();
@@ -1684,6 +1686,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("searchEpisodesGroup.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             SearchEpisodesGroupController controller = fxmlLoader.getController();
             controller.initiValues(this, selectedSeries.getThemdbID());
             Stage stage = new Stage();
@@ -3856,6 +3859,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addLibrary-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             AddLibraryController addLibraryController = fxmlLoader.getController();
             addLibraryController.setParent(this);
             addLibraryController.initValues();
@@ -3886,6 +3890,7 @@ public class DesktopViewController {
             FXMLLoader fxmlLoader = new FXMLLoader();
             fxmlLoader.setLocation(getClass().getResource("discCard.fxml"));
             Pane cardBox = fxmlLoader.load();
+            cardBox.setStyle(getBaseFontSize());
             DiscController discController = fxmlLoader.getController();
             discController.setDesktopParentParent(this);
             discController.setData(episode);
@@ -3991,6 +3996,8 @@ public class DesktopViewController {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("addLibrary-view.fxml"));
                 Parent root1 = fxmlLoader.load();
+                root1.setStyle(getBaseFontSize());
+                root1.setStyle(getBaseFontSize());
                 AddLibraryController addLibraryController = fxmlLoader.getController();
                 addLibraryController.setParent(this);
                 addLibraryController.setValues(currentLibrary);
@@ -4014,6 +4021,7 @@ public class DesktopViewController {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editCollection-view.fxml"));
                 Parent root1 = fxmlLoader.load();
+                root1.setStyle(getBaseFontSize());
                 EditCollectionController addColController = fxmlLoader.getController();
                 addColController.setParentController(this);
                 addColController.setSeries(selectedSeries, currentLibrary.getType().equals("Shows"));
@@ -4038,6 +4046,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editSeason-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             EditSeasonController addSeasonController = fxmlLoader.getController();
             addSeasonController.setParentController(this);
             addSeasonController.setSeason(selectedSeason, currentLibrary.getType().equals("Shows"));
@@ -4066,6 +4075,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("editDisc-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             EditDiscController addDiscController = fxmlLoader.getController();
             addDiscController.setParentController(this);
             addDiscController.setDisc(d);
@@ -4093,6 +4103,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("confirmationWindow.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             ConfirmationWindowController controller = fxmlLoader.getController();
             controller.setParent(this);
             controller.initValues(title, message);
@@ -4245,6 +4256,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
             Parent root = fxmlLoader.load();
+            root.setStyle(getBaseFontSize());
             //Controller controller = fxmlLoader.getController();
             //controller.playIntroVideo();
             Stage stage = new Stage();
@@ -4285,6 +4297,7 @@ public class DesktopViewController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("mainMenuDesktop-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             MainMenuDesktopController addDiscController = fxmlLoader.getController();
             addDiscController.initValues(this);
             Stage stage = new Stage();

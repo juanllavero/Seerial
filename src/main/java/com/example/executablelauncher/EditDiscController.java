@@ -204,6 +204,7 @@ public class EditDiscController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("urlPaster-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(App.getBaseFontSize());
             UrlPasterController controller = fxmlLoader.getController();
             controller.setDiscParent(this);
             controller.initValues(false);
@@ -379,13 +380,13 @@ public class EditDiscController {
                 MediaInfo mediaInfo = episodeToEdit.getMediaInfo();
 
                 //MEDIA INFO
-                generalInfoBox.getChildren().add(
-                        new Text() {{
-                            setText("Media Info");
-                            setFill(Color.WHITE);
-                            setFont(Font.font("Roboto", FontWeight.BOLD, 16));
-                        }}
-                );
+                Text title = new Text("Media Info");
+                title.setFill(Color.WHITE);
+                title.getStyleClass().add("small-text");
+                title.getStyleClass().add("-fx-font-weight:bold;");
+
+                generalInfoBox.getChildren().add(title);
+
                 addTextLine(generalInfoBox, "Duration: ", mediaInfo.getDuration());
                 addTextLine(generalInfoBox, "File: ", mediaInfo.getFile());
                 addTextLine(generalInfoBox, "Location: ", mediaInfo.getLocation());
@@ -407,11 +408,13 @@ public class EditDiscController {
         generateMetadataTask.setOnFailed(e -> {
             Platform.runLater(() -> {
                 detailsBox.getChildren().remove(loadingIndicator);
-                generalInfoBox.getChildren().add(new Text() {{
-                    setText("Media info could not be generated");
-                    setFill(Color.WHITE);
-                    setFont(Font.font("Roboto", FontWeight.BOLD, 16));
-                }});
+
+                Text title = new Text("Media info could not be generated");
+                title.setFill(Color.WHITE);
+                title.getStyleClass().add("small-text");
+                title.getStyleClass().add("-fx-font-weight:bold;");
+
+                generalInfoBox.getChildren().add(title);
             });
         });
 
@@ -425,13 +428,12 @@ public class EditDiscController {
             tracksInfoBox.getChildren().add(spacer);
         }
 
-        tracksInfoBox.getChildren().add(
-                new Text() {{
-                    setText("Video");
-                    setFill(Color.WHITE);
-                    setFont(Font.font("Roboto", FontWeight.BOLD, 16));
-                }}
-        );
+        Text title = new Text("Video");
+        title.setFill(Color.WHITE);
+        title.getStyleClass().add("small-text");
+        title.getStyleClass().add("-fx-font-weight:bold;");
+
+        tracksInfoBox.getChildren().add(title);
 
         if (track.getCodec() != null)
             addTextLine(tracksInfoBox, "Codec: ", track.getCodec());
@@ -477,13 +479,12 @@ public class EditDiscController {
             tracksInfoBox.getChildren().add(spacer);
         }
 
-        tracksInfoBox.getChildren().add(
-                new Text() {{
-                    setText("Audio");
-                    setFill(Color.WHITE);
-                    setFont(Font.font("Roboto", FontWeight.BOLD, 16));
-                }}
-        );
+        Text title = new Text("Audio");
+        title.setFill(Color.WHITE);
+        title.getStyleClass().add("small-text");
+        title.getStyleClass().add("-fx-font-weight:bold;");
+
+        tracksInfoBox.getChildren().add(title);
 
         if (track.getCodec() != null)
             addTextLine(tracksInfoBox, "Codec: ", track.getCodec());
@@ -523,13 +524,12 @@ public class EditDiscController {
             tracksInfoBox.getChildren().add(spacer);
         }
 
-        tracksInfoBox.getChildren().add(
-                new Text() {{
-                    setText("Subtitles");
-                    setFill(Color.WHITE);
-                    setFont(Font.font("Roboto", FontWeight.BOLD, 16));
-                }}
-        );
+        Text title = new Text("Subtitles");
+        title.setFill(Color.WHITE);
+        title.getStyleClass().add("small-text");
+        title.getStyleClass().add("-fx-font-weight:bold;");
+
+        tracksInfoBox.getChildren().add(title);
 
         if (track.getCodec() != null){
             addTextLine(tracksInfoBox, "Codec: ", track.getCodec());
@@ -550,20 +550,20 @@ public class EditDiscController {
         addTextLine(tracksInfoBox, "Display Title: ", track.getDisplayTitle());
     }
     private void addTextLine(VBox box, String header, String content){
-        box.getChildren().add(
-                new TextFlow(
-                        new Text() {{
-                            setText(header);
-                            setFill(Color.GRAY);
-                            setFont(Font.font("Roboto", FontWeight.NORMAL, 15));
-                        }},
-                        new Text() {{
-                            setText(content);
-                            setFill(Color.WHITE);
-                            setFont(Font.font("Roboto", FontWeight.BOLD, 14));
-                        }}
-                )
-        );
+        TextFlow textFlow = new TextFlow();
+
+        Text first = new Text(header);
+        first.setFill(Color.GRAY);
+        first.getStyleClass().add("tiny-text");
+
+        Text second = new Text(content);
+        second.setFill(Color.WHITE);
+        second.getStyleClass().add("tiny-text");
+        second.getStyleClass().add("-fx-font-weight:bold;");
+
+        textFlow.getChildren().addAll(first, second);
+
+        box.getChildren().add(textFlow);
     }
     //endregion
 

@@ -40,7 +40,7 @@
       </HBox>
    </bottom>
    <left>
-      <VBox prefHeight="325.0" prefWidth="127.0" styleClass="midSectionDarkColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+      <VBox prefHeight="325.0" styleClass="midSectionDarkColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <children>
             <Button fx:id="generalCatButton" alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showGeneralView" styleClass="editButton" stylesheets="@styles.css" text="General" textFill="WHITE">
                <padding>
@@ -121,7 +121,7 @@
                         <Insets top="20.0" />
                      </VBox.margin>
                   </CheckBox>
-                  <Label fx:id="interpolationText" text="La interpolación permite generar fotogramas para obtener una imagen más fluida." textFill="#8a8a8a">
+                  <Label fx:id="interpolationText" text="La interpolación permite generar fotogramas para obtener una imagen más fluida." textFill="#8a8a8a" wrapText="true">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>

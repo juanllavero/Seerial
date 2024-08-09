@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXCheckBox?>
+<?import com.jfoenix.controls.JFXSlider?>
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.effect.ColorAdjust?>
@@ -84,10 +88,7 @@
                      <right>
                         <HBox BorderPane.alignment="CENTER">
                            <children>
-                              <Label fx:id="clock" alignment="CENTER" prefHeight="35.0" prefWidth="98.0" text="22:30" textFill="WHITE">
-                                 <font>
-                                    <Font size="26.0" />
-                                 </font>
+                              <Label fx:id="clock" alignment="CENTER" prefHeight="35.0" prefWidth="98.0" styleClass="big-text" stylesheets="@styles.css" text="22:30" textFill="WHITE">
                                  <effect>
                                     <DropShadow />
                                  </effect>
@@ -131,11 +132,7 @@
                         <Insets />
                      </opaqueInsets>
                      <content>
-                        <FlowPane fx:id="cardContainer" hgap="30.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="40.0">
-                           <padding>
-                              <Insets bottom="50.0" top="100.0" />
-                           </padding>
-                        </FlowPane>
+                        <FlowPane fx:id="cardContainer" hgap="30.0" rowValignment="TOP" styleClass="transparent" stylesheets="@styles.css" vgap="40.0" />
                      </content>
                   </ScrollPane>
                   <BorderPane fx:id="mainViewPane" visible="false">
@@ -145,9 +142,9 @@
                               <StackPane>
                                  <children>
                                     <ImageView fx:id="logoImage" fitHeight="225.0" fitWidth="326.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT" />
-                                    <Label fx:id="titleText" text="Show's Name" textFill="WHITE" StackPane.alignment="BOTTOM_LEFT">
+                                    <Label fx:id="titleText" styleClass="title-text" stylesheets="@styles.css" text="Show's Name" textFill="WHITE" StackPane.alignment="BOTTOM_LEFT">
                                        <font>
-                                          <Font name="System Bold" size="58.0" />
+                                          <Font name="SansSerif Bold" />
                                        </font>
                                        <effect>
                                           <DropShadow />
@@ -158,35 +155,26 @@
                               <HBox fx:id="episodeNameBox" />
                               <HBox spacing="20.0">
                                  <children>
-                                    <Label fx:id="info1" text="Info" textFill="WHITE" wrapText="true">
-                                       <font>
-                                          <Font size="32.0" />
-                                       </font>
+                                    <Label fx:id="info1" styleClass="more-large-text" stylesheets="@styles.css" text="Info" textFill="WHITE" wrapText="true">
                                        <effect>
                                           <DropShadow />
                                        </effect>
                                     </Label>
-                                    <Label fx:id="info2" text="Info" textFill="WHITE" wrapText="true">
-                                       <font>
-                                          <Font size="32.0" />
-                                       </font>
+                                    <Label fx:id="info2" styleClass="more-large-text" stylesheets="@styles.css" text="Info" textFill="WHITE" wrapText="true">
                                        <effect>
                                           <DropShadow />
                                        </effect>
                                     </Label>
-                                    <Label fx:id="info3" text="Info" textFill="WHITE" wrapText="true">
-                                       <font>
-                                          <Font size="32.0" />
-                                       </font>
+                                    <Label fx:id="info3" styleClass="more-large-text" stylesheets="@styles.css" text="Info" textFill="WHITE" wrapText="true">
                                        <effect>
                                           <DropShadow />
                                        </effect>
                                     </Label>
                                     <HBox fx:id="timeLeftBox" alignment="CENTER_LEFT" fillHeight="false" styleClass="playerOptionsButton" stylesheets="@styles.css">
                                        <children>
-                                          <Label fx:id="timeLeftField" text="24m left" textFill="WHITE">
+                                          <Label fx:id="timeLeftField" styleClass="small-text" stylesheets="@styles.css" text="24m left" textFill="WHITE">
                                              <font>
-                                                <Font name="System Bold" size="18.0" />
+                                                <Font name="SansSerif Bold" />
                                              </font>
                                           </Label>
                                        </children>
@@ -196,23 +184,20 @@
                                     </HBox>
                                  </children>
                               </HBox>
-                              <Label fx:id="overviewText" alignment="TOP_LEFT" prefHeight="171.0" prefWidth="1105.0" text="Overview" textFill="WHITE" wrapText="true">
-                                 <font>
-                                    <Font size="32.0" />
-                                 </font>
+                              <Label fx:id="overviewText" alignment="TOP_LEFT" maxHeight="250.0" prefWidth="1105.0" styleClass="more-large-text" stylesheets="@styles.css" text="Overview" textFill="WHITE" wrapText="true">
                                  <effect>
                                     <DropShadow />
                                  </effect>
                               </Label>
-                              <Label fx:id="continueWatchingTitle" text="Continue Watching" textFill="WHITE">
+                              <Label fx:id="continueWatchingTitle" styleClass="extra-large-text" stylesheets="@styles.css" text="Continue Watching" textFill="WHITE">
                                  <effect>
                                     <DropShadow />
                                  </effect>
                                  <font>
-                                    <Font name="System Bold" size="34.0" />
+                                    <Font name="SansSerif Bold" />
                                  </font>
                                  <VBox.margin>
-                                    <Insets top="20.0" />
+                                    <Insets top="10.0" />
                                  </VBox.margin>
                               </Label>
                            </children>
@@ -236,35 +221,35 @@
                         </ScrollPane>
                      </bottom>
                   </BorderPane>
-                  <Pane fx:id="episodeMenuParent" prefHeight="200.0" prefWidth="200.0">
+                  <Pane fx:id="episodeMenuParent">
                      <children>
                         <VBox fx:id="episodeMenuBox" style="-fx-background-radius: 5px;" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                            <children>
-                              <Button fx:id="playEpisodeButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Reproducir" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="27.0" />
-                                 </font>
-                              </Button>
-                              <Button fx:id="goToLibraryButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Ir a librería" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="27.0" />
-                                 </font>
-                              </Button>
-                              <Button fx:id="goToEpisodeButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Ir a episodio" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="27.0" />
-                                 </font>
-                              </Button>
-                              <Button fx:id="markWatchedButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Marcar como visto" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="27.0" />
-                                 </font>
-                              </Button>
-                              <Button fx:id="closeEpisodeMenuButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#hideEpisodeMenu" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Volver" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="27.0" />
-                                 </font>
-                              </Button>
+                              <Button fx:id="playEpisodeButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" stylesheets="@styles.css" text="Reproducir" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="playerOptionsButton" />
+                                    <String fx:value="large-text" />
+                                 </styleClass></Button>
+                              <Button fx:id="goToLibraryButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" stylesheets="@styles.css" text="Ir a librería" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="playerOptionsButton" />
+                                    <String fx:value="large-text" />
+                                 </styleClass></Button>
+                              <Button fx:id="goToEpisodeButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" stylesheets="@styles.css" text="Ir a episodio" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="playerOptionsButton" />
+                                    <String fx:value="large-text" />
+                                 </styleClass></Button>
+                              <Button fx:id="markWatchedButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" stylesheets="@styles.css" text="Marcar como visto" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="playerOptionsButton" />
+                                    <String fx:value="large-text" />
+                                 </styleClass></Button>
+                              <Button fx:id="closeEpisodeMenuButton" alignment="BASELINE_LEFT" focusTraversable="false" graphicTextGap="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#hideEpisodeMenu" stylesheets="@styles.css" text="Volver" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="playerOptionsButton" />
+                                    <String fx:value="large-text" />
+                                 </styleClass></Button>
                            </children>
                            <padding>
                               <Insets bottom="2.0" top="2.0" />
@@ -297,145 +282,135 @@
       </ImageView>
       <StackPane fx:id="mainMenu" styleClass="blurredBackground" stylesheets="@styles.css" StackPane.alignment="CENTER">
          <children>
-            <VBox fx:id="menuOptions" alignment="TOP_CENTER" spacing="20.0" stylesheets="@styles.css">
+            <VBox fx:id="menuOptions" alignment="TOP_CENTER" spacing="20.0" stylesheets="@styles.css" StackPane.alignment="CENTER">
                <children>
-                  <Label fx:id="appName" alignment="CENTER" text="Seerial" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="50.0" />
-                     </font>
+                  <Label fx:id="appName" alignment="CENTER" styleClass="title-text" stylesheets="@styles.css" text="Seerial" textFill="WHITE">
                      <VBox.margin>
                         <Insets bottom="20.0" />
                      </VBox.margin>
                   </Label>
-                  <Button fx:id="settingsButton" alignment="CENTER" graphicTextGap="8.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#openSettings" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Settings" textFill="WHITE">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
+                  <Button fx:id="settingsButton" alignment="CENTER" graphicTextGap="8.0" maxWidth="600.0" mnemonicParsing="false" onAction="#openSettings" stylesheets="@styles.css" text="Settings" textFill="WHITE">
                      <padding>
                         <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
+                     <styleClass>
+                        <String fx:value="playerOptionsButton" />
+                        <String fx:value="large-text" />
+                     </styleClass>
                   </Button>
-                  <Button fx:id="switchToDesktopButton" alignment="CENTER" graphicTextGap="15.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#switchToDesktop" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Switch to Desktop Mode" textFill="WHITE">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
+                  <Button fx:id="switchToDesktopButton" alignment="CENTER" graphicTextGap="15.0" maxWidth="600.0" mnemonicParsing="false" onAction="#switchToDesktop" stylesheets="@styles.css" text="Switch to Desktop Mode" textFill="WHITE">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
                      <padding>
                         <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
+                     <styleClass>
+                        <String fx:value="playerOptionsButton" />
+                        <String fx:value="large-text" />
+                     </styleClass>
                   </Button>
-                  <Button fx:id="backButton" alignment="CENTER" graphicTextGap="8.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#hideContextMenu" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Volver" textFill="WHITE">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
+                  <Button fx:id="backButton" alignment="CENTER" graphicTextGap="8.0" maxWidth="600.0" mnemonicParsing="false" onAction="#hideContextMenu" stylesheets="@styles.css" text="Volver" textFill="WHITE">
                      <padding>
                         <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
+                     <styleClass>
+                        <String fx:value="playerOptionsButton" />
+                        <String fx:value="large-text" />
+                     </styleClass>
                   </Button>
-                  <Button fx:id="exitButton" alignment="CENTER" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#close" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Exit" textFill="WHITE">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
+                  <Button fx:id="exitButton" alignment="CENTER" graphicTextGap="8.0" layoutX="10.0" layoutY="73.0" maxWidth="600.0" mnemonicParsing="false" onAction="#close" stylesheets="@styles.css" text="Exit" textFill="WHITE">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
                      <padding>
                         <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
+                     <styleClass>
+                        <String fx:value="playerOptionsButton" />
+                        <String fx:value="large-text" />
+                     </styleClass>
                   </Button>
                </children>
                <effect>
                   <DropShadow />
                </effect>
                <StackPane.margin>
-                  <Insets bottom="500.0" left="500.0" right="500.0" top="250.0" />
+                  <Insets top="100.0" />
                </StackPane.margin>
             </VBox>
-            <BorderPane fx:id="settingsWindow" StackPane.alignment="CENTER">
-               <top>
-                  <Label fx:id="settingsTitle" text="Settings" textFill="WHITE" BorderPane.alignment="CENTER">
-                     <font>
-                        <Font name="System Bold" size="50.0" />
-                     </font>
-                     <BorderPane.margin>
-                        <Insets bottom="50.0" />
-                     </BorderPane.margin>
+            <VBox fx:id="settingsWindow" maxHeight="-Infinity" maxWidth="-Infinity" spacing="5.0" styleClass="translucent" stylesheets="@styles.css" StackPane.alignment="CENTER_RIGHT">
+               <children>
+                  <Label fx:id="settingsTitle" styleClass="title-text" stylesheets="@styles.css" text="Settings" textFill="WHITE">
+                     <VBox.margin>
+                        <Insets bottom="20.0" />
+                     </VBox.margin>
                   </Label>
-               </top>
-               <padding>
-                  <Insets top="200.0" />
-               </padding>
-               <left>
-                  <VBox fx:id="leftOptionsPane" alignment="TOP_RIGHT" fillWidth="false" BorderPane.alignment="CENTER">
-                     <children>
-                        <Button fx:id="cardSizeButton" alignment="TOP_LEFT" mnemonicParsing="false" prefWidth="550.0" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Poster size" textFill="WHITE">
-                           <font>
-                              <Font size="24.0" />
-                           </font>
-                           <padding>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                           </padding>
-                        </Button>
-                     </children>
-                     <BorderPane.margin>
-                        <Insets right="10.0" />
-                     </BorderPane.margin>
-                  </VBox>
-               </left>
-               <center>
-                  <StackPane BorderPane.alignment="CENTER_LEFT">
-                     <children>
-                        <VBox fx:id="cardSizeOptions" fillWidth="false" styleClass="translucent" stylesheets="@styles.css" StackPane.alignment="TOP_LEFT">
-                           <children>
-                              <Button fx:id="tinyCardButton" alignment="TOP_LEFT" maxWidth="-Infinity" mnemonicParsing="false" prefWidth="500.0" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Tiny" textFill="WHITE">
-                                 <font>
-                                    <Font size="24.0" />
-                                 </font>
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </Button>
-                              <Button fx:id="smallCardButton" alignment="TOP_LEFT" maxWidth="-Infinity" mnemonicParsing="false" prefWidth="500.0" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Small" textFill="WHITE">
-                                 <font>
-                                    <Font size="24.0" />
-                                 </font>
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </Button>
-                              <Button fx:id="normalCardButton" alignment="TOP_LEFT" maxWidth="-Infinity" mnemonicParsing="false" prefWidth="500.0" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Normal" textFill="WHITE">
-                                 <font>
-                                    <Font size="24.0" />
-                                 </font>
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </Button>
-                              <Button fx:id="largeCardButton" alignment="TOP_LEFT" maxWidth="-Infinity" mnemonicParsing="false" prefWidth="500.0" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Large" textFill="WHITE">
-                                 <font>
-                                    <Font size="24.0" />
-                                 </font>
-                                 <padding>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </Button>
-                           </children>
-                           <padding>
-                              <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-                           </padding>
-                        </VBox>
-                     </children>
-                     <BorderPane.margin>
-                        <Insets />
-                     </BorderPane.margin>
+                  <BorderPane stylesheets="@styles.css">
+                     <styleClass>
+                        <String fx:value="playerOptionsButton" />
+                        <String fx:value="big-text" />
+                     </styleClass>
                      <padding>
-                        <Insets bottom="200.0" left="10.0" right="200.0" />
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                      </padding>
-                  </StackPane>
-               </center>
-            </BorderPane>
+                     <left>
+                        <Label fx:id="cardSizeText" text="Tamaño de las tarjetas" textFill="WHITE" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="50.0" />
+                           </BorderPane.margin>
+                        </Label>
+                     </left>
+                     <right>
+                        <JFXSlider fx:id="cardSizeSlider" BorderPane.alignment="CENTER" />
+                     </right>
+                  </BorderPane>
+                  <BorderPane stylesheets="@styles.css">
+                     <styleClass>
+                        <String fx:value="playerOptionsButton" />
+                        <String fx:value="big-text" />
+                     </styleClass>
+                     <padding>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                     </padding>
+                     <left>
+                        <Label fx:id="showClockText" text="Mostrar reloj" textFill="WHITE" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="50.0" />
+                           </BorderPane.margin>
+                        </Label>
+                     </left>
+                     <right>
+                        <JFXCheckBox fx:id="showClockCheck" checkedColor="WHITE" text=" " unCheckedColor="BLACK" BorderPane.alignment="CENTER" />
+                     </right>
+                  </BorderPane>
+                  <BorderPane stylesheets="@styles.css">
+                     <styleClass>
+                        <String fx:value="playerOptionsButton" />
+                        <String fx:value="big-text" />
+                     </styleClass>
+                     <padding>
+                        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                     </padding>
+                     <left>
+                        <Label fx:id="backgroundChoiceText" text="Fondo de librerías" textFill="WHITE" BorderPane.alignment="CENTER">
+                           <BorderPane.margin>
+                              <Insets right="50.0" />
+                           </BorderPane.margin>
+                        </Label>
+                     </left>
+                     <right>
+                        <ChoiceBox fx:id="backgroundChoice" prefWidth="150.0" BorderPane.alignment="CENTER" />
+                     </right>
+                  </BorderPane>
+               </children>
+               <padding>
+                  <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
+               </padding>
+               <StackPane.margin>
+                  <Insets right="50.0" />
+               </StackPane.margin>
+            </VBox>
          </children>
       </StackPane>
    </children>

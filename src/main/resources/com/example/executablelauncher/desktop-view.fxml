@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.effect.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.GaussianBlur?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" styleClass="transparent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
+<StackPane fx:id="mainBox" styleClass="transparent" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.DesktopViewController">
    <children>
       <ImageView fx:id="globalBackground" fitHeight="1080.0" fitWidth="2027.0" pickOnBounds="true">
          <image>
@@ -79,148 +89,153 @@
                                                 <Insets bottom="10.0" />
                                              </padding>
                                           </VBox>
-                                          <BorderPane maxHeight="700.0">
-                                             <top>
-                                                <HBox styleClass="seasonButtonActive" stylesheets="@styles.css" BorderPane.alignment="CENTER">
-                                                   <children>
-                                                      <Label fx:id="detailsText" text="Details" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="20.0" />
-                                                         </font>
-                                                         <effect>
-                                                            <DropShadow />
-                                                         </effect>
-                                                      </Label>
-                                                   </children>
-                                                   <BorderPane.margin>
-                                                      <Insets bottom="5.0" />
-                                                   </BorderPane.margin>
-                                                </HBox>
-                                             </top>
-                                             <left>
-                                                <VBox fillWidth="false" minWidth="-Infinity" prefHeight="143.0" prefWidth="197.0" spacing="2.0" BorderPane.alignment="CENTER">
-                                                   <children>
-                                                      <Label fx:id="yearText" text="Year" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="episodesText" text="Episodes" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="totalDurationText" text="Total duration" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                         <VBox.margin>
-                                                            <Insets />
-                                                         </VBox.margin>
-                                                      </Label>
-                                                      <Label fx:id="seasonNumberText" text="Season number" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="rootFolderText" text="Root folder" textFill="WHITE">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                         <VBox.margin>
-                                                            <Insets />
-                                                         </VBox.margin>
-                                                      </Label>
-                                                   </children>
-                                                </VBox>
-                                             </left>
-                                             <center>
-                                                <VBox alignment="TOP_RIGHT" minWidth="240.0" spacing="2.0" BorderPane.alignment="CENTER">
-                                                   <children>
-                                                      <Label fx:id="yearField" alignment="CENTER_RIGHT" text="Year" textFill="#aeaeae" wrapText="true">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="episodesField" alignment="CENTER_RIGHT" text="Episodes" textFill="#aeaeae" wrapText="true">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <VBox.margin>
-                                                            <Insets />
-                                                         </VBox.margin>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="totalDurationField" alignment="CENTER_RIGHT" text="240 min" textFill="#aeaeae" wrapText="true">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="seasonNumberField" alignment="CENTER_RIGHT" text="1" textFill="#aeaeae" wrapText="true">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                      <Label fx:id="rootFolderField" alignment="CENTER_RIGHT" prefHeight="71.0" prefWidth="222.0" styleClass="folderLink" stylesheets="@styles.css" text="C:\User\Folder\Folde\Folder" textFill="WHITE" wrapText="true">
-                                                         <font>
-                                                            <Font size="18.0" />
-                                                         </font>
-                                                         <effect>
-                                                            <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
-                                                         </effect>
-                                                      </Label>
-                                                   </children>
-                                                </VBox>
-                                             </center>
-                                             <bottom>
-                                                <ImageView fx:id="seriesCover" fitHeight="416.0" fitWidth="440.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_LEFT">
-                                                   <BorderPane.margin>
-                                                      <Insets top="20.0" />
-                                                   </BorderPane.margin>
-                                                </ImageView>
-                                             </bottom>
+                                          <VBox maxWidth="300.0" minWidth="300.0" prefWidth="300.0">
                                              <HBox.margin>
                                                 <Insets left="10.0" />
                                              </HBox.margin>
-                                          </BorderPane>
+                                             <children>
+                                                <BorderPane maxWidth="300.0" minWidth="300.0" prefWidth="300.0">
+                                                   <top>
+                                                      <HBox styleClass="seasonButtonActive" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+                                                         <children>
+                                                            <Label fx:id="detailsText" text="Details" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="20.0" />
+                                                               </font>
+                                                               <effect>
+                                                                  <DropShadow />
+                                                               </effect>
+                                                            </Label>
+                                                         </children>
+                                                         <BorderPane.margin>
+                                                            <Insets bottom="5.0" />
+                                                         </BorderPane.margin>
+                                                      </HBox>
+                                                   </top>
+                                                   <left>
+                                                      <VBox maxWidth="130.0" minWidth="130.0" prefWidth="130.0" spacing="2.0" BorderPane.alignment="CENTER">
+                                                         <children>
+                                                            <Label fx:id="yearText" text="Year" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="episodesText" text="Episodes" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="totalDurationText" text="Total duration" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                               <VBox.margin>
+                                                                  <Insets />
+                                                               </VBox.margin>
+                                                            </Label>
+                                                            <Label fx:id="seasonNumberText" text="Season number" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="rootFolderText" text="Root folder" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                               <VBox.margin>
+                                                                  <Insets />
+                                                               </VBox.margin>
+                                                            </Label>
+                                                         </children>
+                                                      </VBox>
+                                                   </left>
+                                                   <right>
+                                                      <VBox alignment="TOP_RIGHT" maxWidth="180.0" minWidth="180.0" prefWidth="180.0" spacing="2.0" BorderPane.alignment="CENTER">
+                                                         <children>
+                                                            <Label fx:id="yearField" alignment="CENTER_RIGHT" prefHeight="27.0" prefWidth="122.0" text="Year" textFill="#aeaeae">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="episodesField" alignment="CENTER_RIGHT" prefHeight="27.0" prefWidth="128.0" text="Episodes" textFill="#aeaeae">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <VBox.margin>
+                                                                  <Insets />
+                                                               </VBox.margin>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="totalDurationField" alignment="CENTER_RIGHT" prefHeight="27.0" prefWidth="168.0" text="240 min" textFill="#aeaeae">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="seasonNumberField" alignment="CENTER_RIGHT" text="1" textFill="#aeaeae">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                            <Label fx:id="rootFolderField" alignment="CENTER_RIGHT" prefHeight="27.0" prefWidth="176.0" styleClass="folderLink" stylesheets="@styles.css" text="C:\User\Folder\Folde\Folder" textFill="WHITE">
+                                                               <font>
+                                                                  <Font size="18.0" />
+                                                               </font>
+                                                               <effect>
+                                                                  <DropShadow blurType="GAUSSIAN" radius="12.93" spread="0.31" width="32.72" />
+                                                               </effect>
+                                                            </Label>
+                                                         </children>
+                                                         <padding>
+                                                            <Insets left="5.0" />
+                                                         </padding>
+                                                      </VBox>
+                                                   </right>
+                                                </BorderPane>
+                                                <ImageView fx:id="seriesCover" fitHeight="450.0" fitWidth="300.0" pickOnBounds="true" preserveRatio="true">
+                                                   <VBox.margin>
+                                                      <Insets top="15.0" />
+                                                   </VBox.margin>
+                                                </ImageView>
+                                             </children>
+                                          </VBox>
                                        </children>
                                     </HBox>
                                  </children>

@@ -60,6 +60,8 @@ public class VideoPlayer {
             mpvSetProperty("gpu-api", "vulkan");
             mpvSetProperty("profile", "high-quality");
             mpvSetProperty("vo", "gpu-next");
+
+            mpvSetProperty("gpu-context", "auto");
             mpvSetProperty("hwdec", "auto-safe");
 
             //HDR Settings

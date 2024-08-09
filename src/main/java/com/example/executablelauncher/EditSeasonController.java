@@ -27,6 +27,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.commons.io.FileUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -40,6 +42,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.example.executablelauncher.App.*;
+import static com.example.executablelauncher.utils.Utils.cropToAspectRatio;
 
 public class EditSeasonController {
     //region FXML ATTRIBUTES
@@ -294,7 +297,12 @@ public class EditSeasonController {
             File newFile = new File("resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + (number + 1) + ".jpg");
 
             try{
-                Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                BufferedImage originalImage = ImageIO.read(file);
+                BufferedImage croppedImage = cropToAspectRatio(originalImage, 300, 450);
+
+                ImageIO.write(croppedImage, "jpg", newFile);
+                originalImage.flush();
+                croppedImage.flush();
             }catch (IOException e){
                 System.err.println("Poster not copied");
             }
@@ -310,7 +318,9 @@ public class EditSeasonController {
             try{
                 Image img = new Image(file.toURI().toURL().toExternalForm());
                 backgroundResolution.setText((int)img.getWidth() + "x" + (int)img.getHeight());
-                backgroundImageView.setImage(img);
+
+                Image compressedImg = new Image(file.toURI().toURL().toExternalForm(), backgroundImageView.getFitWidth(), backgroundImageView.getFitHeight(), true, true);
+                backgroundImageView.setImage(compressedImg);
             } catch (MalformedURLException e) {
                 selectedBackground = null;
                 System.err.println("Background not loaded");
@@ -374,6 +384,7 @@ public class EditSeasonController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ImageDownloader-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             Stage stage = new Stage();
             stage.setTitle("ImageDownloader");
             stage.initStyle(StageStyle.UNDECORATED);
@@ -409,6 +420,7 @@ public class EditSeasonController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("urlPaster-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(App.getBaseFontSize());
             UrlPasterController controller = fxmlLoader.getController();
             controller.setParent(this);
             controller.initValues(isLogo);

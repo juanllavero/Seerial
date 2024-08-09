@@ -12,13 +12,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="472.0" prefWidth="718.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchSeriesController">
+<BorderPane minHeight="472.0" minWidth="642.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchSeriesController">
    <top>
       <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
             <Label fx:id="titleWindow" text="Search Series" textFill="WHITE" BorderPane.alignment="CENTER">
                <font>
-                  <Font size="18.0" />
+                  <Font name="System Bold" size="20.0" />
                </font>
             </Label>
          </left>
@@ -50,20 +50,35 @@
                      <children>
                         <VBox>
                            <children>
-                              <Label fx:id="titleText" text="Title" textFill="WHITE" />
-                              <TextField fx:id="titleField" prefHeight="25.0" prefWidth="288.0" styleClass="textFieldColor" stylesheets="@styles.css" />
+                              <Label fx:id="titleText" text="Title" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></Label>
+                              <TextField fx:id="titleField" prefHeight="25.0" prefWidth="288.0" styleClass="textFieldColor" stylesheets="@styles.css">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></TextField>
                            </children>
                         </VBox>
                         <VBox>
                            <children>
-                              <Label fx:id="yearText" text="Year" textFill="WHITE" />
-                              <TextField fx:id="yearField" prefHeight="25.0" prefWidth="169.0" styleClass="textFieldColor" stylesheets="@styles.css" />
+                              <Label fx:id="yearText" text="Year" textFill="WHITE">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></Label>
+                              <TextField fx:id="yearField" prefHeight="25.0" prefWidth="169.0" styleClass="textFieldColor" stylesheets="@styles.css">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font></TextField>
                            </children>
                         </VBox>
                         <Button fx:id="searchButton" mnemonicParsing="false" onAction="#searchSeries" styleClass="desktopButton" stylesheets="@styles.css" text="Search" textFill="WHITE">
                            <HBox.margin>
                               <Insets top="15.0" />
                            </HBox.margin>
+                           <font>
+                              <Font size="14.0" />
+                           </font>
                         </Button>
                      </children>
                      <padding>

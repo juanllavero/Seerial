@@ -6,12 +6,11 @@ import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.WindowDecoration;
+import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXSlider;
 import de.androidpit.colorthief.ColorThief;
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -21,24 +20,19 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -57,177 +51,65 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
+import static com.example.executablelauncher.App.getBaseFontSize;
 import static com.example.executablelauncher.utils.Utils.*;
 
 public class Controller implements Initializable {
     //region FXML ATTRIBUTES
-    @FXML
-    private FlowPane cardContainer;
-
-    @FXML
-    private BorderPane mainPane;
-
-    @FXML
-    private Pane fill;
-
-    @FXML
-    private Pane shade;
-
-    @FXML
-    private StackPane mainViewBundle;
-
-    @FXML
-    private ImageView menuShadow;
-
-    @FXML
-    private ImageView currentlyWatchingImage;
-
-    @FXML
-    private ImageView mainViewShadow;
-
-    @FXML
-    private ImageView noise;
-
-    @FXML
-    private ImageView backgroundImage;
-
-    @FXML
-    private ImageView logoImage;
-
-    @FXML
-    private HBox episodeNameBox;
-
-    @FXML
-    private ScrollPane scrollPane;
-
-    @FXML
-    private StackPane mainMenu;
-
-    @FXML
-    private HBox topBar;
-
-    @FXML
-    private BorderPane topBorderPane;
-
-    @FXML
-    private StackPane mainBox;
-
-    @FXML
-    private HBox librariesBox;
-
-    @FXML
-    private Button switchToDesktopButton;
-
-    @FXML
-    private Button exitButton;
-
-    @FXML
-    private Button mainViewButton;
-
-    @FXML
-    private Pane episodeMenuParent;
-
-    @FXML
-    private VBox episodeMenuBox;
-
-    @FXML
-    private Button playEpisodeButton;
-
-    @FXML
-    private Button goToLibraryButton;
-
-    @FXML
-    private Button goToEpisodeButton;
-
-    @FXML
-    private Button markWatchedButton;
-
-    @FXML
-    private Button closeEpisodeMenuButton;
-
-    @FXML
-    private StackPane mainStack;
-
-    @FXML
-    private Label titleText;
-
-    @FXML
-    private Label info1;
-
-    @FXML
-    private Label info2;
-
-    @FXML
-    private Label info3;
-
-    @FXML
-    private HBox timeLeftBox;
-
-    @FXML
-    private Label timeLeftField;
-
-    @FXML
-    private Label overviewText;
-
-    @FXML
-    private Label continueWatchingTitle;
-
-    @FXML
-    private BorderPane mainViewPane;
-
-    @FXML
-    private HBox continueWatchingBox;
-
-    @FXML
-    private VBox menuOptions;
-
-    @FXML
-    private BorderPane settingsWindow;
-
-    @FXML
-    private Button settingsButton;
-
-    @FXML
-    private Button cardSizeButton;
-
-    @FXML
-    private VBox cardSizeOptions;
-
-    @FXML
-    private Button backButton;
-
-    @FXML
-    private Button menuButton;
-
-    @FXML
-    private Button tinyCardButton;
-
-    @FXML
-    private Button smallCardButton;
-
-    @FXML
-    private Button normalCardButton;
-
-    @FXML
-    private Button largeCardButton;
-
-    @FXML
-    private ScrollPane continueWatchingScroll;
-
-    @FXML
-    private VBox leftOptionsPane;
-
-    @FXML
-    private Label clock;
-
-    @FXML
-    private Label settingsTitle;
-
-    @FXML
-    private Label appName;
-
-    @FXML
-    private ImageView globalShadow;
+    @FXML FlowPane cardContainer;
+    @FXML BorderPane mainPane;
+    @FXML Pane fill;
+    @FXML Pane shade;
+    @FXML StackPane mainViewBundle;
+    @FXML ImageView menuShadow;
+    @FXML ImageView currentlyWatchingImage;
+    @FXML ImageView mainViewShadow;
+    @FXML ImageView noise;
+    @FXML ImageView backgroundImage;
+    @FXML ImageView logoImage;
+    @FXML HBox episodeNameBox;
+    @FXML ScrollPane scrollPane;
+    @FXML StackPane mainMenu;
+    @FXML HBox topBar;
+    @FXML BorderPane topBorderPane;
+    @FXML StackPane mainBox;
+    @FXML HBox librariesBox;
+    @FXML Button switchToDesktopButton;
+    @FXML Button exitButton;
+    @FXML Button mainViewButton;
+    @FXML Pane episodeMenuParent;
+    @FXML VBox episodeMenuBox;
+    @FXML Button playEpisodeButton;
+    @FXML Button goToLibraryButton;
+    @FXML Button goToEpisodeButton;
+    @FXML Button markWatchedButton;
+    @FXML Button closeEpisodeMenuButton;
+    @FXML Label titleText;
+    @FXML Label info1;
+    @FXML Label info2;
+    @FXML Label info3;
+    @FXML HBox timeLeftBox;
+    @FXML Label timeLeftField;
+    @FXML Label overviewText;
+    @FXML Label continueWatchingTitle;
+    @FXML BorderPane mainViewPane;
+    @FXML HBox continueWatchingBox;
+    @FXML VBox menuOptions;
+    @FXML VBox settingsWindow;
+    @FXML Button settingsButton;
+    @FXML Button backButton;
+    @FXML Button menuButton;
+    @FXML ScrollPane continueWatchingScroll;
+    @FXML Label cardSizeText;
+    @FXML Label showClockText;
+    @FXML Label backgroundChoiceText;
+    @FXML JFXSlider cardSizeSlider;
+    @FXML JFXCheckBox showClockCheck;
+    @FXML ChoiceBox backgroundChoice;
+    @FXML Label clock;
+    @FXML Label settingsTitle;
+    @FXML Label appName;
+    @FXML ImageView globalShadow;
     //endregion
 
     List<Library> libraries = null;
@@ -241,13 +123,16 @@ public class Controller implements Initializable {
     String libraryType = null;
     FadeTransition fadeTransition = null;
     PauseTransition delay = null;
-    int rowSize = 0;
+    int columnCount = 0;
     int rowCount = 0;
+    double cardWidth = 300;
+    double cardHeight = 450;
     int buttonCount = 0;
     boolean inMainView = false;
     boolean inSeasonView = false;
     SeasonController seasonController;
     boolean editMode = false;
+    double cardRatio = 1.3;
 
     @FXML
     void close() {
@@ -283,102 +168,7 @@ public class Controller implements Initializable {
             }
         });
 
-        cardSizeButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal)
-                cardSizeOptions.setVisible(true);
-        });
-
-        int columnCount = Integer.parseInt(Configuration.loadConfig("cardSize", "5"));
-        switch (columnCount){
-            case 5:
-                largeCardButton.getStyleClass().clear();
-                largeCardButton.getStyleClass().add("playerOptionsSelected");
-                break;
-            case 7:
-                normalCardButton.getStyleClass().clear();
-                normalCardButton.getStyleClass().add("playerOptionsSelected");
-                break;
-            case 9:
-                smallCardButton.getStyleClass().clear();
-                smallCardButton.getStyleClass().add("playerOptionsSelected");
-                break;
-            case 11:
-                tinyCardButton.getStyleClass().clear();
-                tinyCardButton.getStyleClass().add("playerOptionsSelected");
-                break;
-        }
-
-        updateRowSize(columnCount);
-
         Platform.runLater(() -> buttonCount = getVisibleButtonCountGlobal(continueWatchingScroll, continueWatchingBox));
-
-        tinyCardButton.setOnKeyPressed(e -> {
-            if (App.pressedSelect(e)){
-                for (Node node : cardSizeOptions.getChildren()){
-                    node.getStyleClass().clear();
-                    node.getStyleClass().add("playerOptionsButton");
-                }
-
-                tinyCardButton.getStyleClass().add("playerOptionsSelected");
-
-                Configuration.saveConfig("cardSize", "11");
-                rowSize = 0;
-                updateRowSize(11);
-                showSeriesFrom(currentLibrary, false);
-                tinyCardButton.requestFocus();
-            }
-        });
-
-        smallCardButton.setOnKeyPressed(e -> {
-            if (App.pressedSelect(e)){
-                for (Node node : cardSizeOptions.getChildren()){
-                    node.getStyleClass().clear();
-                    node.getStyleClass().add("playerOptionsButton");
-                }
-
-                smallCardButton.getStyleClass().add("playerOptionsSelected");
-
-                Configuration.saveConfig("cardSize", "9");
-                rowSize = 0;
-                updateRowSize(9);
-                showSeriesFrom(currentLibrary, false);
-                smallCardButton.requestFocus();
-            }
-        });
-
-        normalCardButton.setOnKeyPressed(e -> {
-            if (App.pressedSelect(e)){
-                for (Node node : cardSizeOptions.getChildren()){
-                    node.getStyleClass().clear();
-                    node.getStyleClass().add("playerOptionsButton");
-                }
-
-                normalCardButton.getStyleClass().add("playerOptionsSelected");
-
-                Configuration.saveConfig("cardSize", "7");
-                rowSize = 0;
-                updateRowSize(7);
-                showSeriesFrom(currentLibrary, false);
-                normalCardButton.requestFocus();
-            }
-        });
-
-        largeCardButton.setOnKeyPressed(e -> {
-            if (App.pressedSelect(e)){
-                for (Node node : cardSizeOptions.getChildren()){
-                    node.getStyleClass().clear();
-                    node.getStyleClass().add("playerOptionsButton");
-                }
-
-                largeCardButton.getStyleClass().add("playerOptionsSelected");
-
-                Configuration.saveConfig("cardSize", "5");
-                rowSize = 0;
-                updateRowSize(5);
-                showSeriesFrom(currentLibrary, false);
-                largeCardButton.requestFocus();
-            }
-        });
 
         //mainViewPane.setVisible(false);
 
@@ -404,9 +194,6 @@ public class Controller implements Initializable {
         noise.setFitHeight(screenHeight);
         noise.setFitWidth(screenWidth);
         noise.setPreserveRatio(false);
-
-        leftOptionsPane.setPrefWidth(screenWidth * 0.5);
-        cardSizeOptions.setPrefWidth(450);
 
         //Set padding for the series container
         cardContainer.setPrefWidth(screenWidth);
@@ -571,7 +358,6 @@ public class Controller implements Initializable {
                 showContinueWatchingView();
             else if (App.pressedRight(e))
                 librariesBox.getChildren().getFirst().requestFocus();
-
         });
 
         //region CLOCK TIMELINE
@@ -641,21 +427,25 @@ public class Controller implements Initializable {
         }
     }
 
-    private void updateRowSize(int newSize){
-        double screenWidth = Screen.getPrimary().getBounds().getWidth();
-        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+    private void adjustFlowPane(int rowCount) {
+        //Apply padding to FlowPane
+        double paddingSide = Screen.getPrimary().getBounds().getWidth() * 0.2;
+        double paddingTop = Screen.getPrimary().getBounds().getHeight() * 0.2;
 
-        if (newSize != rowSize){
-            rowSize = newSize;
+        paddingSide = paddingSide / Math.pow(2, rowCount - 1);
+        paddingTop = paddingTop / Math.pow(2, rowCount - 1);
+        cardContainer.setPadding(new Insets(paddingTop, paddingSide, paddingTop, paddingSide));
 
-            if (screenWidth / screenHeight > 1.8)
-                rowSize += 2;
-        }
+        //Get available width and height for the cards
+        double availableWidth = scrollPane.getViewportBounds().getWidth() - (paddingSide * 2);
+        double availableHeight = scrollPane.getViewportBounds().getHeight() - (paddingTop * 2);
 
-        Platform.runLater(() -> {
-            rowCount = (int) Math.ceil((double) seriesButtons.size() / rowSize);
-            scrollPane.setVmax(rowCount - 1);
-        });
+        //Calculate new card size maintaining the aspect ratio 2:3
+        cardHeight = availableHeight / rowCount;
+        cardWidth = cardHeight / cardRatio;
+
+        //Calculate the new number of columns
+        columnCount = (int) (availableWidth / cardWidth);
     }
 
     public void selectLibrary(Library library, Series series){
@@ -710,6 +500,8 @@ public class Controller implements Initializable {
             App.wakeUpDrive(folder);
         }
 
+        adjustFlowPane(1);
+
         libraryType = currentLibrary.getType();
         cardContainer.getChildren().clear();
         seriesButtons.clear();
@@ -724,24 +516,9 @@ public class Controller implements Initializable {
         if (selectSeries)
             selectedSeries = null;
 
-        /*String imagePath = "resources/img/backgroundDefault.png";
-
-        BackgroundImage myBI = new BackgroundImage(
-                new Image("file:" + imagePath,
-                        Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true),
-                BackgroundRepeat.REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.DEFAULT,
-                BackgroundSize.DEFAULT);
-
-        mainBox.setBackground(new Background(myBI));
-        backgroundImage.setImage(new Image("file:" + imagePath,
-                Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight(), false, true));
-        backgroundImage.setVisible(false);*/
-
         seriesBackgroundEffect(library.getSeries().getFirst().getSeasons().getFirst());
 
         Platform.runLater(() -> {
-            updateRowSize(rowSize);
-
             if (selectSeries)
                 if (selectCurrentSeries)
                     restoreSelection();
@@ -782,6 +559,7 @@ public class Controller implements Initializable {
                 if (!s.getSeasons().isEmpty() && seriesButtons.get(series.indexOf(s)).isFocused()) {
                     Season season = s.getSeasons().get(0);
                     if (season != null) {
+                        //If config says default or black background --> do nothing
                         seriesBackgroundEffect(season);
                     }
                 }
@@ -853,29 +631,7 @@ public class Controller implements Initializable {
         if (!imgFile.isFile())
             coverSrc = "resources/img/DefaultPoster.png";
 
-        int innerSpace;
-        double aspectRatio = 1.28125;
-
-        //If screen aspect ratio is greater than 16:90
-        if (screenAspectRatio > 1.8){
-            innerSpace = 250;
-        }else{
-            innerSpace = 125;
-        }
-
-        //Calculate the size of the card
-        int numCards = 6;
-        if (episode != null){
-            if (screenWidth / screenHeight > 1.8)
-                numCards += 2;
-        }else{
-            numCards = rowSize;
-        }
-
-        originalWidth = (Screen.getPrimary().getBounds().getWidth() - innerSpace - ((30 * (numCards - 1)) * 2)) / numCards;
-        originalHeight = originalWidth * aspectRatio;
-
-        Rectangle img = setRoundedBorders(coverSrc, originalWidth, originalHeight);
+        Rectangle img = setRoundedBorders(coverSrc, cardWidth, cardHeight);
 
         StackPane main = null;
         if (episode != null){
@@ -922,7 +678,7 @@ public class Controller implements Initializable {
                 scaleTransition.play();
 
                 //Update scroll vertical value
-                int index = (seriesButtons.indexOf(btn) / rowSize);
+                int index = (seriesButtons.indexOf(btn) / columnCount);
 
                 if (index != scrollPane.getVvalue()) {
                     Bounds cardBounds = btn.localToScene(btn.getBoundsInLocal());
@@ -955,11 +711,11 @@ public class Controller implements Initializable {
                     if (App.pressedSelect(event) || App.pressedBack(event))
                         toggleEditMode();
                     else if (App.pressedUp(event)){
-                        if (index >= rowSize)
-                            moveCard(btn, index - rowSize);
+                        if (index >= columnCount)
+                            moveCard(btn, index - columnCount);
                     }else if (App.pressedDown(event)){
-                        if (index + rowSize < seriesButtons.size())
-                            moveCard(btn, index + rowSize);
+                        if (index + columnCount < seriesButtons.size())
+                            moveCard(btn, index + columnCount);
                     }else if (App.pressedLeft(event)){
                         if (index > 0)
                             moveCard(btn, index - 1);
@@ -974,13 +730,13 @@ public class Controller implements Initializable {
                     }
 
                     if (App.pressedUp(event)){
-                        if (index < rowSize)
+                        if (index < columnCount)
                             librariesBox.getChildren().get(libraries.indexOf(currentLibrary)).requestFocus();
                         else
-                            seriesButtons.get(seriesButtons.indexOf(btn) - rowSize).requestFocus();
+                            seriesButtons.get(seriesButtons.indexOf(btn) - columnCount).requestFocus();
                     }else if (App.pressedDown(event)){
-                        if (index + rowSize < seriesButtons.size())
-                            seriesButtons.get(seriesButtons.indexOf(btn) + rowSize).requestFocus();
+                        if (index + columnCount < seriesButtons.size())
+                            seriesButtons.get(seriesButtons.indexOf(btn) + columnCount).requestFocus();
                         else
                             seriesButtons.getLast().requestFocus();
                     }else if (App.pressedLeft(event)){
@@ -1007,15 +763,14 @@ public class Controller implements Initializable {
     }
     private Rectangle setRoundedBorders(String imageSrc, double width, double height){
         Rectangle rectangle = new Rectangle(0, 0, width, height);
-        rectangle.setArcWidth(20.0);
-        rectangle.setArcHeight(20.0);
+        rectangle.setArcWidth(10.0);
+        rectangle.setArcHeight(10.0);
 
         ImagePattern pattern = new ImagePattern(
                 new Image("file:" + imageSrc, width, height, false, false)
         );
 
         rectangle.setFill(pattern);
-        rectangle.setEffect(new DropShadow(15, Color.BLACK));
 
         return rectangle;
     }
@@ -1132,8 +887,8 @@ public class Controller implements Initializable {
             topButton.setGraphic(topImage);
             topButton.setOnMouseClicked(e -> {
                 int index = series.indexOf(selectedSeries);
-                if (index >= rowSize)
-                    moveCard(btn, index - rowSize);
+                if (index >= columnCount)
+                    moveCard(btn, index - columnCount);
             });
 
             Button bottomButton = new Button();
@@ -1145,8 +900,8 @@ public class Controller implements Initializable {
             bottomButton.setGraphic(bottomImage);
             bottomButton.setOnMouseClicked(e -> {
                 int index = series.indexOf(selectedSeries);
-                if (index + rowSize < seriesButtons.size())
-                    moveCard(btn, index + rowSize);
+                if (index + columnCount < seriesButtons.size())
+                    moveCard(btn, index + columnCount);
             });
 
             StackPane rightPane = new StackPane(rightButton);
@@ -1347,8 +1102,7 @@ public class Controller implements Initializable {
                 episodeNameBox.getChildren().clear();
                 if (DataManager.INSTANCE.getLibrary(series).getType().equals("Shows")){
                     Label episodeName = new Label(episode.getName());
-                    episodeName.setFont(new Font("Roboto", 42));
-                    episodeName.setStyle("-fx-font-weight: bold");
+                    episodeName.setStyle("-fx-font-weight: bold; -fx-font-size: 3.2em");
                     episodeName.setTextFill(Color.color(1, 1, 1));
                     episodeName.setEffect(new DropShadow());
                     episodeNameBox.getChildren().add(episodeName);
@@ -1621,7 +1375,8 @@ public class Controller implements Initializable {
         globalShadow.setVisible(false);
         menuOptions.setVisible(false);
         settingsWindow.setVisible(true);
-        cardSizeButton.requestFocus();
+
+        //Implement
     }
     public void showSeason(Series s){
         playCategoriesSound();
@@ -1639,6 +1394,7 @@ public class Controller implements Initializable {
     private FadeTransition generateSeasonView(Series s) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("season-view.fxml"));
         Parent root = fxmlLoader.load();
+        root.setStyle(getBaseFontSize());
         seasonController = fxmlLoader.getController();
         seasonController.setParent(this);
         seasonController.setSeasons(currentLibrary, s, s.isPlaySameMusic(), libraryType.equals("Shows"));
@@ -1677,6 +1433,7 @@ public class Controller implements Initializable {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
             Parent root = fxmlLoader.load();
+            root.setStyle(getBaseFontSize());
             Stage stage = new Stage();
 
             WindowDecoration windowDecoration = null;

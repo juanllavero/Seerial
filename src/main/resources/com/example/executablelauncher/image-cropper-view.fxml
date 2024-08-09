@@ -7,35 +7,51 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageCropper">
    <top>
       <HBox alignment="CENTER" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <children>
-            <TextField fx:id="urlText" prefHeight="25.0" prefWidth="197.0" promptText="Paste url">
+            <TextField fx:id="urlText" prefHeight="25.0" prefWidth="197.0" promptText="Paste url" styleClass="textFieldColor" stylesheets="@styles.css">
                <HBox.margin>
                   <Insets right="5.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </TextField>
-            <Button fx:id="downloadButton" mnemonicParsing="false" onAction="#downloadImage" text="Download">
+            <Button fx:id="downloadButton" mnemonicParsing="false" onAction="#downloadImage" styleClass="desktopButton" stylesheets="@styles.css" text="Download">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </Button>
-            <TextField fx:id="imageText" prefHeight="25.0" prefWidth="192.0">
+            <TextField fx:id="imageText" prefHeight="25.0" prefWidth="192.0" styleClass="textFieldColor" stylesheets="@styles.css">
                <HBox.margin>
                   <Insets right="5.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </TextField>
-            <Button fx:id="loadButton" mnemonicParsing="false" onAction="#loadImage" text="Load File">
+            <Button fx:id="loadButton" mnemonicParsing="false" onAction="#loadImage" styleClass="desktopButton" stylesheets="@styles.css" text="Load File">
                <HBox.margin>
                   <Insets right="10.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </Button>
-            <Button fx:id="cropButton" mnemonicParsing="false" onAction="#cropImage" text="Crop Image">
+            <Button fx:id="cropButton" mnemonicParsing="false" onAction="#cropImage" styleClass="desktopButton" stylesheets="@styles.css" text="Crop Image">
                <HBox.margin>
                   <Insets left="10.0" />
                </HBox.margin>
+               <font>
+                  <Font size="14.0" />
+               </font>
             </Button>
          </children>
          <padding>

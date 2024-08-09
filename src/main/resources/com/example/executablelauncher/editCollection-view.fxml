@@ -15,9 +15,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="584.0" prefWidth="811.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.EditCollectionController">
+<BorderPane minHeight="550.0" minWidth="680.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.EditCollectionController">
    <top>
-      <BorderPane prefHeight="55.0" prefWidth="600.0" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+      <BorderPane prefHeight="55.0" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
             <Label fx:id="title" text="Add Collection" textFill="#f8f8f8" BorderPane.alignment="CENTER">
                <font>

@@ -57,6 +57,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.executablelauncher.App.getBaseFontSize;
 import static com.example.executablelauncher.App.mediaExecutor;
 import static com.example.executablelauncher.utils.Utils.*;
 
@@ -739,6 +740,7 @@ public class SeasonController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
             Parent root = fxmlLoader.load();
+            root.setStyle(getBaseFontSize());
 
             Stage videoStage = (Stage) mainBox.getScene().getWindow();
 

@@ -18,7 +18,7 @@
 
 <StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.EditSeasonController">
    <children>
-      <BorderPane prefHeight="618.0" prefWidth="711.0" styleClass="midSectionLightColor" stylesheets="@styles.css">
+      <BorderPane styleClass="midSectionLightColor" stylesheets="@styles.css">
          <top>
             <BorderPane prefHeight="55.0" prefWidth="600.0" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <left>
@@ -445,11 +445,11 @@
             </VBox>
          </left>
       </BorderPane>
-      <BorderPane fx:id="downloadingPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="156.0" prefWidth="402.0" styleClass="borderSectionsColor" stylesheets="@styles.css">
+      <BorderPane fx:id="downloadingPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="borderSectionsColor" stylesheets="@styles.css">
          <top>
             <Label fx:id="downloadingText" alignment="CENTER" prefHeight="27.0" prefWidth="305.0" text="Downloading..." textFill="WHITE" BorderPane.alignment="CENTER">
                <BorderPane.margin>
-                  <Insets />
+                  <Insets bottom="10.0" />
                </BorderPane.margin>
                <font>
                   <Font size="18.0" />

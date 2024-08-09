@@ -130,6 +130,21 @@ public class App extends Application {
     public static void setDesktopController(DesktopViewController controller){
         desktopController = controller;
     }
+    public static String getBaseFontSize(){
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        String style;
+        if (screenHeight < 1080) {
+            style = "-fx-font-size: 10px;";
+        } else if (screenHeight >= 1080 && screenHeight < 1440) {
+            style = "-fx-font-size: 16px;";
+        } else if (screenHeight >= 1440 && screenHeight < 2160) {
+            style = "-fx-font-size: 18px;";
+        } else {
+            style = "-fx-font-size: 20px;";
+        }
+
+        return style;
+    }
     private void loadDesktopMode() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
@@ -139,6 +154,8 @@ public class App extends Application {
             windowDecoration = new WindowDecoration(primaryStage, true);
             windowDecoration.setCornerPreference(CornerPreference.ROUND);
         }
+
+        root.setStyle(getBaseFontSize());
 
         primaryStage.setTitle(App.textBundle.getString("desktopMode"));
         primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
@@ -155,6 +172,7 @@ public class App extends Application {
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
         Parent root = fxmlLoader.load();
+        root.setStyle(getBaseFontSize());
         primaryStage = new Stage();
         primaryStage.setTitle(App.textBundle.getString("fullscreenMode"));
         primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
