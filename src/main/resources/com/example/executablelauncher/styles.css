@@ -62,6 +62,12 @@
     -fx-background-color: rgba(0, 0, 0, 0.01);
 }
 
+.editCardBorder{
+    -fx-border-color: #8EDCE6;
+    -fx-border-width: 5px;
+    -fx-border-radius: 10;
+}
+
 .minimizeButton{
     -fx-background-color: transparent;
 }
@@ -577,6 +583,13 @@
 .seriesCoverButton:focused {
     -fx-background-color: transparent;
     -fx-border-color: white;
+    -fx-border-radius: 15;
+    -fx-border-width: 4;
+}
+
+.seriesCoverButtonEditMode {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
     -fx-border-radius: 15;
     -fx-border-width: 4;
 }

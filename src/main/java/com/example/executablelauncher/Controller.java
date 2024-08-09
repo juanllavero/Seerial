@@ -613,8 +613,11 @@ public class Controller implements Initializable {
                             selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) - 1));
                         else
                             showContinueWatchingView();
-                    }else if (App.pressedRB(event) && libraries.indexOf(currentLibrary) < libraries.size() - 1){
-                        selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) + 1));
+                    }else if (App.pressedRB(event)){
+                        if (inMainView)
+                            selectLibraryButton((Button) librariesBox.getChildren().getFirst());
+                        else if (libraries.indexOf(currentLibrary) < libraries.size() - 1)
+                            selectLibraryButton((Button) librariesBox.getChildren().get(libraries.indexOf(currentLibrary) + 1));
                     }else if (App.pressedEdit(event) && !inMainView)
                         toggleEditMode();
                 }
@@ -635,62 +638,6 @@ public class Controller implements Initializable {
             appName.setText(App.textBundle.getString("noLibraries"));
 
             switchToDesktopButton.requestFocus();
-        }
-    }
-
-    private void toggleEditMode(){
-        editMode = !editMode;
-
-        Button btn = seriesButtons.get(series.indexOf(selectedSeries));
-
-        if (editMode){
-            Rectangle img = (Rectangle) btn.getGraphic();
-            StackPane pane = new StackPane();
-
-            BorderPane borderPane = new BorderPane();
-
-            DropShadow dropShadow = new DropShadow();
-            dropShadow.setRadius(8.0);
-            dropShadow.setOffsetX(2.0);
-            dropShadow.setOffsetY(2.0);
-            dropShadow.setColor(Color.BLACK);
-
-            // Imágenes para los diferentes lados con DropShadow aplicado
-            ImageView rightImage = new ImageView(new Image(getFileAsIOStream("img/icons/flechaDer.png"), 35, 35, true, true));
-            rightImage.setEffect(dropShadow);
-
-            ImageView leftImage = new ImageView(new Image(getFileAsIOStream("img/icons/flechaIzq.png"), 35, 35, true, true));
-            leftImage.setEffect(dropShadow);
-
-            ImageView topImage = new ImageView(new Image(getFileAsIOStream("img/icons/arrowUp.png"), 35, 35, true, true));
-            topImage.setEffect(dropShadow);
-
-            ImageView bottomImage = new ImageView(new Image(getFileAsIOStream("img/icons/arrowDown.png"), 35, 35, true, true));
-            bottomImage.setEffect(dropShadow);
-
-            // StackPane para alinear las imágenes al centro de su lado
-            StackPane rightPane = new StackPane(rightImage);
-            rightPane.setAlignment(Pos.CENTER);  // Centrado en el lado derecho
-            borderPane.setRight(rightPane);
-
-            StackPane leftPane = new StackPane(leftImage);
-            leftPane.setAlignment(Pos.CENTER);  // Centrado en el lado izquierdo
-            borderPane.setLeft(leftPane);
-
-            StackPane topPane = new StackPane(topImage);
-            topPane.setAlignment(Pos.CENTER);  // Centrado en la parte superior
-            borderPane.setTop(topPane);
-
-            StackPane bottomPane = new StackPane(bottomImage);
-            bottomPane.setAlignment(Pos.CENTER);  // Centrado en la parte inferior
-            borderPane.setBottom(bottomPane);
-
-            pane.getChildren().addAll(img, borderPane);
-            btn.setGraphic(pane);
-        }else{
-            StackPane pane = (StackPane) btn.getGraphic();
-            Rectangle img = (Rectangle) pane.getChildren().getFirst();
-            btn.setGraphic(img);
         }
     }
 
@@ -1002,30 +949,47 @@ public class Controller implements Initializable {
 
         btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
             if (!inSeasonView){
-                if (App.pressedSelect(event)){
-                    if (selectedSeries != null) {
-                        showSeason(selectedSeries);
-                    }
-                }
-
                 int index = seriesButtons.indexOf(btn);
 
-                if (App.pressedUp(event)){
-                    if (index < rowSize)
-                        librariesBox.getChildren().get(libraries.indexOf(currentLibrary)).requestFocus();
-                    else
-                        seriesButtons.get(seriesButtons.indexOf(btn) - rowSize).requestFocus();
-                }else if (App.pressedDown(event)){
-                    if (index + rowSize < seriesButtons.size())
-                        seriesButtons.get(seriesButtons.indexOf(btn) + rowSize).requestFocus();
-                    else
-                        seriesButtons.getLast().requestFocus();
-                }else if (App.pressedLeft(event)){
-                    if (index > 0)
-                        seriesButtons.get(seriesButtons.indexOf(btn) - 1).requestFocus();
-                }else if (App.pressedRight(event)){
-                    if (index < seriesButtons.size() - 1)
-                        seriesButtons.get(seriesButtons.indexOf(btn) + 1).requestFocus();
+                if (editMode){
+                    if (App.pressedSelect(event) || App.pressedBack(event))
+                        toggleEditMode();
+                    else if (App.pressedUp(event)){
+                        if (index >= rowSize)
+                            moveCard(btn, index - rowSize);
+                    }else if (App.pressedDown(event)){
+                        if (index + rowSize < seriesButtons.size())
+                            moveCard(btn, index + rowSize);
+                    }else if (App.pressedLeft(event)){
+                        if (index > 0)
+                            moveCard(btn, index - 1);
+                    }else if (App.pressedRight(event)){
+                        if (index < seriesButtons.size() - 1)
+                            moveCard(btn, index + 1);
+                    }
+                }else{
+                    if (App.pressedSelect(event)){
+                        if (selectedSeries != null)
+                            showSeason(selectedSeries);
+                    }
+
+                    if (App.pressedUp(event)){
+                        if (index < rowSize)
+                            librariesBox.getChildren().get(libraries.indexOf(currentLibrary)).requestFocus();
+                        else
+                            seriesButtons.get(seriesButtons.indexOf(btn) - rowSize).requestFocus();
+                    }else if (App.pressedDown(event)){
+                        if (index + rowSize < seriesButtons.size())
+                            seriesButtons.get(seriesButtons.indexOf(btn) + rowSize).requestFocus();
+                        else
+                            seriesButtons.getLast().requestFocus();
+                    }else if (App.pressedLeft(event)){
+                        if (index > 0)
+                            seriesButtons.get(seriesButtons.indexOf(btn) - 1).requestFocus();
+                    }else if (App.pressedRight(event)){
+                        if (index < seriesButtons.size() - 1)
+                            seriesButtons.get(seriesButtons.indexOf(btn) + 1).requestFocus();
+                    }
                 }
             }
         });
@@ -1110,6 +1074,119 @@ public class Controller implements Initializable {
             }*/
         });
     }
+
+    //region EDIT ORDER MODE
+    private void toggleEditMode(){
+        editMode = !editMode;
+
+        Button btn = seriesButtons.get(series.indexOf(selectedSeries));
+
+        if (editMode){
+            btn.getStyleClass().clear();
+            btn.getStyleClass().add("seriesCoverButtonEditMode");
+
+            Rectangle img = (Rectangle) btn.getGraphic();
+            StackPane pane = new StackPane();
+
+            BorderPane borderPane = new BorderPane();
+            borderPane.getStyleClass().add("editCardBorder");
+
+            DropShadow dropShadow = new DropShadow();
+            dropShadow.setRadius(8.0);
+            dropShadow.setOffsetX(2.0);
+            dropShadow.setOffsetY(2.0);
+            dropShadow.setColor(Color.BLACK);
+
+            Button rightButton = new Button();
+            rightButton.setFocusTraversable(false);
+            rightButton.getStyleClass().clear();
+            rightButton.getStyleClass().add("menuButton");
+            ImageView rightImage = new ImageView(new Image(getFileAsIOStream("img/icons/flechaDer.png"), 35, 35, true, true));
+            rightImage.setEffect(dropShadow);
+            rightButton.setGraphic(rightImage);
+            rightButton.setOnMouseClicked(e -> {
+                int index = series.indexOf(selectedSeries);
+                if (index < seriesButtons.size() - 1)
+                    moveCard(btn, index + 1);
+            });
+
+            Button leftButton = new Button();
+            leftButton.setFocusTraversable(false);
+            leftButton.getStyleClass().clear();
+            leftButton.getStyleClass().add("menuButton");
+            ImageView leftImage = new ImageView(new Image(getFileAsIOStream("img/icons/flechaIzq.png"), 35, 35, true, true));
+            leftImage.setEffect(dropShadow);
+            leftButton.setGraphic(leftImage);
+            leftButton.setOnMouseClicked(e -> {
+                int index = series.indexOf(selectedSeries);
+                if (index > 0)
+                    moveCard(btn, index - 1);
+            });
+
+            Button topButton = new Button();
+            topButton.setFocusTraversable(false);
+            topButton.getStyleClass().clear();
+            topButton.getStyleClass().add("menuButton");
+            ImageView topImage = new ImageView(new Image(getFileAsIOStream("img/icons/arrowUp.png"), 35, 35, true, true));
+            topImage.setEffect(dropShadow);
+            topButton.setGraphic(topImage);
+            topButton.setOnMouseClicked(e -> {
+                int index = series.indexOf(selectedSeries);
+                if (index >= rowSize)
+                    moveCard(btn, index - rowSize);
+            });
+
+            Button bottomButton = new Button();
+            bottomButton.setFocusTraversable(false);
+            bottomButton.getStyleClass().clear();
+            bottomButton.getStyleClass().add("menuButton");
+            ImageView bottomImage = new ImageView(new Image(getFileAsIOStream("img/icons/arrowDown.png"), 35, 35, true, true));
+            bottomImage.setEffect(dropShadow);
+            bottomButton.setGraphic(bottomImage);
+            bottomButton.setOnMouseClicked(e -> {
+                int index = series.indexOf(selectedSeries);
+                if (index + rowSize < seriesButtons.size())
+                    moveCard(btn, index + rowSize);
+            });
+
+            StackPane rightPane = new StackPane(rightButton);
+            rightPane.setAlignment(Pos.CENTER);
+            borderPane.setRight(rightPane);
+
+            StackPane leftPane = new StackPane(leftButton);
+            leftPane.setAlignment(Pos.CENTER);
+            borderPane.setLeft(leftPane);
+
+            StackPane topPane = new StackPane(topButton);
+            topPane.setAlignment(Pos.CENTER);
+            borderPane.setTop(topPane);
+
+            StackPane bottomPane = new StackPane(bottomButton);
+            bottomPane.setAlignment(Pos.CENTER);
+            borderPane.setBottom(bottomPane);
+
+            pane.getChildren().addAll(img, borderPane);
+            btn.setGraphic(pane);
+        }else{
+            btn.getStyleClass().clear();
+            btn.getStyleClass().add("seriesCoverButton");
+
+            StackPane pane = (StackPane) btn.getGraphic();
+            Rectangle img = (Rectangle) pane.getChildren().getFirst();
+            btn.setGraphic(img);
+        }
+    }
+    private void moveCard(Button btn, int index){
+        cardContainer.getChildren().remove(btn);
+        cardContainer.getChildren().add(index, btn);
+
+        seriesButtons.remove(btn);
+        seriesButtons.add(index, btn);
+
+        series.remove(selectedSeries);
+        series.add(index, selectedSeries);
+    }
+    //endregion
 
     //region MAIN VIEW
     private void showContinueWatchingView(){
