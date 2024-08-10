@@ -117,7 +117,6 @@ public class VideoPlayerController {
     List<AudioTrack> audioTracks = new ArrayList<>();
     List<SubtitleTrack> subtitleTracks = new ArrayList<>();
     PauseTransition hideSlider;
-    boolean subsActivated = true;
     boolean fullscreen = false;
     int currentDisc = 0;
     boolean movingSlider = false;
@@ -252,24 +251,22 @@ public class VideoPlayerController {
                 showControls();
         });
 
-        videoStage.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
+        /*videoStage.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
             if (App.pressedBack(e)){
                 if (optionsBox.isVisible())
                     hideOptions();
-                else if (!controlsShown)
-                    showControls();
+                else if (controlsShown)
+                    hideControls();
                 else
                     stop();
             }
-        });
+        });*/
 
         controlsStage.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
             if (App.pressedBack(e)){
                 if (optionsBox.isVisible())
                     hideOptions();
                 else if (!controlsShown)
-                    showControls();
-                else
                     stop();
             }
         });
@@ -294,7 +291,7 @@ public class VideoPlayerController {
 
         videoStage.getScene().setOnKeyReleased(e -> {
             if (!controlsShown && !App.pressedLeft(e) && !App.pressedRight(e)
-                    && !App.pressedRB(e) && !App.pressedLB(e))
+                    && !App.pressedRB(e) && !App.pressedLB(e) && !App.pressedBack(e))
                 showControls();
         });
         //endregion
@@ -925,6 +922,12 @@ public class VideoPlayerController {
         videoStage.setFullScreen(fullscreen);
         controlsStage.requestFocus();
     }
+    public void hideOptions(){
+        optionsBox.setVisible(false);
+
+        if (!controlsShown)
+            showControls();
+    }
     private void showControls(){
         timeline.playFromStart();
 
@@ -1001,9 +1004,18 @@ public class VideoPlayerController {
     public void stop() {
         checkTimeWatched();
 
-        timeline.stop();
-        touchTimeline.stop();
-        runtimeTimeline.stop();
+        if (timeline != null)
+            timeline.stop();
+        if (touchTimeline != null)
+            touchTimeline.stop();
+        if (volumeCount != null)
+            volumeCount.stop();
+        if (runtimeTimeline != null)
+            runtimeTimeline.stop();
+        if (hideMouse != null)
+            hideMouse.stop();
+        if (hideSlider != null)
+            hideSlider.stop();
 
         videoStage.setFullScreen(false);
 
@@ -1659,9 +1671,6 @@ public class VideoPlayerController {
             Button trackButton = addSimpleButton(track.getDisplayTitle(), true, true);
             simpleMenu.getChildren().add(trackButton);
 
-            if (track.isSelected())
-                setSelectedImage(trackButton, true);
-
             trackButton.setOnMouseClicked(e -> {
                 if (!track.isSelected())
                     addAudioButtonAction(track, trackButton);
@@ -1678,9 +1687,12 @@ public class VideoPlayerController {
             });
             trackButton.setOnMouseEntered(e -> setOnHover(trackButton, true, true));
             trackButton.setOnMouseExited(e -> setOnExitHover(trackButton, true, true));
-        }
 
-        simpleMenu.getChildren().getFirst().requestFocus();
+            if (track.isSelected()){
+                setSelectedImage(trackButton, true);
+                trackButton.requestFocus();
+            }
+        }
     }
     private void showAudioTracks(Button audiosButton, Label text){
         optionsContainer.getChildren().clear();
@@ -1716,6 +1728,11 @@ public class VideoPlayerController {
         }
     }
     private void audioButtonAction(AudioTrack track, Button btn, Label selectedAudioText){
+        playInteractionSound();
+
+        for (AudioTrack aTrack : audioTracks)
+            aTrack.setSelected(aTrack == track);
+
         videoPlayer.setAudioTrack(audioTracks.indexOf(track) + 1);
 
         for (Node node : optionsContainer.getChildren())
@@ -1724,7 +1741,7 @@ public class VideoPlayerController {
         setSelectedImage(btn, true);
         selectedAudioText.setText(track.getDisplayTitle());
     }
-    private void tracksInMenuMovement(Button btn, KeyEvent event, Button videoButton) {
+    private void tracksInMenuMovement(Button btn, KeyEvent event, Button parentButton) {
         if (App.pressedDown(event)){
             if (optionsContainer.getChildren().indexOf(btn) < optionsContainer.getChildren().size() - 1)
                 optionsContainer.getChildren().get(optionsContainer.getChildren().indexOf(btn) + 1).requestFocus();
@@ -1732,7 +1749,7 @@ public class VideoPlayerController {
             if (optionsContainer.getChildren().indexOf(btn) > 0)
                 optionsContainer.getChildren().get(optionsContainer.getChildren().indexOf(btn) - 1).requestFocus();
         }else if (App.pressedLeft(event)) {
-            videoButton.requestFocus();
+            parentButton.requestFocus();
         }
     }
     private void addAudioButtonAction(AudioTrack track, Button trackButton) {
@@ -1815,7 +1832,7 @@ public class VideoPlayerController {
         centerOptions.getChildren().clear();
 
         Button subsTracks = addSimpleButton(App.textBundle.getString("languageText"), false, false);
-        Button subsDelay = addSimpleButton(App.buttonsBundle.getString("audioDelay"), false, false);
+        Button subsDelay = addSimpleButton(App.buttonsBundle.getString("subsDelay"), false, false);
 
         if (episode.getSubtitleTracks().isEmpty())
             hideButton(subsTracks);
@@ -1883,6 +1900,50 @@ public class VideoPlayerController {
     }
     private void showSubtitleTracks(Button subsButton, Label text){
         optionsContainer.getChildren().clear();
+
+        //Add first button to disable subtitles
+        Button noneButton = addSimpleButton(App.buttonsBundle.getString("none"), true, false);
+        optionsContainer.getChildren().add(noneButton);
+
+        noneButton.setOnMouseEntered(e -> setOnHover(noneButton, true, true));
+        noneButton.setOnMouseExited(e -> setOnExitHover(noneButton, true, true));
+        noneButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal)
+                setOnHover(noneButton, true, false);
+            else
+                setOnExitHover(noneButton, true, false);
+        });
+        noneButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+            if (App.pressedSelect(event)){
+                playInteractionSound();
+
+                for (SubtitleTrack sTrack : subtitleTracks)
+                    sTrack.setSelected(false);
+
+                videoPlayer.disableSubtitles();
+                season.setSelectedSubtitleTrack(-1);
+                season.setSubtitleTrackLanguage("");
+
+                for (Node node : optionsContainer.getChildren())
+                    removeSelectedImage((Button) node, true);
+
+                setSelectedImage(noneButton, true);
+                text.setText("");
+            }else{
+                tracksInMenuMovement(noneButton, event, subsButton);
+            }
+        });
+
+        if (season.getSubtitleTrackLanguage() == null || season.getSubtitleTrackLanguage().isEmpty()) {
+            setSelectedImage(noneButton, true);
+
+            videoPlayer.disableSubtitles();
+            season.setSelectedSubtitleTrack(-1);
+            season.setSubtitleTrackLanguage("");
+
+            noneButton.requestFocus();
+        }
+
         for (SubtitleTrack track : subtitleTracks){
             Button btn = addSimpleButton(track.getDisplayTitle(), true, false);
             btn.setFocusTraversable(false);
@@ -1891,6 +1952,8 @@ public class VideoPlayerController {
             if (track.isSelected()) {
                 setSelectedImage(btn, true);
                 text.setText(track.getDisplayTitle());
+
+                removeSelectedImage(btn, true);
             }
 
             btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
@@ -1902,21 +1965,29 @@ public class VideoPlayerController {
             });
 
             btn.setOnMouseClicked(e -> {
-                if (!track.isSelected())
+                if (!track.isSelected()) {
+                    removeSelectedImage(btn, true);
                     subsButtonAction(track, btn, text);
+                }
             });
             btn.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) ->{
-                if (App.pressedSelect(event) || App.pressedRight(event) && !track.isSelected())
+                if (App.pressedSelect(event) || App.pressedRight(event) && !track.isSelected()) {
+                    removeSelectedImage(btn, true);
                     subsButtonAction(track, btn, text);
-                else {
+                }else {
                     tracksInMenuMovement(btn, event, subsButton);
                 }
             });
         }
 
-        simpleMenu.getChildren().getFirst().requestFocus();
+        optionsContainer.getChildren().getFirst().requestFocus();
     }
     private void subsButtonAction(SubtitleTrack track, Button btn, Label text){
+        playInteractionSound();
+
+        for (SubtitleTrack sTrack : subtitleTracks)
+            sTrack.setSelected(sTrack == track);
+
         videoPlayer.setSubtitleTrack(subtitleTracks.indexOf(track) + 1);
 
         for (Node node : optionsContainer.getChildren())
@@ -1988,31 +2059,22 @@ public class VideoPlayerController {
         simpleMenu.getChildren().clear();
 
         //Add first button to disable subtitles
-        Button btn = addSimpleButton(App.buttonsBundle.getString("none"), true, true);
-        simpleMenu.getChildren().add(btn);
+        Button noneButton = addSimpleButton(App.buttonsBundle.getString("none"), true, true);
+        simpleMenu.getChildren().add(noneButton);
 
-        if (season.getSubtitleTrackLanguage() == null || season.getSubtitleTrackLanguage().isEmpty()) {
-            setSelectedImage(btn, true);
-
-            videoPlayer.disableSubtitles();
-            season.setSelectedSubtitleTrack(-1);
-            season.setSubtitleTrackLanguage("");
-        }
-
-        btn.setOnMouseEntered(e -> setOnHover(btn, true, true));
-        btn.setOnMouseExited(e -> setOnExitHover(btn, true, true));
-        btn.focusedProperty().addListener((obs, oldVal, newVal) -> {
+        noneButton.setOnMouseEntered(e -> setOnHover(noneButton, true, true));
+        noneButton.setOnMouseExited(e -> setOnExitHover(noneButton, true, true));
+        noneButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                setOnHover(btn, true, true);
+                setOnHover(noneButton, true, true);
             else
-                setOnExitHover(btn, true, true);
+                setOnExitHover(noneButton, true, true);
         });
-        btn.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
+        noneButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
             if (App.pressedSelect(event)){
                 for (SubtitleTrack sTrack : subtitleTracks)
                     sTrack.setSelected(false);
 
-                subsActivated = false;
                 videoPlayer.disableSubtitles();
                 season.setSelectedSubtitleTrack(-1);
                 season.setSubtitleTrackLanguage("");
@@ -2021,24 +2083,31 @@ public class VideoPlayerController {
                     setOnExitHover((Button) node, true, true);
                 }
 
-                setOnHover(btn, true, true);
+                setOnHover(noneButton, true, true);
             }
         });
+
+        if (season.getSubtitleTrackLanguage() == null || season.getSubtitleTrackLanguage().isEmpty()) {
+            setSelectedImage(noneButton, true);
+
+            videoPlayer.disableSubtitles();
+            season.setSelectedSubtitleTrack(-1);
+            season.setSubtitleTrackLanguage("");
+
+            noneButton.requestFocus();
+        }
 
         for (SubtitleTrack track : subtitleTracks){
             Button trackButton = addSimpleButton(track.getDisplayTitle(), true, true);
             simpleMenu.getChildren().add(trackButton);
 
-            if (track.isSelected())
-                setSelectedImage(trackButton, true);
-
             trackButton.setOnMouseClicked(e -> {
                 if (!track.isSelected())
-                    addSubtitleButtonAction(track, trackButton, btn);
+                    addSubtitleButtonAction(track, trackButton, noneButton);
             });
             trackButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
                 if (App.pressedSelect(event) && !track.isSelected())
-                    addSubtitleButtonAction(track, trackButton, btn);
+                    addSubtitleButtonAction(track, trackButton, noneButton);
             });
             trackButton.setOnMouseEntered(e -> setOnHover(trackButton, true, true));
             trackButton.setOnMouseExited(e -> setOnExitHover(trackButton, true, true));
@@ -2048,6 +2117,15 @@ public class VideoPlayerController {
                 else
                     setOnExitHover(trackButton, true, true);
             });
+
+            if (track.isSelected()) {
+                setSelectedImage(trackButton, true);
+
+                //Disable selection of button "None"
+                removeSelectedImage(noneButton, true);
+
+                trackButton.requestFocus();
+            }
         }
     }
     private void addSubtitleButtonAction(SubtitleTrack track, Button trackButton, Button btn){
@@ -2299,10 +2377,6 @@ public class VideoPlayerController {
         addInteractionSound(btn);
 
         return btn;
-    }
-    public void hideOptions(){
-        optionsBox.setVisible(false);
-        showControls();
     }
     //endregion
 

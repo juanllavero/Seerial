@@ -11,6 +11,7 @@ import com.jfoenix.controls.JFXSlider;
 import de.androidpit.colorthief.ColorThief;
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -27,6 +28,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -43,6 +45,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -105,7 +108,7 @@ public class Controller implements Initializable {
     @FXML Label backgroundChoiceText;
     @FXML JFXSlider cardSizeSlider;
     @FXML JFXCheckBox showClockCheck;
-    @FXML ChoiceBox backgroundChoice;
+    @FXML JFXCheckBox backgroundCheck;
     @FXML Label clock;
     @FXML Label settingsTitle;
     @FXML Label appName;
@@ -131,8 +134,11 @@ public class Controller implements Initializable {
     boolean inMainView = false;
     boolean inSeasonView = false;
     SeasonController seasonController;
+    boolean darkBackground = false;
     boolean editMode = false;
     double cardRatio = 1.3;
+    double cardMargin = 10;
+    boolean longPressDetected = false;
 
     @FXML
     void close() {
@@ -149,6 +155,49 @@ public class Controller implements Initializable {
         continueWatchingTitle.setText(App.textBundle.getString("continueWatching"));
 
         settingsTitle.setText(App.buttonsBundle.getString("settings"));
+        cardSizeText.setText(App.buttonsBundle.getString("cardSize"));
+        showClockText.setText(App.textBundle.getString("showClock"));
+        backgroundChoiceText.setText(App.buttonsBundle.getString("backgroundChoice"));
+
+        backgroundCheck.setSelected(Boolean.parseBoolean(Configuration.loadConfig("backgroundChoice", "true")));
+        showClockCheck.setSelected(Boolean.parseBoolean(Configuration.loadConfig("showClock", "true")));
+
+        clock.setVisible(showClockCheck.isSelected());
+        darkBackground = !backgroundCheck.isSelected();
+
+        DecimalFormat decimalFormat = new DecimalFormat("#");
+        ((Label)((BorderPane) cardSizeSlider.getParent()).getCenter()).setText(decimalFormat.format(cardSizeSlider.getValue()));
+
+        showClockCheck.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            Configuration.saveConfig("showClock", String.valueOf(showClockCheck.isSelected()));
+            clock.setVisible(showClockCheck.isSelected());
+        });
+
+        backgroundCheck.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            Configuration.saveConfig("backgroundChoice", String.valueOf(backgroundCheck.isSelected()));
+            setDarkBackground();
+        });
+
+        cardSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (inMainView) {
+                selectLibraryButton((Button) librariesBox.getChildren().getFirst());
+            }
+
+            ((Label)((BorderPane) cardSizeSlider.getParent()).getCenter()).setText(decimalFormat.format(newValue.intValue()));
+
+            adjustFlowPane(newValue.intValue());
+
+            for (Node node : cardContainer.getChildren()) {
+                if (node instanceof Button) {
+                    ((Rectangle)((Button) node).getGraphic()).setHeight(cardHeight - (cardMargin * 2));
+                    ((Rectangle)((Button) node).getGraphic()).setWidth(cardWidth - (cardMargin * 2));
+                }
+            }
+
+            scrollPane.setVmax(Math.max(1, (double) (cardContainer.getChildren().size() / columnCount) - 1));
+
+            Configuration.saveConfig("cardSize", String.valueOf(newValue.intValue()));
+        });
 
         addInteractionSound(exitButton);
         addInteractionSound(switchToDesktopButton);
@@ -244,6 +293,7 @@ public class Controller implements Initializable {
         markWatchedButton.setText(App.buttonsBundle.getString("markWatched"));
         closeEpisodeMenuButton.setText(App.buttonsBundle.getString("backButton"));
 
+        playEpisodeButton.setOnMouseClicked(e -> playEpisode());
         playEpisodeButton.setOnKeyPressed(e -> {
             playInteractionSound();
             if (App.pressedSelect(e))
@@ -254,6 +304,7 @@ public class Controller implements Initializable {
                 closeEpisodeMenuButton.requestFocus();
         });
 
+        goToLibraryButton.setOnMouseClicked(e -> goToLibrary());
         goToLibraryButton.setOnKeyPressed(e -> {
             playInteractionSound();
             if (App.pressedSelect(e))
@@ -264,6 +315,7 @@ public class Controller implements Initializable {
                 goToEpisodeButton.requestFocus();
         });
 
+        goToEpisodeButton.setOnMouseClicked(e -> goToEpisode());
         goToEpisodeButton.setOnKeyPressed(e -> {
             playInteractionSound();
             if (App.pressedSelect(e))
@@ -274,6 +326,7 @@ public class Controller implements Initializable {
                 markWatchedButton.requestFocus();
         });
 
+        markWatchedButton.setOnMouseClicked(e -> markAsWatched(selectedEpisode));
         markWatchedButton.setOnKeyPressed(e -> {
             playInteractionSound();
             if (App.pressedSelect(e))
@@ -284,6 +337,7 @@ public class Controller implements Initializable {
                 closeEpisodeMenuButton.requestFocus();
         });
 
+        closeEpisodeMenuButton.setOnMouseClicked(e -> hideEpisodeMenu());
         closeEpisodeMenuButton.setOnKeyPressed(e -> {
             playInteractionSound();
             if (App.pressedUp(e))
@@ -427,25 +481,54 @@ public class Controller implements Initializable {
         }
     }
 
+    /**
+     * Calculates the new card width and height as well as the new cardContainer padding values in order to show completely the number of rows given as parameter.
+     * @param rowCount
+     */
     private void adjustFlowPane(int rowCount) {
-        //Apply padding to FlowPane
-        double paddingSide = Screen.getPrimary().getBounds().getWidth() * 0.2;
-        double paddingTop = Screen.getPrimary().getBounds().getHeight() * 0.2;
+        this.rowCount = Math.max(1, rowCount);
 
-        paddingSide = paddingSide / Math.pow(2, rowCount - 1);
-        paddingTop = paddingTop / Math.pow(2, rowCount - 1);
-        cardContainer.setPadding(new Insets(paddingTop, paddingSide, paddingTop, paddingSide));
+        //Set min and max padding for the sides
+        double screenWidth = Screen.getPrimary().getBounds().getWidth();
+        double paddingSideMin = screenWidth * 0.05;
+        double paddingSideMax = screenWidth * 0.10;
 
-        //Get available width and height for the cards
-        double availableWidth = scrollPane.getViewportBounds().getWidth() - (paddingSide * 2);
+        //Calculate top and bottom padding
+        double percentage = 0.2;
+        if (screenWidth / Screen.getPrimary().getBounds().getHeight() <= 1.8)
+            percentage = 0.25;
+        double paddingTop = Math.max(10, Screen.getPrimary().getBounds().getHeight() * percentage);
+        paddingTop = paddingTop / Math.pow(1.6, rowCount - 1);
+
+        //Get maximum height for the cards
         double availableHeight = scrollPane.getViewportBounds().getHeight() - (paddingTop * 2);
 
-        //Calculate new card size maintaining the aspect ratio 2:3
+        //Calculate card full width and height (without margins)
         cardHeight = availableHeight / rowCount;
         cardWidth = cardHeight / cardRatio;
 
-        //Calculate the new number of columns
-        columnCount = (int) (availableWidth / cardWidth);
+        //Get maximum width to display the cards
+        double availableWidth = scrollPane.getViewportBounds().getWidth() - (paddingSideMin * 2);
+
+        //Calculate number of columns
+        columnCount = (int) Math.floor(availableWidth / (cardWidth + (cardMargin * 2)));
+
+        //Recalculate card size in order to fill the maximum space
+        double totalCardWidth = columnCount * (cardWidth + (cardMargin * 2));
+        if (totalCardWidth > availableWidth) {
+            double scaleFactor = availableWidth / totalCardWidth;
+            cardWidth *= scaleFactor;
+            cardHeight = cardWidth * cardRatio;
+        }
+
+        //Get the final side padding for the card container
+        double paddingSideFinal = (scrollPane.getViewportBounds().getWidth() - (columnCount * (cardWidth + (cardMargin * 2)))) / 2;
+
+        //Assure the final padding is in the established range
+        paddingSideFinal = Math.max(paddingSideMin, Math.min(paddingSideFinal, paddingSideMax));
+
+        //Set the new padding for the card container
+        cardContainer.setPadding(new Insets(paddingTop, paddingSideFinal, paddingTop, paddingSideFinal));
     }
 
     public void selectLibrary(Library library, Series series){
@@ -488,6 +571,9 @@ public class Controller implements Initializable {
         if (library != currentLibrary)
             DataManager.INSTANCE.currentLibrary = library;
 
+        if (editMode)
+            toggleEditMode();
+
         if (inMainView) {
             inMainView = false;
             showLibraryView();
@@ -500,7 +586,7 @@ public class Controller implements Initializable {
             App.wakeUpDrive(folder);
         }
 
-        adjustFlowPane(1);
+        adjustFlowPane(Integer.parseInt(Configuration.loadConfig("cardSize", "2")));
 
         libraryType = currentLibrary.getType();
         cardContainer.getChildren().clear();
@@ -519,6 +605,8 @@ public class Controller implements Initializable {
         seriesBackgroundEffect(library.getSeries().getFirst().getSeasons().getFirst());
 
         Platform.runLater(() -> {
+            scrollPane.setVmax(Math.max(1, (double) (cardContainer.getChildren().size() / columnCount) - 1));
+
             if (selectSeries)
                 if (selectCurrentSeries)
                     restoreSelection();
@@ -570,6 +658,12 @@ public class Controller implements Initializable {
     }
 
     private void seriesBackgroundEffect(Season season){
+        if (darkBackground){
+            mainBox.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
+            backgroundImage.setVisible(false);
+            return;
+        }
+
         String imagePath = "resources/img/backgrounds/" + season.getId();
         File fullBlur = new File(imagePath + "/fullBlur.jpg");
         String backgroundPath = fullBlur.exists() ? "fullBlur.jpg" : "background.jpg";
@@ -614,10 +708,7 @@ public class Controller implements Initializable {
     }
 
     private Button addBaseCard(Series s, Episode episode){
-        double screenAspectRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
-        double screenWidth = Screen.getPrimary().getBounds().getWidth();
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
-        double originalWidth, originalHeight;
 
         Button btn = new Button();
 
@@ -631,7 +722,17 @@ public class Controller implements Initializable {
         if (!imgFile.isFile())
             coverSrc = "resources/img/DefaultPoster.png";
 
-        Rectangle img = setRoundedBorders(coverSrc, cardWidth, cardHeight);
+        double newWidth, newHeight;
+
+        if (episode != null){
+            newHeight = screenHeight * 0.35;
+            newWidth = newHeight / cardRatio;
+        }else{
+            newWidth = cardWidth - (cardMargin * 2);
+            newHeight = cardHeight - (cardMargin * 2);
+        }
+
+        Rectangle img = setRoundedBorders(coverSrc, newWidth, newHeight, 10);
 
         StackPane main = null;
         if (episode != null){
@@ -668,8 +769,8 @@ public class Controller implements Initializable {
                 playInteractionSound();
 
                 ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.15), btn);
-                scaleTransition.setToX(1.1);
-                scaleTransition.setToY(1.1);
+                scaleTransition.setToX(1.05);
+                scaleTransition.setToY(1.05);
 
                 scaleTransition.setOnFinished(e -> {
                     CompletableFuture.runAsync(() -> selectSeries(series.get(seriesButtons.indexOf(btn))));
@@ -689,7 +790,7 @@ public class Controller implements Initializable {
                         //Animate transition
                         Timeline timeline = new Timeline();
                         KeyValue keyValue = new KeyValue(scrollPane.vvalueProperty(), index);
-                        KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.1), keyValue);
+                        KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.15), keyValue);
                         timeline.getKeyFrames().add(keyFrame);
                         timeline.play();
                     }
@@ -708,7 +809,7 @@ public class Controller implements Initializable {
                 int index = seriesButtons.indexOf(btn);
 
                 if (editMode){
-                    if (App.pressedSelect(event) || App.pressedBack(event))
+                    if (App.pressedSelect(event))
                         toggleEditMode();
                     else if (App.pressedUp(event)){
                         if (index >= columnCount)
@@ -751,7 +852,7 @@ public class Controller implements Initializable {
         });
 
         btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
-            if (event.getButton().equals(MouseButton.PRIMARY)){
+            if (event.getButton().equals(MouseButton.PRIMARY) && !editMode && !longPressDetected){
                 if (btn == seriesButtons.get(series.indexOf(selectedSeries)))
                     showSeason(selectedSeries);
                 else
@@ -759,20 +860,31 @@ public class Controller implements Initializable {
             }
         });
 
+        PauseTransition longPressPause = new PauseTransition(Duration.seconds(0.8));
+
+        longPressPause.setOnFinished(event -> {
+            longPressDetected = true;
+            toggleEditMode();
+        });
+
+        btn.addEventHandler(MouseEvent.MOUSE_PRESSED, (MouseEvent event) -> {
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
+                longPressDetected = false;
+                longPressPause.playFromStart();
+            }
+        });
+
+        btn.addEventHandler(MouseEvent.MOUSE_RELEASED, (MouseEvent event) -> {
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
+                longPressPause.stop();
+                if (longPressDetected) {
+                    event.consume();
+                }
+            }
+        });
+
         cardContainer.getChildren().add(btn);
-    }
-    private Rectangle setRoundedBorders(String imageSrc, double width, double height){
-        Rectangle rectangle = new Rectangle(0, 0, width, height);
-        rectangle.setArcWidth(10.0);
-        rectangle.setArcHeight(10.0);
-
-        ImagePattern pattern = new ImagePattern(
-                new Image("file:" + imageSrc, width, height, false, false)
-        );
-
-        rectangle.setFill(pattern);
-
-        return rectangle;
+        FlowPane.setMargin(btn, new Insets(cardMargin));
     }
     private void showLibraryView(){
         Platform.runLater(() -> {
@@ -948,6 +1060,9 @@ public class Controller implements Initializable {
         if (inMainView)
             return;
 
+        if (editMode)
+            toggleEditMode();
+
         for (Node node : librariesBox.getChildren()){
             Button btn = (Button) node;
             btn.getStyleClass().clear();
@@ -1092,11 +1207,11 @@ public class Controller implements Initializable {
 
                 if (!logoSrc.isEmpty()){
                     Image img;
-                    img = new Image("file:" + logoSrc, mainPane.getScene().getWidth() * 0.2, mainPane.getScene().getHeight() * 0.2, true, true);
+                    img = new Image("file:" + logoSrc, mainPane.getScene().getHeight() * 0.6, mainPane.getScene().getHeight() * 0.6, true, true);
 
                     logoImage.setImage(img);
-                    logoImage.setFitWidth(mainPane.getScene().getWidth() * 0.2);
-                    logoImage.setFitHeight(mainPane.getScene().getHeight() * 0.2);
+                    logoImage.setFitWidth(mainPane.getScene().getHeight() * 0.6);
+                    logoImage.setFitHeight(mainPane.getScene().getHeight() * 0.6);
                 }
 
                 episodeNameBox.getChildren().clear();
@@ -1142,7 +1257,6 @@ public class Controller implements Initializable {
                             double newHeight = originalWidth / targetAspectRatio;
 
                             int xOffset = 0;
-                            int yOffset = (int) ((background.getImage().getHeight() - originalHeight) / 2);
 
                             PixelReader pixelReader = background.getImage().getPixelReader();
                             croppedImage = new WritableImage(pixelReader, xOffset, 0, (int) originalWidth, (int) newHeight);
@@ -1189,8 +1303,8 @@ public class Controller implements Initializable {
         Timeline timeline = new Timeline();
 
         // Define the number of steps for the transition
-        int steps = 20;
-        float duration = 1f;
+        int steps = 15;
+        float duration = 0.8f;
         double stepDuration = (duration * 1000) / steps;
 
         for (int i = 0; i <= steps; i++) {
@@ -1354,6 +1468,15 @@ public class Controller implements Initializable {
         continueWatchingBox.getChildren().get(continueWatching.indexOf(selectedEpisode)).requestFocus();
     }
     //endregion
+
+    private void setDarkBackground(){
+        darkBackground = !backgroundCheck.isSelected();
+
+        if (!inMainView){
+            backgroundImage.setVisible(false);
+            mainBox.setBackground(new Background(new BackgroundFill(Color.BLACK, null, null)));
+        }
+    }
     @FXML
     void hideContextMenu(){
         selectedSeries = null;
@@ -1364,6 +1487,9 @@ public class Controller implements Initializable {
     }
     @FXML
     void showMenu(){
+        if (editMode)
+            toggleEditMode();
+
         globalShadow.setVisible(true);
         mainMenu.setVisible(true);
         menuOptions.setVisible(true);
@@ -1372,11 +1498,13 @@ public class Controller implements Initializable {
     }
     @FXML
     void openSettings(){
+        cardSizeSlider.setValue(Integer.parseInt(Configuration.loadConfig("cardSize", "2")));
+
         globalShadow.setVisible(false);
         menuOptions.setVisible(false);
         settingsWindow.setVisible(true);
 
-        //Implement
+        cardSizeSlider.requestFocus();
     }
     public void showSeason(Series s){
         playCategoriesSound();

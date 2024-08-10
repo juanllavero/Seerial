@@ -2788,9 +2788,9 @@ public class DesktopViewController {
 
             //Compress image
             Thumbnails.of(bufferedImage)
-                    .size(376, 540)
+                    .size(720, 1080)
                     .outputFormat("jpg")
-                    .outputQuality(1)
+                    .outputQuality(0.8)
                     .toFile("resources/img/seriesCovers/" + id + "/" + i + ".jpg");
 
             bufferedImage.flush();
@@ -3026,6 +3026,9 @@ public class DesktopViewController {
                                 saveDiscWithoutMetadata(library, file, season);
                         }
 
+                        if (season.getEpisodes().isEmpty())
+                            series.removeSeason(season);
+
                         continue;
                     }
 
@@ -3095,6 +3098,9 @@ public class DesktopViewController {
                         if (file.isFile() && validVideoFile(file))
                             processMovie(library, file, season, movieMetadata.runtime);
                     }
+
+                    if (season.getEpisodes().isEmpty())
+                        series.removeSeason(season);
                 }
 
                 if (!exists)
@@ -3467,7 +3473,7 @@ public class DesktopViewController {
 
             //Compress image
             Thumbnails.of(bufferedImage)
-                    .size(480, 270)
+                    .scale(1)
                     .outputFormat("jpg")
                     .outputQuality(0.8)
                     .toFile("resources/img/discCovers/" + episode.getId() + "/" + number + ".jpg");

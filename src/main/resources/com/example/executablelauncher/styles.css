@@ -15,8 +15,16 @@
     -fx-lighter-grey-color: #5e5e5e;
 }
 
+.bold {
+    -fx-font-weight: bold;
+}
+
 .title-text {
     -fx-font-size: 3.625em; /* 58px */
+}
+
+.subtitle-text {
+    -fx-font-size: 3.3em;
 }
 
 .extra-large-text {
@@ -24,7 +32,7 @@
 }
 
 .more-large-text {
-    -fx-font-size: 2em; /* 32px */
+    -fx-font-size: 2em;
 }
 
 .large-text {
@@ -95,12 +103,6 @@
 
 .transparentTrick{
     -fx-background-color: rgba(0, 0, 0, 0.01);
-}
-
-.editCardBorder{
-    -fx-border-color: #8EDCE6;
-    -fx-border-width: 5px;
-    -fx-border-radius: 10;
 }
 
 .minimizeButton{
@@ -608,10 +610,17 @@
     -fx-border-insets: -4;
 }
 
+.editCardBorder{
+    -fx-border-color: #8EDCE6;
+    -fx-border-radius: 0;
+    -fx-border-width: 6;
+    -fx-effect: null;
+}
+
 .seriesCoverButton{
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-border-radius: 10;
+    -fx-border-radius: 0;
     -fx-border-width: 6;
     -fx-effect: dropShadow(gaussian, black, 10, 0.0, 0, 0);
 }
@@ -619,7 +628,7 @@
 .seriesCoverButton:focused {
     -fx-background-color: transparent;
     -fx-border-color: white;
-    -fx-border-radius: 10;
+    -fx-border-radius: 0;
     -fx-border-width: 6;
     -fx-effect: null;
 }
@@ -627,7 +636,7 @@
 .seriesCoverButtonEditMode {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    /*-fx-border-radius: 15;*/
+    -fx-border-radius: 0;
     -fx-border-width: 6;
     -fx-effect: null;
 }

@@ -41,6 +41,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.*;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -100,7 +101,6 @@ public class SeasonController {
     @FXML HBox timeLeftBox;
     @FXML Label timeLeftField;
     @FXML BorderPane detailsBox;
-    @FXML ImageView detailsImage;
     @FXML HBox detailsInfo;
     @FXML Label detailsOverview;
     @FXML Label detailsTitle;
@@ -496,18 +496,18 @@ public class SeasonController {
         if (!logoFile.exists() || !logoFile.isFile()){
             infoBox.getChildren().remove(0);
             Label seriesTitle = new Label(series.getName());
-            seriesTitle.setFont(new Font("Roboto", 65));
-            seriesTitle.setStyle("-fx-font-weight: bold");
+            seriesTitle.getStyleClass().add("title-text");
+            seriesTitle.getStyleClass().add("bold");
             seriesTitle.setTextFill(Color.color(1, 1, 1));
             seriesTitle.setEffect(new DropShadow());
             infoBox.getChildren().add(0, seriesTitle);
         }else {
             Image img;
-            img = new Image("file:" + logoSrc, screenWidth * 0.25, screenHeight * 0.25, true, true);
+            img = new Image("file:" + logoSrc, screenHeight * 0.6, screenHeight * 0.6, true, true);
 
             logo.setImage(img);
-            logo.setFitWidth(screenWidth * 0.25);
-            logo.setFitHeight(screenHeight * 0.25);
+            logo.setFitWidth(screenHeight * 0.6);
+            logo.setFitHeight(screenHeight * 0.6);
         }
 
         processBackgroundMedia();
@@ -936,14 +936,15 @@ public class SeasonController {
         fadeOutEffect(mainPane, 0.6f, 0).play();
         mainPane.setVisible(false);
 
+        double width = Screen.getPrimary().getBounds().getWidth() * 0.25;
         if (isShow){
-            detailsImage.setImage(new Image("file:" + selectedEpisode.getImgSrc()));
             genresField.setText(series.getGenres());
+            detailsBox.setLeft(setRoundedBorders(selectedEpisode.getImgSrc(), width, width / ((double) 1920 /1080), 20));
         }else{
-            detailsImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
-            detailsImage.setImage(new Image("file:" + seasons.get(currentSeason).getCoverSrc()));
             genresField.setText(seasons.get(currentSeason).getGenres());
+            detailsBox.setLeft(setRoundedBorders(seasons.get(currentSeason).getCoverSrc(), width, width / ((double) 2 /3), 20));
         }
+
         detailsTitle.setText(selectedEpisode.getName());
         detailsOverview.setText(overviewField.getText());
 
@@ -991,25 +992,25 @@ public class SeasonController {
                 changed = true;
             }else if (box.getChildren().size() == 10 && changed){
                 Label label = new Label("...");
-                label.setFont(new Font("Roboto", 21));
+                label.getStyleClass().addAll("big-text", "bold");
                 label.setTextFill(Color.WHITE);
                 label.setAlignment(Pos.CENTER_LEFT);
+                label.setEffect(new DropShadow());
                 box.getChildren().add(label);
                 break;
             }
 
-            box.getChildren().add(new TextFlow(
-                    new Text() {{
-                        setText(member.name);
-                        setFill(Color.WHITE);
-                        setFont(Font.font("System", FontWeight.BOLD, 21));
-                    }},
-                    new Text() {{
-                        setText(" " + App.textBundle.getString("as") + " '" + member.character + "'");
-                        setFill(Color.LIGHTGRAY);
-                        setFont(Font.font("System", FontWeight.NORMAL, 21));
-                    }}
-            ));
+            Text first = new Text(member.name);
+            first.setFill(Color.WHITE);
+            first.getStyleClass().addAll("big-text", "bold");
+            first.setEffect(new DropShadow());
+
+            Text second = new Text(" " + App.textBundle.getString("as") + " '" + member.character + "'");
+            second.setFill(Color.LIGHTGRAY);
+            second.getStyleClass().add("big-text");
+            second.setEffect(new DropShadow());
+
+            box.getChildren().add(new TextFlow(first, second));
         }
 
         File file = new File(selectedEpisode.getVideoSrc());

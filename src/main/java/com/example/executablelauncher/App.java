@@ -216,8 +216,11 @@ public class App extends Application {
     }
 
     public static void close(){
-        executorService.shutdown();
+        if (!analysisExecutor.isTerminated())
+            analysisExecutor.shutdownNow();
+        executorService.shutdownNow();
         mediaExecutor.shutdownNow();
+        executor.shutdownNow();
 
         if (analysisExecutor != null)
             analysisExecutor.shutdownNow();

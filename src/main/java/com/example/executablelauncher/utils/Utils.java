@@ -20,6 +20,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
@@ -29,6 +30,8 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Screen;
 import javafx.util.Duration;
@@ -246,6 +249,24 @@ public class Utils {
     }
 
     //region EFFECTS
+    public static Rectangle setRoundedBorders(String imageSrc, double width, double height, double roundValue){
+        Rectangle rectangle = new Rectangle(0, 0, width, height);
+        rectangle.setArcWidth(roundValue);
+        rectangle.setArcHeight(roundValue);
+
+        File imgFile = new File(imageSrc);
+
+        if (!imgFile.exists())
+            return null;
+
+        ImagePattern pattern = new ImagePattern(
+                new Image("file:" + imageSrc, width, height, false, false)
+        );
+
+        rectangle.setFill(pattern);
+
+        return rectangle;
+    }
     public static ParallelTransition createParallelTransition(Node node1, Node node2, Node node3, Node node4, float seconds){
         FadeTransition mainImages = fadeOutEffect(node1, seconds, 0);
         FadeTransition mainPane = fadeOutEffect(node2, seconds, 0);
