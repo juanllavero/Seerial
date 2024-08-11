@@ -1,8 +1,10 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.YoutubeVideo;
+import com.example.executablelauncher.utils.Utils;
 import info.movito.themoviedbapi.model.MovieDb;
 import info.movito.themoviedbapi.model.tv.TvSeries;
+import io.github.palexdev.materialfx.controls.MFXProgressSpinner;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -20,14 +22,18 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -49,22 +55,20 @@ public class YoutubeSearchController {
     private TextField searchField;
 
     @FXML
-    private Button viewButton;
-
-    @FXML
     private Label windowTitle;
     List<Pane> resultsCards = new ArrayList<>();
     List<YoutubeVideo> resultVideos = new ArrayList<>();
     DesktopViewController parentController = null;
     EditSeasonController seasonParentController = null;
     YoutubeVideo selectedVideo = null;
+    MediaPlayer mediaPlayer = null;
+    boolean searching = false;
 
     public void initValues(DesktopViewController parent, EditSeasonController seasonParent, String searchText){
         windowTitle.setText(App.textBundle.getString("searchMusic"));
         downloadButton.setText(App.buttonsBundle.getString("downloadMusic"));
 
         searchButton.setText(App.buttonsBundle.getString("searchButton"));
-        viewButton.setText(App.buttonsBundle.getString("viewVideo"));
 
         searchField.setText(searchText + " main theme");
 
@@ -76,29 +80,39 @@ public class YoutubeSearchController {
 
     @FXML
     void search() {
-        resultVideos.clear();
+        if (searching)
+            return;
+
+        searching = true;
+
+        resultVideos = null;
         resultsCards.clear();
         resultsContainer.getChildren().clear();
+
+        MFXProgressSpinner spinner = Utils.getCircularProgress(50);
+        resultsContainer.getChildren().add(spinner);
+        VBox.setMargin(spinner, new Insets(100, 10, 10, 10));
+
         Task<Void> searchVideosTask = new Task<>() {
             @Override
             protected Void call() {
                 resultVideos = parentController.searchYoutube(searchField.getText());
-
                 return null;
             }
         };
 
         searchVideosTask.setOnSucceeded(e -> {
+            resultsContainer.getChildren().clear();
             if (resultVideos != null){
                 for (YoutubeVideo video : resultVideos){
                     addResultsCard(video);
                 }
             }
+
+            searching = false;
         });
 
-        Thread thread = new Thread(searchVideosTask);
-        thread.setDaemon(true);
-        thread.start();
+        App.executor.submit(searchVideosTask);
     }
 
     private void addResultsCard(YoutubeVideo video){
@@ -110,14 +124,28 @@ public class YoutubeSearchController {
             cardBox.setLeft(new ImageView(new Image(video.thumbnail_url, 150, 100, true, true)));
 
             Label videoTitle = new Label(video.title);
-            videoTitle.setFont(new Font("Arial", 18));
+            videoTitle.getStyleClass().add("small-text");
             videoTitle.setTextFill(Color.WHITE);
+            videoTitle.setWrapText(true);
 
-            cardBox.setCenter(videoTitle);
+            Label videoUrl = new Label(video.watch_url);
+            videoUrl.getStyleClass().addAll("folderLink", "tiny-text");
+            videoUrl.setTextFill(Color.WHITE);
 
-            cardBox.setOnMouseClicked(event -> {
-                selectMedia(cardBox);
+            videoUrl.setOnMouseClicked(e -> {
+                try {
+                    Desktop.getDesktop().browse(new URI(video.watch_url));
+                } catch (IOException | URISyntaxException ex) {
+                    App.showErrorMessage("URL ERROR", "", "Browser could not be opened");
+                }
             });
+
+            VBox videoInfo = new VBox(videoTitle, videoUrl);
+            videoInfo.setPadding(new Insets(5, 5, 5, 10));
+
+            cardBox.setCenter(videoInfo);
+
+            cardBox.setOnMouseClicked(event -> selectMedia(cardBox));
 
             resultsCards.add(cardBox);
             resultsContainer.getChildren().add(cardBox);
@@ -140,7 +168,6 @@ public class YoutubeSearchController {
 
         selectedVideo = resultVideos.get(index);
 
-        viewButton.setDisable(false);
         downloadButton.setDisable(false);
     }
 
@@ -155,28 +182,10 @@ public class YoutubeSearchController {
     }
 
     @FXML
-    void viewMedia(){
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("VideoPopup.fxml"));
-            Parent root = loader.load();
-
-            Scene scene = new Scene(root);
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("YouTube Video Popup");
-            stage.setScene(scene);
-
-            VideoPopupController controller = loader.getController();
-            controller.initialize(selectedVideo.watch_url.substring(selectedVideo.watch_url.lastIndexOf("=") + 1));
-
-            stage.showAndWait();
-        } catch (IOException e) {
-            System.err.println("YoutubeSearchController: viewMedia error");
-        }
-    }
-
-    @FXML
     void close(){
+        if (mediaPlayer != null)
+            mediaPlayer.stop();
+
         Stage stage = (Stage) windowTitle.getScene().getWindow();
         stage.close();
     }

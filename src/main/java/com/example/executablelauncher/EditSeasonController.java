@@ -15,15 +15,16 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.commons.io.FileUtils;
 
@@ -155,16 +156,16 @@ public class EditSeasonController {
     //region ATTRIBUTES
     public Season seasonToEdit = null;
     public String seriesName = "";
-    private List<File> logoFiles = new ArrayList<>();
+    private final List<File> logoFiles = new ArrayList<>();
     private File selectedLogo = null;
 
-    private List<File> posterFiles = new ArrayList<>();
+    private final List<File> posterFiles = new ArrayList<>();
     private File selectedPoster = null;
     private File selectedBackground = null;
     public File selectedVideo = null;
     public File selectedMusic = null;
     private DesktopViewController parentController = null;
-    private FileChooser fileChooser = new FileChooser();
+    private final FileChooser fileChooser = new FileChooser();
 
     //Old values to check
     private String oldBackgroundPath = "";
@@ -231,7 +232,12 @@ public class EditSeasonController {
         sortingText.setText(App.textBundle.getString("sortingOrder"));
         videoText.setText(App.textBundle.getString("backgroundVideo"));
         musicText.setText(App.textBundle.getString("backgroundMusic"));
-        title.setText(App.textBundle.getString("seasonWindowTitleEdit"));
+
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows"))
+            title.setText(App.textBundle.getString("seasonWindowTitleEdit"));
+        else
+            title.setText(App.textBundle.getString("movieWindowTitleEdit"));
+
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         backgroundText.setText(App.textBundle.getString("backgroundImage"));
         musicDownloadButton.setText(buttonsBundle.getString("downloadButton"));
@@ -271,16 +277,22 @@ public class EditSeasonController {
                 }
             }
 
-            File newFile = new File("resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".jpg");
+            File baseDir = new File("resources/img/logos/" + seasonToEdit.getId() + "/");
+
+            if (!baseDir.exists())
+                DataManager.INSTANCE.createFolder("resources/img/logos/" + seasonToEdit.getId() + "/");
+
+            File newFile = new File("resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
-                System.err.println("Thumbnail not copied");
+                System.err.println("Logo not copied");
             }
 
-            logoFiles.add(file);
-            addImage(file);
+            logoFiles.clear();
+            imagesContainer.getChildren().clear();
+            loadImages();
         }
     }
     public void loadPoster(String src){
@@ -307,8 +319,9 @@ public class EditSeasonController {
                 System.err.println("Poster not copied");
             }
 
-            posterFiles.add(file);
-            addPoster(file);
+            posterFiles.clear();
+            postersContainer.getChildren().clear();
+            loadPosters();
         }
     }
     public void loadBackground(String src){

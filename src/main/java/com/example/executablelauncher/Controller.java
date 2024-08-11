@@ -44,6 +44,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.time.LocalTime;
@@ -194,7 +195,7 @@ public class Controller implements Initializable {
                 }
             }
 
-            scrollPane.setVmax(Math.max(1, (double) (cardContainer.getChildren().size() / columnCount) - 1));
+            scrollPane.setVmax(Math.max(1, Math.ceil((double) cardContainer.getChildren().size() / columnCount)) - 1);
 
             Configuration.saveConfig("cardSize", String.valueOf(newValue.intValue()));
         });
@@ -605,7 +606,7 @@ public class Controller implements Initializable {
         seriesBackgroundEffect(library.getSeries().getFirst().getSeasons().getFirst());
 
         Platform.runLater(() -> {
-            scrollPane.setVmax(Math.max(1, (double) (cardContainer.getChildren().size() / columnCount) - 1));
+            scrollPane.setVmax(Math.max(1, Math.ceil((double) cardContainer.getChildren().size() / columnCount)) - 1);
 
             if (selectSeries)
                 if (selectCurrentSeries)
@@ -712,7 +713,7 @@ public class Controller implements Initializable {
 
         Button btn = new Button();
 
-        String coverSrc = "resources/img/DefaultPoster.png";
+        String coverSrc = "resources/img/fileNotFound.png";
 
         if (!s.getCoverSrc().isEmpty())
             coverSrc = s.getCoverSrc();
@@ -720,7 +721,7 @@ public class Controller implements Initializable {
         File imgFile = new File(coverSrc);
 
         if (!imgFile.isFile())
-            coverSrc = "resources/img/DefaultPoster.png";
+            coverSrc = "resources/img/fileNotFound.png";
 
         double newWidth, newHeight;
 
@@ -834,18 +835,18 @@ public class Controller implements Initializable {
                         if (index < columnCount)
                             librariesBox.getChildren().get(libraries.indexOf(currentLibrary)).requestFocus();
                         else
-                            seriesButtons.get(seriesButtons.indexOf(btn) - columnCount).requestFocus();
+                            seriesButtons.get(index - columnCount).requestFocus();
                     }else if (App.pressedDown(event)){
                         if (index + columnCount < seriesButtons.size())
-                            seriesButtons.get(seriesButtons.indexOf(btn) + columnCount).requestFocus();
-                        else
+                            seriesButtons.get(index + columnCount).requestFocus();
+                        else if ((int) Math.ceil((double) seriesButtons.size() / columnCount) != ((index / columnCount) + 1))       //If the button is not in the last row
                             seriesButtons.getLast().requestFocus();
                     }else if (App.pressedLeft(event)){
                         if (index > 0)
-                            seriesButtons.get(seriesButtons.indexOf(btn) - 1).requestFocus();
+                            seriesButtons.get(index - 1).requestFocus();
                     }else if (App.pressedRight(event)){
                         if (index < seriesButtons.size() - 1)
-                            seriesButtons.get(seriesButtons.indexOf(btn) + 1).requestFocus();
+                            seriesButtons.get(index + 1).requestFocus();
                     }
                 }
             }
@@ -1205,13 +1206,22 @@ public class Controller implements Initializable {
                 logoImage.setVisible(!logoSrc.isEmpty());
                 titleText.setVisible(logoSrc.isEmpty());
 
-                if (!logoSrc.isEmpty()){
-                    Image img;
-                    img = new Image("file:" + logoSrc, mainPane.getScene().getHeight() * 0.6, mainPane.getScene().getHeight() * 0.6, true, true);
+                File logoFile = new File(logoSrc);
 
-                    logoImage.setImage(img);
-                    logoImage.setFitWidth(mainPane.getScene().getHeight() * 0.6);
-                    logoImage.setFitHeight(mainPane.getScene().getHeight() * 0.6);
+                if (logoFile.exists() && logoFile.isFile()){
+                    Image img;
+                    try {
+                        img = new Image(logoFile.toURI().toURL().toExternalForm(), mainPane.getScene().getHeight() * 0.6, mainPane.getScene().getHeight() * 0.6, true, true);
+
+                        logoImage.setImage(img);
+                        logoImage.setFitWidth(mainPane.getScene().getHeight() * 0.6);
+                        logoImage.setFitHeight(mainPane.getScene().getHeight() * 0.6);
+                    } catch (MalformedURLException e) {
+                        System.err.println("selectEpisode: logo image could not be loaded");
+                    }
+                }else{
+                    logoImage.setVisible(false);
+                    titleText.setVisible(true);
                 }
 
                 episodeNameBox.getChildren().clear();
@@ -1532,14 +1542,14 @@ public class Controller implements Initializable {
         root.setVisible(false);
         mainBox.getChildren().add(root);
 
-        return fadeInEffect(root, 1f);
+        return fadeInEffect(root, 0.4f);
     }
     public void closeSeasonView(){
         if (inMainView){
             loadContinueWatchingEpisodes();
         }
 
-        FadeTransition fadeOut = fadeOutEffect(mainBox.getChildren().getLast(), 1f, 0);
+        FadeTransition fadeOut = fadeOutEffect(mainBox.getChildren().getLast(), 0.4f, 0);
         fadeOut.setOnFinished(e -> {
             inSeasonView = false;
             mainBox.getChildren().removeLast();

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -13,16 +14,15 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<BorderPane minHeight="550.0" minWidth="680.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.EditCollectionController">
+<BorderPane maxWidth="700.0" minHeight="550.0" minWidth="700.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.EditCollectionController">
    <top>
       <BorderPane prefHeight="55.0" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
-            <Label fx:id="title" text="Add Collection" textFill="#f8f8f8" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="22.0" />
-               </font>
+            <Label fx:id="title" stylesheets="@styles.css" text="Add Collection" textFill="#f8f8f8" BorderPane.alignment="CENTER">
+               <styleClass>
+                  <String fx:value="medium-text" />
+               </styleClass>
                <BorderPane.margin>
                   <Insets />
                </BorderPane.margin>
@@ -53,14 +53,15 @@
                      <HBox.margin>
                         <Insets right="50.0" />
                      </HBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </Button>
                   <Button fx:id="cancelButton" mnemonicParsing="false" onMouseClicked="#cancelButton" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE">
-                     <font>
-                        <Font size="14.0" />
-                     </font></Button>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
+                  </Button>
                </children>
             </HBox>
          </right>
@@ -82,22 +83,22 @@
                                  <HBox.margin>
                                     <Insets left="2.0" top="5.0" />
                                  </HBox.margin>
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                               </Button>
                               <Button fx:id="fromURLButton" mnemonicParsing="false" onAction="#loadLogoURL" styleClass="desktopButton" stylesheets="@styles.css" text="From URL" textFill="WHITE">
                                  <HBox.margin>
                                     <Insets left="2.0" top="5.0" />
                                  </HBox.margin>
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                               </Button>
                               <Button fx:id="downloadLogosButton" mnemonicParsing="false" onAction="#downloadLogo" styleClass="desktopButton" stylesheets="@styles.css" text="Download images" textFill="WHITE">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                               </Button>
                            </children>
                            <VBox.margin>
@@ -129,14 +130,14 @@
                                  <HBox.margin>
                                     <Insets left="2.0" top="5.0" />
                                  </HBox.margin>
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                               </Button>
                               <Button fx:id="fromURLButton2" mnemonicParsing="false" onAction="#loadPosterURL" styleClass="desktopButton" stylesheets="@styles.css" text="From URL" textFill="WHITE">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                                  <HBox.margin>
                                     <Insets left="2.0" top="5.0" />
                                  </HBox.margin>
@@ -145,9 +146,9 @@
                                  <HBox.margin>
                                     <Insets />
                                  </HBox.margin>
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                               </Button>
                            </children>
                            <VBox.margin>
@@ -171,54 +172,54 @@
             </ScrollPane>
             <VBox fx:id="generalBox" spacing="10.0">
                <children>
-                  <Label fx:id="name" text="Name" textFill="WHITE">
+                  <Label fx:id="name" stylesheets="@styles.css" text="Name" textFill="WHITE">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </Label>
                   <TextField fx:id="nameField" styleClass="textFieldColor" stylesheets="@styles.css">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </TextField>
-                  <Label fx:id="sorting" prefHeight="17.0" prefWidth="240.0" text="Sorting Order" textFill="#fcfcfc">
+                  <Label fx:id="sorting" prefHeight="17.0" prefWidth="240.0" stylesheets="@styles.css" text="Sorting Order" textFill="#fcfcfc">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </Label>
                   <TextField fx:id="orderField" styleClass="textFieldColor" stylesheets="@styles.css">
                      <VBox.margin>
                         <Insets />
                      </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                      <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </padding>
                   </TextField>
-                  <CheckBox fx:id="playSameMusic" mnemonicParsing="false" text="Play same music in all seasons" textFill="WHITE" wrapText="true">
+                  <CheckBox fx:id="playSameMusic" mnemonicParsing="false" stylesheets="@styles.css" text="Play same music in all seasons" textFill="WHITE" wrapText="true">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </CheckBox>
                </children>
                <StackPane.margin>
@@ -238,25 +239,25 @@
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
-               <font>
-                  <Font size="14.0" />
-               </font>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
             </Button>
             <Button fx:id="postersViewButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showPostersView" styleClass="editButton" stylesheets="@styles.css" text="Posters">
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
-               <font>
-                  <Font size="14.0" />
-               </font>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
             </Button>
             <Button fx:id="logosViewButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showLogosView" styleClass="editButton" stylesheets="@styles.css" text="Logos">
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
-               <font>
-                  <Font size="14.0" />
-               </font>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
             </Button>
          </children>
       </VBox>

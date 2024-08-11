@@ -17,7 +17,7 @@
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="2569.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
+<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="2569.0" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="1080.0" fitWidth="2175.0" pickOnBounds="true" preserveRatio="true" smooth="false" StackPane.alignment="TOP_LEFT">
          <image>
@@ -104,19 +104,31 @@
                <children>
                   <VBox fx:id="infoBox" alignment="BOTTOM_LEFT" prefHeight="310.0" prefWidth="1108.0" spacing="5.0" stylesheets="@styles.css">
                      <children>
-                        <ImageView fx:id="logo" fitHeight="138.0" fitWidth="344.0" pickOnBounds="true" preserveRatio="true">
+                        <StackPane alignment="BOTTOM_LEFT">
+                           <children>
+                              <ImageView fx:id="logo" fitHeight="301.0" fitWidth="631.0" pickOnBounds="true" preserveRatio="true" />
+                              <Label fx:id="seriesTitle" alignment="CENTER" stylesheets="@styles.css" text="Series Title" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
+                                 <styleClass>
+                                    <String fx:value="title-text" />
+                                    <String fx:value="bold" />
+                                 </styleClass>
+                              </Label>
+                           </children>
                            <VBox.margin>
-                              <Insets bottom="10.0" />
+                              <Insets bottom="5.0" />
                            </VBox.margin>
-                        </ImageView>
+                        </StackPane>
                         <Label fx:id="episodeName" stylesheets="@styles.css" text="Episode Name" textFill="WHITE">
+                           <effect>
+                              <DropShadow offsetY="2.5" spread="0.45" />
+                           </effect>
                            <styleClass>
                               <String fx:value="subtitle-text" />
                               <String fx:value="bold" />
                            </styleClass>
-                           <effect>
-                              <DropShadow offsetY="2.5" spread="0.45" />
-                           </effect>
                         </Label>
                         <HBox fx:id="detailsInfo" alignment="CENTER_LEFT" spacing="10.0">
                            <children>

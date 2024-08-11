@@ -107,6 +107,9 @@ public class ImageDownloaderController {
         if (!width.isEmpty() && !height.isEmpty()){
             widthField.setText(width);
             heightField.setText(height);
+        }else{
+            widthField.setText("");
+            heightField.setText("");
         }
 
         resolutionText.setText(App.textBundle.getString("resolutionText"));
@@ -169,10 +172,7 @@ public class ImageDownloaderController {
         //Run when the process ends
         task.setOnSucceeded(e -> postDownload());
 
-        //Start the process in a new thread
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+        App.executor.submit(task);
     }
 
     private void preDownload(){
@@ -306,6 +306,8 @@ public class ImageDownloaderController {
         if (seasonParent != null){
             if (isLogo)
                 seasonParent.loadLogo(selectedFile.getAbsolutePath());
+            else if (isCover)
+                seasonParent.loadPoster(selectedFile.getAbsolutePath());
             else
                 seasonParent.loadBackground(selectedFile.getAbsolutePath());
         }else{

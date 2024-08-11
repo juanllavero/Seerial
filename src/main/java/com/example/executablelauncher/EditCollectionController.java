@@ -101,12 +101,14 @@ public class EditCollectionController {
     private Label title;
     //endregion
 
+    //region ATTRIBUTES
     private DesktopViewController controllerParent;
     public Series seriesToEdit = null;
-    private List<File> coverFiles = new ArrayList<>();
+    private final List<File> coverFiles = new ArrayList<>();
     private File selectedCover = null;
-    private List<File> logoFiles = new ArrayList<>();
+    private final List<File> logoFiles = new ArrayList<>();
     private File selectedLogo = null;
+    //endregion
 
     //region INITIALIZATION
     public void setSeries(Series s, boolean isShow){
@@ -136,7 +138,12 @@ public class EditCollectionController {
         sorting.setText(App.textBundle.getString("sortingOrder"));
         saveButton.setText(App.buttonsBundle.getString("saveButton"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
-        title.setText(App.textBundle.getString("collectionWindowTitleEdit"));
+
+        if (isShow)
+            title.setText(App.textBundle.getString("showWindowTitleEdit"));
+        else
+            title.setText(App.textBundle.getString("collectionWindowTitleEdit"));
+
         selectImageButton.setText(App.buttonsBundle.getString("selectImage"));
         downloadImagesButton.setText(App.buttonsBundle.getString("downloadImages"));
         generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
@@ -173,7 +180,7 @@ public class EditCollectionController {
                 }
             }
 
-            File newFile = new File("resources/img/logos/" + seriesToEdit.getId() + "/" + (number + 1) + ".jpg");
+            File newFile = new File("resources/img/logos/" + seriesToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -181,8 +188,9 @@ public class EditCollectionController {
                 System.err.println("Logo not copied");
             }
 
-            logoFiles.add(file);
-            addImage(file);
+            logoFiles.clear();
+            logosContainer.getChildren().clear();
+            loadLogos();
         }
     }
     private File getImageFile(){
@@ -300,7 +308,7 @@ public class EditCollectionController {
 
             try{
                 BufferedImage originalImage = ImageIO.read(file);
-                BufferedImage croppedImage = cropToAspectRatio(originalImage, 300, 450);
+                BufferedImage croppedImage = cropToAspectRatio(originalImage, 2, 3);
 
                 ImageIO.write(croppedImage, "jpg", newFile);
                 originalImage.flush();
@@ -309,8 +317,9 @@ public class EditCollectionController {
                 System.err.println("Poster not copied");
             }
 
-            coverFiles.add(file);
-            addPoster(file);
+            coverFiles.clear();
+            posterContainer.getChildren().clear();
+            loadImages();
         }
     }
     @FXML
@@ -384,7 +393,10 @@ public class EditCollectionController {
         File dir = new File("resources/img/seriesCovers/" + seriesToEdit.getId());
         if (dir.exists()) {
             File[] files = dir.listFiles();
-            assert files != null;
+
+            if (files == null)
+                return;
+
             coverFiles.addAll(Arrays.asList(files));
 
             for (File f : coverFiles) {

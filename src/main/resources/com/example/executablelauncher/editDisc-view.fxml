@@ -19,7 +19,7 @@
    <top>
       <BorderPane prefHeight="55.0" prefWidth="600.0" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
-            <Label fx:id="titleText" styleClass="big-text" stylesheets="@styles.css" text="Edit Video" textFill="#f8f8f8" BorderPane.alignment="CENTER">
+            <Label fx:id="titleText" styleClass="medium-text" stylesheets="@styles.css" text="Edit Video" textFill="#f8f8f8" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets />
                </BorderPane.margin>

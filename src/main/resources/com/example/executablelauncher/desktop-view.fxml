@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -89,7 +90,7 @@
                                                 <Insets bottom="10.0" />
                                              </padding>
                                           </VBox>
-                                          <VBox maxWidth="300.0" minWidth="300.0" prefWidth="300.0">
+                                          <VBox alignment="TOP_CENTER" maxWidth="300.0" minWidth="300.0" prefWidth="300.0">
                                              <HBox.margin>
                                                 <Insets left="10.0" />
                                              </HBox.margin>
@@ -234,6 +235,15 @@
                                                       <Insets top="15.0" />
                                                    </VBox.margin>
                                                 </ImageView>
+                                                <Button fx:id="changePosterButton" alignment="CENTER" mnemonicParsing="false" stylesheets="@styles.css" text="Mostrar poster de colección" textFill="WHITE">
+                                                   <styleClass>
+                                                      <String fx:value="desktopButton" />
+                                                      <String fx:value="tiny-text" />
+                                                   </styleClass>
+                                                   <VBox.margin>
+                                                      <Insets top="10.0" />
+                                                   </VBox.margin>
+                                                </Button>
                                              </children>
                                           </VBox>
                                        </children>

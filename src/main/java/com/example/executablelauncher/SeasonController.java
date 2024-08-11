@@ -66,6 +66,7 @@ public class SeasonController {
     //region FXML ATTRIBUTES
     @FXML Pane fill;
     @FXML Pane shade;
+    @FXML Label seriesTitle;
     @FXML Label directedByText;
     @FXML Label writtenByText;
     @FXML Label createdByText;
@@ -314,16 +315,6 @@ public class SeasonController {
             }
         });
 
-        lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal)
-                playInteractionSound();
-        });
-
-        nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal)
-                playInteractionSound();
-        });
-
         detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedDown(event)){
                 if (episodeButtons.size() <= 1 && !isShow)
@@ -479,35 +470,29 @@ public class SeasonController {
         WritableImage croppedImage = new WritableImage(pixelReader, xOffset, 0, (int) newWidth, (int) newHeight);
 
         backgroundImage.setImage(croppedImage);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.6), backgroundImage);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1);
-        fadeIn.play();
+        fadeInEffect(backgroundImage, 0.5f).play();
         //endregion
 
-        String logoSrc;
+        String logoSrc = season.getLogoSrc();
         if (isShow)
             logoSrc = series.getLogoSrc();
-        else
-            logoSrc = season.getLogoSrc();
 
         File logoFile = new File(logoSrc);
 
         if (!logoFile.exists() || !logoFile.isFile()){
-            infoBox.getChildren().remove(0);
-            Label seriesTitle = new Label(series.getName());
-            seriesTitle.getStyleClass().add("title-text");
-            seriesTitle.getStyleClass().add("bold");
-            seriesTitle.setTextFill(Color.color(1, 1, 1));
-            seriesTitle.setEffect(new DropShadow());
-            infoBox.getChildren().add(0, seriesTitle);
-        }else {
+            seriesTitle.setText(series.getName());
+            seriesTitle.setVisible(true);
+            logo.setVisible(false);
+        }else if (logoFile.exists()){
             Image img;
             img = new Image("file:" + logoSrc, screenHeight * 0.6, screenHeight * 0.6, true, true);
 
             logo.setImage(img);
             logo.setFitWidth(screenHeight * 0.6);
             logo.setFitHeight(screenHeight * 0.6);
+
+            seriesTitle.setVisible(false);
+            logo.setVisible(true);
         }
 
         processBackgroundMedia();
@@ -552,7 +537,7 @@ public class SeasonController {
 
         yearField.setText(season.getYear());
         durationField.setText(setRuntime(selectedEpisode.getRuntime()));
-        episodeName.setText("");
+        hideNode(episodeName);
 
         if (selectedEpisode.getImdbScore() != 0){
             scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/imdb.png"), 40, 40, true, true));
@@ -1038,6 +1023,7 @@ public class SeasonController {
     private void updateDiscInfo(Episode episode) {
         selectedEpisode = episode;
         episodeName.setText(episode.getName());
+        showNode(episodeName);
 
         if (!episode.getOverview().isEmpty())
             overviewField.setText(episode.getOverview());

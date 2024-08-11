@@ -18,13 +18,16 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +38,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 import static com.example.executablelauncher.utils.Utils.getMediaInfo;
 
@@ -108,11 +110,13 @@ public class EditDiscController {
     private Button urlImageLoadButton;
     //endregion
 
+    //region ATTRIBUTES
     private DesktopViewController controllerParent;
-    private List<File> imagesFiles = new ArrayList<>();
+    private final List<File> imagesFiles = new ArrayList<>();
     private File selectedImage = null;
     public Episode episodeToEdit = null;
     boolean mediaInfoShown = false;
+    //endregion
 
     //region INITIALIZATION
     public void setDisc(Episode d){
@@ -121,7 +125,7 @@ public class EditDiscController {
 
         generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
         thumbnailsViewButton.setText(App.buttonsBundle.getString("thumbnailsButton"));
-        thumbnailsViewButton.setText(App.textBundle.getString("details"));
+        detailsViewButton.setText(App.textBundle.getString("details"));
         selectImageButton.setText(App.buttonsBundle.getString("selectImage"));
         urlImageLoadButton.setText(App.buttonsBundle.getString("downloadImages"));
         titleText.setText(App.textBundle.getString("episodeWindowTitleEdit"));
@@ -240,8 +244,9 @@ public class EditDiscController {
                 System.err.println("Thumbnail not copied");
             }
 
-            imagesFiles.add(file);
-            addImage(file);
+            imagesFiles.clear();
+            imagesContainer.getChildren().clear();
+            loadImages();
         }
     }
     //endregion
@@ -256,7 +261,10 @@ public class EditDiscController {
         File dir = new File("resources/img/discCovers/" + episodeToEdit.getId());
         if (dir.exists()){
             File[] files = dir.listFiles();
-            assert files != null;
+
+            if (files == null)
+                return;
+
             imagesFiles.addAll(Arrays.asList(files));
 
             for (File f : imagesFiles){

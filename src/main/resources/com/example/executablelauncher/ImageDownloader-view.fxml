@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -13,9 +14,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" style="-fx-border-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageDownloaderController">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="1000.0" style="-fx-border-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageDownloaderController">
    <children>
       <BorderPane fx:id="mainPane" maxHeight="686.0" maxWidth="1096.0" minHeight="600.0" minWidth="750.0" styleClass="midSectionDarkColor" stylesheets="@styles.css">
          <center>
@@ -36,30 +36,30 @@
                      <VBox.margin>
                         <Insets bottom="10.0" />
                      </VBox.margin>
-                     <font>
-                        <Font size="14.0" />
-                     </font>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </Button>
                   <BorderPane>
                      <left>
                         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                            <children>
-                              <Label fx:id="resolutionText" text="Resolution: " textFill="WHITE">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font></Label>
-                              <TextField fx:id="widthField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1920">
+                              <Label fx:id="resolutionText" stylesheets="@styles.css" text="Resolution: " textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass></Label>
+                              <TextField fx:id="widthField" alignment="CENTER" prefHeight="25.0" prefWidth="60.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1920">
                                  <HBox.margin>
                                     <Insets left="5.0" />
                                  </HBox.margin>
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font></TextField>
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass></TextField>
                               <Label text="X" />
-                              <TextField fx:id="heightField" prefHeight="25.0" prefWidth="49.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1080">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font></TextField>
+                              <TextField fx:id="heightField" alignment="CENTER" prefHeight="25.0" prefWidth="60.0" styleClass="textFieldColor" stylesheets="@styles.css" text="1080">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass></TextField>
                            </children>
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -71,9 +71,9 @@
                            <BorderPane.margin>
                               <Insets right="5.0" />
                            </BorderPane.margin>
-                           <font>
-                              <Font size="14.0" />
-                           </font>
+                           <styleClass>
+                              <String fx:value="tiny-text" />
+                           </styleClass>
                         </TextField>
                      </center>
                      <right>
@@ -81,9 +81,9 @@
                            <BorderPane.margin>
                               <Insets right="5.0" />
                            </BorderPane.margin>
-                           <font>
-                              <Font size="14.0" />
-                           </font>
+                           <styleClass>
+                              <String fx:value="tiny-text" />
+                           </styleClass>
                         </Button>
                      </right>
                   </BorderPane>
@@ -91,10 +91,10 @@
                      <left>
                         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
                            <children>
-                              <CheckBox fx:id="transparentCheck" mnemonicParsing="false" text="Transparent" textFill="WHITE">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font></CheckBox>
+                              <CheckBox fx:id="transparentCheck" mnemonicParsing="false" stylesheets="@styles.css" text="Transparent" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass></CheckBox>
                            </children>
                         </HBox>
                      </left>
@@ -105,14 +105,14 @@
                                  <HBox.margin>
                                     <Insets right="10.0" />
                                  </HBox.margin>
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                               </Button>
                               <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancel" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font></Button>
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass></Button>
                            </children>
                         </HBox>
                      </right>
@@ -132,10 +132,10 @@
          <top>
             <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <left>
-                  <Label fx:id="title" text="Image Downloader" textFill="WHITE" BorderPane.alignment="CENTER">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
+                  <Label fx:id="title" stylesheets="@styles.css" text="Image Downloader" textFill="WHITE" BorderPane.alignment="CENTER">
+                     <styleClass>
+                        <String fx:value="medium-text" />
+                     </styleClass>
                   </Label>
                </left>
                <right>
@@ -149,13 +149,13 @@
       </BorderPane>
       <BorderPane fx:id="downloadingPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="199.0" prefWidth="439.0" styleClass="borderSectionsColor" stylesheets="@styles.css">
          <top>
-            <Label fx:id="downloadingText" text="Downloading..." textFill="WHITE" BorderPane.alignment="CENTER">
+            <Label fx:id="downloadingText" stylesheets="@styles.css" text="Downloading..." textFill="WHITE" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets />
                </BorderPane.margin>
-               <font>
-                  <Font size="22.0" />
-               </font>
+               <styleClass>
+                  <String fx:value="small-text" />
+               </styleClass>
             </Label>
          </top>
          <center>

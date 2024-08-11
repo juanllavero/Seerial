@@ -55,6 +55,10 @@
     -fx-font-size: 0.875em; /* 14px */
 }
 
+.moreTiny-text {
+    -fx-font-size: 0.6em;
+}
+
 .borderSectionsColor{
     -fx-background-color: #323232;
 }

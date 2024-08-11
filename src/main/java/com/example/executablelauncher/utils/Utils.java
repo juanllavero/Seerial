@@ -32,15 +32,9 @@ import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.SVGPath;
 import javafx.stage.Screen;
 import javafx.util.Duration;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import xss.it.fx.helpers.CornerPreference;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -537,13 +531,13 @@ public class Utils {
         }
         return true;
     }
-    public static void hideButton(Button btn){
-        btn.setVisible(false);
-        btn.setManaged(false);
+    public static void hideNode(Node node){
+        node.setVisible(false);
+        node.setManaged(false);
     }
-    public static void showButton(Button btn){
-        btn.setVisible(true);
-        btn.setManaged(true);
+    public static void showNode(Node node){
+        node.setVisible(true);
+        node.setManaged(true);
     }
     public static String getFolderSrc(String src) {
         String[] parts = src.split("[/\\\\]");

@@ -119,6 +119,7 @@ public class DesktopViewController {
     @FXML VBox activityBox;
     @FXML VBox activityMessageBox;
     @FXML Button activityButton;
+    @FXML Button changePosterButton;
     @FXML Label downloadingMetadataText;
     @FXML Label downloadingImagesText;
     @FXML Label downloadingSongsText;
@@ -198,33 +199,33 @@ public class DesktopViewController {
     //endregion
 
     //region ATTRIBUTES
-    private VideoPlayerController videoPlayerController;
-    private final ImageViewPane seasonBackground = new ImageViewPane();
-    private final ImageViewPane seasonBackgroundNoise = new ImageViewPane();
-    private final ImageViewPane seasonBackgroundClarity = new ImageViewPane();
-    private final ImageViewPane seriesBackgroundNoise = new ImageViewPane();
-    private final ImageViewPane seriesBackgroundClarity = new ImageViewPane();
-
-    private static List<Library> libraries = new ArrayList<>();
-    private static List<Series> seriesList = new ArrayList<>();
-    private static List<Season> seasonList = new ArrayList<>();
-    private static List<Episode> episodeList = new CopyOnWriteArrayList<>();
-    private static List<Button> seriesButtons = new ArrayList<>();
-    private static List<Button> seasonsButtons = new ArrayList<>();
-    private static Library currentLibrary = null;
-    private static Series selectedSeries = null;
-    private static Season selectedSeason = null;
+    VideoPlayerController videoPlayerController;
+    final ImageViewPane seasonBackground = new ImageViewPane();
+    final ImageViewPane seasonBackgroundNoise = new ImageViewPane();
+    final ImageViewPane seasonBackgroundClarity = new ImageViewPane();
+    final ImageViewPane seriesBackgroundNoise = new ImageViewPane();
+    final ImageViewPane seriesBackgroundClarity = new ImageViewPane();
+    static List<Library> libraries = new ArrayList<>();
+    static List<Series> seriesList = new ArrayList<>();
+    static List<Season> seasonList = new ArrayList<>();
+    static List<Episode> episodeList = new CopyOnWriteArrayList<>();
+    static List<Button> seriesButtons = new ArrayList<>();
+    static List<Button> seasonsButtons = new ArrayList<>();
+    static Library currentLibrary = null;
+    static Series selectedSeries = null;
+    static Season selectedSeason = null;
     public static Episode selectedEpisode = null;
-    private static List<Episode> selectedEpisodes = new ArrayList<>();
-    private static List<DiscController> episodesControllers = new ArrayList<>();
-    private Series draggedSeries;
-    private double ASPECT_RATIO = 16.0 / 9.0;
-    private boolean acceptRemove = false;
-    private boolean canDragSeries = true;
-    private static int numFilesToCheck = 0;
-    private static int imageDownloadProcesses = 0;
-    private boolean searchingForFiles = false;
-    private static final OkHttpClient client = new OkHttpClient.Builder()
+    static List<Episode> selectedEpisodes = new ArrayList<>();
+    static List<DiscController> episodesControllers = new ArrayList<>();
+    Series draggedSeries;
+    double ASPECT_RATIO = 16.0 / 9.0;
+    boolean acceptRemove = false;
+    boolean canDragSeries = true;
+    static int numFilesToCheck = 0;
+    static int imageDownloadProcesses = 0;
+    boolean searchingForFiles = false;
+    boolean seasonPoster = true;
+    static final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
@@ -273,6 +274,31 @@ public class DesktopViewController {
         selectionOptions.setVisible(false);
 
         activityBox.setVisible(false);
+
+        changePosterButton.setOnAction(e -> {
+            seasonPoster = !seasonPoster;
+
+            try{
+                Image image;
+                if (seasonPoster && !selectedSeason.getCoverSrc().isEmpty()){
+                    changePosterButton.setText(App.buttonsBundle.getString("collectionPoster"));
+
+                    File file = new File(selectedSeason.getCoverSrc());
+                    image = new Image(file.toURI().toURL().toExternalForm(), 300, 450, true, true);
+                }else if (!selectedSeries.getCoverSrc().isEmpty()){
+                    changePosterButton.setText(App.buttonsBundle.getString("seasonPoster"));
+
+                    File file = new File(selectedSeries.getCoverSrc());
+                    image = new Image(file.toURI().toURL().toExternalForm(), 300, 450, true, true);
+                }else {
+                    image = new Image(getFileAsIOStream("img/fileNotFound.png"), 300, 450, true, true);
+                }
+                seriesCover.setImage(image);
+            } catch (MalformedURLException ex) {
+                System.err.println("DesktopViewController: could not change poster");
+            }
+
+        });
 
         menuParentPane.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> hideMenu());
 
@@ -430,6 +456,11 @@ public class DesktopViewController {
 
     //region CONTENT
     public void updateLanguage() {
+        if (seasonPoster)
+            changePosterButton.setText(App.buttonsBundle.getString("collectionPoster"));
+        else
+            changePosterButton.setText(App.buttonsBundle.getString("seasonPoster"));
+
         settingsButton.setText(App.buttonsBundle.getString("settings"));
         exitButton.setText(App.buttonsBundle.getString("eixtButton"));
         switchFSButton.setText(App.buttonsBundle.getString("switchToFullscreen"));
@@ -497,17 +528,17 @@ public class DesktopViewController {
             btn.setTextAlignment(TextAlignment.LEFT);
             btn.setMaxWidth(Integer.MAX_VALUE);
             btn.getStyleClass().clear();
-            btn.getStyleClass().add("libraryMenuButton");
+            btn.getStyleClass().addAll("libraryMenuButton", "tiny-text");
 
             btn.setOnMouseClicked(event -> {
                 for (Node node : libraryContainer.getChildren()) {
                     Button button = (Button) node;
                     button.getStyleClass().clear();
-                    button.getStyleClass().add("libraryMenuButton");
+                    button.getStyleClass().addAll("libraryMenuButton", "tiny-text");
                 }
 
                 btn.getStyleClass().clear();
-                btn.getStyleClass().add("libraryMenuButtonSelected");
+                btn.getStyleClass().addAll("libraryMenuButtonSelected", "tiny-text");
 
                 selectLibrary(btn.getText());
                 hideMenu();
@@ -521,22 +552,11 @@ public class DesktopViewController {
 
             if (btn.getText().equals(currentLibrary.getName())) {
                 btn.getStyleClass().clear();
-                btn.getStyleClass().add("libraryMenuButtonSelected");
+                btn.getStyleClass().addAll("libraryMenuButtonSelected", "tiny-text");
 
                 selectLibrary(btn.getText());
             }
         }
-    }
-
-    public void updateLibraries(String oldName, String newName) {
-        for (Node node : libraryContainer.getChildren()) {
-            Button btn = (Button) node;
-
-            if (btn.getText().equals(oldName))
-                btn.setText(newName);
-        }
-
-        librarySelector.setText(newName);
     }
 
     public void showSeries() {
@@ -701,11 +721,14 @@ public class DesktopViewController {
     private void setCoverImage() {
         try {
             Image image;
-            if (!selectedSeries.getCoverSrc().isEmpty()) {
+            if (seasonPoster && !selectedSeason.getCoverSrc().isEmpty()){
+                File file = new File(selectedSeason.getCoverSrc());
+                image = new Image(file.toURI().toURL().toExternalForm(), 300, 450, true, true);
+            }else if (!seasonPoster && !selectedSeries.getCoverSrc().isEmpty()){
                 File file = new File(selectedSeries.getCoverSrc());
                 image = new Image(file.toURI().toURL().toExternalForm(), 300, 450, true, true);
             } else {
-                image = new Image(getFileAsIOStream("img/DefaultPoster.png"), 300, 450, true, true);
+                image = new Image(getFileAsIOStream("img/fileNotFound.png"), 300, 450, true, true);
             }
 
             seriesCover.setImage(image);
@@ -727,7 +750,8 @@ public class DesktopViewController {
     private void setTextNoLogo() {
         seasonLogoBox.getChildren().remove(0);
         Label seasonLogoText = new Label(selectedSeries.getName());
-        seasonLogoText.setFont(Font.font("Roboto", FontWeight.BOLD, FontPosture.REGULAR, 42));
+        seasonLogoText.getStyleClass().clear();
+        seasonLogoText.getStyleClass().addAll("title-text", "bold");
         seasonLogoText.setTextFill(Color.color(1, 1, 1));
         seasonLogoText.setEffect(new DropShadow());
         seasonLogoText.setPadding(new Insets(0, 0, 0, 15));
@@ -830,10 +854,16 @@ public class DesktopViewController {
             changeEpisodesGroup.setDisable(false);
             identificationShow.setDisable(false);
             identificationMovie.setDisable(true);
+
+            seasonPoster = false;
+            changePosterButton.setVisible(false);
         } else {
             changeEpisodesGroup.setDisable(true);
             identificationMovie.setDisable(false);
             identificationShow.setDisable(true);
+
+            seasonPoster = true;
+            changePosterButton.setVisible(true);
         }
 
         showSeries();
@@ -1599,7 +1629,7 @@ public class DesktopViewController {
                 if (posterDir.exists()) {
                     selectedSeason.setCoverSrc("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
 
-                    if (selectedSeries.getSeasons().size() == 1 || selectedSeries.getCoverSrc().equals("resources/img/DefaultPoster.png") || selectedSeries.getCoverSrc().isEmpty()) {
+                    if (selectedSeries.getSeasons().size() == 1 || selectedSeries.getCoverSrc().equals("resources/img/fileNotFound.png") || selectedSeries.getCoverSrc().isEmpty()) {
                         posterDir = new File("resources/img/seriesCovers/" + selectedSeason.getId() + "/0.jpg");
                         if (posterDir.exists()) {
                             Path sourcePath = Paths.get(posterDir.toURI());
@@ -2982,6 +3012,14 @@ public class DesktopViewController {
                     if (filesInFolder == null)
                         continue;
 
+                    boolean videoFiles = false;
+                    for (File file : filesInFolder)
+                        if (validVideoFile(file))
+                            videoFiles = true;
+
+                    if (!videoFiles)
+                        continue;
+
                     NameYearContainer result = extractNameAndYear(folder.getName());
 
                     String movieName = result.name;
@@ -3786,17 +3824,11 @@ public class DesktopViewController {
         BorderPane pane = (BorderPane) btn.getGraphic();
         ((Label) pane.getLeft()).setText(selectedSeries.getName());
 
-        setCoverImage();
+        if (!seasonPoster)
+            setCoverImage();
 
         if (currentLibrary.getType().equals("Shows") && !selectedSeries.getLogoSrc().isEmpty())
             setLogoNoText(new File(selectedSeries.getLogoSrc()));
-    }
-
-    private void updateSeries(Series series) {
-        if (series == selectedSeries) {
-            selectedSeries = null;
-            selectSeries(series);
-        }
     }
 
     public void addSeries(Library library, Series s) {

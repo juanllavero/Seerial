@@ -141,13 +141,17 @@
                               <StackPane>
                                  <children>
                                     <ImageView fx:id="logoImage" fitHeight="225.0" fitWidth="326.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT" />
-                                    <Label fx:id="titleText" styleClass="subtitle-text" stylesheets="@styles.css" text="Show's Name" textFill="WHITE" StackPane.alignment="BOTTOM_LEFT">
+                                    <Label fx:id="titleText" stylesheets="@styles.css" text="Show's Name" textFill="WHITE" StackPane.alignment="BOTTOM_LEFT">
                                        <font>
                                           <Font name="SansSerif Bold" />
                                        </font>
                                        <effect>
                                           <DropShadow />
                                        </effect>
+                                       <styleClass>
+                                          <String fx:value="subtitle-text" />
+                                          <String fx:value="bold" />
+                                       </styleClass>
                                     </Label>
                                  </children>
                               </StackPane>
@@ -290,10 +294,14 @@
          <children>
             <VBox fx:id="menuOptions" alignment="TOP_CENTER" maxHeight="720.0" spacing="20.0" stylesheets="@styles.css" StackPane.alignment="CENTER">
                <children>
-                  <Label fx:id="appName" alignment="CENTER" styleClass="title-text" stylesheets="@styles.css" text="Seerial" textFill="WHITE">
+                  <Label fx:id="appName" alignment="CENTER" stylesheets="@styles.css" text="Seerial" textFill="WHITE">
                      <VBox.margin>
                         <Insets bottom="20.0" />
                      </VBox.margin>
+                     <styleClass>
+                        <String fx:value="title-text" />
+                        <String fx:value="bold" />
+                     </styleClass>
                   </Label>
                   <Button fx:id="settingsButton" alignment="CENTER" graphicTextGap="8.0" maxWidth="1200.0" mnemonicParsing="false" onAction="#openSettings" stylesheets="@styles.css" text="Settings" textFill="WHITE">
                      <padding>
@@ -347,10 +355,14 @@
             </VBox>
             <VBox fx:id="settingsWindow" maxHeight="-Infinity" maxWidth="-Infinity" spacing="5.0" styleClass="translucent" stylesheets="@styles.css" StackPane.alignment="CENTER_RIGHT">
                <children>
-                  <Label fx:id="settingsTitle" styleClass="title-text" stylesheets="@styles.css" text="Settings" textFill="WHITE">
+                  <Label fx:id="settingsTitle" stylesheets="@styles.css" text="Settings" textFill="WHITE">
                      <VBox.margin>
                         <Insets bottom="20.0" />
                      </VBox.margin>
+                     <styleClass>
+                        <String fx:value="title-text" />
+                        <String fx:value="bold" />
+                     </styleClass>
                   </Label>
                   <BorderPane stylesheets="@styles.css">
                      <styleClass>

@@ -363,7 +363,7 @@ public class VideoPlayerController {
         optionsBox.setVisible(false);
 
         if (parentController != null)
-            hideButton(fullScreenButton);
+            hideNode(fullScreenButton);
 
         //region BUTTONS MOVEMENT
         optionsBox.setOnMouseClicked(e -> {
@@ -1290,7 +1290,7 @@ public class VideoPlayerController {
         Button gammaButton = addSimpleButton(App.buttonsBundle.getString("gamma"), false, false);
 
         if (episode.getVideoTracks().isEmpty())
-            hideButton(videoTracks);
+            hideNode(videoTracks);
 
         centerOptions.getChildren().addAll(videoTracks, zoomOptions, gammaButton);
 
@@ -1584,7 +1584,7 @@ public class VideoPlayerController {
         Button audioDelay = addSimpleButton(App.buttonsBundle.getString("audioDelay"), false, false);
 
         if (episode.getAudioTracks().isEmpty())
-            hideButton(audioTracks);
+            hideNode(audioTracks);
 
         centerOptions.getChildren().addAll(audioTracks, audioDelay);
 
@@ -1835,7 +1835,7 @@ public class VideoPlayerController {
         Button subsDelay = addSimpleButton(App.buttonsBundle.getString("subsDelay"), false, false);
 
         if (episode.getSubtitleTracks().isEmpty())
-            hideButton(subsTracks);
+            hideNode(subsTracks);
 
         centerOptions.getChildren().addAll(subsTracks, subsDelay);
 

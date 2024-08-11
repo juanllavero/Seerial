@@ -7,45 +7,46 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import java.lang.String?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="700.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchResultEpGroupCardController">
    <center>
       <VBox BorderPane.alignment="CENTER">
          <children>
             <HBox>
                <children>
-                  <Label fx:id="titleText" text="All Episodes" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="18.0" />
-                     </font>
+                  <Label fx:id="titleText" text="All Episodes" textFill="WHITE" stylesheets="@styles.css">
+                     <styleClass>
+                        <String fx:value="medium-text" />
+                     </styleClass>
                   </Label>
                </children>
             </HBox>
             <HBox>
                <children>
-                  <Label fx:id="groupsText" text="1 group" textFill="WHITE">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
+                  <Label fx:id="groupsText" text="1 group" textFill="WHITE" stylesheets="@styles.css">
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </Label>
-                  <Label fx:id="middleComma" text=", " textFill="WHITE">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
+                  <Label fx:id="middleComma" text=", " textFill="WHITE" stylesheets="@styles.css">
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </Label>
-                  <Label fx:id="episodesText" text="89 episodes" textFill="WHITE">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
+                  <Label fx:id="episodesText" text="89 episodes" textFill="WHITE" stylesheets="@styles.css">
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </Label>
                </children>
             </HBox>
-            <Label fx:id="descriptionText" text="All episodes sorted into their smaller story arcs." textFill="#c9c9c9" wrapText="true">
+            <Label fx:id="descriptionText" text="All episodes sorted into their smaller story arcs." textFill="#c9c9c9" wrapText="true" stylesheets="@styles.css">
                <VBox.margin>
                   <Insets top="5.0" />
                </VBox.margin>
-               <font>
-                  <Font size="15.0" />
-               </font>
+               <styleClass>
+                  <String fx:value="moreTiny-text" />
+               </styleClass>
             </Label>
          </children>
       </VBox>

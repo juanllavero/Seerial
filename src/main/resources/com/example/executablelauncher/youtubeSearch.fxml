@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -10,7 +11,6 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400.0" minWidth="600.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.YoutubeSearchController">
    <top>
@@ -27,10 +27,10 @@
             </Button>
          </right>
          <left>
-            <Label fx:id="windowTitle" text="Video Search" textFill="WHITE" BorderPane.alignment="CENTER">
-               <font>
-                  <Font name="System Bold" size="20.0" />
-               </font>
+            <Label fx:id="windowTitle" stylesheets="@styles.css" text="Video Search" textFill="WHITE" BorderPane.alignment="CENTER">
+               <styleClass>
+                  <String fx:value="medium-text" />
+               </styleClass>
             </Label>
          </left>
          <padding>
@@ -41,14 +41,11 @@
    <bottom>
       <HBox alignment="CENTER" spacing="10.0" styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="viewButton" disable="true" mnemonicParsing="false" onAction="#viewMedia" styleClass="desktopButton" stylesheets="@styles.css" text="View Video" textFill="WHITE">
-               <font>
-                  <Font size="14.0" />
-               </font></Button>
             <Button fx:id="downloadButton" disable="true" mnemonicParsing="false" onAction="#downloadMedia" styleClass="desktopButton" stylesheets="@styles.css" text="Download video" textFill="WHITE">
-               <font>
-                  <Font size="14.0" />
-               </font></Button>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
+            </Button>
          </children>
          <padding>
             <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
@@ -61,13 +58,15 @@
             <HBox alignment="CENTER" spacing="10.0" styleClass="midSectionDarkColor" stylesheets="@styles.css">
                <children>
                   <TextField fx:id="searchField" styleClass="textFieldColor" stylesheets="@styles.css" HBox.hgrow="ALWAYS">
-                     <font>
-                        <Font size="14.0" />
-                     </font></TextField>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
+                  </TextField>
                   <Button fx:id="searchButton" mnemonicParsing="false" onAction="#search" styleClass="desktopButton" stylesheets="@styles.css" text="Search" textFill="WHITE">
-                     <font>
-                        <Font size="14.0" />
-                     </font></Button>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
+                  </Button>
                </children>
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -75,7 +74,7 @@
             </HBox>
             <ScrollPane fitToWidth="true" hbarPolicy="NEVER" hmax="0.0" styleClass="midSectionLightColor" stylesheets="@styles.css">
                <content>
-                  <VBox fx:id="resultsContainer" />
+                  <VBox fx:id="resultsContainer" alignment="TOP_CENTER" />
                </content>
             </ScrollPane>
          </children>

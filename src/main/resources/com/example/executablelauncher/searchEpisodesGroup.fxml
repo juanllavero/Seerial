@@ -10,14 +10,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import java.lang.String?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="472.0" prefWidth="718.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchEpisodesGroupController">
    <top>
       <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
-            <Label fx:id="titleWindow" text="Search Episodes Group" textFill="WHITE" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="18.0" />
-               </font>
+            <Label fx:id="titleWindow" text="Search Episodes Group" textFill="WHITE" BorderPane.alignment="CENTER" stylesheets="@styles.css">
+               <styleClass>
+                  <String fx:value="medium-text" />
+               </styleClass>
             </Label>
          </left>
          <right>
