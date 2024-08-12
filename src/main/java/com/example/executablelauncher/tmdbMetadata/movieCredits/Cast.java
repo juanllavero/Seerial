@@ -1,5 +1,8 @@
 package com.example.executablelauncher.tmdbMetadata.movieCredits;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Cast {
     public boolean adult;
     public int gender;

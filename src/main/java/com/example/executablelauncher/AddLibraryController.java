@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.example.executablelauncher.App.textBundle;
+import static com.example.executablelauncher.utils.Utils.getFileAsIOStream;
+
 public class AddLibraryController {
     //region FXML ATTRIBUTES
     @FXML
@@ -29,6 +32,12 @@ public class AddLibraryController {
 
     @FXML
     private Button closeButton;
+
+    @FXML
+    private Label orderText;
+
+    @FXML
+    private TextField orderField;
 
     @FXML
     private Button cancelButton;
@@ -79,12 +88,13 @@ public class AddLibraryController {
     private Label typeText;
     //endregion
 
-    private DesktopViewController parentController;
-    private String catName = "";
-    private String type = "";
-    private List<String> folders = new ArrayList<>();
-    private boolean inGeneralView = true;
-    private Library libraryToEdit = null;
+    DesktopViewController parentController;
+    String catName = "";
+    String type = "";
+    List<String> folders = new ArrayList<>();
+    boolean inGeneralView = true;
+    Library libraryToEdit = null;
+    boolean foldersChanged = false;
 
     //region INITIALIZATION
     @FXML
@@ -100,6 +110,8 @@ public class AddLibraryController {
         folderBox.setVisible(false);
         showOnFullscreen.setSelected(true);
         setButtonsValues();
+
+        orderField.setDisable(true);
 
         List<Locale> languages = App.tmdbLanguages;
         for (Locale locale : languages){
@@ -123,6 +135,9 @@ public class AddLibraryController {
         this.catName = libraryToEdit.getName();
         this.folders = libraryToEdit.getFolders();
 
+        orderField.setDisable(false);
+        orderField.setText(String.valueOf(toEdit.getOrder()));
+
         List<Locale> languages = App.tmdbLanguages;
         for (Locale locale : languages){
             languageChoice.getItems().add(locale.getDisplayName());
@@ -138,23 +153,20 @@ public class AddLibraryController {
             showsTypeButton.setDisable(true);
             showsTypeButton.setOpacity(0.5);
 
-            File file = new File("resources/img/icons/moviesSelected.png");
-            try{
-                moviesTypeButton.setGraphic(new ImageView(new Image(file.toURI().toURL().toExternalForm())));
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
+            moviesTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/moviesSelected.png"))));
         }else if (type.equals("Shows")){
             setShowsType();
             moviesTypeButton.setDisable(true);
             moviesTypeButton.setOpacity(0.5);
-            showsTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/showsSelected.png"))));
+            showsTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/showsSelected.png"))));
         }
 
         showGeneralView();
     }
 
     private void setButtonsValues() {
+        orderText.setText(App.textBundle.getString("sortingOrder"));
+        typeText.setText(App.textBundle.getString("type") + ":");
         saveButton.setText(App.buttonsBundle.getString("next"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         showOnFullscreen.setText(App.textBundle.getString("showOnFullscreen"));
@@ -188,6 +200,11 @@ public class AddLibraryController {
                 return;
             }
 
+            if (!orderField.getText().isEmpty() && orderField.getText().matches("\\d{3,}")){
+                App.showErrorMessage("Invalid data", "", textBundle.getString("sortingError"));
+                return;
+            }
+
             String language = "es-ES";
             List<Locale> languages = App.tmdbLanguages;
             for (Locale locale : languages){
@@ -197,19 +214,22 @@ public class AddLibraryController {
             }
 
             if (libraryToEdit != null){
-                String oldName = libraryToEdit.getName();
+                if (libraryToEdit.getFolders() != folders)
+                    foldersChanged = true;
 
                 libraryToEdit.setName(nameField.getText());
                 libraryToEdit.setLanguage(language);
                 libraryToEdit.setType(type);
                 libraryToEdit.setFolders(folders);
                 libraryToEdit.setShowOnFullscreen(showOnFullscreen.isSelected());
+                libraryToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
-                parentController.updateLibraries(oldName, libraryToEdit.getName());
+                parentController.updateLibraries();
 
-                parentController.searchFiles();
+                if (foldersChanged)
+                    parentController.searchFiles();
             }else{
-                Library library = new Library(nameField.getText(), language, type, folders, showOnFullscreen.isSelected());
+                Library library = new Library(nameField.getText(), language, type, DataManager.INSTANCE.libraries.size(), folders, showOnFullscreen.isSelected());
                 DataManager.INSTANCE.createLibrary(library);
                 parentController.loadLibrary(library);
             }
@@ -227,8 +247,8 @@ public class AddLibraryController {
         moviesTypeButton.getStyleClass().add("buttonSelected");
         if (libraryToEdit == null)
             nameField.setText(App.textBundle.getString("movies"));
-        moviesTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/moviesSelected.png"))));
-        showsTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/shows.png"))));
+        moviesTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/moviesSelected.png"))));
+        showsTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/shows.png"))));
     }
 
     @FXML
@@ -239,8 +259,8 @@ public class AddLibraryController {
         showsTypeButton.getStyleClass().add("buttonSelected");
         if (libraryToEdit == null)
             nameField.setText(App.textBundle.getString("shows"));
-        moviesTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/movies.png"))));
-        showsTypeButton.setGraphic(new ImageView(new Image(("file:resources/img/icons/showsSelected.png"))));
+        moviesTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/movies.png"))));
+        showsTypeButton.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/showsSelected.png"))));
     }
 
     private void clearTypeSelection(){
@@ -304,7 +324,7 @@ public class AddLibraryController {
         HBox box = new HBox(folderSrc);
         box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(0, 0, 0, 10));
-        Image img = new Image("file:resources/img/icons/close.png");
+        Image img = new Image(getFileAsIOStream("img/icons/close.png"));
         ImageView image = new ImageView(img);
         image.setFitWidth(20);
         image.setFitHeight(20);

@@ -17,6 +17,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -28,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.example.executablelauncher.App.buttonsBundle;
+import static com.example.executablelauncher.utils.Utils.cropToAspectRatio;
 
 public class EditCollectionController {
     //region FXML ATTRIBUTES
@@ -98,12 +101,14 @@ public class EditCollectionController {
     private Label title;
     //endregion
 
+    //region ATTRIBUTES
     private DesktopViewController controllerParent;
     public Series seriesToEdit = null;
-    private List<File> coverFiles = new ArrayList<>();
+    private final List<File> coverFiles = new ArrayList<>();
     private File selectedCover = null;
-    private List<File> logoFiles = new ArrayList<>();
+    private final List<File> logoFiles = new ArrayList<>();
     private File selectedLogo = null;
+    //endregion
 
     //region INITIALIZATION
     public void setSeries(Series s, boolean isShow){
@@ -121,7 +126,8 @@ public class EditCollectionController {
 
         setImageFile(s.getCoverSrc());
 
-        if (s.getOrder() > 0)
+        orderField.setDisable(true);
+        if (s.getOrder() >= 0)
             orderField.setText(Integer.toString(s.getOrder()));
 
         //Initial values
@@ -132,7 +138,12 @@ public class EditCollectionController {
         sorting.setText(App.textBundle.getString("sortingOrder"));
         saveButton.setText(App.buttonsBundle.getString("saveButton"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
-        title.setText(App.textBundle.getString("collectionWindowTitleEdit"));
+
+        if (isShow)
+            title.setText(App.textBundle.getString("showWindowTitleEdit"));
+        else
+            title.setText(App.textBundle.getString("collectionWindowTitleEdit"));
+
         selectImageButton.setText(App.buttonsBundle.getString("selectImage"));
         downloadImagesButton.setText(App.buttonsBundle.getString("downloadImages"));
         generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
@@ -169,7 +180,7 @@ public class EditCollectionController {
                 }
             }
 
-            File newFile = new File("resources/img/logos/" + seriesToEdit.getId() + "/" + (number + 1) + ".jpg");
+            File newFile = new File("resources/img/logos/" + seriesToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -177,8 +188,9 @@ public class EditCollectionController {
                 System.err.println("Logo not copied");
             }
 
-            logoFiles.add(file);
-            addImage(file);
+            logoFiles.clear();
+            logosContainer.getChildren().clear();
+            loadLogos();
         }
     }
     private File getImageFile(){
@@ -295,13 +307,19 @@ public class EditCollectionController {
             File newFile = new File("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + (number + 1) + ".jpg");
 
             try{
-                Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                BufferedImage originalImage = ImageIO.read(file);
+                BufferedImage croppedImage = cropToAspectRatio(originalImage, 2, 3);
+
+                ImageIO.write(croppedImage, "jpg", newFile);
+                originalImage.flush();
+                croppedImage.flush();
             }catch (IOException e){
                 System.err.println("Poster not copied");
             }
 
-            coverFiles.add(file);
-            addPoster(file);
+            coverFiles.clear();
+            posterContainer.getChildren().clear();
+            loadImages();
         }
     }
     @FXML
@@ -375,7 +393,10 @@ public class EditCollectionController {
         File dir = new File("resources/img/seriesCovers/" + seriesToEdit.getId());
         if (dir.exists()) {
             File[] files = dir.listFiles();
-            assert files != null;
+
+            if (files == null)
+                return;
+
             coverFiles.addAll(Arrays.asList(files));
 
             for (File f : coverFiles) {
@@ -507,22 +528,13 @@ public class EditCollectionController {
 
     @FXML
     void save(MouseEvent event) {
-
         if (nameField.getText().isEmpty()){
             App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("emptyField"));
             return;
         }
 
-        if (!orderField.getText().isEmpty() && orderField.getText().matches("\\d{3,}")){
-            App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("sortingError"));
-            return;
-        }
-
         seriesToEdit.setName(nameField.getText());
         seriesToEdit.setPlaySameMusic(playSameMusic.isSelected());
-
-        if (!orderField.getText().isEmpty() && !orderField.getText().equals("0"))
-            seriesToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
         if (selectedCover != null)
             seriesToEdit.setCoverSrc("resources/img/seriesCovers/" + seriesToEdit.getId() + "/" + selectedCover.getName());

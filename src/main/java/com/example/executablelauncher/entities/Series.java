@@ -11,8 +11,8 @@ public class Series implements Serializable {
     String name = "";
     String overview = "";
     String year = "";
-    int order = 0;
     float score = 0;
+    int order;
     int numberOfEpisodes = 0;
     int numberOfSeasons = 0;
     String coverSrc = "";
@@ -23,9 +23,13 @@ public class Series implements Serializable {
     List<Season> seasons = new ArrayList<>();
     List<String> genres = new ArrayList<>();
     boolean playSameMusic = false;
+    boolean analyzingFiles = false;
+    int currentlyWatchingSeason = -1;
+    String productionStudios = "";
 
-    public Series() {
+    public Series(int order) {
         id = UUID.randomUUID().toString();
+        this.order = order;
     }
 
     public String getId() {
@@ -181,5 +185,43 @@ public class Series implements Serializable {
                 return season;
 
         return null;
+    }
+
+    public boolean isAnalyzingFiles() {
+        return analyzingFiles;
+    }
+
+    public void setAnalyzingFiles(boolean analyzingFiles) {
+        this.analyzingFiles = analyzingFiles;
+    }
+
+    public boolean isBeingWatched(){
+        return currentlyWatchingSeason != -1;
+    }
+
+    public Season getCurrentlyWatchingSeason(){
+        if (currentlyWatchingSeason != -1 && currentlyWatchingSeason < seasons.size())
+            return seasons.get(currentlyWatchingSeason);
+
+        return null;
+    }
+
+    public int getCurrentlyWatchingSeasonIndex(){
+        if (currentlyWatchingSeason < seasons.size())
+            return currentlyWatchingSeason;
+
+        return -1;
+    }
+
+    public void setCurrentlyWatchingSeason(int index){
+        currentlyWatchingSeason = index;
+    }
+
+    public String getProductionStudios() {
+        return productionStudios;
+    }
+
+    public void setProductionStudios(String productionStudios) {
+        this.productionStudios = productionStudios;
     }
 }

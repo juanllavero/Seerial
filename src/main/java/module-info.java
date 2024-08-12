@@ -1,7 +1,7 @@
 module com.example.executablelauncher {
     requires javafx.controls;
     requires javafx.fxml;
-
+    requires fx.jni;
     requires java.desktop;
     requires javafx.media;
     requires org.jsoup;
@@ -26,6 +26,12 @@ module com.example.executablelauncher {
     requires com.google.api.client;
     requires com.google.api.client.json.jackson2;
     requires org.bytedeco.ffmpeg;
+    requires opencv;
+    requires com.github.kokorin.jaffree;
+    requires color.thief;
+    requires MaterialFX;
+    requires uk.co.caprica.vlcj;
+    requires uk.co.caprica.vlcj.javafx;
 
     opens com.example.executablelauncher to javafx.fxml;
     exports com.example.executablelauncher;
@@ -39,11 +45,13 @@ module com.example.executablelauncher {
     opens com.example.executablelauncher.tmdbMetadata.images to javafx.fxml;
     exports com.example.executablelauncher.tmdbMetadata.common;
     opens com.example.executablelauncher.tmdbMetadata.common to javafx.fxml;
+    exports com.example.executablelauncher.tmdbMetadata.movieCredits;
+    opens com.example.executablelauncher.tmdbMetadata.movieCredits to javafx.fxml;
     exports com.example.executablelauncher.videoPlayer;
     opens com.example.executablelauncher.videoPlayer to javafx.fxml;
     exports com.example.executablelauncher.utils;
-    opens com.example.executablelauncher.utils to javafx.fxml;
     exports com.example.executablelauncher.tmdbMetadata.groups;
     opens com.example.executablelauncher.tmdbMetadata.groups to javafx.fxml;
     exports com.example.executablelauncher.fileMetadata;
+    opens com.example.executablelauncher.utils;
 }

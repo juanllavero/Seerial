@@ -1,6 +1,12 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.MediaInfo;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,8 +18,16 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
-import javafx.stage.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,10 +39,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.example.executablelauncher.utils.Utils.getMediaInfo;
+
 public class EditDiscController {
     //region FXML ATTRIBUTES
     @FXML
     private Button cancelButton;
+
+    @FXML
+    private TextArea overviewField;
+
+    @FXML
+    private Label overviewText;
 
     @FXML
     private TextField fileField;
@@ -41,6 +63,18 @@ public class EditDiscController {
 
     @FXML
     private Button generalViewButton;
+
+    @FXML
+    private Button detailsViewButton;
+
+    @FXML
+    private BorderPane detailsBox;
+
+    @FXML
+    private VBox generalInfoBox;
+
+    @FXML
+    private VBox tracksInfoBox;
 
     @FXML
     private FlowPane imagesContainer;
@@ -76,10 +110,13 @@ public class EditDiscController {
     private Button urlImageLoadButton;
     //endregion
 
+    //region ATTRIBUTES
     private DesktopViewController controllerParent;
-    private List<File> imagesFiles = new ArrayList<>();
+    private final List<File> imagesFiles = new ArrayList<>();
     private File selectedImage = null;
     public Episode episodeToEdit = null;
+    boolean mediaInfoShown = false;
+    //endregion
 
     //region INITIALIZATION
     public void setDisc(Episode d){
@@ -88,17 +125,25 @@ public class EditDiscController {
 
         generalViewButton.setText(App.buttonsBundle.getString("generalButton"));
         thumbnailsViewButton.setText(App.buttonsBundle.getString("thumbnailsButton"));
+        detailsViewButton.setText(App.textBundle.getString("details"));
         selectImageButton.setText(App.buttonsBundle.getString("selectImage"));
         urlImageLoadButton.setText(App.buttonsBundle.getString("downloadImages"));
         titleText.setText(App.textBundle.getString("episodeWindowTitleEdit"));
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         saveButton.setText(App.buttonsBundle.getString("saveButton"));
         orderText.setText(App.textBundle.getString("sortingOrder"));
+        overviewText.setText(App.textBundle.getString("overview"));
         fileText.setText(App.textBundle.getString("file"));
         nameText.setText(App.textBundle.getString("name"));
 
         selectedImage = new File(d.getImgSrc());
         nameField.setText(d.getName());
+        orderField.setText(String.valueOf(d.getOrder()));
+
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows"))
+            orderField.setDisable(true);
+
+        overviewField.setText(d.getOverview());
 
         fileText.setDisable(true);
 
@@ -163,6 +208,7 @@ public class EditDiscController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("urlPaster-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(App.getBaseFontSize());
             UrlPasterController controller = fxmlLoader.getController();
             controller.setDiscParent(this);
             controller.initValues(false);
@@ -198,8 +244,9 @@ public class EditDiscController {
                 System.err.println("Thumbnail not copied");
             }
 
-            imagesFiles.add(file);
-            addImage(file);
+            imagesFiles.clear();
+            imagesContainer.getChildren().clear();
+            loadImages();
         }
     }
     //endregion
@@ -214,7 +261,10 @@ public class EditDiscController {
         File dir = new File("resources/img/discCovers/" + episodeToEdit.getId());
         if (dir.exists()){
             File[] files = dir.listFiles();
-            assert files != null;
+
+            if (files == null)
+                return;
+
             imagesFiles.addAll(Arrays.asList(files));
 
             for (File f : imagesFiles){
@@ -228,7 +278,7 @@ public class EditDiscController {
     }
     private void addImage(File file){
         try{
-            Image img = new Image(file.toURI().toURL().toExternalForm(), 150, 84, true, true);
+            Image img = new Image(file.toURI().toURL().toExternalForm(), 250, 184, true, true);
             ImageView image = new ImageView(img);
 
             Button btn = new Button();
@@ -267,17 +317,22 @@ public class EditDiscController {
     void showGeneralView() {
         posterBox.setVisible(false);
         generalBox.setVisible(true);
+        detailsBox.setVisible(false);
 
         generalViewButton.getStyleClass().clear();
         generalViewButton.getStyleClass().add("buttonSelected");
 
         thumbnailsViewButton.getStyleClass().clear();
         thumbnailsViewButton.getStyleClass().add("editButton");
+
+        detailsViewButton.getStyleClass().clear();
+        detailsViewButton.getStyleClass().add("editButton");
     }
     @FXML
     void showThumbnailsView() {
         posterBox.setVisible(true);
         generalBox.setVisible(false);
+        detailsBox.setVisible(false);
 
         thumbnailsViewButton.getStyleClass().clear();
         thumbnailsViewButton.getStyleClass().add("buttonSelected");
@@ -285,13 +340,243 @@ public class EditDiscController {
         generalViewButton.getStyleClass().clear();
         generalViewButton.getStyleClass().add("editButton");
 
+        detailsViewButton.getStyleClass().clear();
+        detailsViewButton.getStyleClass().add("editButton");
+
         showImages();
+    }
+    //endregion
+
+    //region DETAILS
+    @FXML
+    void showDetails(){
+        posterBox.setVisible(false);
+        generalBox.setVisible(false);
+        detailsBox.setVisible(true);
+
+        detailsViewButton.getStyleClass().clear();
+        detailsViewButton.getStyleClass().add("buttonSelected");
+
+        generalViewButton.getStyleClass().clear();
+        generalViewButton.getStyleClass().add("editButton");
+
+        thumbnailsViewButton.getStyleClass().clear();
+        thumbnailsViewButton.getStyleClass().add("editButton");
+
+        if (!mediaInfoShown)
+            mediaInfoShown = true;
+        else
+            return;
+
+        //Add a progress circle while generating metadata
+        ProgressIndicator loadingIndicator = new ProgressIndicator();
+        loadingIndicator.setPrefSize(25, 25);
+        detailsBox.setTop(loadingIndicator);
+
+        Task<Void> generateMetadataTask = new Task<>() {
+            @Override
+            protected Void call() {
+                getMediaInfo(episodeToEdit);
+                return null;
+            }
+        };
+
+        generateMetadataTask.setOnSucceeded(e -> {
+            Platform.runLater(() -> {
+                detailsBox.getChildren().remove(loadingIndicator);
+
+                MediaInfo mediaInfo = episodeToEdit.getMediaInfo();
+
+                //MEDIA INFO
+                Text title = new Text("Media Info");
+                title.setFill(Color.WHITE);
+                title.getStyleClass().add("small-text");
+                title.getStyleClass().add("-fx-font-weight:bold;");
+
+                generalInfoBox.getChildren().add(title);
+
+                addTextLine(generalInfoBox, "Duration: ", mediaInfo.getDuration());
+                addTextLine(generalInfoBox, "File: ", mediaInfo.getFile());
+                addTextLine(generalInfoBox, "Location: ", mediaInfo.getLocation());
+                addTextLine(generalInfoBox, "Bitrate: ", mediaInfo.getBitrate());
+                addTextLine(generalInfoBox, "Size: ", mediaInfo.getSize());
+                addTextLine(generalInfoBox, "Container: ", mediaInfo.getContainer());
+
+                for (VideoTrack track : episodeToEdit.getVideoTracks())
+                    processVideoData(track);
+
+                for (AudioTrack track : episodeToEdit.getAudioTracks())
+                    processAudioData(track);
+
+                for (SubtitleTrack track : episodeToEdit.getSubtitleTracks())
+                    processSubtitleData(track);
+            });
+        });
+
+        generateMetadataTask.setOnFailed(e -> {
+            Platform.runLater(() -> {
+                detailsBox.getChildren().remove(loadingIndicator);
+
+                Text title = new Text("Media info could not be generated");
+                title.setFill(Color.WHITE);
+                title.getStyleClass().add("small-text");
+                title.getStyleClass().add("-fx-font-weight:bold;");
+
+                generalInfoBox.getChildren().add(title);
+            });
+        });
+
+        App.executor.submit(generateMetadataTask);
+    }
+
+    private void processVideoData(VideoTrack track){
+        if (!tracksInfoBox.getChildren().isEmpty()){
+            Region spacer = new Region();
+            spacer.setPrefHeight(15);
+            tracksInfoBox.getChildren().add(spacer);
+        }
+
+        Text title = new Text("Video");
+        title.setFill(Color.WHITE);
+        title.getStyleClass().add("small-text");
+        title.getStyleClass().add("-fx-font-weight:bold;");
+
+        tracksInfoBox.getChildren().add(title);
+
+        if (track.getCodec() != null)
+            addTextLine(tracksInfoBox, "Codec: ", track.getCodec());
+
+        if (track.getCodecExt() != null)
+            addTextLine(tracksInfoBox, "Codec Extended: ", track.getCodecExt());
+
+        if (track.getBitrate() != null)
+            addTextLine(tracksInfoBox, "Bitrate: ", track.getBitrate());
+
+        if (track.getFramerate() != null)
+            addTextLine(tracksInfoBox, "Frame Rate: ", track.getFramerate());
+
+        if (track.getCodedHeight() != null && track.getCodedWidth() != null) {
+            addTextLine(tracksInfoBox, "Coded Height: ", track.getCodedHeight());
+            addTextLine(tracksInfoBox, "Coded Width: ", track.getCodedWidth());
+        }
+
+        if (track.getChromaLocation() != null)
+            addTextLine(tracksInfoBox, "Chroma Location: ", track.getChromaLocation());
+
+        if (track.getColorSpace() != null)
+            addTextLine(tracksInfoBox, "Color Space: ", track.getColorSpace());
+
+        if (track.getAspectRatio() != null)
+            addTextLine(tracksInfoBox, "Aspect Ratio: ", track.getAspectRatio());
+
+        if (track.getProfile() != null)
+            addTextLine(tracksInfoBox, "Profile: ", track.getProfile());
+
+        if (track.getRefFrames() != null)
+            addTextLine(tracksInfoBox, "Ref Frames: ", track.getRefFrames());
+
+        if (track.getColorRange() != null)
+            addTextLine(tracksInfoBox, "Color Range: ", track.getColorRange());
+
+        addTextLine(tracksInfoBox, "Display Title: ", track.getDisplayTitle());
+    }
+    private void processAudioData(AudioTrack track){
+        if (!tracksInfoBox.getChildren().isEmpty()){
+            Region spacer = new Region();
+            spacer.setPrefHeight(15);
+            tracksInfoBox.getChildren().add(spacer);
+        }
+
+        Text title = new Text("Audio");
+        title.setFill(Color.WHITE);
+        title.getStyleClass().add("small-text");
+        title.getStyleClass().add("-fx-font-weight:bold;");
+
+        tracksInfoBox.getChildren().add(title);
+
+        if (track.getCodec() != null)
+            addTextLine(tracksInfoBox, "Codec: ", track.getCodec());
+
+        if (track.getCodecExt() != null)
+            addTextLine(tracksInfoBox, "Codec Extended: ", track.getCodecExt());
+
+        if (track.getChannels() != null)
+            addTextLine(tracksInfoBox, "Channels: ", track.getChannels());
+
+        if (track.getChannelLayout() != null)
+            addTextLine(tracksInfoBox, "Channel Layout: ", track.getChannelLayout());
+
+        if (track.getBitrate() != null)
+            addTextLine(tracksInfoBox, "Bitrate: ", track.getBitrate());
+
+        if (track.getLanguage() != null) {
+            addTextLine(tracksInfoBox, "Language: ", track.getLanguage());
+            addTextLine(tracksInfoBox, "Language tag: ", track.getLanguageTag());
+        }
+
+        if (track.getBitDepth() != null)
+            addTextLine(tracksInfoBox, "Bit Depth: ", track.getBitDepth());
+
+        if (track.getProfile() != null)
+            addTextLine(tracksInfoBox, "Profile: ", track.getProfile());
+
+        if (track.getSamplingRate() != null)
+            addTextLine(tracksInfoBox, "SamplingRate: ", track.getSamplingRate());
+
+        addTextLine(tracksInfoBox, "Display Title: ", track.getDisplayTitle());
+    }
+    private void processSubtitleData(SubtitleTrack track){
+        if (!tracksInfoBox.getChildren().isEmpty()){
+            Region spacer = new Region();
+            spacer.setPrefHeight(15);
+            tracksInfoBox.getChildren().add(spacer);
+        }
+
+        Text title = new Text("Subtitles");
+        title.setFill(Color.WHITE);
+        title.getStyleClass().add("small-text");
+        title.getStyleClass().add("-fx-font-weight:bold;");
+
+        tracksInfoBox.getChildren().add(title);
+
+        if (track.getCodec() != null){
+            addTextLine(tracksInfoBox, "Codec: ", track.getCodec());
+        }
+
+        if (track.getCodecExt() != null)
+            addTextLine(tracksInfoBox, "Codec Extended: ", track.getCodecExt());
+
+        if (track.getLanguage() != null) {
+            addTextLine(tracksInfoBox, "Language: ", track.getLanguage());
+            addTextLine(tracksInfoBox, "Language tag: ", track.getLanguageTag());
+        }
+
+        if (track.getTitle() != null) {
+            addTextLine(tracksInfoBox, "Title: ", track.getTitle());
+        }
+
+        addTextLine(tracksInfoBox, "Display Title: ", track.getDisplayTitle());
+    }
+    private void addTextLine(VBox box, String header, String content){
+        TextFlow textFlow = new TextFlow();
+
+        Text first = new Text(header);
+        first.setFill(Color.GRAY);
+        first.getStyleClass().add("tiny-text");
+
+        Text second = new Text(content);
+        second.setFill(Color.WHITE);
+        second.getStyleClass().add("tiny-text");
+        second.getStyleClass().add("-fx-font-weight:bold;");
+
+        textFlow.getChildren().addAll(first, second);
+
+        box.getChildren().add(textFlow);
     }
     //endregion
 
     @FXML
     void save(ActionEvent event) {
-
         if (nameField.getText().isEmpty()){
             App.showErrorMessage(App.textBundle.getString("error"), "", App.textBundle.getString("emptyField"));
             return;
@@ -303,8 +588,9 @@ public class EditDiscController {
         }
 
         episodeToEdit.setName(nameField.getText());
+        episodeToEdit.setOverview(overviewField.getText());
 
-        if (!orderField.getText().isEmpty() && !orderField.getText().equals("0"))
+        if (!orderField.getText().isEmpty() && !orderField.isDisable())
             episodeToEdit.setOrder(Integer.parseInt(orderField.getText()));
 
         if (selectedImage != null)

@@ -10,13 +10,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="208.0" prefWidth="422.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ConfirmationWindowController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ConfirmationWindowController">
    <top>
       <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
             <Label fx:id="title" text="Remove Element" textFill="#f8f8f8" BorderPane.alignment="CENTER">
                <font>
-                  <Font size="20.0" />
+                  <Font name="SansSerif Bold" size="20.0" />
                </font>
                <BorderPane.margin>
                   <Insets />

@@ -1,8 +1,8 @@
 package com.example.executablelauncher.entities;
 
 public class Chapter {
-    String title = "";
-    double time = 0;
+    String title;
+    double time;
     String displayTime = "";
     String thumbnailSrc = "";
 
@@ -20,7 +20,7 @@ public class Chapter {
     }
 
     public double getTime() {
-        return time;
+        return time / 1000;
     }
 
     public void setTime(double time) {

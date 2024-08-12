@@ -1,39 +1,45 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Episode;
-import com.example.executablelauncher.entities.Season;
-import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.entities.*;
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
+import com.example.executablelauncher.tmdbMetadata.movieCredits.Cast;
 import com.example.executablelauncher.utils.Configuration;
 import com.example.executablelauncher.utils.Utils;
 import com.jfoenix.controls.JFXSlider;
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.BoxBlur;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
-import javafx.scene.robot.Robot;
-import javafx.scene.text.Font;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.*;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -45,166 +51,106 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static com.example.executablelauncher.App.getBaseFontSize;
+import static com.example.executablelauncher.App.mediaExecutor;
+import static com.example.executablelauncher.utils.Utils.*;
 
 public class SeasonController {
     //region FXML ATTRIBUTES
-    @FXML
-    private BorderPane videoError;
-
-    @FXML
-    private Label errorTitle;
-
-    @FXML
-    private Label errorMessage;
-
-    @FXML
-    private Button errorButton;
-
-    @FXML
-    private MediaView backgroundVideo;
-
-    @FXML
-    private ImageView backgroundImage;
-
-    @FXML
-    private ImageView backgroundShadow;
-
-    @FXML
-    private ImageView backgroundShadow2;
-
-    @FXML
-    private ImageView scoreProviderImg;
-
-    @FXML
-    private HBox cardContainer;
-
-    @FXML
-    private VBox detailsText;
-
-    @FXML
-    private HBox timeLeftBox;
-
-    @FXML
-    private Label timeLeftField;
-
-    @FXML
-    private BorderPane detailsBox;
-
-    @FXML
-    private ImageView detailsImage;
-
-    @FXML
-    private Pane videoPlayerPane;
-
-    @FXML
-    private HBox detailsInfo;
-
-    @FXML
-    private Label detailsOverview;
-
-    @FXML
-    private Label detailsTitle;
-
-    @FXML
-    private Label durationField;
-
-    @FXML
-    private Label episodeName;
-
-    @FXML
-    private Label fileDetailsText;
-
-    @FXML
-    private Label fileNameField;
-
-    @FXML
-    private Label fileNameText;
-
-    @FXML
-    private VBox infoBox;
-
-    @FXML
-    private Button lastSeasonButton;
-
-    @FXML
-    private ImageView logo;
-
-    @FXML
-    private StackPane mainBox;
-
-    @FXML
-    private BorderPane mainPane;
-
-    @FXML
-    private ImageView menuShadow;
-
-    @FXML
-    private Button nextSeasonButton;
-
-    @FXML
-    private Button watchedButton;
-
-    @FXML
-    private Button optionsButton;
-
-    @FXML
-    private Label overviewField;
-
-    @FXML
-    private Button playButton;
-
-    @FXML
-    private Button detailsButton;
-
-    @FXML
-    private Label scoreField;
-
-    @FXML
-    private Label seasonEpisodeNumber;
-
-    @FXML
-    private ScrollPane episodeScroll;
-
-    @FXML
-    private Label writtenByField;
-
-    @FXML
-    private Label writtenByText;
-
-    @FXML
-    private Label genresText;
-
-    @FXML
-    private Label genresField;
-
-    @FXML
-    private Label yearField;
+    @FXML Pane fill;
+    @FXML Pane shade;
+    @FXML Label seriesTitle;
+    @FXML Label directedByText;
+    @FXML Label writtenByText;
+    @FXML Label createdByText;
+    @FXML Label musicByText;
+    @FXML Label studioText;
+    @FXML Label directedByField;
+    @FXML Label writtenByField;
+    @FXML Label createdByField;
+    @FXML Label musicByField;
+    @FXML Label studioField;
+    @FXML Label fileSizeText;
+    @FXML Label fileSizeField;
+    @FXML Label bitrateText;
+    @FXML Label bitrateField;
+    @FXML Label castText;
+    @FXML VBox castLeftBox;
+    @FXML VBox castRightBox;
+    @FXML BorderPane videoError;
+    @FXML Button goBackButton;
+    @FXML Button videoTrackButton;
+    @FXML Button audioTrackButton;
+    @FXML Button subsTrackButton;
+    @FXML Label errorTitle;
+    @FXML Label errorMessage;
+    @FXML Button errorButton;
+    @FXML MediaView backgroundVideo;
+    @FXML ImageView backgroundImage;
+    @FXML ImageView backgroundShadow;
+    @FXML ImageView backgroundShadow2;
+    @FXML ImageView scoreProviderImg;
+    @FXML HBox cardContainer;
+    @FXML VBox detailsText;
+    @FXML HBox timeLeftBox;
+    @FXML Label timeLeftField;
+    @FXML BorderPane detailsBox;
+    @FXML HBox detailsInfo;
+    @FXML Label detailsOverview;
+    @FXML Label detailsTitle;
+    @FXML Label durationField;
+    @FXML Label episodeName;
+    @FXML Label fileDetailsText;
+    @FXML Label fileNameField;
+    @FXML Label fileNameText;
+    @FXML VBox infoBox;
+    @FXML Button lastSeasonButton;
+    @FXML ImageView logo;
+    @FXML StackPane mainBox;
+    @FXML BorderPane mainPane;
+    @FXML ImageView menuShadow;
+    @FXML Button nextSeasonButton;
+    @FXML Button watchedButton;
+    @FXML Button optionsButton;
+    @FXML Label overviewField;
+    @FXML Button playButton;
+    @FXML Button detailsButton;
+    @FXML Label scoreField;
+    @FXML Label seasonEpisodeNumber;
+    @FXML ScrollPane episodeScroll;
+    @FXML Label genresText;
+    @FXML Label genresField;
+    @FXML Label yearField;
     //endregion
 
     //region ATTRIBUTES
-    private Controller controllerParent;
-
-    private List<Season> seasons = new ArrayList<>();
-    private List<Episode> episodes = new ArrayList<>();
-    private List<Button> episodeButtons = new ArrayList<>();
-    private int currentSeason = 0;
-    private Episode selectedEpisode = null;
-    private Timeline timeline = null;
-    private MediaPlayer mp = null;
-    private boolean isVideo = false;
-    private boolean playSameMusic = false;
-    private boolean isShow = false;
-    private Series series = null;
-    private boolean episodesFocussed = true;
-    private boolean playingVideo = false;
-    private int buttonCount = 0;
+    Controller controllerParent;
+    Library library;
+    List<Season> seasons = new ArrayList<>();
+    List<Episode> episodes = new ArrayList<>();
+    List<Button> episodeButtons = new ArrayList<>();
+    Episode selectedEpisode = null;
+    Series series = null;
+    int currentSeason = 0;
+    int buttonCount = 0;
+    MediaPlayer mp = null;
+    boolean isShow = false;
+    boolean isVideo = false;
+    boolean playingVideo = false;
+    boolean playSameMusic = false;
+    boolean episodesFocussed = true;
     //endregion
 
     //region INITIALIZATION
     public void setParent(Controller c){
         controllerParent = c;
     }
-    public void setSeasons(Series series, boolean playSameMusic, boolean isShow){
+    public void setSeasons(Library library, Series series, boolean playSameMusic, boolean isShow){
+        this.library = library;
         this.isShow = isShow;
         this.series = series;
         this.playSameMusic = playSameMusic;
@@ -213,11 +159,12 @@ public class SeasonController {
         assert seasons != null;
         seasons.sort(new Utils.SeasonComparator());
 
+        shade.setVisible(false);
+        fill.setVisible(false);
+
         menuShadow.setFitWidth(Screen.getPrimary().getBounds().getWidth());
         menuShadow.setFitHeight(Screen.getPrimary().getBounds().getHeight());
         menuShadow.setVisible(false);
-
-        videoPlayerPane.setVisible(false);
 
         mainBox.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedBack(event)){
@@ -230,12 +177,21 @@ public class SeasonController {
             }
         });
 
-        //Set buttons for next and last season
-        updateButtons();
-
         errorTitle.setText(App.textBundle.getString("playbackError"));
         errorMessage.setText(App.textBundle.getString("videoErrorMessage"));
         errorButton.setText(App.buttonsBundle.getString("ok"));
+
+        fileDetailsText.setText(App.textBundle.getString("fileDetails"));
+        castText.setText(App.textBundle.getString("cast"));
+        directedByText.setText(App.textBundle.getString("directedBy"));
+        writtenByText.setText(App.textBundle.getString("writtenBy"));
+        createdByText.setText(App.textBundle.getString("createdBy"));
+        musicByText.setText(App.textBundle.getString("musicBy"));
+        studioText.setText(App.textBundle.getString("studios"));
+        genresText.setText(App.textBundle.getString("genres"));
+        fileNameText.setText(App.textBundle.getString("fileName"));
+        fileSizeText.setText(App.textBundle.getString("size"));
+        bitrateText.setText(App.textBundle.getString("bitrate"));
 
         errorButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedSelect(event)) {
@@ -246,6 +202,15 @@ public class SeasonController {
                 else
                     playButton.requestFocus();
             }
+        });
+
+        errorButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) -> {
+            videoError.setVisible(false);
+
+            if (isShow)
+                episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+            else
+                playButton.requestFocus();
         });
 
         videoError.setVisible(false);
@@ -267,58 +232,77 @@ public class SeasonController {
 
         episodeScroll.setPrefWidth(screenWidth);
 
+        episodeScroll.setOnMouseClicked(e -> {
+            if (!episodesFocussed)
+                episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
+        });
+
         detailsText.setPrefWidth(screenWidth / 2);
         detailsBox.setVisible(false);
 
+        double aspectRatio = screenWidth / screenHeight;
+        if (aspectRatio > (double) 16/9){
+            shade.setPrefWidth(((double) 16/9) * screenHeight);
+            shade.setPrefHeight(screenHeight);
+
+            fill.setPrefWidth(screenWidth - shade.getPrefWidth());
+            fill.setPrefHeight(screenHeight);
+        }else{
+            shade.setPrefWidth(screenWidth);
+            shade.setPrefHeight(screenHeight);
+
+            fill.setPrefWidth(0);
+        }
+
         detailsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal)
-                controllerParent.playInteractionSound();
+                playInteractionSound();
         });
 
         playButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
-                controllerParent.playInteractionSound();
+                playInteractionSound();
                 playButton.setText(App.buttonsBundle.getString("playButton"));
                 ImageView img = (ImageView) playButton.getGraphic();
-                img.setImage(new Image("file:resources/img/icons/playSelected.png", 30, 30, true, true));
+                img.setImage(new Image(getFileAsIOStream("img/icons/playSelected.png"), 30, 30, true, true));
             }else{
                 playButton.setText("");
                 ImageView img = (ImageView) playButton.getGraphic();
-                img.setImage(new Image("file:resources/img/icons/play.png", 30, 30, true, true));
+                img.setImage(new Image(getFileAsIOStream("img/icons/play.png"), 30, 30, true, true));
             }
         });
 
         watchedButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             ImageView img = (ImageView) watchedButton.getGraphic();
             if (newVal){
-                controllerParent.playInteractionSound();
+                playInteractionSound();
                 if (selectedEpisode.isWatched()){
                     watchedButton.setText(App.buttonsBundle.getString("markUnwatched"));
-                    img.setImage(new Image("file:resources/img/icons/watchedSelected.png", 30, 30, true, true));
+                    img.setImage(new Image(getFileAsIOStream("img/icons/watchedSelected.png"), 30, 30, true, true));
                 }else{
                     watchedButton.setText(App.buttonsBundle.getString("markWatched"));
-                    img.setImage(new Image("file:resources/img/icons/toWatchSelected.png", 30, 30, true, true));
+                    img.setImage(new Image(getFileAsIOStream("img/icons/toWatchSelected.png"), 30, 30, true, true));
                 }
             }else{
                 watchedButton.setText("");
                 if (selectedEpisode.isWatched()){
-                    img.setImage(new Image("file:resources/img/icons/watched.png", 30, 30, true, true));
+                    img.setImage(new Image(getFileAsIOStream("img/icons/watched.png"), 30, 30, true, true));
                 }else{
-                    img.setImage(new Image("file:resources/img/icons/toWatch.png", 30, 30, true, true));
+                    img.setImage(new Image(getFileAsIOStream("img/icons/toWatch.png"), 30, 30, true, true));
                 }
             }
         });
 
         optionsButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal){
-                controllerParent.playInteractionSound();
+                playInteractionSound();
                 optionsButton.setText(App.buttonsBundle.getString("moreButton"));
                 ImageView img = (ImageView) optionsButton.getGraphic();
-                img.setImage(new Image("file:resources/img/icons/optionsSelected.png", 30, 30, true, true));
+                img.setImage(new Image(getFileAsIOStream("img/icons/optionsSelected.png"), 30, 30, true, true));
             }else{
                 optionsButton.setText("");
                 ImageView img = (ImageView) optionsButton.getGraphic();
-                img.setImage(new Image("file:resources/img/icons/options.png", 30, 30, true, true));
+                img.setImage(new Image(getFileAsIOStream("img/icons/options.png"), 30, 30, true, true));
             }
         });
 
@@ -326,16 +310,6 @@ public class SeasonController {
             if (App.pressedSelect(event)){
                 toggleWatched();
             }
-        });
-
-        lastSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal)
-                controllerParent.playInteractionSound();
-        });
-
-        nextSeasonButton.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal)
-                controllerParent.playInteractionSound();
         });
 
         detailsButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
@@ -360,6 +334,11 @@ public class SeasonController {
                 watchedButton.requestFocus();
             else if (App.pressedLeft(event) && lastSeasonButton.isVisible())
                 lastSeasonButton.requestFocus();
+        });
+
+        playButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
+            if (App.pressedSelect(event))
+                playEpisode(selectedEpisode);
         });
 
         watchedButton.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event) -> {
@@ -390,7 +369,7 @@ public class SeasonController {
 
         lastSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedSelect(event)){
-                controllerParent.playCategoriesSound();
+                playCategoriesSound();
                 lastSeason();
             }else if (App.pressedRight(event)) {
                 if (episodeButtons.size() > 1 && episodesFocussed)
@@ -398,17 +377,17 @@ public class SeasonController {
                 else
                     playButton.requestFocus();
             }else if (App.pressedLeft(event)) {
-                controllerParent.playCategoriesSound();
+                playCategoriesSound();
                 lastSeason();
             }
         });
 
         nextSeasonButton.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) -> {
             if (App.pressedSelect(event)){
-                controllerParent.playCategoriesSound();
+                playCategoriesSound();
                 nextSeason();
             }else if (App.pressedRight(event)) {
-                controllerParent.playCategoriesSound();
+                playCategoriesSound();
                 nextSeason();
             }else if (App.pressedLeft(event)) {
                 if (episodeButtons.size() > 1 && episodesFocussed)
@@ -430,23 +409,21 @@ public class SeasonController {
         setEpisodesOutOfFocusButton(watchedButton);
         setEpisodesOutOfFocusButton(optionsButton);
 
-        if (playSameMusic){
+        if (playSameMusic)
             findAndPlaySong();
-        }
 
         currentSeason = 0;
+
+        //Find currently watching episode if exists
+        if (series.isBeingWatched())
+            currentSeason = series.getCurrentlyWatchingSeasonIndex();
+
         assert seasons != null;
-        updateInfo(seasons.get(0));
+        updateInfo(seasons.get(currentSeason));
     }
     private void updateInfo(Season season){
-        if (mp != null){
-            if (isVideo || !playSameMusic) {
-                stopPlayer();
-            }
-        }
-
-        if (timeline != null)
-            timeline.stop();
+        if (mp != null && (isVideo || !playSameMusic))
+            stopPlayer();
 
         if (season.getEpisodes().size() > 1 || isShow){
             cardContainer.setPrefHeight((Screen.getPrimary().getBounds().getHeight() / 5) + 20);
@@ -455,6 +432,8 @@ public class SeasonController {
             cardContainer.setPrefHeight(0);
             cardContainer.setVisible(false);
         }
+
+        updateButtons();
 
         //Set Background Image
         Image background = new Image("file:" + season.getBackgroundSrc());
@@ -488,33 +467,29 @@ public class SeasonController {
         WritableImage croppedImage = new WritableImage(pixelReader, xOffset, 0, (int) newWidth, (int) newHeight);
 
         backgroundImage.setImage(croppedImage);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.8), backgroundImage);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1);
-        fadeIn.play();
+        fadeInEffect(backgroundImage, 0.5f).play();
         //endregion
 
-        String logoSrc;
+        String logoSrc = season.getLogoSrc();
         if (isShow)
             logoSrc = series.getLogoSrc();
-        else
-            logoSrc = season.getLogoSrc();
 
-        if (logoSrc.isEmpty()){
-            infoBox.getChildren().remove(0);
-            Label seriesTitle = new Label(series.getName());
-            seriesTitle.setFont(new Font("Arial", 58));
-            seriesTitle.setStyle("-fx-font-weight: bold");
-            seriesTitle.setTextFill(Color.color(1, 1, 1));
-            seriesTitle.setEffect(new DropShadow());
-            infoBox.getChildren().add(0, seriesTitle);
-        }else {
+        File logoFile = new File(logoSrc);
+
+        if (!logoFile.exists() || !logoFile.isFile()){
+            seriesTitle.setText(series.getName());
+            seriesTitle.setVisible(true);
+            logo.setVisible(false);
+        }else if (logoFile.exists()){
             Image img;
-            img = new Image("file:" + logoSrc, screenWidth * 0.25, screenHeight * 0.25, true, true);
+            img = new Image("file:" + logoSrc, screenHeight * 0.6, screenHeight * 0.6, true, true);
 
             logo.setImage(img);
-            logo.setFitWidth(screenWidth * 0.25);
-            logo.setFitHeight(screenHeight * 0.25);
+            logo.setFitWidth(screenHeight * 0.6);
+            logo.setFitHeight(screenHeight * 0.6);
+
+            seriesTitle.setVisible(false);
+            logo.setVisible(true);
         }
 
         processBackgroundMedia();
@@ -523,25 +498,32 @@ public class SeasonController {
         episodeButtons.clear();
         episodes = season.getEpisodes();
 
-        episodes.sort(new Utils.EpisodeComparator().reversed());
-        for (Episode episode : episodes){
+        episodes.sort(new Utils.EpisodeComparator());
+        for (Episode episode : episodes)
             addEpisodeCard(episode);
-        }
 
         if (!episodes.isEmpty())
             selectedEpisode = episodes.get(0);
 
-        if (episodeButtons.size() <= 1 && !isShow){
-            setTimeLeft(episodes.get(0));
-        }
+        if (episodes.size() == 1)
+            updateSelectedTrackButtons(selectedEpisode);
+
+        if (season.isBeingWatched())
+            selectedEpisode = episodes.get(season.getCurrentlyWatchingEpisodeIndex());
+
+        if (episodeButtons.size() <= 1 && !isShow)
+            setTimeLeft(timeLeftBox, timeLeftField, episodes.get(0));
 
         Platform.runLater(() -> {
             cardContainer.setTranslateX(0);
-            buttonCount = getVisibleButtonsCount();
+            buttonCount = getVisibleButtonCountGlobal(episodeScroll, cardContainer);
 
-            if (episodeButtons.size() > 1 || isShow)
-                episodeButtons.get(season.getLastDisc()).requestFocus();
-            else
+            if (episodeButtons.size() > 1 || isShow) {
+                if (season.isBeingWatched())
+                    episodeButtons.get(season.getCurrentlyWatchingEpisodeIndex()).requestFocus();
+                else
+                    episodeButtons.get(season.getLastDisc()).requestFocus();
+            }else
                 playButton.requestFocus();
         });
 
@@ -552,13 +534,13 @@ public class SeasonController {
 
         yearField.setText(season.getYear());
         durationField.setText(setRuntime(selectedEpisode.getRuntime()));
-        episodeName.setText("");
+        hideNode(episodeName);
 
         if (selectedEpisode.getImdbScore() != 0){
-            scoreProviderImg.setImage(new Image("file:resources/img/icons/imdb.png", 30, 30, true, true));
+            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/imdb.png"), 40, 40, true, true));
             scoreField.setText(String.valueOf(selectedEpisode.getImdbScore()));
         }else{
-            scoreProviderImg.setImage(new Image("file:resources/img/icons/tmdb.png", 30, 30, true, true));
+            scoreProviderImg.setImage(new Image(getFileAsIOStream("img/icons/tmdb.png"), 40, 40, true, true));
             scoreField.setText(String.valueOf(selectedEpisode.getScore()));
         }
 
@@ -566,24 +548,7 @@ public class SeasonController {
             detailsInfo.getChildren().remove(seasonEpisodeNumber);
         }
 
-        fadeInEffect(backgroundImage);
-    }
-    private int getVisibleButtonsCount() {
-        double scrollPaneWidth = episodeScroll.getWidth();
-        double scrollPaneX = episodeScroll.getLayoutX();
-
-        int visibleButtons = 0;
-
-        for (Node button : cardContainer.getChildren()) {
-            Bounds buttonBounds = button.localToScene(button.getBoundsInLocal());
-            double buttonX = buttonBounds.getMinX();
-
-            if (buttonX >= scrollPaneX && buttonX + buttonBounds.getWidth() <= scrollPaneX + scrollPaneWidth) {
-                visibleButtons++;
-            }
-        }
-
-        return visibleButtons;
+        updateWatchedButton();
     }
     public Controller getParent(){
         return controllerParent;
@@ -596,6 +561,7 @@ public class SeasonController {
         nextSeasonButton.setVisible(currentSeason != seasons.size() - 1);
     }
     public void stopVideo(){
+        mainBox.setDisable(false);
         playingVideo = false;
 
         if (episodeButtons.size() > 1 || isShow)
@@ -603,12 +569,20 @@ public class SeasonController {
         else
             playButton.requestFocus();
 
-        setTimeLeft(selectedEpisode);
-        reloadEpisodeCard();
+        Series selectedSeries = App.getSelectedSeries();
+        Season selectedSeason = seasons.get(currentSeason);
+        markPreviousAndNextEpisodes(selectedSeries, selectedSeason, selectedEpisode);
+
+        setTimeLeft(timeLeftBox, timeLeftField, selectedEpisode);
         updateWatchedButton();
 
-        if (mp != null)
-            mp.play();
+        for (Episode episode : selectedSeason.getEpisodes())
+            reloadEpisodeCard(episode);
+
+        if (playSameMusic)
+            findAndPlaySong();
+        else
+            processBackgroundMedia();
     }
     //endregion
 
@@ -637,7 +611,7 @@ public class SeasonController {
                     scaleTransition.setToY(1.1);
                     scaleTransition.play();
 
-                    controllerParent.playInteractionSound();
+                    playInteractionSound();
 
                     updateDiscInfo(episodes.get(episodeButtons.indexOf(btn)));
                 }else{
@@ -671,6 +645,15 @@ public class SeasonController {
                         episodeButtons.get(index + 1).requestFocus();
                     else if (nextSeasonButton.isVisible())
                         nextSeasonButton.requestFocus();
+                }
+            });
+
+            btn.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
+                if (event.getButton().equals(MouseButton.PRIMARY)){
+                    if (btn == episodeButtons.get(episodes.indexOf(selectedEpisode)) && episodesFocussed)
+                        playEpisode(selectedEpisode);
+                    else
+                        btn.requestFocus();
                 }
             });
 
@@ -717,13 +700,8 @@ public class SeasonController {
     }
 
     public void playEpisode(Episode episode){
-        if (mp != null)
-            mp.stop();
-
-        if (timeline != null)
-            timeline.stop();
-
-        playingVideo = true;
+        if (playingVideo)
+            return;
 
         //Check if the video file exists before showing the video player
         File videoFile = new File(episode.getVideoSrc());
@@ -734,37 +712,59 @@ public class SeasonController {
             return;
         }
 
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
-            Parent root1 = fxmlLoader.load();
+        if (mp != null)
+            stopPlayer();
 
-            Stage thisStage = (Stage) mainBox.getScene().getWindow();
+        selectedEpisode = episode;
+        playingVideo = true;
 
-            Stage stage = new Stage();
-            stage.setTitle("VideoPlayer");
-            stage.initStyle(StageStyle.TRANSPARENT);
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initOwner(thisStage);
-            Scene scene = new Scene(root1);
-            scene.setFill(Color.TRANSPARENT);
-            scene.setCursor(Cursor.NONE);
-            stage.setScene(scene);
+        mainBox.setDisable(true);
 
-            String name = series.getName();
-            if (!isShow)
-                name = seasons.get(currentSeason).getName();
+        if (System.getProperty("os.name").toLowerCase().contains("win")){
+            try{
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
+                Parent root = fxmlLoader.load();
+                root.setStyle(getBaseFontSize());
 
-            VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setParent(this);
-            playerController.setVideo(seasons.get(currentSeason), episode, name, scene);
+                Stage videoStage = (Stage) mainBox.getScene().getWindow();
 
-            stage.setMaximized(true);
-            stage.show();
+                Stage controlsStage = new Stage();
+                controlsStage.setTitle("Video Player Controls");
+                controlsStage.initStyle(StageStyle.TRANSPARENT);
+                controlsStage.initModality(Modality.NONE);
+                controlsStage.initOwner(videoStage);
+                Scene scene = new Scene(root);
+                scene.setFill(Color.TRANSPARENT);
+                controlsStage.setScene(scene);
 
-            new Robot().mouseMove(Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
-            fadeInEffect((Pane) root1);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                String name = series.getName();
+                if (!isShow)
+                    name = seasons.get(currentSeason).getName();
+
+                VideoPlayerController playerController = fxmlLoader.getController();
+                playerController.setFullScreenPlayer(this, controlsStage);
+                playerController.setVideo(seasons.get(currentSeason), episode, name, videoStage);
+
+                controlsStage.setMaximized(true);
+                controlsStage.show();
+
+                fadeInEffect((Pane) root);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }else{
+            VlcjJavaFxApplication videoPlayer = new VlcjJavaFxApplication();
+
+            try {
+                Stage stage = new Stage();
+                videoPlayer.init();
+                videoPlayer.setSeasonParent(this);
+                videoPlayer.startVideo(seasons.get(currentSeason), episode);
+                videoPlayer.start(stage);
+                stage.setFullScreen(true);
+            } catch (Exception e) {
+                System.err.println("playEpisode: could not load VLC video player");
+            }
         }
     }
 
@@ -792,43 +792,48 @@ public class SeasonController {
         }
     }
 
-    private void toggleWatched(){
+    @FXML
+    void toggleWatched(){
         if (selectedEpisode.isWatched())
             selectedEpisode.setUnWatched();
         else
             selectedEpisode.setWatched();
 
-        reloadEpisodeCard();
-        updateWatchedButton();
-    }
+        Series selectedSeries = App.getSelectedSeries();
+        Season selectedSeason = seasons.get(currentSeason);
+        markPreviousAndNextEpisodes(selectedSeries, selectedSeason, selectedEpisode);
 
-    public void setWatched(){
-        selectedEpisode.setWatched();
-        reloadEpisodeCard();
+        setTimeLeft(timeLeftBox, timeLeftField, selectedEpisode);
         updateWatchedButton();
+
+        for (Episode episode : selectedSeason.getEpisodes())
+            reloadEpisodeCard(episode);
     }
     private void updateWatchedButton(){
         ImageView img = (ImageView) watchedButton.getGraphic();
 
         if (watchedButton.isFocused()){
             if (selectedEpisode.isWatched()){
-                img.setImage(new Image("file:resources/img/icons/watchedSelected.png", 30, 30, true, true));
+                img.setImage(new Image(getFileAsIOStream("img/icons/watchedSelected.png"), 30, 30, true, true));
             }else{
-                img.setImage(new Image("file:resources/img/icons/toWatchSelected.png", 30, 30, true, true));
+                img.setImage(new Image(getFileAsIOStream("img/icons/toWatchSelected.png"), 30, 30, true, true));
             }
         }else{
             if (selectedEpisode.isWatched()){
-                img.setImage(new Image("file:resources/img/icons/watched.png", 30, 30, true, true));
+                img.setImage(new Image(getFileAsIOStream("img/icons/watched.png"), 30, 30, true, true));
             }else{
-                img.setImage(new Image("file:resources/img/icons/toWatch.png", 30, 30, true, true));
+                img.setImage(new Image(getFileAsIOStream("img/icons/toWatch.png"), 30, 30, true, true));
             }
         }
     }
-    private void reloadEpisodeCard(){
-        Button btn = episodeButtons.get(episodes.indexOf(selectedEpisode));
+    private void reloadEpisodeCard(Episode episode){
+        if (episodeButtons.isEmpty())
+            return;
+
+        Button btn = episodeButtons.get(episodes.indexOf(episode));
         btn.setGraphic(null);
 
-        setEpisodeCardValues(btn, selectedEpisode);
+        setEpisodeCardValues(btn, episode);
     }
     private void setEpisodeCardValues(Button btn, Episode selectedEpisode) {
         ImageView thumbnail = new ImageView();
@@ -854,8 +859,8 @@ public class SeasonController {
         StackPane main = new StackPane(thumbnail);
         BorderPane details = new BorderPane();
 
-        if (selectedEpisode.getTimeWatched() > 5000){
-            JFXSlider slider = new JFXSlider(0, selectedEpisode.getRuntime() * 60 * 1000
+        if (selectedEpisode.getTimeWatched() != 0){
+            JFXSlider slider = new JFXSlider(0, selectedEpisode.getRuntimeInSeconds()
                     , selectedEpisode.getTimeWatched());
             slider.setFocusTraversable(false);
             details.setBottom(slider);
@@ -883,7 +888,7 @@ public class SeasonController {
 
         if (selectedEpisode.isWatched()){
             ImageView watched = new ImageView(
-                    new Image("file:resources/img/icons/tick.png", 25, 25, true, true));
+                    new Image(getFileAsIOStream("img/icons/episodeTick.png"), 25, 25, true, true));
             videoInfo.getChildren().add(watched);
             watched.setTranslateY(5);
         }
@@ -903,25 +908,7 @@ public class SeasonController {
             stopPlayer();
         }
 
-        if (timeline != null)
-            timeline.stop();
-
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = (Stage) mainBox.getScene().getWindow();
-            stage.setTitle("ExecutableLauncher");
-            Scene scene = new Scene(root);
-            scene.setCursor(Cursor.NONE);
-            scene.setFill(Color.BLACK);
-            stage.setScene(scene);
-            stage.setMaximized(true);
-            stage.setWidth(Screen.getPrimary().getBounds().getWidth());
-            stage.setHeight(Screen.getPrimary().getBounds().getHeight());
-            stage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        controllerParent.closeSeasonView();
     }
     @FXML
     void lastSeason(){
@@ -940,85 +927,116 @@ public class SeasonController {
     }
     //endregion
 
-    //region EFFECTS
-    public void fadeOutEffect(Pane pane){
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.6), pane);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0);
-        fadeOut.play();
-        pane.setVisible(false);
-    }
-
-    public void fadeOutEffect(ImageView img){
-        FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), img);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0);
-        fadeOut.play();
-        img.setVisible(false);
-    }
-
-    public void fadeInEffect(Pane pane){
-        pane.setVisible(true);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.6), pane);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
-    }
-
-    public void fadeInEffect(ImageView img){
-        img.setVisible(true);
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), img);
-        fadeIn.setFromValue(0);
-        fadeIn.setToValue(1.0);
-        fadeIn.play();
-    }
-    //endregion
-
     //region DETAILS
     @FXML
     void openDetails(){
-        controllerParent.playCategoriesSound();
-        fadeOutEffect(mainPane);
+        playCategoriesSound();
+        fadeOutEffect(mainPane, 0.6f, 0).play();
+        mainPane.setVisible(false);
 
+        double width = Screen.getPrimary().getBounds().getWidth() * 0.25;
         if (isShow){
-            detailsImage.setImage(new Image("file:" + selectedEpisode.getImgSrc()));
             genresField.setText(series.getGenres());
+            detailsBox.setLeft(setRoundedBorders(selectedEpisode.getImgSrc(), width, width / ((double) 1920 /1080), 20));
         }else{
-            detailsImage.setFitHeight(Screen.getPrimary().getBounds().getHeight());
-            detailsImage.setImage(new Image("file:" + seasons.get(currentSeason).getCoverSrc()));
             genresField.setText(seasons.get(currentSeason).getGenres());
+            detailsBox.setLeft(setRoundedBorders(seasons.get(currentSeason).getCoverSrc(), width, width / ((double) 2 /3), 20));
         }
+
         detailsTitle.setText(selectedEpisode.getName());
         detailsOverview.setText(overviewField.getText());
+
+        directedByField.setVisible(!selectedEpisode.getDirectedBy().isEmpty());
+        directedByField.setManaged(!selectedEpisode.getDirectedBy().isEmpty());
+        directedByText.setVisible(!selectedEpisode.getDirectedBy().isEmpty());
+        directedByText.setManaged(!selectedEpisode.getDirectedBy().isEmpty());
+
+        writtenByField.setVisible(!selectedEpisode.getWrittenBy().isEmpty());
+        writtenByField.setManaged(!selectedEpisode.getWrittenBy().isEmpty());
+        writtenByText.setVisible(!selectedEpisode.getWrittenBy().isEmpty());
+        writtenByText.setManaged(!selectedEpisode.getWrittenBy().isEmpty());
+
+        createdByField.setVisible(!seasons.get(currentSeason).getCreator().isEmpty());
+        createdByField.setManaged(!seasons.get(currentSeason).getCreator().isEmpty());
+        createdByText.setVisible(!seasons.get(currentSeason).getCreator().isEmpty());
+        createdByText.setManaged(!seasons.get(currentSeason).getCreator().isEmpty());
+
+        musicByField.setVisible(!seasons.get(currentSeason).getMusicComposer().isEmpty());
+        musicByField.setManaged(!seasons.get(currentSeason).getMusicComposer().isEmpty());
+        musicByText.setVisible(!seasons.get(currentSeason).getMusicComposer().isEmpty());
+        musicByText.setManaged(!seasons.get(currentSeason).getMusicComposer().isEmpty());
+
+        studioField.setVisible(!seasons.get(currentSeason).getProductionStudios().isEmpty());
+        studioField.setManaged(!seasons.get(currentSeason).getProductionStudios().isEmpty());
+        studioText.setVisible(!seasons.get(currentSeason).getProductionStudios().isEmpty());
+        studioText.setManaged(!seasons.get(currentSeason).getProductionStudios().isEmpty());
+
+        directedByField.setText(selectedEpisode.getDirectedBy());
+        writtenByField.setText(selectedEpisode.getWrittenBy());
+        createdByField.setText(seasons.get(currentSeason).getCreator());
+        musicByField.setText(seasons.get(currentSeason).getMusicComposer());
+        studioField.setText(seasons.get(currentSeason).getProductionStudios());
+        fileNameField.setText(selectedEpisode.getMediaInfo().getFile());
+        fileSizeField.setText(selectedEpisode.getMediaInfo().getSize());
+        bitrateField.setText(selectedEpisode.getMediaInfo().getBitrate());
+
+        castLeftBox.getChildren().clear();
+        castRightBox.getChildren().clear();
+        VBox box = castLeftBox;
+        boolean changed = false;
+        for (Cast member : seasons.get(currentSeason).getCast()){
+            if (box.getChildren().size() == 11 && !changed) {
+                box = castRightBox;
+                changed = true;
+            }else if (box.getChildren().size() == 10 && changed){
+                Label label = new Label("...");
+                label.getStyleClass().addAll("big-text", "bold");
+                label.setTextFill(Color.WHITE);
+                label.setAlignment(Pos.CENTER_LEFT);
+                label.setEffect(new DropShadow());
+                box.getChildren().add(label);
+                break;
+            }
+
+            Text first = new Text(member.name);
+            first.setFill(Color.WHITE);
+            first.getStyleClass().addAll("big-text", "bold");
+            first.setEffect(new DropShadow());
+
+            Text second = new Text(" " + App.textBundle.getString("as") + " '" + member.character + "'");
+            second.setFill(Color.LIGHTGRAY);
+            second.getStyleClass().add("big-text");
+            second.setEffect(new DropShadow());
+
+            box.getChildren().add(new TextFlow(first, second));
+        }
 
         File file = new File(selectedEpisode.getVideoSrc());
         fileNameField.setText(file.getName());
 
+        menuShadow.setVisible(true);
+        detailsBox.setVisible(true);
         fadeInEffect(menuShadow);
         fadeInEffect(detailsBox);
 
         detailsBox.requestFocus();
     }
-
+    @FXML
     private void closeDetails(){
-        fadeOutEffect(menuShadow);
-        fadeOutEffect(detailsBox);
+        fadeOutEffect(menuShadow, 0.6f, 0).play();
+        fadeOutEffect(detailsBox, 0.6f, 0).play();
         fadeInEffect(mainPane);
+
+        menuShadow.setVisible(false);
+        detailsBox.setVisible(false);
 
         detailsButton.requestFocus();
     }
-    public String setRuntime(int runtime){
-        int h = runtime / 60;
-        int m = runtime % 60;
 
-        if (h == 0)
-            return (m + "m");
-
-        return (h + "h " + m + "m");
-    }
     private void updateDiscInfo(Episode episode) {
         selectedEpisode = episode;
         episodeName.setText(episode.getName());
+        showNode(episodeName);
 
         if (!episode.getOverview().isEmpty())
             overviewField.setText(episode.getOverview());
@@ -1030,49 +1048,71 @@ public class SeasonController {
         durationField.setText(setRuntime(episode.getRuntime()));
         scoreField.setText(String.valueOf(episode.getScore()));
 
-        setTimeLeft(episode);
+        setTimeLeft(timeLeftBox, timeLeftField, episode);
+
+        updateSelectedTrackButtons(episode);
 
         updateWatchedButton();
     }
-    private void setTimeLeft(Episode episode){
-        if (episode.getTimeWatched() > 5000){
-            timeLeftBox.setVisible(true);
-            long leftTime = ((long) episode.getRuntime() * 60 * 1000) - episode.getTimeWatched();
 
-            long hours = leftTime / 3600000;
-            long minutes = (leftTime % 3600000) / 60000;
-
-            String timeLeft;
-            if (App.globalLanguage != Locale.forLanguageTag("es-ES")) {
-                if (hours > 0) {
-                    timeLeft = hours + " " + App.textBundle.getString("hours") + " " + minutes + " " + App.textBundle.getString("minutes") + " " + App.textBundle.getString("timeLeft");
-                } else {
-                    timeLeft = minutes + " min left";
-                }
-            } else {
-                if (hours > 0) {
-                    timeLeft = App.textBundle.getString("timeLeft") + " " + hours + " " + App.textBundle.getString("hours") + " " + minutes + " " + App.textBundle.getString("minutes");
-                } else {
-                    timeLeft = "Quedan " + minutes + " minutos";
+    private void updateSelectedTrackButtons(Episode episode){
+        if (episode.getVideoTracks().isEmpty()){
+            videoTrackButton.setVisible(false);
+        }else{
+            videoTrackButton.setVisible(true);
+            VideoTrack selectedTrack = episode.getVideoTracks().getFirst();
+            for (VideoTrack track : episode.getVideoTracks()){
+                if (track.isSelected()){
+                    selectedTrack = track;
+                    break;
                 }
             }
 
-            timeLeftField.setText(timeLeft);
+            videoTrackButton.setText(selectedTrack.getDisplayTitle());
+        }
+
+        if (episode.getAudioTracks().isEmpty()){
+            audioTrackButton.setVisible(false);
         }else{
-            timeLeftBox.setVisible(false);
+            audioTrackButton.setVisible(true);
+            AudioTrack selectedTrack = episode.getAudioTracks().getFirst();
+            for (AudioTrack track : episode.getAudioTracks()){
+                if (track.isSelected()){
+                    selectedTrack = track;
+                    break;
+                }
+            }
+
+            audioTrackButton.setText(selectedTrack.getDisplayTitle());
+        }
+
+        if (episode.getSubtitleTracks().isEmpty()){
+            subsTrackButton.setVisible(false);
+        }else{
+            subsTrackButton.setVisible(true);
+            SubtitleTrack selectedTrack = episode.getSubtitleTracks().getFirst();
+            for (SubtitleTrack track : episode.getSubtitleTracks()){
+                if (track.isSelected()){
+                    selectedTrack = track;
+                    break;
+                }
+            }
+
+            subsTrackButton.setText(selectedTrack.getDisplayTitle());
         }
     }
     //endregion
 
     //region BACKGROUND VIDEO/MUSIC
     private void processBackgroundMedia(){
-        if (!seasons.get(currentSeason).getVideoSrc().isEmpty()){
-            if (mp != null)
-                mp.stop();
+        if (mp != null)
+            stopPlayer();
 
+        if (!seasons.get(currentSeason).getVideoSrc().isEmpty()){
             File file = new File(seasons.get(currentSeason).getVideoSrc());
             Media media = new Media(file.toURI().toString());
             mp = new MediaPlayer(media);
+
             backgroundVideo.setMediaPlayer(mp);
             backgroundVideo.setVisible(false);
             isVideo = true;
@@ -1088,67 +1128,63 @@ public class SeasonController {
         }
     }
     private void setMediaPlayer(){
-        Task<Void> mpTask = new Task<>() {
-            @Override
-            protected Void call() {
-                int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
-                mp.setVolume((double) volume / 100);
-                mp.setOnEndOfMedia(() -> stopPlayer());
+        double delay;
+        if (isVideo)
+            delay = Double.parseDouble(Configuration.loadConfig("backgroundDelay", "3"));
+        else
+            delay = 0.5;
 
-                double delay = 0.5;
-                if (isVideo)
-                    delay = Double.parseDouble(Configuration.loadConfig("backgroundDelay", "3"));
+        App.initializeMediaExecutor();
+        mediaExecutor.schedule(() -> {
+            int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
+            mp.setVolume((double) volume / 100);
+            mp.setOnEndOfMedia(this::stopPlayer);
 
-                timeline = new javafx.animation.Timeline(
-                        new javafx.animation.KeyFrame(Duration.seconds(delay), event -> playBackgroundMedia())
-                );
-                timeline.play();
-                return null;
-            }
-        };
+            Platform.runLater(() ->{
+                if (isVideo){
+                    double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
+                    double mediaRatio = (double) backgroundVideo.getMediaPlayer().getMedia().getWidth() / backgroundVideo.getMediaPlayer().getMedia().getHeight();
 
-        Thread thread = new Thread(mpTask);
-        thread.setDaemon(true);
-        thread.start();
+                    backgroundVideo.setPreserveRatio(true);
 
-        App.tasks.add(mpTask);
-    }
-    private void playBackgroundMedia(){
-        Platform.runLater(() ->{
-            if (isVideo){
-                double screenRatio = Screen.getPrimary().getBounds().getWidth() / Screen.getPrimary().getBounds().getHeight();
-                double mediaRatio = (double) backgroundVideo.getMediaPlayer().getMedia().getWidth() / backgroundVideo.getMediaPlayer().getMedia().getHeight();
+                    if (screenRatio > 1.8f && mediaRatio > 1.8f)
+                        backgroundVideo.setPreserveRatio(false);
 
-                backgroundVideo.setPreserveRatio(true);
+                    double videoWidth = mediaRatio * backgroundVideo.getFitHeight();
+                    fill.setPrefWidth(Screen.getPrimary().getBounds().getWidth() - videoWidth);
 
-                if (screenRatio > 1.8f && mediaRatio > 1.8f){
-                    backgroundVideo.setPreserveRatio(false);
+                    RadialGradient shadePaint = new RadialGradient(
+                            0, 1, 0.5, 0.5, 2.4, true, CycleMethod.NO_CYCLE,
+                            new Stop(0, Color.TRANSPARENT),
+                            new Stop(0.5, Color.TRANSPARENT),
+                            new Stop(0.6, Color.BLACK)
+                    );
+
+                    fill.setBackground(new Background(new BackgroundFill(Color.BLACK, null, new Insets(-10))));
+                    shade.setBackground(new Background(new BackgroundFill(shadePaint, null, new Insets(-10))));
+
+                    shade.setEffect(new BoxBlur(10, 10, 4));
+
+                    if (mediaRatio <= screenRatio){
+                        fadeInEffect(shade, 0.2f).play();
+                        fadeInEffect(fill, 0.2f).play();
+                    }
+
+                    fadeInEffect(backgroundVideo, 1).play();
+
                 }
 
-                backgroundVideo.setVisible(true);
-
-                //Fade In Transition
-                FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), backgroundVideo);
-                fadeIn.setFromValue(0);
-                fadeIn.setToValue(1.0);
-                fadeIn.play();
-                mp.stop();
                 mp.seek(mp.getStartTime());
                 mp.play();
-            }else{
-                if (mp != null) {
-                    mp.stop();
-                    mp.seek(mp.getStartTime());
-                    mp.play();
-                }
-            }
-        });
+            });
+        }, (long) delay * 1000, TimeUnit.MILLISECONDS);
+
+        mediaExecutor.shutdown();
     }
     private void stopPlayer() {
-        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), backgroundVideo);
-        fadeIn.setFromValue(1.0);
-        fadeIn.setToValue(0);
-        fadeIn.play();
+        fadeOutEffect(backgroundVideo);
+        fadeOutEffect(shade, 0.3f);
+        fadeOutEffect(fill, 0.3f);
 
         double increment = mp.getVolume() * 0.05;
         Timeline timeline = new Timeline(
@@ -1157,9 +1193,15 @@ public class SeasonController {
         timeline.setCycleCount(20);
         timeline.play();
 
-        timeline.setOnFinished(event -> mp.stop());
+        timeline.setOnFinished(event -> {
+            mp.stop();
+            mediaExecutor.shutdownNow();
+        });
     }
     private void findAndPlaySong(){
+        if (mp != null)
+            stopPlayer();
+
         for (Season season : seasons){
             if (!season.getMusicSrc().isEmpty()){
                 Platform.runLater(() -> {

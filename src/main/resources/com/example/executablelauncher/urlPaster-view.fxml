@@ -11,14 +11,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="208.0" prefWidth="422.0" style="-fx-border-color: black;" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.UrlPasterController">
+<?import java.lang.String?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" style="-fx-border-color: black;" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.UrlPasterController">
    <top>
       <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
-            <Label fx:id="title" text="Select URL" textFill="#f8f8f8" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="20.0" />
-               </font>
+            <Label fx:id="title" text="Select URL" textFill="#f8f8f8" BorderPane.alignment="CENTER" stylesheets="@styles.css">
+               <styleClass>
+                  <String fx:value="medium-text" />
+               </styleClass>
                <BorderPane.margin>
                   <Insets />
                </BorderPane.margin>
@@ -46,14 +47,15 @@
                <HBox.margin>
                   <Insets right="30.0" />
                </HBox.margin>
-               <font>
-                  <Font size="14.0" />
-               </font>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
             </Button>
             <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancelButton" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE">
-               <font>
-                  <Font size="14.0" />
-               </font></Button>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
+            </Button>
          </children>
          <padding>
             <Insets bottom="20.0" left="10.0" right="10.0" top="10.0" />
@@ -63,21 +65,22 @@
    <center>
       <VBox alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="pasteURLText" text="Paste a valid URL here" textFill="WHITE">
+            <Label fx:id="pasteURLText" text="Paste a valid URL here" textFill="WHITE" stylesheets="@styles.css">
                <VBox.margin>
                   <Insets bottom="10.0" />
                </VBox.margin>
-               <font>
-                  <Font size="14.0" />
-               </font>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
             </Label>
-            <TextField fx:id="urlField" styleClass="textFieldColor" stylesheets="@styles.css">
-               <font>
-                  <Font size="14.0" />
-               </font></TextField>
+            <TextField fx:id="urlField" prefHeight="30.0" prefWidth="361.0" styleClass="textFieldColor" stylesheets="@styles.css">
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
+            </TextField>
          </children>
          <BorderPane.margin>
-            <Insets bottom="10.0" left="20.0" right="20.0" top="20.0" />
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </BorderPane.margin>
       </VBox>
    </center>

@@ -1,5 +1,10 @@
 package com.example.executablelauncher.entities;
 
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.MediaInfo;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +19,21 @@ public class Episode implements Serializable {
     float score = 0;
     float imdbScore = 0;
     int runtime = 0;
+    float runtimeInSeconds = 0;
     int episodeNumber = 0;
     int seasonNumber = 0;
     String videoSrc = "";
     String imgSrc = "";
     String seasonID = "";
     boolean watched = false;
-    long lastMilisecond = 0;
+    int timeWatched = 0;       //In seconds
     List<Chapter> chapters = new ArrayList<>();
+    MediaInfo mediaInfo;
+    List<VideoTrack> videoTracks = new ArrayList<>();
+    List<AudioTrack> audioTracks = new ArrayList<>();
+    List<SubtitleTrack> subtitleTracks = new ArrayList<>();
+    String directedBy = "";
+    String writtenBy = "";
 
     public Episode() {
         id = UUID.randomUUID().toString();
@@ -111,6 +123,18 @@ public class Episode implements Serializable {
         this.runtime = runtime;
     }
 
+    public float getRuntimeInSeconds() {
+        if (runtimeInSeconds <= 0)
+            return runtime * 60;
+
+        return runtimeInSeconds;
+    }
+
+    public void setRuntimeInSeconds(float runtimeInSeconds) {
+        this.runtimeInSeconds = runtimeInSeconds;
+        this.runtime = (int) (runtimeInSeconds / 60);
+    }
+
     public int getSeasonNumber() {
         return seasonNumber;
     }
@@ -128,28 +152,75 @@ public class Episode implements Serializable {
     }
 
     public void setWatched(){
-        lastMilisecond = 0;
+        timeWatched = 0;
         watched = true;
     }
 
     public void setUnWatched(){
-        lastMilisecond = 0;
+        timeWatched = 0;
         watched = false;
     }
 
     public boolean isWatched(){ return watched; }
 
-    public void setTime(long miliseconds){
-        lastMilisecond = miliseconds;
+    public void setTimeWatched(int seconds){
+        timeWatched = seconds;
 
         //If we have watched more than 90% of the video, it is marked as watched
-        /*long runtimeMilliseconds = (long) runtime * 60 * 1000;
-        if (lastMilisecond > (runtimeMilliseconds * 0.9)){
+        if (timeWatched > (runtimeInSeconds * 0.9)){
             setWatched();
-        }*/
+        }
     }
 
-    public long getTimeWatched(){ return lastMilisecond; }
+    public int getTimeWatched(){ return timeWatched; }
     public List<Chapter> getChapters() { return chapters; }
     public void addChapter(Chapter chapter) { chapters.add(chapter); }
+
+    public MediaInfo getMediaInfo() {
+        return mediaInfo;
+    }
+
+    public void setMediaInfo(MediaInfo mediaInfo) {
+        this.mediaInfo = mediaInfo;
+    }
+
+    public List<VideoTrack> getVideoTracks() {
+        return videoTracks;
+    }
+
+    public void setVideoTracks(List<VideoTrack> videoTracks) {
+        this.videoTracks = videoTracks;
+    }
+
+    public List<AudioTrack> getAudioTracks() {
+        return audioTracks;
+    }
+
+    public void setAudioTracks(List<AudioTrack> audioTracks) {
+        this.audioTracks = audioTracks;
+    }
+
+    public List<SubtitleTrack> getSubtitleTracks() {
+        return subtitleTracks;
+    }
+
+    public void setSubtitleTracks(List<SubtitleTrack> subtitleTracks) {
+        this.subtitleTracks = subtitleTracks;
+    }
+
+    public String getDirectedBy() {
+        return directedBy;
+    }
+
+    public void setDirectedBy(String directedBy) {
+        this.directedBy = directedBy;
+    }
+
+    public String getWrittenBy() {
+        return writtenBy;
+    }
+
+    public void setWrittenBy(String writtenBy) {
+        this.writtenBy = writtenBy;
+    }
 }

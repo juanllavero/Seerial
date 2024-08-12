@@ -1,8 +1,9 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Library;
 import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.utils.WindowDecoration;
 import com.example.executablelauncher.utils.Configuration;
+import javafx.animation.PauseTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -12,6 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
@@ -19,14 +21,20 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
+import nu.pattern.OpenCV;
+import xss.it.fx.helpers.CornerPreference;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static com.example.executablelauncher.utils.Utils.getFileAsIOStream;
 
 public class App extends Application {
     //region LOCALIZATION ATTRIBUTES
@@ -42,8 +50,13 @@ public class App extends Application {
     public static String lastVideoDirectory = null;
     public static String lastMusicDirectory = null;
     public static boolean isConnectedToInternet = false;
+    public static ExecutorService analysisExecutor;
+    public static final ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    public static ScheduledExecutorService mediaExecutor = Executors.newSingleThreadScheduledExecutor();
     static ScheduledExecutorService executorService;
     public static List<Task<Void>> tasks = new ArrayList<>();
+    private static DesktopViewController desktopController;
+    static String mode = "desktop";
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -78,6 +91,8 @@ public class App extends Application {
         executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(App::isInternetAvailable, 0, 5, TimeUnit.MINUTES);
 
+        initializeAnalysisExecutor();
+
         //Set resource bundles
         File file = new File("resources/");
         URL[] urls = {file.toURI().toURL()};
@@ -94,42 +109,75 @@ public class App extends Application {
             Locale.forLanguageTag("fr-FR")
         });
 
-        String mode = Configuration.loadConfig("fullscreen", "off");
-
         primaryStage = stage;
 
-        if (mode.equals("off"))
+        if (mode.equals("desktop"))
             loadDesktopMode();
         else
             loadFullscreenMode();
 
         primaryStage.show();
 
-        primaryStage.setOnCloseRequest(event -> close());
+        primaryStage.setOnCloseRequest(event -> {
+            if (desktopController != null)
+                desktopController.closeWindow();
+            else
+                close();
+
+            event.consume();
+        });
+    }
+    public static void setDesktopController(DesktopViewController controller){
+        desktopController = controller;
+    }
+    public static String getBaseFontSize(){
+        double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        String style;
+        if (screenHeight < 1080) {
+            style = "-fx-font-size: 10px;";
+        } else if (screenHeight >= 1080 && screenHeight < 1440) {
+            style = "-fx-font-size: 16px;";
+        } else if (screenHeight >= 1440 && screenHeight < 2160) {
+            style = "-fx-font-size: 18px;";
+        } else {
+            style = "-fx-font-size: 20px;";
+        }
+
+        return style;
     }
     private void loadDesktopMode() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("desktop-view.fxml"));
         Parent root = fxmlLoader.load();
+
+        WindowDecoration windowDecoration = null;
+        if (System.getProperty("os.name").toLowerCase().contains("win")){
+            windowDecoration = new WindowDecoration(primaryStage, true);
+            windowDecoration.setCornerPreference(CornerPreference.ROUND);
+        }
+
+        root.setStyle(getBaseFontSize());
+
         primaryStage.setTitle(App.textBundle.getString("desktopMode"));
-        primaryStage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
+        primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
         Scene scene = new Scene(root);
         scene.setFill(Color.BLACK);
         primaryStage.setScene(scene);
         primaryStage.setWidth(Screen.getPrimary().getBounds().getWidth() / 1.5);
         primaryStage.setHeight(Screen.getPrimary().getBounds().getHeight() / 1.25);
         DesktopViewController desktopViewController = fxmlLoader.getController();
-        desktopViewController.initValues();
+        desktopViewController.initValues(windowDecoration);
     }
     private void loadFullscreenMode() throws IOException {
+        DataManager.INSTANCE.currentLibrary = null;
+
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main-view.fxml"));
         Parent root = fxmlLoader.load();
-        //Controller controller = fxmlLoader.getController();
-        //controller.playIntroVideo();
+        root.setStyle(getBaseFontSize());
         primaryStage = new Stage();
         primaryStage.setTitle(App.textBundle.getString("fullscreenMode"));
-        primaryStage.getIcons().add(new Image("file:resources/img/icons/AppIcon.png"));
+        primaryStage.getIcons().add(new Image(getFileAsIOStream("img/icons/AppIcon.png")));
         Scene scene = new Scene(root);
-        scene.setCursor(Cursor.NONE);
+        //scene.setCursor(Cursor.NONE);
         scene.setFill(Color.BLACK);
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
@@ -163,14 +211,19 @@ public class App extends Application {
     public static boolean pressedLB(KeyEvent event){
         return event.getCode().equals(KeyCode.SUBTRACT) || event.getCode().equals(KeyCode.MINUS);
     }
+    public static boolean pressedEdit(KeyEvent event){
+        return event.getCode().equals(KeyCode.E);
+    }
 
     public static void close(){
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        if (!analysisExecutor.isTerminated())
+            analysisExecutor.shutdownNow();
+        executorService.shutdownNow();
+        mediaExecutor.shutdownNow();
+        executor.shutdownNow();
+
+        if (analysisExecutor != null)
+            analysisExecutor.shutdownNow();
 
         for (Task<Void> task : tasks)
             if (task.isRunning())
@@ -264,7 +317,7 @@ public class App extends Application {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
-        alert.setGraphic(null);
+        alert.setGraphic(new ImageView(new Image(getFileAsIOStream("img/icons/error.png"), 18, 18, true, true)));
 
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getScene().getStylesheets().add(Objects.requireNonNull(App.class.getResource("styles.css")).toExternalForm());
@@ -276,7 +329,21 @@ public class App extends Application {
         alert.showAndWait();
     }
 
+    public static void initializeAnalysisExecutor(){
+        analysisExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 4);
+    }
+
+    public static void initializeMediaExecutor(){
+        mediaExecutor = Executors.newSingleThreadScheduledExecutor();
+    }
+
     public static void main(String[] args) {
+        //Load OpenCV library to apply blur effect to images
+        OpenCV.loadLocally();
+
+        if (args.length > 0 && args[0].equals("fullscreen"))
+            mode = "fullscreen";
+
         launch(args);
     }
 }

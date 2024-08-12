@@ -20,11 +20,12 @@ public class Library implements Serializable {
         id = UUID.randomUUID().toString();
     }
 
-    public Library(String n, String lang, String t, List<String> f, boolean s){
+    public Library(String n, String lang, String t, int o, List<String> f, boolean s){
         id = UUID.randomUUID().toString();
         name = n;
         language = lang;
         type = t;
+        order = o;
         folders = f;
         showOnFullscreen = s;
     }
@@ -110,5 +111,13 @@ public class Library implements Serializable {
                 return series;
 
         return null;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

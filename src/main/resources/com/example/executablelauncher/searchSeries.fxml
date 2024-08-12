@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -10,16 +11,15 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="472.0" prefWidth="718.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchSeriesController">
+<BorderPane minHeight="500.0" minWidth="720.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchSeriesController">
    <top>
       <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
-            <Label fx:id="titleWindow" text="Search Series" textFill="WHITE" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="18.0" />
-               </font>
+            <Label fx:id="titleWindow" stylesheets="@styles.css" text="Search Series" textFill="WHITE" BorderPane.alignment="CENTER">
+               <styleClass>
+                  <String fx:value="medium-text" />
+               </styleClass>
             </Label>
          </left>
          <right>
@@ -50,20 +50,39 @@
                      <children>
                         <VBox>
                            <children>
-                              <Label fx:id="titleText" text="Title" textFill="WHITE" />
-                              <TextField fx:id="titleField" prefHeight="25.0" prefWidth="288.0" styleClass="textFieldColor" stylesheets="@styles.css" />
+                              <Label fx:id="titleText" stylesheets="@styles.css" text="Title" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
+                              </Label>
+                              <TextField fx:id="titleField" prefHeight="25.0" prefWidth="288.0" styleClass="textFieldColor" stylesheets="@styles.css">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
+                              </TextField>
                            </children>
                         </VBox>
                         <VBox>
                            <children>
-                              <Label fx:id="yearText" text="Year" textFill="WHITE" />
-                              <TextField fx:id="yearField" prefHeight="25.0" prefWidth="169.0" styleClass="textFieldColor" stylesheets="@styles.css" />
+                              <Label fx:id="yearText" stylesheets="@styles.css" text="Year" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
+                              </Label>
+                              <TextField fx:id="yearField" prefHeight="25.0" prefWidth="169.0" styleClass="textFieldColor" stylesheets="@styles.css">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
+                              </TextField>
                            </children>
                         </VBox>
                         <Button fx:id="searchButton" mnemonicParsing="false" onAction="#searchSeries" styleClass="desktopButton" stylesheets="@styles.css" text="Search" textFill="WHITE">
                            <HBox.margin>
                               <Insets top="15.0" />
                            </HBox.margin>
+                           <styleClass>
+                              <String fx:value="tiny-text" />
+                           </styleClass>
                         </Button>
                      </children>
                      <padding>

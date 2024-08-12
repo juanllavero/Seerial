@@ -1,6 +1,12 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Episode;
+import com.example.executablelauncher.fileMetadata.AudioTrack;
+import com.example.executablelauncher.fileMetadata.MediaInfo;
+import com.example.executablelauncher.fileMetadata.SubtitleTrack;
+import com.example.executablelauncher.fileMetadata.VideoTrack;
+import com.github.kokorin.jaffree.ffprobe.Stream;
+import com.jfoenix.controls.JFXSlider;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -19,6 +25,10 @@ import net.coobird.thumbnailator.Thumbnails;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.Locale;
+
+import static com.example.executablelauncher.utils.Utils.getFileAsIOStream;
 
 public class DiscController {
     @FXML
@@ -50,6 +60,9 @@ public class DiscController {
 
     @FXML
     private StackPane thumbnailStackPane;
+
+    @FXML
+    private JFXSlider slider;
 
     @FXML
     private Button playButton;
@@ -84,23 +97,12 @@ public class DiscController {
             number.setFont(new Font("System", 16));
         }
 
-        thumbnailStackPane.addEventHandler(KeyEvent.KEY_RELEASED, (KeyEvent event) ->{
-            if (playButton.isVisible()){
-                if (event.getCode().equals(KeyCode.ENTER)){
-                    if (desktopParent != null)
-                        desktopParent.playEpisode(episode);
-                }
-            }
-        });
-
         playButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event) ->{
             if (desktopParent != null)
                 desktopParent.playEpisode(episode);
         });
 
-        thumbnailStackPane.setOnMouseEntered(e -> {
-            hoverDisc();
-        });
+        thumbnailStackPane.setOnMouseEntered(e -> hoverDisc());
 
         thumbnailStackPane.setOnMouseExited(e -> {
             if (discSelected){
@@ -126,39 +128,40 @@ public class DiscController {
         });
 
         playButton.setOnMouseEntered(e -> {
-            playImage.setImage(new Image("file:resources/img/icons/playSelected.png"));
+            playImage.setImage(new Image(getFileAsIOStream("img/icons/playSelected.png")));
         });
 
         playButton.setOnMouseExited(e -> {
-            playImage.setImage(new Image("file:resources/img/icons/play.png"));
+            playImage.setImage(new Image(getFileAsIOStream("img/icons/play.png")));
         });
     }
-
     public void setWatched(){
         watched.setVisible(episode.isWatched());
-    }
 
+        if (!episode.isWatched() && episode.getTimeWatched() != 0){
+            slider.setVisible(true);
+            slider.setMax(episode.getRuntimeInSeconds());
+            slider.setValue(episode.getTimeWatched());
+        }else{
+            slider.setVisible(false);
+        }
+    }
     private void setHoverButtons(ImageView img){
         img.setOnMouseEntered(e -> img.setOpacity(1));
-
         img.setOnMouseExited(e -> img.setOpacity(0.7));
     }
-
     public void setDesktopParentParent(DesktopViewController c){
         desktopParent = c;
     }
-
     @FXML
-    void selectDisc(MouseEvent event){
+    void selectDisc(){
         selectDiscDesktop();
     }
-
     @FXML
     void openMenu(MouseEvent event){
-        desktopParent.selectedEpisode = episode;
+        DesktopViewController.selectedEpisode = episode;
         desktopParent.openDiscMenu(event);
     }
-
     public void selectDiscDesktop(){
         desktopParent.selectEpisode(episode);
         if (discSelected){
@@ -168,15 +171,16 @@ public class DiscController {
             thumbnailShadow.setVisible(true);
             playButton.setVisible(false);
             discMenu.setVisible(false);
+            slider.setVisible(false);
             selectDiscButton.setVisible(true);
             thumbnailStackPane.getStyleClass().add("discSelected");
-            selectDiscButton.setImage(new Image("file:resources/img/icons/tick.png"));
+            selectDiscButton.setImage(new Image(getFileAsIOStream("img/icons/tick.png")));
         }
     }
-
     public void hoverDisc(){
         thumbnailShadow.setVisible(true);
         selectDiscButton.setVisible(true);
+        slider.setVisible(!episode.isWatched() && episode.getTimeWatched() != 0);
 
         if (!desktopParent.isEpisodeSelected()){
             playButton.setVisible(true);
@@ -184,19 +188,21 @@ public class DiscController {
         }else{
             playButton.setVisible(false);
             discMenu.setVisible(false);
+            slider.setVisible(false);
         }
     }
-
     public void clearSelection(){
         discSelected = false;
         thumbnailShadow.setVisible(false);
         playButton.setVisible(false);
         selectDiscButton.setVisible(false);
         discMenu.setVisible(false);
-        thumbnailStackPane.getStyleClass().add("discButton");
-        selectDiscButton.setImage(new Image("file:resources/img/icons/circle.png"));
-    }
 
+        slider.setVisible(!episode.isWatched() && episode.getTimeWatched() != 0);
+
+        thumbnailStackPane.getStyleClass().add("discButton");
+        selectDiscButton.setImage(new Image(getFileAsIOStream("img/icons/circle.png")));
+    }
     public void setThumbnail(){
         if (episode.getImgSrc().isEmpty() || oldThumbnailPath.equals(episode.getImgSrc()))
             return;

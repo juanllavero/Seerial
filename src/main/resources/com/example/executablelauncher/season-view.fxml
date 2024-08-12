@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -16,7 +17,7 @@
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="2569.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
+<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="2569.0" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="1080.0" fitWidth="2175.0" pickOnBounds="true" preserveRatio="true" smooth="false" StackPane.alignment="TOP_LEFT">
          <image>
@@ -26,6 +27,10 @@
             <ColorAdjust brightness="-0.28" />
          </effect>
       </ImageView>
+      <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
+         <effect>
+            <DropShadow height="255.0" radius="127.0" spread="0.44" width="255.0" />
+         </effect></MediaView>
       <ImageView fx:id="backgroundShadow" fitHeight="1080.0" fitWidth="2572.0" pickOnBounds="true" StackPane.alignment="CENTER_RIGHT">
          <effect>
             <ColorAdjust contrast="0.21" />
@@ -42,10 +47,14 @@
             <Image url="@../../../img/backgroundShadow.png" />
          </image>
       </ImageView>
-      <MediaView fx:id="backgroundVideo" fitHeight="1080.0" fitWidth="1920.0" StackPane.alignment="CENTER_RIGHT">
-         <effect>
-            <DropShadow height="255.0" radius="127.0" spread="0.44" width="255.0" />
-         </effect></MediaView>
+      <BorderPane prefHeight="200.0" prefWidth="200.0">
+         <left>
+            <Pane fx:id="fill" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+         </left>
+         <center>
+            <Pane fx:id="shade" prefHeight="1030.0" prefWidth="331.0" BorderPane.alignment="CENTER" />
+         </center>
+      </BorderPane>
       <BorderPane fx:id="mainPane" prefWidth="1280.0">
          <right>
             <Button fx:id="nextSeasonButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#nextSeason" styleClass="fullscreenButtonTransparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
@@ -54,6 +63,9 @@
                      <image>
                         <Image url="@../../../img/icons/flechaDer.png" />
                      </image>
+                     <effect>
+                        <DropShadow />
+                     </effect>
                   </ImageView>
                </graphic>
                <BorderPane.margin>
@@ -71,6 +83,9 @@
                      <image>
                         <Image url="@../../../img/icons/flechaIzq.png" />
                      </image>
+                     <effect>
+                        <DropShadow />
+                     </effect>
                   </ImageView>
                </graphic>
                <BorderPane.margin>
@@ -89,51 +104,68 @@
                <children>
                   <VBox fx:id="infoBox" alignment="BOTTOM_LEFT" prefHeight="310.0" prefWidth="1108.0" spacing="5.0" stylesheets="@styles.css">
                      <children>
-                        <ImageView fx:id="logo" fitHeight="138.0" fitWidth="344.0" pickOnBounds="true" preserveRatio="true">
+                        <StackPane alignment="BOTTOM_LEFT">
+                           <children>
+                              <ImageView fx:id="logo" fitHeight="301.0" fitWidth="631.0" pickOnBounds="true" preserveRatio="true" />
+                              <Label fx:id="seriesTitle" alignment="CENTER" stylesheets="@styles.css" text="Series Title" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect>
+                                 <styleClass>
+                                    <String fx:value="title-text" />
+                                    <String fx:value="bold" />
+                                 </styleClass>
+                              </Label>
+                           </children>
                            <VBox.margin>
-                              <Insets bottom="10.0" />
+                              <Insets bottom="5.0" />
                            </VBox.margin>
-                        </ImageView>
-                        <Label fx:id="episodeName" text="Episode Name" textFill="WHITE">
-                           <font>
-                              <Font name="System Bold" size="24.0" />
-                           </font>
+                        </StackPane>
+                        <Label fx:id="episodeName" stylesheets="@styles.css" text="Episode Name" textFill="WHITE">
                            <effect>
                               <DropShadow offsetY="2.5" spread="0.45" />
                            </effect>
+                           <styleClass>
+                              <String fx:value="subtitle-text" />
+                              <String fx:value="bold" />
+                           </styleClass>
                         </Label>
                         <HBox fx:id="detailsInfo" alignment="CENTER_LEFT" spacing="10.0">
                            <children>
-                              <Label fx:id="seasonEpisodeNumber" text="S1E1" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
+                              <Label fx:id="seasonEpisodeNumber" stylesheets="@styles.css" text="S1E1" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="large-text" />
+                                    <String fx:value="bold" />
+                                 </styleClass>
                                  <effect>
                                     <DropShadow offsetY="2.5" spread="0.45" />
                                  </effect>
                               </Label>
-                              <Label fx:id="yearField" text="Sep 28, 2023" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
+                              <Label fx:id="yearField" stylesheets="@styles.css" text="Sep 28, 2023" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="large-text" />
+                                    <String fx:value="bold" />
+                                 </styleClass>
                                  <effect>
                                     <DropShadow offsetY="2.5" spread="0.45" />
                                  </effect>
                               </Label>
-                              <Label fx:id="durationField" text="25m" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
+                              <Label fx:id="durationField" stylesheets="@styles.css" text="25m" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="large-text" />
+                                    <String fx:value="bold" />
+                                 </styleClass>
                                  <effect>
                                     <DropShadow offsetY="2.5" spread="0.45" />
                                  </effect>
                               </Label>
                               <HBox fx:id="timeLeftBox" alignment="CENTER_LEFT" fillHeight="false" styleClass="playerOptionsButton" stylesheets="@styles.css">
                                  <children>
-                                    <Label fx:id="timeLeftField" text="24m left" textFill="WHITE">
-                                       <font>
-                                          <Font name="System Bold" size="18.0" />
-                                       </font>
+                                    <Label fx:id="timeLeftField" stylesheets="@styles.css" text="24m left" textFill="WHITE">
+                                       <styleClass>
+                                          <String fx:value="big-text" />
+                                          <String fx:value="bold" />
+                                       </styleClass>
                                     </Label>
                                  </children>
                                  <padding>
@@ -147,27 +179,25 @@
                         </HBox>
                         <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
                            <children>
-                              <ImageView fx:id="scoreProviderImg" fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="scoreProviderImg" fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../../../../resources/img/icons/tmdb.png" />
                                  </image>
                               </ImageView>
                               <Label fx:id="scoreField" text="8.5" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="13.0" />
-                                 </font>
+                                 <styleClass>
+                                    <String fx:value="big-text" />
+                                    <String fx:value="bold" />
+                                 </styleClass>
                               </Label>
                            </children>
                         </HBox>
-                        <Button fx:id="detailsButton" alignment="TOP_LEFT" graphicTextGap="0.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" prefWidth="649.0" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
-                           <font>
-                              <Font size="20.0" />
-                           </font>
+                        <Button fx:id="detailsButton" alignment="TOP_LEFT" graphicTextGap="0.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" prefHeight="118.0" prefWidth="699.0" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
                            <graphic>
-                              <Label fx:id="overviewField" alignment="TOP_LEFT" prefHeight="89.0" prefWidth="839.0" text="Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, " textFill="WHITE" wrapText="true">
-                                 <font>
-                                    <Font name="System Bold" size="16.0" />
-                                 </font>
+                              <Label fx:id="overviewField" alignment="TOP_LEFT" prefHeight="135.0" prefWidth="689.0" text="Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, " textFill="WHITE" wrapText="true">
+                                 <styleClass>
+                                    <String fx:value="large-text" />
+                                 </styleClass>
                                  <padding>
                                     <Insets bottom="5.0" left="2.0" top="5.0" />
                                  </padding>
@@ -185,7 +215,7 @@
                         <Insets left="130.0" />
                      </padding>
                   </VBox>
-                  <ScrollPane fx:id="episodeScroll" fitToWidth="true" hbarPolicy="NEVER" pannable="true" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
+                  <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
                      <content>
                         <HBox fx:id="cardContainer" alignment="CENTER_LEFT" fillHeight="false" spacing="50.0">
                            <padding>
@@ -197,14 +227,14 @@
                         <Insets bottom="10.0" top="10.0" />
                      </VBox.margin>
                   </ScrollPane>
-                  <HBox fillHeight="false" spacing="20.0">
+                  <HBox alignment="BOTTOM_LEFT" fillHeight="false" spacing="20.0">
                      <children>
-                        <Button fx:id="playButton" accessibleRole="IMAGE_VIEW" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onAction="#play" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
-                           <font>
-                              <Font name="System Bold" size="18.0" />
-                           </font>
+                        <Button fx:id="playButton" accessibleRole="IMAGE_VIEW" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onMouseClicked="#play" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
+                           <styleClass>
+                              <String fx:value="big-text" />
+                           </styleClass>
                            <graphic>
-                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" translateX="2.0">
+                              <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../../img/icons/play.png" />
                                  </image>
@@ -217,7 +247,7 @@
                               <Insets />
                            </HBox.margin>
                         </Button>
-                        <Button fx:id="watchedButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
+                        <Button fx:id="watchedButton" alignment="CENTER" graphicTextGap="20.0" mnemonicParsing="false" onMouseClicked="#toggleWatched" styleClass="fullscreenButton" stylesheets="@styles.css" textAlignment="CENTER" textFill="#2c2c2c">
                            <graphic>
                               <ImageView fitHeight="30.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
                                  <image>
@@ -228,9 +258,9 @@
                            <padding>
                               <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                            </padding>
-                           <font>
-                              <Font name="System Bold" size="18.0" />
-                           </font>
+                           <styleClass>
+                              <String fx:value="big-text" />
+                           </styleClass>
                            <HBox.margin>
                               <Insets />
                            </HBox.margin>
@@ -249,120 +279,271 @@
                            <padding>
                               <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                            </padding>
-                           <font>
-                              <Font name="System Bold" size="18.0" />
-                           </font>
+                           <styleClass>
+                              <String fx:value="big-text" />
+                           </styleClass>
+                        </Button>
+                        <Button fx:id="videoTrackButton" alignment="CENTER" focusTraversable="false" graphicTextGap="20.0" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Español (AAC)" textAlignment="CENTER" textFill="#2c2c2c">
+                           <styleClass>
+                              <String fx:value="big-text" />
+                              <String fx:value="bold" />
+                           </styleClass>
+                           <HBox.margin>
+                              <Insets bottom="10.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="audioTrackButton" alignment="CENTER" focusTraversable="false" graphicTextGap="20.0" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Español (AAC)" textAlignment="CENTER" textFill="#2c2c2c">
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
+                                 <image>
+                                    <Image url="@../../../img/icons/audioMid.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <styleClass>
+                              <String fx:value="big-text" />
+                              <String fx:value="bold" />
+                           </styleClass>
+                           <HBox.margin>
+                              <Insets bottom="10.0" />
+                           </HBox.margin>
+                        </Button>
+                        <Button fx:id="subsTrackButton" alignment="CENTER" focusTraversable="false" graphicTextGap="20.0" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="Español (AAC)" textAlignment="CENTER" textFill="#2c2c2c">
+                           <graphic>
+                              <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" styleClass="optionsButton">
+                                 <image>
+                                    <Image url="@../../../img/icons/subs.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <styleClass>
+                              <String fx:value="big-text" />
+                              <String fx:value="bold" />
+                           </styleClass>
+                           <HBox.margin>
+                              <Insets bottom="10.0" />
+                           </HBox.margin>
                         </Button>
                      </children>
                      <VBox.margin>
-                        <Insets left="130.0" />
+                        <Insets left="130.0" top="20.0" />
                      </VBox.margin>
                   </HBox>
                </children>
             </VBox>
          </center>
+         <top>
+            <BorderPane BorderPane.alignment="CENTER">
+               <left>
+                  <Button fx:id="goBackButton" focusTraversable="false" mnemonicParsing="false" onMouseClicked="#goBack" styleClass="fullscreenButtonTransparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
+                     <graphic>
+                        <ImageView fitHeight="55.0" fitWidth="55.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../../../img/icons/flechaAtras.png" />
+                           </image>
+                           <effect>
+                              <DropShadow />
+                           </effect>
+                        </ImageView>
+                     </graphic>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                     <BorderPane.margin>
+                        <Insets left="10.0" top="10.0" />
+                     </BorderPane.margin>
+                  </Button>
+               </left>
+            </BorderPane>
+         </top>
       </BorderPane>
       <ImageView fx:id="menuShadow" fitHeight="1078.0" fitWidth="1918.0" pickOnBounds="true" visible="false">
          <image>
             <Image url="@../../../img/desktopBackgroundShadow.png" />
          </image>
       </ImageView>
-      <BorderPane fx:id="detailsBox" StackPane.alignment="CENTER">
+      <BorderPane fx:id="detailsBox" onMouseClicked="#closeDetails" StackPane.alignment="CENTER">
          <padding>
-            <Insets bottom="150.0" left="150.0" right="150.0" top="150.0" />
+            <Insets bottom="100.0" left="100.0" right="100.0" top="100.0" />
          </padding>
-         <right>
-            <VBox fx:id="detailsText" spacing="5.0" BorderPane.alignment="TOP_LEFT">
+         <center>
+            <VBox fx:id="detailsText" spacing="5.0" BorderPane.alignment="CENTER">
                <children>
-                  <Label fx:id="detailsTitle" alignment="TOP_LEFT" text="Title of the movie/show" textFill="WHITE">
+                  <Label fx:id="detailsTitle" alignment="TOP_LEFT" stylesheets="@styles.css" text="Title of the movie/show" textFill="WHITE">
                      <font>
-                        <Font name="System Bold" size="32.0" />
+                        <Font name="SansSerif Bold" />
                      </font>
+                     <styleClass>
+                        <String fx:value="subtitle-text" />
+                        <String fx:value="bold" />
+                     </styleClass>
+                     <effect>
+                        <DropShadow />
+                     </effect>
                   </Label>
-                  <Label fx:id="detailsOverview" alignment="TOP_LEFT" prefWidth="845.0" text="Overview of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show," textFill="WHITE" wrapText="true">
-                     <font>
-                        <Font name="System Bold" size="21.0" />
-                     </font>
+                  <Label fx:id="detailsOverview" alignment="TOP_LEFT" maxHeight="400.0" styleClass="large-text" stylesheets="@styles.css" text="Overview of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show, of the movie/show," textFill="WHITE" wrapText="true">
                      <VBox.margin>
-                        <Insets bottom="10.0" />
+                        <Insets />
                      </VBox.margin>
+                     <effect>
+                        <DropShadow />
+                     </effect>
                   </Label>
                   <HBox>
                      <children>
-                        <VBox prefWidth="250.0">
+                        <VBox minWidth="300.0" spacing="2.0">
                            <children>
-                              <Label fx:id="genresText" text="Géneros" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Label>
+                              <Label fx:id="directedByText" styleClass="large-text" stylesheets="@styles.css" text="Dirigido por" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="writtenByText" styleClass="large-text" stylesheets="@styles.css" text="Escrito por" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="createdByText" styleClass="large-text" stylesheets="@styles.css" text="Creado por" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="studioText" styleClass="large-text" stylesheets="@styles.css" text="Estudio" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="genresText" styleClass="large-text" stylesheets="@styles.css" text="Géneros" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="musicByText" styleClass="large-text" stylesheets="@styles.css" text="Música compuesta por" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
                            </children>
+                           <HBox.margin>
+                              <Insets right="50.0" />
+                           </HBox.margin>
                         </VBox>
-                        <VBox>
+                        <VBox spacing="2.0">
                            <children>
-                              <Label fx:id="genresField" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Label>
+                              <Label fx:id="directedByField" styleClass="large-text" stylesheets="@styles.css" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="writtenByField" styleClass="large-text" stylesheets="@styles.css" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="createdByField" styleClass="large-text" stylesheets="@styles.css" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="studioField" styleClass="large-text" stylesheets="@styles.css" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="genresField" styleClass="large-text" stylesheets="@styles.css" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="musicByField" styleClass="large-text" stylesheets="@styles.css" text="Acción, Aventuras, ..." textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
                            </children>
                         </VBox>
                      </children>
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </HBox>
-                  <Label fx:id="fileDetailsText" text="Detalles del archivo" textFill="WHITE">
-                     <font>
-                        <Font name="System Bold" size="20.0" />
-                     </font>
                      <VBox.margin>
                         <Insets top="20.0" />
                      </VBox.margin>
+                  </HBox>
+                  <Label fx:id="fileDetailsText" stylesheets="@styles.css" text="Detalles del archivo" textFill="WHITE">
+                     <styleClass>
+                        <String fx:value="more-large-text" />
+                        <String fx:value="bold" />
+                     </styleClass>
+                     <VBox.margin>
+                        <Insets top="20.0" />
+                     </VBox.margin>
+                     <effect>
+                        <DropShadow />
+                     </effect>
                   </Label>
                   <HBox>
                      <children>
-                        <VBox prefWidth="250.0">
+                        <VBox minWidth="300.0" spacing="2.0">
                            <children>
-                              <Label fx:id="fileNameText" text="Nombre del archivo" textFill="WHITE">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Label>
+                              <Label fx:id="fileNameText" styleClass="large-text" stylesheets="@styles.css" text="Nombre del archivo" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="fileSizeText" styleClass="large-text" stylesheets="@styles.css" text="Tamaño" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="bitrateText" styleClass="large-text" stylesheets="@styles.css" text="Bitrate" textFill="WHITE">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
                            </children>
+                           <HBox.margin>
+                              <Insets right="50.0" />
+                           </HBox.margin>
                         </VBox>
-                        <VBox>
+                        <VBox spacing="2.0">
                            <children>
-                              <Label fx:id="fileNameField" text="Nombre del archivo.mkv" textFill="WHITE" wrapText="true">
-                                 <font>
-                                    <Font name="System Bold" size="18.0" />
-                                 </font>
-                              </Label>
+                              <Label fx:id="fileNameField" styleClass="large-text" stylesheets="@styles.css" text="Nombre del archivo.mkv" textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="fileSizeField" styleClass="large-text" stylesheets="@styles.css" text="4.8 GB" textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
+                              <Label fx:id="bitrateField" styleClass="large-text" stylesheets="@styles.css" text="12.4 mbps" textFill="WHITE" wrapText="true">
+                                 <effect>
+                                    <DropShadow />
+                                 </effect></Label>
                            </children>
                         </VBox>
                      </children>
                   </HBox>
+                  <Label fx:id="castText" stylesheets="@styles.css" text="Reparto" textFill="WHITE">
+                     <styleClass>
+                        <String fx:value="more-large-text" />
+                        <String fx:value="bold" />
+                     </styleClass>
+                     <VBox.margin>
+                        <Insets bottom="5.0" top="20.0" />
+                     </VBox.margin>
+                     <effect>
+                        <DropShadow />
+                     </effect>
+                  </Label>
+                  <HBox>
+                     <children>
+                        <VBox fx:id="castLeftBox" spacing="2.0" />
+                        <VBox fx:id="castRightBox" spacing="2.0">
+                           <HBox.margin>
+                              <Insets left="20.0" />
+                           </HBox.margin></VBox>
+                     </children>
+                  </HBox>
                </children>
-            </VBox>
-         </right>
-         <center>
-            <ImageView fx:id="detailsImage" fitHeight="363.0" fitWidth="652.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="TOP_RIGHT">
-               <image>
-                  <Image url="@../../../img/aaa.png" />
-               </image>
                <BorderPane.margin>
-                  <Insets right="50.0" />
+                  <Insets left="50.0" />
                </BorderPane.margin>
-            </ImageView>
+            </VBox>
          </center>
       </BorderPane>
-      <Pane fx:id="videoPlayerPane" style="-fx-background-color: black;" visible="false" />
       <BorderPane fx:id="videoError" style="-fx-background-color: black;" visible="false">
          <top>
-            <Label fx:id="errorTitle" text="Error al reproducir el archivo" textFill="WHITE" BorderPane.alignment="CENTER">
+            <Label fx:id="errorTitle" stylesheets="@styles.css" text="Error al reproducir el archivo" textFill="WHITE" BorderPane.alignment="CENTER">
                <font>
-                  <Font name="System Bold" size="45.0" />
+                  <Font name="SansSerif Bold" />
                </font>
+               <styleClass>
+                  <String fx:value="title-text" />
+                  <String fx:value="bold" />
+               </styleClass>
             </Label>
          </top>
          <StackPane.margin>
@@ -379,10 +560,12 @@
                         <Font size="29.0" />
                      </font>
                   </Label>
-                  <Button fx:id="errorButton" mnemonicParsing="false" styleClass="playerOptionsButton" stylesheets="@styles.css" text="De acuerdo" textFill="WHITE">
-                     <font>
-                        <Font size="28.0" />
-                     </font>
+                  <Button fx:id="errorButton" mnemonicParsing="false" stylesheets="@styles.css" text="De acuerdo" textFill="WHITE">
+                     <styleClass>
+                        <String fx:value="playerOptionsButton" />
+                        <String fx:value="extra-large-text" />
+                        <String fx:value="bold" />
+                     </styleClass>
                   </Button>
                </children>
                <BorderPane.margin>

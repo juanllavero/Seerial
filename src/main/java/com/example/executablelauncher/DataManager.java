@@ -20,10 +20,9 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DataManager {
-    public static DataManager INSTANCE = new DataManager();
+    public static final DataManager INSTANCE = new DataManager();
     final String LOCAL_FILE = "data.json";
     List<Library> libraries = new ArrayList<>();
-    List<Series> seriesToRemove = new ArrayList<>();
     public Library currentLibrary = null;
 
     //region LOAD/SAVE DATA
@@ -93,25 +92,46 @@ public class DataManager {
     }
     //endregion
 
-    private void scanForMissingFiles(Library library){
+    public void scanForMissingFiles(Library library){
         Iterator<Series> seriesIterator = library.getSeries().iterator();
         while (seriesIterator.hasNext()) {
             Series show = seriesIterator.next();
+            show.setAnalyzingFiles(false);
 
             Iterator<Season> temporadaIterator = show.getSeasons().iterator();
             while (temporadaIterator.hasNext()) {
                 Season season = temporadaIterator.next();
 
-                Iterator<Episode> episodioIterator = season.getEpisodes().iterator();
-                while (episodioIterator.hasNext()) {
-                    Episode episode = episodioIterator.next();
+                //Mark episodes to remove
+                List<Episode> episodesToRemove = new ArrayList<>();
+
+                for (Episode episode : season.getEpisodes()) {
                     File file = new File(episode.getVideoSrc());
 
                     //Check if drive is connected and the file is missing
                     if (App.checkIfDriveIsConnected(episode.getVideoSrc()) && !file.exists()) {
-                        episodioIterator.remove();
-                        deleteEpisodeData(episode);
+                        episodesToRemove.add(episode);
+                    } else if (episode.getImgSrc().isEmpty()) {
+                        File imageFolder = new File("resources/img/discCovers/" + episode.getId() + "/");
+
+                        if (!imageFolder.exists()) {
+                            System.out.println("Image folder does not exist for episode: " + episode.getId());
+                            continue;
+                        }
+
+                        File[] images = imageFolder.listFiles();
+
+                        if (images == null)
+                            continue;
+
+                        episode.setImgSrc("resources/img/discCovers/" + episode.getId() + "/" + images[0].getName());
                     }
+                }
+
+                //Remove episodes
+                for (Episode episode : episodesToRemove) {
+                    season.getEpisodes().remove(episode);
+                    deleteEpisodeData(episode);
                 }
 
                 //Remove season if it has no episodes
@@ -152,29 +172,22 @@ public class DataManager {
         return null;
     }
 
+    public Library getLibrary(Series series){
+        for (Library library : libraries){
+            for (Series s : library.getSeries()){
+                if (s == series)
+                    return library;
+            }
+        }
+        return currentLibrary;
+    }
+
     public boolean libraryExists(String name){
         for (Library library : libraries){
             if (library.getName().equals(name))
                 return true;
         }
         return false;
-    }
-
-    public void checkEmptySeasons(Library library, Series s, boolean removeHere){
-        List<Season> seasonsToDelete = new ArrayList<>();
-        for (Season season : s.getSeasons()){
-            if (season.getEpisodes().isEmpty())
-                seasonsToDelete.add(season);
-        }
-
-        for (Season season : seasonsToDelete)
-            s.removeSeason(season);
-
-        if (removeHere && s.getSeasons().isEmpty()) {
-            deleteSeriesData(s);
-            library.removeSeries(s);
-        }else if (s.getSeasons().isEmpty())
-            seriesToRemove.add(s);
     }
 
     //region DELETE
@@ -197,6 +210,8 @@ public class DataManager {
 
         for (Season season : series.getSeasons())
             deleteSeasonData(season);
+
+        currentLibrary.getAnalyzedFolders().remove(series.getFolder());
     }
     public void deleteSeasonData(Season season){
         try{

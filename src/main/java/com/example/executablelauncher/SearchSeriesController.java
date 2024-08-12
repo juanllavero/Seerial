@@ -137,6 +137,7 @@ public class SearchSeriesController {
                 FXMLLoader fxmlLoader = new FXMLLoader();
                 fxmlLoader.setLocation(getClass().getResource("searchResultCard.fxml"));
                 Pane cardBox = fxmlLoader.load();
+                cardBox.setStyle(App.getBaseFontSize());
                 SearchResultCardController controller = fxmlLoader.getController();
                 controller.initValues(title, year, resume, posterPath);
 

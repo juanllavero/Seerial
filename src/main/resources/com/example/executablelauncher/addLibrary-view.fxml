@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
@@ -13,16 +14,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="329.0" prefWidth="533.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddLibraryController">
+<BorderPane styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.AddLibraryController">
    <top>
       <BorderPane styleClass="borderSectionsColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <left>
-            <Label fx:id="title" alignment="CENTER" text="Add Category" textFill="#f8f8f8" BorderPane.alignment="CENTER">
-               <font>
-                  <Font size="22.0" />
-               </font>
+            <Label fx:id="title" alignment="CENTER" styleClass="medium-text" stylesheets="@styles.css" text="Add Category" textFill="#f8f8f8" BorderPane.alignment="CENTER">
                <BorderPane.margin>
                   <Insets />
                </BorderPane.margin>
@@ -51,6 +48,9 @@
       <VBox styleClass="midSectionDarkColor" stylesheets="@styles.css" BorderPane.alignment="CENTER">
          <children>
             <Button fx:id="generalViewButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#showGeneralView" styleClass="editButton" stylesheets="@styles.css" text="General">
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
@@ -59,6 +59,9 @@
                <padding>
                   <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                </padding>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
             </Button>
          </children>
       </VBox>
@@ -72,14 +75,27 @@
                      <HBox.margin>
                         <Insets right="10.0" />
                      </HBox.margin>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </Button>
-                  <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancelButton" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE" />
+                  <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#cancelButton" styleClass="desktopButton" stylesheets="@styles.css" text="Cancel" textFill="WHITE">
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
+                  </Button>
                </children>
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
             </HBox>
          </right>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
       </BorderPane>
    </bottom>
    <center>
@@ -91,12 +107,15 @@
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
+                     <styleClass>
+                        <String fx:value="tiny-text" />
+                     </styleClass>
                   </Label>
                   <HBox>
                      <children>
-                        <Button fx:id="moviesTypeButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#setMoviesType" styleClass="editButton" stylesheets="@styles.css" text="Movies">
+                        <Button fx:id="moviesTypeButton" contentDisplay="TOP" graphicTextGap="10.0" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#setMoviesType" styleClass="editButton" stylesheets="@styles.css" text="Movies">
                            <graphic>
-                              <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true" smooth="false">
+                              <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true" smooth="false">
                                  <image>
                                     <Image url="@../../../../../../resources/img/icons/movies.png" />
                                  </image></ImageView>
@@ -104,10 +123,13 @@
                            <padding>
                               <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                            </padding>
+                           <styleClass>
+                              <String fx:value="tiny-text" />
+                           </styleClass>
                         </Button>
-                        <Button fx:id="showsTypeButton" contentDisplay="TOP" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#setShowsType" styleClass="editButton" text="Shows">
+                        <Button fx:id="showsTypeButton" contentDisplay="TOP" graphicTextGap="10.0" maxHeight="1.7976931348623157E308" mnemonicParsing="false" onAction="#setShowsType" styleClass="editButton" text="Shows">
                            <graphic>
-                              <ImageView fitHeight="35.0" fitWidth="35.0" pickOnBounds="true" preserveRatio="true" smooth="false">
+                              <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true" smooth="false">
                                  <image>
                                     <Image url="@../../../../../../resources/img/icons/shows.png" />
                                  </image></ImageView>
@@ -115,6 +137,9 @@
                            <padding>
                               <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                            </padding>
+                           <styleClass>
+                              <String fx:value="tiny-text" />
+                           </styleClass>
                         </Button>
                      </children>
                      <VBox.margin>
@@ -125,7 +150,10 @@
                      <children>
                         <VBox>
                            <children>
-                              <Label fx:id="nameText" text="Name" textFill="WHITE">
+                              <Label fx:id="nameText" stylesheets="@styles.css" text="Name" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                                  <opaqueInsets>
                                     <Insets />
                                  </opaqueInsets>
@@ -133,7 +161,11 @@
                                     <Insets />
                                  </VBox.margin>
                               </Label>
-                              <TextField fx:id="nameField" prefHeight="25.0" prefWidth="228.0">
+                              <TextField fx:id="nameField" prefHeight="25.0" prefWidth="228.0" stylesheets="@styles.css">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                    <String fx:value="textFieldColor" />
+                                 </styleClass>
                                  <VBox.margin>
                                     <Insets top="5.0" />
                                  </VBox.margin>
@@ -142,12 +174,21 @@
                         </VBox>
                         <VBox>
                            <children>
-                              <Label fx:id="languageText" text="Language" textFill="WHITE">
+                              <Label fx:id="languageText" stylesheets="@styles.css" text="Language" textFill="WHITE">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                                  <opaqueInsets>
                                     <Insets />
                                  </opaqueInsets>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
                               </Label>
-                              <ChoiceBox fx:id="languageChoice" prefWidth="150.0">
+                              <ChoiceBox fx:id="languageChoice" stylesheets="@styles.css">
+                                 <styleClass>
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
                                  <VBox.margin>
                                     <Insets top="5.0" />
                                  </VBox.margin>
@@ -159,11 +200,41 @@
                         </VBox>
                      </children>
                   </HBox>
-                  <CheckBox fx:id="showOnFullscreen" mnemonicParsing="false" text="Show on Fullscreen mode" textFill="WHITE">
-                     <VBox.margin>
-                        <Insets top="20.0" />
-                     </VBox.margin>
-                  </CheckBox>
+                  <BorderPane>
+                     <padding>
+                        <Insets bottom="10.0" top="10.0" />
+                     </padding>
+                     <left>
+                        <VBox prefHeight="42.0" prefWidth="63.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <Label fx:id="orderText" styleClass="tiny-text" stylesheets="@styles.css" text="Order" textFill="WHITE">
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" />
+                                 </VBox.margin>
+                              </Label>
+                              <TextField fx:id="orderField" stylesheets="@styles.css">
+                                 <styleClass>
+                                    <String fx:value="textFieldColor" />
+                                    <String fx:value="tiny-text" />
+                                 </styleClass>
+                              </TextField>
+                           </children>
+                        </VBox>
+                     </left>
+                     <center>
+                        <CheckBox fx:id="showOnFullscreen" mnemonicParsing="false" stylesheets="@styles.css" text="Show on Fullscreen mode" textFill="WHITE" BorderPane.alignment="BOTTOM_LEFT">
+                           <styleClass>
+                              <String fx:value="tiny-text" />
+                           </styleClass>
+                           <BorderPane.margin>
+                              <Insets bottom="5.0" left="20.0" />
+                           </BorderPane.margin>
+                        </CheckBox>
+                     </center>
+                  </BorderPane>
                </children>
                <padding>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -177,6 +248,9 @@
                            <VBox.margin>
                               <Insets bottom="10.0" />
                            </VBox.margin>
+                           <styleClass>
+                              <String fx:value="tiny-text" />
+                           </styleClass>
                         </Button>
                         <VBox fx:id="folderContainer" spacing="5.0">
                            <VBox.margin>
@@ -191,6 +265,9 @@
                </content>
             </ScrollPane>
          </children>
+         <padding>
+            <Insets top="10.0" />
+         </padding>
       </StackPane>
    </center>
 </BorderPane>

@@ -1,9 +1,13 @@
 package com.example.executablelauncher.entities;
 
+import com.example.executablelauncher.tmdbMetadata.movieCredits.Cast;
+import com.example.executablelauncher.utils.Utils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Season implements Serializable {
     final String id;
@@ -25,9 +29,18 @@ public class Season implements Serializable {
     String folder = "";
     boolean showName = true;
     String audioTrackLanguage = "";
+    int selectedAudioTrack = -1;
     String subtitleTrackLanguage = "";
-    List<Episode> episodes = new ArrayList<>();
+    int selectedSubtitleTrack = -1;
+    List<Episode> episodes = new CopyOnWriteArrayList<>();
     List<String> genres = new ArrayList<>();
+    int currentlyWatchingEpisode = -1;
+    List<Cast> cast = new ArrayList<>();
+    String creator = "";
+    String musicComposer = "";
+    String directedBy = "";
+    String writtenBy = "";
+    String productionStudios = "";
 
     public Season() {
         id = UUID.randomUUID().toString();
@@ -81,6 +94,22 @@ public class Season implements Serializable {
 
     public void setSubtitleTrackLanguage(String subtitleTrackLanguage) {
         this.subtitleTrackLanguage = subtitleTrackLanguage;
+    }
+
+    public int getSelectedAudioTrack() {
+        return selectedAudioTrack;
+    }
+
+    public void setSelectedAudioTrack(int selectedAudioTrack) {
+        this.selectedAudioTrack = selectedAudioTrack;
+    }
+
+    public int getSelectedSubtitleTrack() {
+        return selectedSubtitleTrack;
+    }
+
+    public void setSelectedSubtitleTrack(int selectedSubtitleTrack) {
+        this.selectedSubtitleTrack = selectedSubtitleTrack;
     }
 
     public String getLogoSrc() {
@@ -248,5 +277,75 @@ public class Season implements Serializable {
                 return episode;
 
         return null;
+    }
+
+    public boolean isBeingWatched(){
+        return currentlyWatchingEpisode != -1;
+    }
+
+    public Episode getCurrentlyWatchingEpisode(){
+        if (currentlyWatchingEpisode != -1 && currentlyWatchingEpisode < episodes.size())
+            return episodes.get(currentlyWatchingEpisode);
+
+        return null;
+    }
+
+    public int getCurrentlyWatchingEpisodeIndex(){
+        if (currentlyWatchingEpisode < episodes.size())
+            return currentlyWatchingEpisode;
+
+        return -1;
+    }
+
+    public void setCurrentlyWatchingEpisode(int index){
+        currentlyWatchingEpisode = index;
+    }
+
+    public List<Cast> getCast() {
+        return cast;
+    }
+
+    public void setCast(List<Cast> cast) {
+        this.cast = cast;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
+    public String getMusicComposer() {
+        return musicComposer;
+    }
+
+    public void setMusicComposer(String musicComposer) {
+        this.musicComposer = musicComposer;
+    }
+
+    public String getDirectedBy() {
+        return directedBy;
+    }
+
+    public void setDirectedBy(String directedBy) {
+        this.directedBy = directedBy;
+    }
+
+    public String getWrittenBy() {
+        return writtenBy;
+    }
+
+    public void setWrittenBy(String writtenBy) {
+        this.writtenBy = writtenBy;
+    }
+
+    public String getProductionStudios() {
+        return productionStudios;
+    }
+
+    public void setProductionStudios(String productionStudios) {
+        this.productionStudios = productionStudios;
     }
 }

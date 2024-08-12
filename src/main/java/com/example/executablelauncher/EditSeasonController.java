@@ -2,6 +2,12 @@ package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Season;
 import com.example.executablelauncher.entities.Series;
+import com.github.kokorin.jaffree.ffmpeg.FFmpeg;
+import com.github.kokorin.jaffree.ffmpeg.NullOutput;
+import com.github.kokorin.jaffree.ffmpeg.UrlInput;
+import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -9,17 +15,21 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.*;
 import org.apache.commons.io.FileUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,11 +40,19 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.example.executablelauncher.App.*;
+import static com.example.executablelauncher.utils.Utils.cropToAspectRatio;
 
 public class EditSeasonController {
     //region FXML ATTRIBUTES
+    @FXML
+    private BorderPane downloadingPane;
+
+    @FXML
+    private Label downloadingText;
+
     @FXML
     private ImageView backgroundImageView;
 
@@ -138,16 +156,16 @@ public class EditSeasonController {
     //region ATTRIBUTES
     public Season seasonToEdit = null;
     public String seriesName = "";
-    private List<File> logoFiles = new ArrayList<>();
+    private final List<File> logoFiles = new ArrayList<>();
     private File selectedLogo = null;
 
-    private List<File> posterFiles = new ArrayList<>();
+    private final List<File> posterFiles = new ArrayList<>();
     private File selectedPoster = null;
     private File selectedBackground = null;
     public File selectedVideo = null;
     public File selectedMusic = null;
     private DesktopViewController parentController = null;
-    private FileChooser fileChooser = new FileChooser();
+    private final FileChooser fileChooser = new FileChooser();
 
     //Old values to check
     private String oldBackgroundPath = "";
@@ -205,6 +223,7 @@ public class EditSeasonController {
         showGeneralView();
     }
     private void initValues(){
+        downloadingPane.setVisible(false);
         nameText.setText(App.textBundle.getString("name"));
         yearText.setText(App.textBundle.getString("year"));
         saveButton.setText(buttonsBundle.getString("saveButton"));
@@ -213,7 +232,12 @@ public class EditSeasonController {
         sortingText.setText(App.textBundle.getString("sortingOrder"));
         videoText.setText(App.textBundle.getString("backgroundVideo"));
         musicText.setText(App.textBundle.getString("backgroundMusic"));
-        title.setText(App.textBundle.getString("seasonWindowTitleEdit"));
+
+        if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows"))
+            title.setText(App.textBundle.getString("seasonWindowTitleEdit"));
+        else
+            title.setText(App.textBundle.getString("movieWindowTitleEdit"));
+
         cancelButton.setText(App.buttonsBundle.getString("cancelButton"));
         backgroundText.setText(App.textBundle.getString("backgroundImage"));
         musicDownloadButton.setText(buttonsBundle.getString("downloadButton"));
@@ -253,16 +277,22 @@ public class EditSeasonController {
                 }
             }
 
-            File newFile = new File("resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".jpg");
+            File baseDir = new File("resources/img/logos/" + seasonToEdit.getId() + "/");
+
+            if (!baseDir.exists())
+                DataManager.INSTANCE.createFolder("resources/img/logos/" + seasonToEdit.getId() + "/");
+
+            File newFile = new File("resources/img/logos/" + seasonToEdit.getId() + "/" + (number + 1) + ".png");
 
             try{
                 Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }catch (IOException e){
-                System.err.println("Thumbnail not copied");
+                System.err.println("Logo not copied");
             }
 
-            logoFiles.add(file);
-            addImage(file);
+            logoFiles.clear();
+            imagesContainer.getChildren().clear();
+            loadImages();
         }
     }
     public void loadPoster(String src){
@@ -279,13 +309,19 @@ public class EditSeasonController {
             File newFile = new File("resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + (number + 1) + ".jpg");
 
             try{
-                Files.copy(file.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                BufferedImage originalImage = ImageIO.read(file);
+                BufferedImage croppedImage = cropToAspectRatio(originalImage, 300, 450);
+
+                ImageIO.write(croppedImage, "jpg", newFile);
+                originalImage.flush();
+                croppedImage.flush();
             }catch (IOException e){
                 System.err.println("Poster not copied");
             }
 
-            posterFiles.add(file);
-            addPoster(file);
+            posterFiles.clear();
+            postersContainer.getChildren().clear();
+            loadPosters();
         }
     }
     public void loadBackground(String src){
@@ -295,7 +331,9 @@ public class EditSeasonController {
             try{
                 Image img = new Image(file.toURI().toURL().toExternalForm());
                 backgroundResolution.setText((int)img.getWidth() + "x" + (int)img.getHeight());
-                backgroundImageView.setImage(img);
+
+                Image compressedImg = new Image(file.toURI().toURL().toExternalForm(), backgroundImageView.getFitWidth(), backgroundImageView.getFitHeight(), true, true);
+                backgroundImageView.setImage(compressedImg);
             } catch (MalformedURLException e) {
                 selectedBackground = null;
                 System.err.println("Background not loaded");
@@ -359,6 +397,7 @@ public class EditSeasonController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("ImageDownloader-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(getBaseFontSize());
             Stage stage = new Stage();
             stage.setTitle("ImageDownloader");
             stage.initStyle(StageStyle.UNDECORATED);
@@ -394,6 +433,7 @@ public class EditSeasonController {
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("urlPaster-view.fxml"));
             Parent root1 = fxmlLoader.load();
+            root1.setStyle(App.getBaseFontSize());
             UrlPasterController controller = fxmlLoader.getController();
             controller.setParent(this);
             controller.initValues(isLogo);
@@ -587,7 +627,8 @@ public class EditSeasonController {
             fileChooser.setInitialDirectory(new File(lastVideoDirectory));
         else
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allVideos"), "*.mp4"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter(App.textBundle.getString("allVideos"), "*.mp4", "*.mkv", "*.avi"
+                , "*.mov", "*.wmv", "*.mpeg", "*.m2ts"));
         selectedVideo = fileChooser.showOpenDialog(((Button) event.getSource()).getScene().getWindow());
         if (selectedVideo != null){
             videoField.setText(selectedVideo.getPath());
@@ -670,10 +711,11 @@ public class EditSeasonController {
                 App.showErrorMessage("Invalid data", "", App.textBundle.getString("videoNotFound"));
                 return;
             }else if (video.exists()){
-                String videoExtension = videoField.getText().substring(videoField.getText().length() - 3);
+                String videoExtension = videoField.getText().substring(videoField.getText().lastIndexOf("."));
                 videoExtension = videoExtension.toLowerCase();
 
-                if (!videoExtension.equals("mkv") && !videoExtension.equals("mp4")){
+                if (!videoExtension.equals(".mkv") && !videoExtension.equals(".mp4") && !videoExtension.equals(".avi") && !videoExtension.equals(".mov")
+                        && !videoExtension.equals(".wmv") && !videoExtension.equals(".mpeg") && !videoExtension.equals(".m2ts")){
                     App.showErrorMessage("Invalid data", "", App.textBundle.getString("videoErrorFormat"));
                     return;
                 }
@@ -714,7 +756,7 @@ public class EditSeasonController {
             oldName = oldBackgroundPath.substring(oldBackgroundPath.lastIndexOf("/")+1);
         if (oldBackgroundPath.isEmpty() || !newName.equals(oldName)){
             if (selectedBackground != null){
-                parentController.saveBackground(seasonToEdit, selectedBackground.getAbsolutePath());
+                parentController.saveBackground(seasonToEdit, selectedBackground.getAbsolutePath(), false);
             }
         }
 
@@ -724,8 +766,6 @@ public class EditSeasonController {
             oldName = "";
             if (!oldVideoPath.isEmpty())
                 oldName = oldVideoPath.substring(oldVideoPath.lastIndexOf("/") + 1);
-            System.out.println(oldName);
-            System.out.println(newName);
             if (oldVideoPath.isEmpty() || !newName.equals(oldName)){
                 try{
                     if (!seasonToEdit.getVideoSrc().isEmpty())
@@ -768,31 +808,82 @@ public class EditSeasonController {
         if (selectedPoster != null)
             seasonToEdit.setCoverSrc("resources/img/seriesCovers/" + seasonToEdit.getId() + "/" + selectedPoster.getName());
 
-        parentController.hideBackgroundShadow();
-        parentController.refreshSeason(seasonToEdit);
-        parentController.clearImageCache();
+        if (!downloadingPane.isVisible()){
+            parentController.hideBackgroundShadow();
+            parentController.refreshSeason(seasonToEdit);
+            parentController.clearImageCache();
 
-        Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
-        stage.close();
+            Stage stage = (Stage) ((Button)event.getSource()).getScene().getWindow();
+            stage.close();
+        }
     }
     private void saveVideo(Season s){
         if (!videoField.getText().isEmpty()){
             if (selectedVideo == null)
                 selectedVideo = new File(videoField.getText());
 
-            int i = selectedVideo.getName().lastIndexOf('.');
-            String extension = "mp4";
-            if (i > 0) {
-                extension = selectedVideo.getName().substring(i+1);
-            }
-            File newVideo = new File("resources/video/" + s.getId() + "_sv." + extension);
+            String inputPath = selectedVideo.getAbsolutePath();
+            if (inputPath.endsWith(".mp4")) {
+                File newVideo = new File("resources/video/" + s.getId() + "_sv.mp4");
 
-            try{
-                Files.copy(selectedVideo.toPath(), newVideo.toPath());
-            }catch (IOException e){
-                System.err.println("Video not copied");
+                try{
+                    Files.copy(selectedVideo.toPath(), newVideo.toPath());
+                }catch (IOException e){
+                    System.err.println("Video not copied");
+                }
+            }else{
+                downloadingPane.setVisible(true);
+                downloadingText.setText(textBundle.getString("convertingVideoFile") + ": 0%");
+                Task<Void> convertVideoTask = new Task<>() {
+                    @Override
+                    protected Void call() {
+                        final AtomicLong duration = new AtomicLong();
+                        FFmpeg.atPath()
+                                .addInput(UrlInput.fromUrl(selectedVideo.getAbsolutePath()))
+                                .setOverwriteOutput(true)
+                                .addOutput(new NullOutput())
+                                .setProgressListener(progress -> duration.set(progress.getTimeMillis()))
+                                .execute();
+
+                        FFmpeg.atPath()
+                                .addInput(UrlInput.fromUrl(selectedVideo.getAbsolutePath()))
+                                .setOverwriteOutput(true)
+                                .addArguments("-movflags", "faststart")
+                                .addArguments("-preset", "ultrafast")
+                                .addOutput(UrlOutput.toUrl("resources/video/" + s.getId() + "_sv.mp4"))
+                                .setProgressListener(progress -> {
+                                    double percents = 100. * progress.getTimeMillis() / duration.get();
+                                    Platform.runLater(() -> downloadingText.setText(textBundle.getString("convertingVideoFile") + ": " + Math.round(percents) + "%"));
+                                })
+                                .execute();
+                        return null;
+                    }
+                };
+
+                convertVideoTask.setOnSucceeded(e -> {
+                    downloadingPane.setVisible(false);
+                    parentController.hideBackgroundShadow();
+                    parentController.refreshSeason(seasonToEdit);
+                    parentController.clearImageCache();
+
+                    Stage stage = (Stage) downloadingPane.getScene().getWindow();
+                    stage.close();
+                });
+
+                convertVideoTask.setOnFailed(e -> {
+                    downloadingPane.setVisible(false);
+                    parentController.hideBackgroundShadow();
+                    parentController.refreshSeason(seasonToEdit);
+                    parentController.clearImageCache();
+
+                    Stage stage = (Stage) downloadingPane.getScene().getWindow();
+                    stage.close();
+                });
+
+                executor.submit(convertVideoTask);
             }
-            s.setVideoSrc("resources/video/" + newVideo.getName());
+
+            s.setVideoSrc("resources/video/" + s.getId() + "_sv.mp4");
         }else{
             s.setVideoSrc("");
         }

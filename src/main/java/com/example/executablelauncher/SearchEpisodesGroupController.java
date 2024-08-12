@@ -86,6 +86,7 @@ public class SearchEpisodesGroupController {
                 FXMLLoader fxmlLoader = new FXMLLoader();
                 fxmlLoader.setLocation(getClass().getResource("searchResultEpGroupCard.fxml"));
                 Pane cardBox = fxmlLoader.load();
+                cardBox.setStyle(App.getBaseFontSize());
                 SearchResultEpGroupCardController controller = fxmlLoader.getController();
                 controller.initValues(group);
 

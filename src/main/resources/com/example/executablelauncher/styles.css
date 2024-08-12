@@ -1,20 +1,62 @@
-/*
-    Icons used: heroicons made by Tailwind Labs for figma.com
-    url: https://www.figma.com/community/file/958423903283802665
-    Licensed under CC BY 4.0
- */
-
 .root {
+    -fx-font-family: "SansSerif";
     -fx-background-color: transparent;
 
+    -fx-font-size: 16px;
+
+
     /* TestMain colors */
-    -fx-main-color: #960F20;
+    -fx-main-color: #8EDCE6;
     -fx-light-color: #EDF2F4;
     -fx-dark-color: #0E0F19;
     -fx-dark-grey-color: #222222;
     -fx-grey-color: #282828;
     -fx-light-grey-color: #323232;
     -fx-lighter-grey-color: #5e5e5e;
+}
+
+.bold {
+    -fx-font-weight: bold;
+}
+
+.title-text {
+    -fx-font-size: 3.625em; /* 58px */
+}
+
+.subtitle-text {
+    -fx-font-size: 3.3em;
+}
+
+.extra-large-text {
+    -fx-font-size: 2.2em; /* 34px */
+}
+
+.more-large-text {
+    -fx-font-size: 2em;
+}
+
+.large-text {
+    -fx-font-size: 1.6875em; /* 27px */
+}
+
+.big-text {
+    -fx-font-size: 1.5em; /* 24px */
+}
+
+.medium-text {
+    -fx-font-size: 1.25em; /* 20px */
+}
+
+.small-text {
+    -fx-font-size: 1.125em; /* 18px */
+}
+
+.tiny-text {
+    -fx-font-size: 0.875em; /* 14px */
+}
+
+.moreTiny-text {
+    -fx-font-size: 0.6em;
 }
 
 .borderSectionsColor{
@@ -43,12 +85,28 @@
     -fx-text-fill: #5e5e5e;
 }
 
+.textAreaColor {
+    -fx-background-color: #5e5e5e;
+    -fx-control-inner-background: #5e5e5e;
+    -fx-text-fill: #EDF2F4;
+}
+
+.textAreaColor:focused {
+    -fx-background-color: #EDF2F4;
+    -fx-control-inner-background: #EDF2F4;
+    -fx-text-fill: #5e5e5e;
+}
+
 .transparent{
     -fx-background-color: transparent;
 }
 
 .translucent{
-    -fx-background-color: rgba(0, 0, 0, 0.37);
+    -fx-background-color: rgba(0, 0, 0, 0.38);
+}
+
+.transparentTrick{
+    -fx-background-color: rgba(0, 0, 0, 0.01);
 }
 
 .minimizeButton{
@@ -56,7 +114,7 @@
 }
 
 .minimizeButton:hover{
-    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-background-color: rgba(0, 0, 0, 0.65);
 }
 
 .maximizeButton{
@@ -64,7 +122,7 @@
 }
 
 .maximizeButton:hover{
-    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-background-color: rgba(0, 0, 0, 0.65);
 }
 
 .closeButton{
@@ -131,24 +189,22 @@
 .playerButton{
     -fx-background-color: transparent;
     -fx-background-radius: 50px;
-    -fx-effect: dropShadow(gaussian, black, 10, 0.0, 0, 0);
 }
 
 .playerButton:hover{
-    -fx-background-color: transparent;
+    -fx-background-color: rgba(235, 235, 235, 0.21);
     -fx-background-radius: 50px;
-    -fx-effect: dropShadow(gaussian, black, 10, 0.0, 0, 0);
 }
 
 .playerButton:focused{
     -fx-background-color: white;
     -fx-background-radius: 50px;
-    -fx-effect: none;
 }
 
 .fullscreenButton{
-    -fx-background-color: rgba(255, 255, 255, 0.21);
+    -fx-background-color: rgba(34, 34, 34, 0.75);
     -fx-background-radius: 50px;
+    -fx-text-fill: black;
 }
 
 .fullscreenButton:hover {
@@ -203,6 +259,16 @@
     -fx-border-color: #8EDCE6;
 }
 
+.activityButton{
+    -fx-background-color: rgba(0, 0, 0, 0.32);
+    -fx-background-radius: 50px;
+}
+
+.activityButton:hover{
+    -fx-background-color: rgba(0, 0, 0, 0.32);
+    -fx-background-radius: 50px;
+}
+
 .selected{
     -fx-background-color: #b8b8b8;
 }
@@ -220,6 +286,12 @@
     -fx-background-color: rgba(34, 34, 34, 0.75);
     -fx-background-radius: 5px;
     -fx-text-fill: white;
+}
+
+.playerOptionsButton:hover{
+    -fx-background-color: #656565;
+    -fx-background-radius: 5px;
+    -fx-text-fill: black;
 }
 
 .playerOptionsButton:focused{
@@ -367,31 +439,43 @@
 .desktopTextButton{
     -fx-background-color: transparent;
     -fx-text-fill: white;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.125em;
 }
 
 .desktopTextButton:hover{
+    -fx-text-fill: white;
+    -fx-font-size: 1.125em;
+}
+
+.desktopTextButtonParent{
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 1.125em;
+}
+
+.desktopTextButtonParent:hover{
     -fx-background-color: rgba(0, 0, 0, 0.47);
     -fx-text-fill: white;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.125em;
 }
 
 .seasonButton{
     -fx-background-color: transparent;
     -fx-text-fill: white;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.125em;
 }
 
 .seasonButton:hover{
     -fx-text-fill: #989898;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.125em;
 }
 
 .seasonButtonActive{
     -fx-text-fill: white;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.125em;
     -fx-border-width: 0 0 1px 0;
     -fx-border-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 10, 0, 0, 0);
 }
 
 .roundButton:hover{
@@ -447,7 +531,7 @@
 
 .alert .content {
     -fx-padding: 10px;
-    -fx-font-size: 14px;
+    -fx-font-size: 0.875em;
     -fx-text-fill: #ffffff;
 }
 
@@ -530,18 +614,35 @@
     -fx-border-insets: -4;
 }
 
+.editCardBorder{
+    -fx-border-color: #8EDCE6;
+    -fx-border-radius: 0;
+    -fx-border-width: 6;
+    -fx-effect: null;
+}
+
 .seriesCoverButton{
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-border-radius: 15;
-    -fx-border-width: 4;
+    -fx-border-radius: 0;
+    -fx-border-width: 6;
+    -fx-effect: dropShadow(gaussian, black, 10, 0.0, 0, 0);
 }
 
 .seriesCoverButton:focused {
     -fx-background-color: transparent;
     -fx-border-color: white;
-    -fx-border-radius: 15;
-    -fx-border-width: 4;
+    -fx-border-radius: 0;
+    -fx-border-width: 6;
+    -fx-effect: null;
+}
+
+.seriesCoverButtonEditMode {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-radius: 0;
+    -fx-border-width: 6;
+    -fx-effect: null;
 }
 
 .episodeButton{
@@ -591,7 +692,7 @@
 .desktopButtonActive{
     -fx-background-color: #8EDCE6;
     -fx-text-fill: #000000;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.125em;
     -fx-font-weight: bold;
 }
 
@@ -604,8 +705,17 @@
     -fx-text-fill: rgba(210, 210, 210, 0.66);
 }
 
-.textButton:hover {
+.textButton:hover{
     -fx-text-fill: rgb(255, 255, 255);
+}
+
+.folderLink{
+    -fx-background-color: transparent;
+    -fx-text-fill: #8EDCE6;
+}
+
+.folderLink:hover{
+    -fx-text-fill: white;
 }
 
 .CatButton{
@@ -613,7 +723,7 @@
     -fx-text-fill: #eaeaea;
     -fx-effect: dropShadow(gaussian, black, 10, 0.0, 0, 0);
     -fx-font-family: Impact, bold;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-border-size: 5px;
     -fx-border-radius: 5px;
     -fx-border-color:transparent;
@@ -634,7 +744,7 @@
     -fx-text-fill: #222222;
     -fx-effect: dropShadow(gaussian, black, 2, 0.0, 0, 0);
     -fx-font-family: Impact, bold;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.5em;
     -fx-background-radius: 5px;
     -fx-border-size: 5px;
     -fx-border-radius: 5px;
@@ -716,6 +826,10 @@
 }
 
 .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .corner {
     -fx-background-color: transparent;
 }
 

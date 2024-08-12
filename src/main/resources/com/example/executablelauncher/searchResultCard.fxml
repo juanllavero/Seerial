@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="240.0" prefWidth="700.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchResultCardController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="700.0" styleClass="midSectionLightColor" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SearchResultCardController">
    <right>
       <VBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
@@ -19,26 +18,27 @@
    <center>
       <VBox BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="titleText" text="Label" textFill="WHITE">
-               <font>
-                  <Font name="System Bold" size="16.0" />
-               </font>
+            <Label fx:id="titleText" stylesheets="@styles.css" text="Label" textFill="WHITE">
+               <styleClass>
+                  <String fx:value="tiny-text" />
+                  <String fx:value="bold" />
+               </styleClass>
             </Label>
-            <Label fx:id="yearText" text="Label" textFill="#c9c9c9">
+            <Label fx:id="yearText" stylesheets="@styles.css" text="Label" textFill="#c9c9c9">
                <VBox.margin>
                   <Insets top="5.0" />
                </VBox.margin>
-               <font>
-                  <Font size="13.0" />
-               </font>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
             </Label>
-            <Label fx:id="resumeText" alignment="TOP_LEFT" prefHeight="161.0" prefWidth="529.0" text="Label" textFill="WHITE" wrapText="true">
+            <Label fx:id="resumeText" alignment="TOP_LEFT" prefHeight="161.0" prefWidth="529.0" stylesheets="@styles.css" text="Label" textFill="WHITE" wrapText="true">
                <VBox.margin>
                   <Insets right="20.0" top="10.0" />
                </VBox.margin>
-               <font>
-                  <Font size="13.0" />
-               </font>
+               <styleClass>
+                  <String fx:value="tiny-text" />
+               </styleClass>
             </Label>
          </children>
       </VBox>
