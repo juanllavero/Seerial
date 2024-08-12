@@ -84,9 +84,10 @@ Portable versions exist for Windows and Linux.
 ### Requirements
 This software is required in order for the application to run.
 
-- JavaFX 22 or newer.
+- Java JDK 21 or newer.
 - Python 3.
 - Python Pytube (pip install pytube).
+- FFMPEG.
 
 ## Branches
 -   `master`  - default branch representing the state of the currently released build.
