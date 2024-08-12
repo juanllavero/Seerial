@@ -1,9 +1,6 @@
 package com.example.executablelauncher;
 
-import com.example.executablelauncher.entities.Episode;
-import com.example.executablelauncher.entities.Library;
-import com.example.executablelauncher.entities.Season;
-import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.entities.*;
 import com.example.executablelauncher.fileMetadata.AudioTrack;
 import com.example.executablelauncher.fileMetadata.SubtitleTrack;
 import com.example.executablelauncher.fileMetadata.VideoTrack;
@@ -722,36 +719,52 @@ public class SeasonController {
         playingVideo = true;
 
         mainBox.setDisable(true);
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
-            Parent root = fxmlLoader.load();
-            root.setStyle(getBaseFontSize());
 
-            Stage videoStage = (Stage) mainBox.getScene().getWindow();
+        if (System.getProperty("os.name").toLowerCase().contains("win")){
+            try{
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
+                Parent root = fxmlLoader.load();
+                root.setStyle(getBaseFontSize());
 
-            Stage controlsStage = new Stage();
-            controlsStage.setTitle("Video Player Controls");
-            controlsStage.initStyle(StageStyle.TRANSPARENT);
-            controlsStage.initModality(Modality.NONE);
-            controlsStage.initOwner(videoStage);
-            Scene scene = new Scene(root);
-            scene.setFill(Color.TRANSPARENT);
-            controlsStage.setScene(scene);
+                Stage videoStage = (Stage) mainBox.getScene().getWindow();
 
-            String name = series.getName();
-            if (!isShow)
-                name = seasons.get(currentSeason).getName();
+                Stage controlsStage = new Stage();
+                controlsStage.setTitle("Video Player Controls");
+                controlsStage.initStyle(StageStyle.TRANSPARENT);
+                controlsStage.initModality(Modality.NONE);
+                controlsStage.initOwner(videoStage);
+                Scene scene = new Scene(root);
+                scene.setFill(Color.TRANSPARENT);
+                controlsStage.setScene(scene);
 
-            VideoPlayerController playerController = fxmlLoader.getController();
-            playerController.setFullScreenPlayer(this, controlsStage);
-            playerController.setVideo(seasons.get(currentSeason), episode, name, videoStage);
+                String name = series.getName();
+                if (!isShow)
+                    name = seasons.get(currentSeason).getName();
 
-            controlsStage.setMaximized(true);
-            controlsStage.show();
+                VideoPlayerController playerController = fxmlLoader.getController();
+                playerController.setFullScreenPlayer(this, controlsStage);
+                playerController.setVideo(seasons.get(currentSeason), episode, name, videoStage);
 
-            fadeInEffect((Pane) root);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                controlsStage.setMaximized(true);
+                controlsStage.show();
+
+                fadeInEffect((Pane) root);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }else{
+            VlcjJavaFxApplication videoPlayer = new VlcjJavaFxApplication();
+
+            try {
+                Stage stage = new Stage();
+                videoPlayer.init();
+                videoPlayer.setSeasonParent(this);
+                videoPlayer.startVideo(seasons.get(currentSeason), episode);
+                videoPlayer.start(stage);
+                stage.setFullScreen(true);
+            } catch (Exception e) {
+                System.err.println("playEpisode: could not load VLC video player");
+            }
         }
     }
 

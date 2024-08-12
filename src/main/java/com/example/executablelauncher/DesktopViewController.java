@@ -101,6 +101,7 @@ import java.util.regex.Pattern;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import xss.it.fx.helpers.CornerPreference;
 
 import static com.example.executablelauncher.App.*;
 import static com.example.executablelauncher.utils.Utils.*;
@@ -1252,34 +1253,48 @@ public class DesktopViewController {
         //Open Video Player
         fadeInEffect(blackBackground);
         mainBox.setDisable(true);
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
-            Parent root = fxmlLoader.load();
-            root.setStyle(getBaseFontSize());
 
-            Stage videoStage = (Stage) mainBox.getScene().getWindow();
+        if (System.getProperty("os.name").toLowerCase().contains("win")){
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("videoPlayer.fxml"));
+                Parent root = fxmlLoader.load();
+                root.setStyle(getBaseFontSize());
 
-            Stage controlsStage = new Stage();
-            controlsStage.setTitle("Video Player Controls");
-            controlsStage.initOwner(videoStage);
-            controlsStage.initModality(Modality.NONE);
-            controlsStage.initStyle(StageStyle.TRANSPARENT);
-            Scene scene = new Scene(root);
-            scene.setFill(Color.TRANSPARENT);
-            //scene.setCursor(Cursor.NONE);
-            controlsStage.setScene(scene);
+                Stage videoStage = (Stage) mainBox.getScene().getWindow();
 
-            String name = selectedSeries.getName();
-            if (!currentLibrary.getType().equals("Shows"))
-                name = selectedSeason.getName();
+                Stage controlsStage = new Stage();
+                controlsStage.setTitle("Video Player Controls");
+                controlsStage.initOwner(videoStage);
+                controlsStage.initModality(Modality.NONE);
+                controlsStage.initStyle(StageStyle.TRANSPARENT);
+                Scene scene = new Scene(root);
+                scene.setFill(Color.TRANSPARENT);
+                controlsStage.setScene(scene);
 
-            videoPlayerController = fxmlLoader.getController();
-            videoPlayerController.setDesktopPlayer(this, controlsStage);
-            videoPlayerController.setVideo(selectedSeason, episode, name, videoStage);
+                String name = selectedSeries.getName();
+                if (!currentLibrary.getType().equals("Shows"))
+                    name = selectedSeason.getName();
 
-            controlsStage.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                videoPlayerController = fxmlLoader.getController();
+                videoPlayerController.setDesktopPlayer(this, controlsStage);
+                videoPlayerController.setVideo(selectedSeason, episode, name, videoStage);
+
+                controlsStage.show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }else{
+            VlcjJavaFxApplication videoPlayer = new VlcjJavaFxApplication();
+
+            try {
+                Stage stage = new Stage();
+                videoPlayer.init();
+                videoPlayer.setDesktopParent(this);
+                videoPlayer.startVideo(selectedSeason, episode);
+                videoPlayer.start(stage);
+            } catch (Exception e) {
+                System.err.println("playEpisode: could not load VLC video player");
+            }
         }
     }
 

@@ -779,23 +779,7 @@ public class Controller implements Initializable {
 
                 scaleTransition.play();
 
-                //Update scroll vertical value
-                int index = (seriesButtons.indexOf(btn) / columnCount);
-
-                if (index != scrollPane.getVvalue()) {
-                    Bounds cardBounds = btn.localToScene(btn.getBoundsInLocal());
-                    Bounds scrollBounds = scrollPane.localToScene(scrollPane.getBoundsInLocal());
-
-                    //Check if the button is outside the view
-                    if (cardBounds.getMinY() < scrollBounds.getMinY() || cardBounds.getMaxY() > scrollBounds.getMaxY()){
-                        //Animate transition
-                        Timeline timeline = new Timeline();
-                        KeyValue keyValue = new KeyValue(scrollPane.vvalueProperty(), index);
-                        KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.15), keyValue);
-                        timeline.getKeyFrames().add(keyFrame);
-                        timeline.play();
-                    }
-                }
+                updateScroll(btn);
             }else{
                 ScaleTransition scaleTransition = new ScaleTransition(Duration.seconds(0.15), btn);
                 scaleTransition.setToX(1);
@@ -886,6 +870,29 @@ public class Controller implements Initializable {
 
         cardContainer.getChildren().add(btn);
         FlowPane.setMargin(btn, new Insets(cardMargin));
+    }
+
+    /**
+     * Updates the scroll vertical value to maintain the button completely in view
+     * @param btn Current button
+     */
+    private void updateScroll(Button btn){
+        int index = (seriesButtons.indexOf(btn) / columnCount);
+
+        if (index != scrollPane.getVvalue()) {
+            Bounds cardBounds = btn.localToScene(btn.getBoundsInLocal());
+            Bounds scrollBounds = scrollPane.localToScene(scrollPane.getBoundsInLocal());
+
+            //Check if the button is outside the view
+            if (cardBounds.getMinY() < scrollBounds.getMinY() || cardBounds.getMaxY() > scrollBounds.getMaxY()){
+                //Animate transition
+                Timeline timeline = new Timeline();
+                KeyValue keyValue = new KeyValue(scrollPane.vvalueProperty(), index);
+                KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.15), keyValue);
+                timeline.getKeyFrames().add(keyFrame);
+                timeline.play();
+            }
+        }
     }
     private void showLibraryView(){
         Platform.runLater(() -> {
@@ -1053,6 +1060,16 @@ public class Controller implements Initializable {
 
         series.remove(selectedSeries);
         series.add(index, selectedSeries);
+
+        index = (int) Math.floor((double) index / columnCount);
+        if (index != scrollPane.getVvalue()){
+            //Animate transition
+            Timeline timeline = new Timeline();
+            KeyValue keyValue = new KeyValue(scrollPane.vvalueProperty(), index);
+            KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.15), keyValue);
+            timeline.getKeyFrames().add(keyFrame);
+            timeline.play();
+        }
     }
     //endregion
 
@@ -1211,11 +1228,11 @@ public class Controller implements Initializable {
                 if (logoFile.exists() && logoFile.isFile()){
                     Image img;
                     try {
-                        img = new Image(logoFile.toURI().toURL().toExternalForm(), mainPane.getScene().getHeight() * 0.6, mainPane.getScene().getHeight() * 0.6, true, true);
+                        img = new Image(logoFile.toURI().toURL().toExternalForm(), mainPane.getScene().getHeight() * 0.4, mainPane.getScene().getHeight() * 0.4, true, true);
 
                         logoImage.setImage(img);
-                        logoImage.setFitWidth(mainPane.getScene().getHeight() * 0.6);
-                        logoImage.setFitHeight(mainPane.getScene().getHeight() * 0.6);
+                        logoImage.setFitWidth(mainPane.getScene().getHeight() * 0.4);
+                        logoImage.setFitHeight(mainPane.getScene().getHeight() * 0.4);
                     } catch (MalformedURLException e) {
                         System.err.println("selectEpisode: logo image could not be loaded");
                     }

@@ -116,15 +116,15 @@
                   </BorderPane>
                </children>
                <BorderPane.margin>
-                  <Insets />
+                  <Insets top="10.0" />
                </BorderPane.margin>
                <padding>
-                  <Insets left="100.0" right="100.0" top="8.0" />
+                  <Insets left="100.0" right="100.0" />
                </padding>
             </HBox>
          </top>
          <center>
-            <StackPane fx:id="mainStack" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <StackPane fx:id="mainStack" BorderPane.alignment="CENTER">
                <children>
                   <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
                      <opaqueInsets>
@@ -141,7 +141,7 @@
                               <StackPane>
                                  <children>
                                     <ImageView fx:id="logoImage" fitHeight="225.0" fitWidth="326.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT" />
-                                    <Label fx:id="titleText" stylesheets="@styles.css" text="Show's Name" textFill="WHITE" StackPane.alignment="BOTTOM_LEFT">
+                                    <Label fx:id="titleText" stylesheets="@styles.css" text="Show's Name" textFill="WHITE" wrapText="true" StackPane.alignment="BOTTOM_LEFT">
                                        <font>
                                           <Font name="SansSerif Bold" />
                                        </font>
@@ -271,6 +271,12 @@
                      </children>
                   </Pane>
                </children>
+               <BorderPane.margin>
+                  <Insets />
+               </BorderPane.margin>
+               <padding>
+                  <Insets top="10.0" />
+               </padding>
             </StackPane>
          </center>
       </BorderPane>
