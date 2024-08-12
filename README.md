@@ -84,10 +84,11 @@ Portable versions exist for Windows and Linux.
 ### Requirements
 This software is required in order for the application to run.
 
-- Java JDK 21 or newer.
-- Python 3.
-- Python Pytube (pip install pytube).
-- FFMPEG.
+- Java JDK 21 or newer (only for Linux, or if using the `.jar` file directly)
+- Python 3
+- Python Pytube (`pip install pytube`)
+- FFMPEG
+- VLC (only for Linux)
 
 ## Branches
 -   `master`  - default branch representing the state of the currently released build.
