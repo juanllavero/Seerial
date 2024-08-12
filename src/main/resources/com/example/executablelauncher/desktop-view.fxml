@@ -275,8 +275,11 @@
                                  </image>
                               </ImageView>
                            </graphic>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
                         </Button>
-                        <Button fx:id="librarySelector" contentDisplay="RIGHT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#showLibraries" styleClass="libraryButton" stylesheets="@styles.css" text="Library Name" textFill="WHITE">
+                        <Button fx:id="librarySelector" contentDisplay="RIGHT" graphicTextGap="10.0" mnemonicParsing="false" onMouseClicked="#showLibraries" stylesheets="@styles.css" text="Library Name" textFill="WHITE">
                            <font>
                               <Font name="System Bold" size="15.0" />
                            </font>
@@ -288,8 +291,16 @@
                               </ImageView>
                            </graphic>
                            <HBox.margin>
-                              <Insets left="10.0" />
+                              <Insets />
                            </HBox.margin>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                           <styleClass>
+                              <String fx:value="libraryButton" />
+                              <String fx:value="tiny-text" />
+                              <String fx:value="bold" />
+                           </styleClass>
                         </Button>
                         <Button fx:id="addLibraryButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#addLibrary" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
@@ -300,8 +311,11 @@
                               </ImageView>
                            </graphic>
                            <HBox.margin>
-                              <Insets left="5.0" right="5.0" />
+                              <Insets />
                            </HBox.margin>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
                         </Button>
                         <Button mnemonicParsing="false" onMouseClicked="#openLibraryMenu" styleClass="desktopMenuButtons" stylesheets="@styles.css">
                            <graphic>
@@ -314,6 +328,9 @@
                            <HBox.margin>
                               <Insets right="5.0" />
                            </HBox.margin>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
                         </Button>
                      </children>
                      <padding>
@@ -384,7 +401,7 @@
             </BorderPane>
          </children>
          <StackPane.margin>
-            <Insets bottom="10.0" left="20.0" right="10.0" />
+            <Insets bottom="10.0" left="10.0" right="10.0" />
          </StackPane.margin>
       </HBox>
       <HBox alignment="TOP_CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="37.0" prefWidth="739.0" StackPane.alignment="TOP_CENTER">

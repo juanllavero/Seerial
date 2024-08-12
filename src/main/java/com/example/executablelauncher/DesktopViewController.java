@@ -358,6 +358,8 @@ public class DesktopViewController {
         if (screenWidth > 1920)
             seriesScrollPane.setPrefWidth(350);
 
+        leftArea.setMaxWidth(seriesScrollPane.getPrefWidth());
+
         seasonsEpisodesBox.setPrefWidth(Integer.MAX_VALUE);
 
         seasonInfoPane.getChildren().add(0, seasonBackground);
@@ -800,11 +802,13 @@ public class DesktopViewController {
             BorderPane pane = (BorderPane) btn.getGraphic();
             ((Label) pane.getLeft()).setText(selectedSeries.getName());
 
-            File[] files = new File("resources/img/seriesCovers/" + selectedSeries.getId() + "/").listFiles();
+            if (selectedSeries.getCoverSrc().isEmpty()){
+                File[] files = new File("resources/img/seriesCovers/" + selectedSeries.getId() + "/").listFiles();
 
-            if (files != null) {
-                File posterDir = files[0];
-                selectedSeries.setCoverSrc("resources/img/seriesCovers/" + selectedSeries.getId() + "/" + posterDir.getName());
+                if (files != null) {
+                    File posterDir = files[0];
+                    selectedSeries.setCoverSrc("resources/img/seriesCovers/" + selectedSeries.getId() + "/" + posterDir.getName());
+                }
             }
 
             Series series = selectedSeries;
@@ -865,6 +869,11 @@ public class DesktopViewController {
             seasonPoster = true;
             changePosterButton.setVisible(true);
         }
+
+        if (seasonPoster)
+            changePosterButton.setText(App.buttonsBundle.getString("collectionPoster"));
+        else
+            changePosterButton.setText(App.buttonsBundle.getString("seasonPoster"));
 
         showSeries();
 
@@ -1916,14 +1925,11 @@ public class DesktopViewController {
                     try {
                         if (!interrupted) {
                             if (library.getType().equals("Shows")) {
-                                if (file.isFile())
-                                    return;
-
-                                File[] filesInDir = file.listFiles();
-                                if (filesInDir == null)
-                                    return;
-
-                                scanTVShow(library, file, filesInDir, false);
+                                if (file.isDirectory()) {
+                                    File[] filesInDir = file.listFiles();
+                                    if (filesInDir != null)
+                                        scanTVShow(library, file, filesInDir, false);
+                                }
                             } else {
                                 scanMovie(library, file);
                             }
@@ -1937,6 +1943,7 @@ public class DesktopViewController {
                     } catch (Exception err) {
                         synchronized (DesktopViewController.class) {
                             numFilesToCheck--;
+                            err.printStackTrace();
                             System.out.println("\nThread " + Thread.currentThread().getName() + " encountered an exception" + err.getMessage());
                             if (numFilesToCheck == 0)
                                 Platform.runLater(() -> postFileSearch(library));
@@ -1960,7 +1967,8 @@ public class DesktopViewController {
                 if (folderFiles != null) {
                     for (File file : folderFiles) {
                         if (file.exists()) {
-                            files.add(file);
+                            if (file.isDirectory() || validVideoFile(file))
+                                files.add(file);
                         }
                     }
                 }
@@ -2010,28 +2018,26 @@ public class DesktopViewController {
 
             analysisExecutor.submit(() -> {
                 try {
-
                     if (library.getType().equals("Shows")) {
-                        Season season = series.getSeasons().get(0);
+                        Season season = series.getSeasons().getFirst();
 
                         if (season.getMusicSrc().isEmpty()) {
                             List<YoutubeVideo> results = searchYoutube(series.getName() + " main theme");
 
                             if (results != null)
-                                downloadMedia(season, results.get(0).watch_url);
+                                downloadMedia(season, results.getFirst().watch_url);
                         }
                     } else {
                         for (Season season : series.getSeasons()) {
                             if (interrupted)
                                 break;
 
-                            if (!season.getMusicSrc().isEmpty())
-                                continue;
+                            if (season.getMusicSrc().isEmpty()) {
+                                List<YoutubeVideo> results = searchYoutube(season.getName() + " main theme");
 
-                            List<YoutubeVideo> results = searchYoutube(season.getName() + " main theme");
-
-                            if (results != null)
-                                downloadMedia(season, results.get(0).watch_url);
+                                if (results != null)
+                                    downloadMedia(season, results.getFirst().watch_url);
+                            }
                         }
                     }
 
@@ -2138,6 +2144,7 @@ public class DesktopViewController {
             //Set values in order to set the attributes from the search result in the new series and download images
             updateMetadata = true;
         }
+
         SeriesMetadata seriesMetadata = downloadSeriesMetadata(library, themdbID);
 
         if (seriesMetadata == null)
@@ -2408,7 +2415,10 @@ public class DesktopViewController {
         return null;
     }
 
-    private boolean validVideoFile(File file) {
+    private static boolean validVideoFile(File file) {
+        if (file.isDirectory())
+            return false;
+
         String videoExtension = file.getAbsolutePath().substring(file.getAbsolutePath().lastIndexOf("."));
         videoExtension = videoExtension.toLowerCase();
 
@@ -3271,6 +3281,9 @@ public class DesktopViewController {
                         processMovie(library, file, season, movieMetadata.runtime);
                 }
 
+                if (season.getEpisodes().isEmpty())
+                    series.removeSeason(season);
+
                 if (!exists)
                     addSeries(library, series);
                 else if (series == selectedSeries)
@@ -3324,12 +3337,12 @@ public class DesktopViewController {
             season.addEpisode(episode);
             episode.setSeasonID(season.getId());
             library.getAnalyzedFiles().put(f.getAbsolutePath(), episode.getId());
-        }
 
-        episode.setName(f.getName().substring(0, f.getName().lastIndexOf(".")));
-        episode.setVideoSrc(f.getAbsolutePath());
-        episode.setSeasonNumber(season.getSeasonNumber());
-        episode.setImgSrc("resources/img/Default_video_thumbnail.jpg");
+            episode.setName(f.getName().substring(0, f.getName().lastIndexOf(".")));
+            episode.setVideoSrc(f.getAbsolutePath());
+            episode.setSeasonNumber(season.getSeasonNumber());
+            episode.setImgSrc("resources/img/Default_video_thumbnail.jpg");
+        }
 
         getMediaInfo(episode);
     }
@@ -3344,23 +3357,23 @@ public class DesktopViewController {
             season.addEpisode(episode);
             episode.setSeasonID(season.getId());
             library.getAnalyzedFiles().put(file.getAbsolutePath(), episode.getId());
+
+            episode.setName(file.getName().substring(0, file.getName().lastIndexOf(".")));
+            episode.setEpisodeNumber(season.getEpisodes().size());
+            episode.setScore(season.getScore());
+            episode.setOverview(season.getOverview());
+            episode.setYear(season.getYear());
+            episode.setRuntime(runtime);
+            episode.setSeasonNumber(season.getSeasonNumber());
+            episode.setVideoSrc(file.getAbsolutePath());
+            episode.setDirectedBy(season.getDirectedBy());
+            episode.setWrittenBy(season.getWrittenBy());
+
+            if (!season.getImdbID().isEmpty())
+                setIMDBScore(season.getImdbID(), episode);
+
+            setMovieThumbnail(episode, season.getThemdbID());
         }
-
-        episode.setName(file.getName().substring(0, file.getName().lastIndexOf(".")));
-        episode.setEpisodeNumber(season.getEpisodes().size());
-        episode.setScore(season.getScore());
-        episode.setOverview(season.getOverview());
-        episode.setYear(season.getYear());
-        episode.setRuntime(runtime);
-        episode.setSeasonNumber(season.getSeasonNumber());
-        episode.setVideoSrc(file.getAbsolutePath());
-        episode.setDirectedBy(season.getDirectedBy());
-        episode.setWrittenBy(season.getWrittenBy());
-
-        if (!season.getImdbID().isEmpty())
-            setIMDBScore(season.getImdbID(), episode);
-
-        setMovieThumbnail(episode, season.getThemdbID());
 
         getMediaInfo(episode);
     }
