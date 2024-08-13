@@ -482,11 +482,11 @@ public class SeasonController {
             logo.setVisible(false);
         }else if (logoFile.exists()){
             Image img;
-            img = new Image("file:" + logoSrc, screenHeight * 0.6, screenHeight * 0.6, true, true);
+            img = new Image("file:" + logoSrc, screenHeight * 0.4, screenHeight * 0.2, true, true);
 
             logo.setImage(img);
-            logo.setFitWidth(screenHeight * 0.6);
-            logo.setFitHeight(screenHeight * 0.6);
+            logo.setFitWidth(screenHeight * 0.4);
+            logo.setFitHeight(screenHeight * 0.2);
 
             seriesTitle.setVisible(false);
             logo.setVisible(true);

@@ -1,6 +1,7 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.Series;
+import com.example.executablelauncher.utils.Utils;
 import com.example.executablelauncher.utils.WindowDecoration;
 import com.example.executablelauncher.utils.Configuration;
 import javafx.animation.PauseTransition;
@@ -23,11 +24,14 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import nu.pattern.OpenCV;
+import org.apache.commons.io.FileUtils;
 import xss.it.fx.helpers.CornerPreference;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,12 +60,22 @@ public class App extends Application {
     static ScheduledExecutorService executorService;
     public static List<Task<Void>> tasks = new ArrayList<>();
     private static DesktopViewController desktopController;
+    public static String themoviedbAPIToken = "";
+    public static String themoviedbAPIKey = "";
     static String mode = "desktop";
 
     @Override
     public void start(Stage stage) throws IOException {
         //Data Initialization
         DataManager.INSTANCE.loadData();
+
+        try{
+            Properties properties = Configuration.loadEncryptedProperties();
+            themoviedbAPIToken = properties.getProperty("TheMovieDBToken");
+            themoviedbAPIKey = properties.getProperty("TheMovieDBKey");
+        } catch (Exception e) {
+            System.err.println("App: could not load encrypted API key");
+        }
 
         //Set global language
         globalLanguage = Locale.forLanguageTag(Configuration.loadConfig("currentLanguageTag", "en-US"));
@@ -228,6 +242,20 @@ public class App extends Application {
         for (Task<Void> task : tasks)
             if (task.isRunning())
                 task.cancel();
+
+        File directory = new File("resources/downloadedMediaCache/");
+        File[] fileList = directory.listFiles();
+
+        if (fileList != null){
+            try{
+                for (File folder : fileList){
+                    if (folder.isDirectory())
+                        FileUtils.deleteDirectory(folder);
+                }
+            } catch (IOException e) {
+                System.err.println("App.close: could not delete downloadedMediaCache folders");
+            }
+        }
 
         DataManager.INSTANCE.saveData();
         Platform.exit();

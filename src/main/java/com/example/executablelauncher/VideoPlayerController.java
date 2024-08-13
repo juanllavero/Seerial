@@ -240,50 +240,40 @@ public class VideoPlayerController {
         videoStage.getScene().setOnMouseClicked(e -> {
             if (optionsBox.isVisible() && !chapterPane.isVisible())
                 hideOptions();
-            else if (!controlsBox.isVisible())
+            else if (!controlsShown)
                 showControls();
         });
 
         controlsStage.getScene().setOnMouseClicked(e -> {
             if (optionsBox.isVisible() && !chapterPane.isVisible())
                 hideOptions();
-            else if (!controlsBox.isVisible())
+            else if (!controlsShown)
                 showControls();
         });
-
-        /*videoStage.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
-            if (App.pressedBack(e)){
-                if (optionsBox.isVisible())
-                    hideOptions();
-                else if (controlsShown)
-                    hideControls();
-                else
-                    stop();
-            }
-        });*/
 
         controlsStage.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
             if (App.pressedBack(e)){
                 if (optionsBox.isVisible())
                     hideOptions();
                 else if (!controlsShown)
-                    stop();
+                    showControls();
             }
         });
 
         controlsStage.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
-            if (videoPlayer.isVideoLoaded()){
-                if (App.pressedRight(e))
-                    goAhead();
-                else if (App.pressedLeft(e))
-                    goBack();
-                else
-                    showControls();
-            }else if (!optionsBox.isVisible() && videoPlayer.isVideoLoaded()){
+            if (!optionsBox.isVisible() && videoPlayer.isVideoLoaded()){
                 if (App.pressedRB(e))
                     volumeUp();
                 else if (App.pressedLB(e))
                     volumeDown();
+                else if (App.pressedRight(e))
+                    goAhead();
+                else if (App.pressedLeft(e))
+                    goBack();
+                else if (App.pressedBack(e) && controlsShown)
+                    stop();
+                else
+                    showControls();
 
                 timeline.playFromStart();
             }

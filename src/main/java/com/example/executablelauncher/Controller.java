@@ -1539,9 +1539,14 @@ public class Controller implements Initializable {
             currentLibrary = DataManager.INSTANCE.getLibrary(selectedSeries);
             DataManager.INSTANCE.currentLibrary = currentLibrary;
 
+            mainViewBundle.setDisable(true);
+            mainPane.setDisable(true);
+
             try {
                 generateSeasonView(s).play();
             } catch (IOException e) {
+                mainViewBundle.setDisable(false);
+                mainPane.setDisable(false);
                 throw new RuntimeException(e);
             }
         }
@@ -1568,6 +1573,8 @@ public class Controller implements Initializable {
 
         FadeTransition fadeOut = fadeOutEffect(mainBox.getChildren().getLast(), 0.4f, 0);
         fadeOut.setOnFinished(e -> {
+            mainViewBundle.setDisable(false);
+            mainPane.setDisable(false);
             inSeasonView = false;
             mainBox.getChildren().removeLast();
 

@@ -52,7 +52,7 @@ public class SearchEpisodesGroupController {
                     .url("https://api.themoviedb.org/3/tv/" + tmdbID + "/episode_groups")
                     .get()
                     .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                    .addHeader("Authorization", "Bearer " + App.themoviedbAPIKey)
                     .build();
 
             Response response = client.newCall(requestGroups).execute();

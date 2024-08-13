@@ -1,10 +1,6 @@
 package com.example.executablelauncher;
 
 import com.example.executablelauncher.entities.*;
-import com.example.executablelauncher.fileMetadata.AudioTrack;
-import com.example.executablelauncher.fileMetadata.MediaInfo;
-import com.example.executablelauncher.fileMetadata.SubtitleTrack;
-import com.example.executablelauncher.fileMetadata.VideoTrack;
 import com.example.executablelauncher.tmdbMetadata.common.Crew;
 import com.example.executablelauncher.tmdbMetadata.common.Genre;
 import com.example.executablelauncher.tmdbMetadata.common.ProductionCompany;
@@ -24,11 +20,6 @@ import com.example.executablelauncher.utils.Utils;
 import com.example.executablelauncher.utils.WindowDecoration;
 import com.example.executablelauncher.videoPlayer.VideoPlayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.kokorin.jaffree.StreamType;
-import com.github.kokorin.jaffree.ffprobe.FFprobe;
-import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
-import com.github.kokorin.jaffree.ffprobe.Format;
-import com.github.kokorin.jaffree.ffprobe.Stream;
 import info.movito.themoviedbapi.TmdbApi;
 import info.movito.themoviedbapi.TmdbTvEpisodes;
 import info.movito.themoviedbapi.TvResultsPage;
@@ -62,10 +53,6 @@ import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontPosture;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -81,41 +68,41 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.opencv.core.Mat;
+import org.opencv.core.Rect;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.*;
-import java.io.*;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
-import xss.it.fx.helpers.CornerPreference;
-
-import static com.example.executablelauncher.App.*;
+import static com.example.executablelauncher.App.analysisExecutor;
+import static com.example.executablelauncher.App.getBaseFontSize;
 import static com.example.executablelauncher.utils.Utils.*;
 
 public class DesktopViewController {
-    static class NameYearContainer {
-        public String name;
-        public String year;
-
-        public NameYearContainer(String name, String year){
-            this.name = name;
-            this.year = year;
-        }
-    }
     //region FXML ATTRIBUTES
     @FXML VBox activityBox;
     @FXML VBox activityMessageBox;
@@ -270,7 +257,7 @@ public class DesktopViewController {
         }
 
         if (App.isConnectedToInternet)
-            tmdbApi = new TmdbApi("4b46560aff5facd1d9ede196ce7d675f");
+            tmdbApi = new TmdbApi(App.themoviedbAPIKey);
 
         selectionOptions.setVisible(false);
 
@@ -931,20 +918,20 @@ public class DesktopViewController {
         if (!Boolean.parseBoolean(Configuration.loadConfig("playMusicDesktop", "false")))
             return;
 
-        if (mp != null)
+        if (mp != null && selectedSeries.isPlaySameMusic() && selectedSeason.getMusicSrc().isEmpty())
+            return;
+        else if (mp != null)
             mp.stop();
 
-        if (selectedSeries.isPlaySameMusic()){
-            if (!selectedSeason.getMusicSrc().isEmpty()){
-                File file = new File(selectedSeason.getMusicSrc());
-                Media media = new Media(file.toURI().toString());
+        if (selectedSeries.isPlaySameMusic() && !selectedSeason.getMusicSrc().isEmpty()){
+            File file = new File(selectedSeason.getMusicSrc());
+            Media media = new Media(file.toURI().toString());
 
-                int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
+            int volume = Integer.parseInt(Configuration.loadConfig("backgroundVolume", "0.4"));
 
-                mp = new MediaPlayer(media);
-                mp.setVolume((double) volume / 100);
-                mp.setOnEndOfMedia(this::stopMusic);
-            }
+            mp = new MediaPlayer(media);
+            mp.setVolume((double) volume / 100);
+            mp.setOnEndOfMedia(this::stopMusic);
         }else{
             for (Season season : selectedSeries.getSeasons()){
                 if (!season.getMusicSrc().isEmpty()){
@@ -2106,6 +2093,10 @@ public class DesktopViewController {
 
         if (library.getAnalyzedFolders().get(directory.getAbsolutePath()) != null) {
             series = library.getSeries(library.getAnalyzedFolders().get(directory.getAbsolutePath()));
+
+            if (series == null)
+                return;
+
             exists = true;
 
             series.setAnalyzingFiles(true);
@@ -2213,6 +2204,9 @@ public class DesktopViewController {
                 }
             }
         }
+
+        if (series.getSeasons().isEmpty())
+            library.getAnalyzedFolders().remove(series.getFolder());
 
         //Hide loading circle in view
         series.setAnalyzingFiles(false);
@@ -2369,7 +2363,7 @@ public class DesktopViewController {
                     .url("https://api.themoviedb.org/3/tv/" + series.getThemdbID() + "/episode_groups")
                     .get()
                     .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                    .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                     .build();
 
             try (Response response = client.newCall(requestGroups).execute()) {
@@ -2410,7 +2404,7 @@ public class DesktopViewController {
                     .url("https://api.themoviedb.org/3/tv/episode_group/" + seasonGroupID)
                     .get()
                     .addHeader("accept", "application/json")
-                    .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                    .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                     .build();
 
             try (Response response = client.newCall(requestGroup).execute()) {
@@ -2442,16 +2436,6 @@ public class DesktopViewController {
     }
 
     private void processEpisode(Library library, Series series, File file, List<SeasonMetadata> seasonsMetadata, SeasonsGroupMetadata episodesGroup, boolean seriesExists) {
-        //Name of the file without the extension
-        String fullName = file.getName().substring(0, file.getName().lastIndexOf("."));
-
-        //Regular expressions for identifying season and/or episode numbers in the file name
-        final String regexSeasonEpisode = "(?i)(?<season>S[0-9]{1,3}+)(?<episode>E[0-9]{1,5})";
-        final String regexOnlyEpisode = "(?i)(?<episode>[0-9]{1,5})";
-
-        final Pattern pattern = Pattern.compile(regexSeasonEpisode, Pattern.MULTILINE);
-        final Matcher matcher = pattern.matcher(fullName);
-
         //SeasonMetadataBasic and episode metadata to find for the current file
         SeasonMetadata seasonMetadata = null;
         EpisodeMetadata episodeMetadata = null;
@@ -2459,8 +2443,14 @@ public class DesktopViewController {
         int realSeason = 0;
         int realEpisode = -1;
 
-        //If episode name only includes episode number
-        if (!matcher.find()) {
+        //Name of the file without the extension
+        String fullName = file.getName().substring(0, file.getName().lastIndexOf("."));
+        List<Integer> seasonEpisode = detectSeasonEpisode(fullName);
+
+        //If there is no season and episode numbers
+        if (seasonEpisode == null || seasonEpisode.isEmpty()){
+            final String regexOnlyEpisode = "(?i)(?:\\([^\\)]*\\))?\\s*(?<episode>[0-9]{1,5})(?=\\s|-|\\.|$)";
+
             Pattern newPattern = Pattern.compile(regexOnlyEpisode, Pattern.MULTILINE);
             Matcher newMatch = newPattern.matcher(fullName);
 
@@ -2497,9 +2487,9 @@ public class DesktopViewController {
 
             if (!episodeFound)
                 return;
-        } else {
-            int seasonNumber = Integer.parseInt(matcher.group("season").substring(1));
-            int episodeNumber = Integer.parseInt(matcher.group("episode").substring(1));
+        }else{
+            int seasonNumber = seasonEpisode.getFirst();
+            int episodeNumber = seasonEpisode.getLast();
 
             realSeason = seasonNumber;
             realEpisode = episodeNumber;
@@ -2751,7 +2741,7 @@ public class DesktopViewController {
                 .url("https://api.themoviedb.org/3/tv/" + episodeMetadata.show_id + "/season/" + episodeMetadata.season_number + "/episode/" + episodeMetadata.episode_number + "credits?language=en-US")
                 .get()
                 .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                 .build();
 
         try (Response response = client.newCall(requestGroups).execute()) {
@@ -2798,7 +2788,7 @@ public class DesktopViewController {
                 .url("https://api.themoviedb.org/3/tv/" + series.getThemdbID() + "/season/" + seasonMetadata.season_number + "/credits?language=en-US")
                 .get()
                 .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                 .build();
 
         try (Response response = client.newCall(requestGroups).execute()) {
@@ -3398,7 +3388,7 @@ public class DesktopViewController {
                 .url("https://api.themoviedb.org/3/movie/" + metadata.id + "/credits?language=en-US")
                 .get()
                 .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                 .build();
 
         try (Response response = client.newCall(requestGroups).execute()) {
@@ -3555,7 +3545,7 @@ public class DesktopViewController {
                 .url("https://api.themoviedb.org/3/movie/" + tmdbID + "?language=" + library.getLanguage())
                 .get()
                 .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -3578,7 +3568,7 @@ public class DesktopViewController {
                 .url("https://api.themoviedb.org/3/tv/" + tmdbID + "?language=" + library.getLanguage())
                 .get()
                 .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -3601,7 +3591,7 @@ public class DesktopViewController {
                 .url("https://api.themoviedb.org/3/tv/" + tmdbID + "/season/" + season + "?language=" + library.getLanguage())
                 .get()
                 .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -3635,7 +3625,7 @@ public class DesktopViewController {
                 .url("https://api.themoviedb.org/3/" + type + "/" + tmdbID + "/images?include_image_language=" + languages)
                 .get()
                 .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -3679,7 +3669,7 @@ public class DesktopViewController {
                 .url("https://api.themoviedb.org/3/" + type + "/" + tmdbID + "/images?include_image_language=" + languages)
                 .get()
                 .addHeader("accept", "application/json")
-                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI0YjQ2NTYwYWZmNWZhY2QxZDllZGUxOTZjZTdkNjc1ZiIsInN1YiI6IjYxZWRkY2I4NGE0YmZjMDAxYjg3ZDM3ZCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.cZua6EdMzzNw5L96N2W94z66Q2YhrCrOsRMdo0RLcOQ")
+                .addHeader("Authorization", "Bearer " + App.themoviedbAPIToken)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {

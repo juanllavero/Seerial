@@ -205,7 +205,7 @@ public class DataManager {
             FileUtils.deleteDirectory(new File("resources/img/seriesCovers/" + series.getId()));
             FileUtils.deleteDirectory(new File("resources/img/logos/" + series.getId()));
         } catch (IOException e) {
-            System.err.println("App.removeCollection: Error deleting cover images directory");
+            System.err.println("removeCollection: Error deleting cover images directory");
         }
 
         for (Season season : series.getSeasons())
@@ -223,7 +223,7 @@ public class DataManager {
             if (!season.getVideoSrc().isEmpty())
                 Files.delete(FileSystems.getDefault().getPath(season.getVideoSrc()));
         } catch (IOException e) {
-            System.err.println("App.removeSeason: Error deleting images files and directories");
+            System.err.println("removeSeason: Error deleting images files and directories");
         }
 
         for (Episode episode : season.getEpisodes())
@@ -235,7 +235,7 @@ public class DataManager {
         try{
             FileUtils.forceDelete(new File("resources/img/discCovers/" + episode.getId()));
         } catch (IOException e) {
-            System.err.println("App.removeDisc: Error deleting directory: resources/img/discCovers/" + episode.getId());
+            System.err.println("removeDisc: Error deleting directory: resources/img/discCovers/" + episode.getId());
         }
 
         currentLibrary.getAnalyzedFiles().remove(episode.getVideoSrc());

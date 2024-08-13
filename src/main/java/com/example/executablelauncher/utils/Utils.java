@@ -40,12 +40,20 @@ import java.io.File;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
+    public static class NameYearContainer {
+        public String name;
+        public String year;
+
+        public NameYearContainer(String name, String year){
+            this.name = name;
+            this.year = year;
+        }
+    }
     public static class SeriesComparator implements Comparator<Series> {
         @Override
         public int compare(Series s1, Series s2) {
@@ -784,6 +792,59 @@ public class Utils {
             case 11 -> "10.1";
             case 12 -> "11.1";
             default -> String.valueOf(channels);
+        };
+    }
+    //endregion
+
+    //region FILE NAME PARSING
+
+    public static List<Integer> detectSeasonEpisode(String filename) {
+        List<Integer> seasonEpisode = new ArrayList<>();
+        String regex = "(?i)" +  //Case insensitive
+                "(?<!\\d)" + //Avoid resolutions as (1080p)
+                "((?:s?(\\d{1,2})[ex-](\\d{1,2}))|(?:II?|III?|IV?|V?)\\s?-\\s?(\\d{1,2}))" +
+                "(?!\\d)"; //Avoid resolutions as (1080p)
+
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(filename);
+
+        if (matcher.find()) {
+            String season = matcher.group(2);
+            String episode = matcher.group(3);
+
+            //Roman number to decimal number
+            if (season == null && matcher.group(4) != null) {
+                season = String.valueOf(romanToInt(matcher.group(1).split("-")[0].trim()));
+
+                if (season.equals("0"))
+                    season = null;
+
+                episode = matcher.group(4);
+            }
+
+            if (season != null && episode != null) {
+                seasonEpisode.add(Integer.parseInt(season));
+                seasonEpisode.add(Integer.parseInt(episode));
+            }
+
+            return seasonEpisode;
+        }
+        return null;
+    }
+
+    public static int romanToInt(String roman) {
+        return switch (roman.toUpperCase()) {
+            case "I" -> 1;
+            case "II" -> 2;
+            case "III" -> 3;
+            case "IV" -> 4;
+            case "V" -> 5;
+            case "VI" -> 6;
+            case "VII" -> 7;
+            case "VIII" -> 8;
+            case "IX" -> 9;
+            case "X" -> 10;
+            default -> 0;
         };
     }
     //endregion

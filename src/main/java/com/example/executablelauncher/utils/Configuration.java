@@ -4,10 +4,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayInputStream;
 
 public class Configuration {
-
-    private static final String CONFIG_FILE = "config.properties";
+    private static final String ALGORITHM = "AES";
+    private static final byte[] KEY = "1234567890123456".getBytes();
+    private static final String CONFIG_FILE = "resources/config/config.properties";
+    private static final String ENCRYPTED_KEYS = "resources/config/keys.properties.enc";
 
     public static void saveConfig(String key, String value) {
         Properties properties = new Properties();
@@ -37,5 +42,20 @@ public class Configuration {
         }
 
         return properties.getProperty(key, defaultValue);
+    }
+
+    public static Properties loadEncryptedProperties() throws Exception {
+        FileInputStream inputStream = new FileInputStream(ENCRYPTED_KEYS);
+        byte[] encryptedData = inputStream.readAllBytes();
+        inputStream.close();
+
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        SecretKeySpec keySpec = new SecretKeySpec(KEY, ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, keySpec);
+        byte[] decryptedData = cipher.doFinal(encryptedData);
+
+        Properties properties = new Properties();
+        properties.load(new ByteArrayInputStream(decryptedData));
+        return properties;
     }
 }

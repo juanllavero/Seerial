@@ -22,6 +22,9 @@ public class MainMenuDesktopController {
     @FXML
     private CheckBox interpolation;
 
+    @FXML
+    private CheckBox highSettingsPlayer;
+
     @FXML Label interpolationText;
 
     @FXML
@@ -112,6 +115,8 @@ public class MainMenuDesktopController {
         interpolationText.setText(App.textBundle.getString("interpolationMeaning"));
         interpolation.setText(App.textBundle.getString("interpolationCheck"));
         interpolation.setSelected(Boolean.parseBoolean(Configuration.loadConfig("interpolation", "false")));
+        highSettingsPlayer.setText(App.textBundle.getString("highSettingsPlayer"));
+        highSettingsPlayer.setSelected(Boolean.parseBoolean(Configuration.loadConfig("highSettingsPlayer", "true")));
         autoScan.setText(App.textBundle.getString("autoScan"));
         autoScan.setSelected(Boolean.parseBoolean(Configuration.loadConfig("autoScan", "true")));
         secondsBeforeVideoText.setText(App.textBundle.getString("backgroundDelay"));

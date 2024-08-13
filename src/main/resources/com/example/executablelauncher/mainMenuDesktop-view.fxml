@@ -144,6 +144,11 @@
                         <Insets top="20.0" />
                      </VBox.margin>
                   </CheckBox>
+                  <CheckBox fx:id="highSettingsPlayer" mnemonicParsing="false" styleClass="tiny-text" stylesheets="@styles.css" text="Modo alto rendimiento para el reproductor" textFill="WHITE">
+                     <VBox.margin>
+                        <Insets top="20.0" />
+                     </VBox.margin>
+                  </CheckBox>
                   <CheckBox fx:id="interpolation" mnemonicParsing="false" stylesheets="@styles.css" text="Habilitar interpolación de fotogramas" textFill="WHITE">
                      <styleClass>
                         <String fx:value="tiny-text" />

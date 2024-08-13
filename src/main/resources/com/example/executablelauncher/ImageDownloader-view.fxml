@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="1000.0" style="-fx-border-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageDownloaderController">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="1000.0" style="-fx-border-color: black; -fx-border-width: 2px;" styleClass="simpleBorder" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.ImageDownloaderController">
    <children>
       <BorderPane fx:id="mainPane" maxHeight="686.0" maxWidth="1096.0" minHeight="600.0" minWidth="750.0" styleClass="midSectionDarkColor" stylesheets="@styles.css">
          <center>

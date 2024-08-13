@@ -47,72 +47,68 @@ public class VideoPlayer {
             throw new IllegalStateException("Playback failed with error: " + error);
         }
 
-        boolean lowSettings = true;
-        if (lowSettings){
+        //region VIDEO SETTINGS
+        boolean hightSettings = Boolean.parseBoolean(Configuration.loadConfig("highSettingsPlayer", "true"));
+        if (!hightSettings){
             mpvSetProperty("gpu-api", "d3d11");
             mpvSetProperty("gpu-context", "d3d11");
             mpvSetProperty("profile", "fast");
             mpvSetProperty("vo", "gpu-next");
             mpvSetProperty("hwdec", "d3d11va");
-            mpvSetProperty("dither-depth", "auto");
         }else{
-            //Video Settings
             mpvSetProperty("gpu-api", "vulkan");
+            mpvSetProperty("gpu-context", "auto");
             mpvSetProperty("profile", "high-quality");
             mpvSetProperty("vo", "gpu-next");
-
-            mpvSetProperty("gpu-context", "auto");
             mpvSetProperty("hwdec", "auto-safe");
-
-            //HDR Settings
-            mpvSetProperty("tone-mapping", "bt.2446a");
-            mpvSetProperty("hdr-peak-percentile", "99.995");
-            mpvSetProperty("hdr-contrast-recovery", "0.30");
-            mpvSetProperty("target-colorspace-hint", "yes");
-            mpvSetProperty("target-contrast", "auto");
-
-            mpvSetProperty("deinterlace", "no");
-            mpvSetProperty("dither-depth", "auto");
-            mpvSetProperty("deband", "yes");
-            mpvSetProperty("deband-iterations", "4");
-            mpvSetProperty("deband-threshold", "35");
-            mpvSetProperty("deband-range", "16");
-            mpvSetProperty("deband-grain", "4");
-
-            mpvSetProperty("cursor-autohide", "100");
-
-            //Subtitles Settings
-            mpvSetProperty("blend-subtitles", "no");
-            mpvSetProperty("demuxer-mkv-subtitle-preroll", "yes");
-            mpvSetProperty("embeddedfonts", "yes");
-            mpvSetProperty("sub-fix-timing", "no");
-            mpvSetProperty("sub-font", "Open Sans SemiBold");
-            mpvSetProperty("sub-font-size", "46");
-            mpvSetProperty("sub-blur", "0.3");
-            mpvSetProperty("sub-border-color", "0.0/0.0/0.0/0.8");
-            mpvSetProperty("sub-border-size", "3.2");
-            mpvSetProperty("sub-color", "0.9/0.9/0.9/1.0");
-            mpvSetProperty("sub-margin-x", "100");
-            mpvSetProperty("sub-margin-y", "50");
-            mpvSetProperty("sub-shadow-color", "0.0/0.0/0.0/0.25");
-            mpvSetProperty("sub-shadow-offset", "0");
-
-            //Audio Settings
-            mpvSetProperty("audio-stream", "silence");
-            mpvSetProperty("audio-pitch-correction", "yes");
-
-            boolean interpolation = Boolean.parseBoolean(Configuration.loadConfig("interpolation", "false"));
-
-            if (interpolation){
-                mpvSetProperty("video-sync", "display-resample");
-                mpvSetProperty("interpolation", "yes");
-                mpvSetProperty("tscale", "sphinx");
-
-                mpvSetProperty("tscale-blur", "0.6991556596428412");
-                mpvSetProperty("tscale-radius", "1.05");
-                mpvSetProperty("tscale-clamp", "0.0");
-            }
         }
+
+        boolean interpolation = Boolean.parseBoolean(Configuration.loadConfig("interpolation", "false"));
+        if (interpolation){
+            mpvSetProperty("video-sync", "display-resample");
+            mpvSetProperty("interpolation", "yes");
+            mpvSetProperty("tscale", "sphinx");
+
+            mpvSetProperty("tscale-blur", "0.6991556596428412");
+            mpvSetProperty("tscale-radius", "1.05");
+            mpvSetProperty("tscale-clamp", "0.0");
+        }
+
+        mpvSetProperty("deinterlace", "no");
+        mpvSetProperty("dither-depth", "auto");
+        mpvSetProperty("deband", "yes");
+        mpvSetProperty("deband-iterations", "4");
+        mpvSetProperty("deband-threshold", "35");
+        mpvSetProperty("deband-range", "16");
+        mpvSetProperty("deband-grain", "4");
+
+        //HDR Settings
+        mpvSetProperty("tone-mapping", "bt.2446a");
+        mpvSetProperty("hdr-peak-percentile", "99.995");
+        mpvSetProperty("hdr-contrast-recovery", "0.30");
+        mpvSetProperty("target-colorspace-hint", "yes");
+        mpvSetProperty("target-contrast", "auto");
+
+        //Subtitles Settings
+        mpvSetProperty("blend-subtitles", "no");
+        mpvSetProperty("demuxer-mkv-subtitle-preroll", "yes");
+        mpvSetProperty("embeddedfonts", "yes");
+        mpvSetProperty("sub-fix-timing", "no");
+        mpvSetProperty("sub-font", "Open Sans SemiBold");
+        mpvSetProperty("sub-font-size", "46");
+        mpvSetProperty("sub-blur", "0.3");
+        mpvSetProperty("sub-border-color", "0.0/0.0/0.0/0.8");
+        mpvSetProperty("sub-border-size", "3.2");
+        mpvSetProperty("sub-color", "0.9/0.9/0.9/1.0");
+        mpvSetProperty("sub-margin-x", "100");
+        mpvSetProperty("sub-margin-y", "50");
+        mpvSetProperty("sub-shadow-color", "0.0/0.0/0.0/0.25");
+        mpvSetProperty("sub-shadow-offset", "0");
+
+        //Audio Settings
+        mpvSetProperty("audio-stream", "silence");
+        mpvSetProperty("audio-pitch-correction", "yes");
+        //endregion
 
         //Detect when the video id loaded
         boolean[] videoLoaded = {false};
