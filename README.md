@@ -16,9 +16,9 @@ libraryFolder
     │   episode 1.ext
     │   episode 2.ext
 ```
-*ext = file extension
+`*ext = file extension`
 
-Shows are detected by its root folder, searching for its name and analyzing all of the video files inside that folder. Because of that, the name of the folder has to be the name of the series; and it is best if the name has the **first air date year** in it, though the year is optional and does not need to be between parenthesis.
+Shows are detected by its root folder, searching for its name and analyzing all of the video files inside that folder. Because of that, the name of the folder has to be the name of the series; and it is best if the name has the `first air date year` in it, though the year is optional and does not need to be between parenthesis.
 
 Example of a show folder:
 > **Game of Thrones (2011)**
@@ -26,9 +26,20 @@ Example of a show folder:
 The video files inside are processed equally and the folders inside are not taken into account, but the name of the video files is key for the algorithm to find the exact match. The video file name needs to have one of this formats:
 
 > **S02E12.mkv**
+> 
+> **s02e12.mkv**
+> 
+> **2x12.mkv**
+> 
+> **2-12.mkv**
+> 
+> **2 - 12.mkv**
+> 
+> **II - 12.mkv**      //Yes, seasons can be in roman numbers (up to season X)
+> 
 > **24.mkv**
 
-Everything extra is optional, like the name of the show or the name of the episode. It only needs to have the season/episode or the absolute episode format. For the first one, the S/E can be lowercase (s/e) and the numbers can be in the format (01) or (1).
+Everything extra is optional, like the name of the show or the name of the episode. It only needs to have the season/episode or the absolute episode format. For the first one, the `S/E` can be lowercase `s/e` and the numbers can be in the format `01` or `1`.
 
 ### Movies/Concerts
 Movies and concerts are processed equally. It is done so in order to add concerts with multiple video files, or movies with extra videos.
@@ -85,10 +96,10 @@ Portable versions exist for Windows and Linux.
 This software is required in order for the application to run.
 
 - Java JDK 21 or newer (only for Linux, or if using the `.jar` file directly)
+- VLC (only for Linux)
 - Python 3
 - Python Pytube (`pip install pytube`)
 - FFMPEG
-- VLC (only for Linux)
 
 ## Branches
 -   `master`  - default branch representing the state of the currently released build.
