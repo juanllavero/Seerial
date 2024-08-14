@@ -100,6 +100,7 @@ public class Controller implements Initializable {
     @FXML HBox continueWatchingBox;
     @FXML VBox menuOptions;
     @FXML VBox settingsWindow;
+    @FXML VBox infoBox;
     @FXML Button settingsButton;
     @FXML Button backButton;
     @FXML Button menuButton;
@@ -254,6 +255,11 @@ public class Controller implements Initializable {
 
         //Remove horizontal and vertical scroll
         DesktopViewController.scrollModification(scrollPane);
+
+        //Set padding to resize content with resolution
+        infoBox.setPadding(new Insets(0, screenHeight * 0.05, 0, screenHeight * 0.05));
+        continueWatchingScroll.setPadding(new Insets(0, 0, screenHeight * 0.05, 0));
+        continueWatchingBox.setPadding(new Insets(30, screenHeight * 0.05, 30, screenHeight * 0.05));
 
         menuShadow.setFitWidth(screenWidth);
         menuShadow.setFitHeight(screenHeight);
@@ -1226,13 +1232,8 @@ public class Controller implements Initializable {
                 File logoFile = new File(logoSrc);
 
                 if (logoFile.exists() && logoFile.isFile()){
-                    Image img;
                     try {
-                        img = new Image(logoFile.toURI().toURL().toExternalForm(), mainPane.getScene().getHeight() * 0.4, mainPane.getScene().getHeight() * 0.4, true, true);
-
-                        logoImage.setImage(img);
-                        logoImage.setFitWidth(mainPane.getScene().getHeight() * 0.4);
-                        logoImage.setFitHeight(mainPane.getScene().getHeight() * 0.4);
+                        setLogoImage(logoImage, logoFile, false);
                     } catch (MalformedURLException e) {
                         System.err.println("selectEpisode: logo image could not be loaded");
                     }
@@ -1543,7 +1544,9 @@ public class Controller implements Initializable {
             mainPane.setDisable(true);
 
             try {
-                generateSeasonView(s).play();
+                FadeTransition fadeIn = generateSeasonView(s);
+                fadeIn.setOnFinished(e -> globalShadow.setVisible(true));
+                fadeIn.play();
             } catch (IOException e) {
                 mainViewBundle.setDisable(false);
                 mainPane.setDisable(false);
@@ -1571,10 +1574,11 @@ public class Controller implements Initializable {
             loadContinueWatchingEpisodes();
         }
 
+        mainPane.setDisable(false);
         FadeTransition fadeOut = fadeOutEffect(mainBox.getChildren().getLast(), 0.4f, 0);
         fadeOut.setOnFinished(e -> {
             mainViewBundle.setDisable(false);
-            mainPane.setDisable(false);
+            globalShadow.setVisible(false);
             inSeasonView = false;
             mainBox.getChildren().removeLast();
 

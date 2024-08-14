@@ -38,6 +38,7 @@ import javafx.util.Duration;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -165,7 +166,16 @@ public class Utils {
 
         return new WritableImage(pixelReader, 0, 0, (int) newWidth, (int) newHeight);
     }
+    public static void setLogoImage(ImageView logo, File logoFile, boolean seasonView) throws MalformedURLException {
+        Image img = new Image(logoFile.toURI().toURL().toExternalForm());
+        logo.setImage(img);
+        logo.setPreserveRatio(true);
 
+        if (seasonView)
+            logo.setFitHeight(Screen.getPrimary().getBounds().getHeight() * 0.25);
+        else
+            logo.setFitHeight(Screen.getPrimary().getBounds().getHeight() * 0.18);
+    }
     public static void markPreviousAndNextEpisodes(Series selectedSeries, Season selectedSeason, Episode selectedEpisode){
         if (DataManager.INSTANCE.currentLibrary.getType().equals("Shows")){
             //Mark as watched every episode before the current one
@@ -797,7 +807,6 @@ public class Utils {
     //endregion
 
     //region FILE NAME PARSING
-
     public static List<Integer> detectSeasonEpisode(String filename) {
         List<Integer> seasonEpisode = new ArrayList<>();
         String regex = "(?i)" +  //Case insensitive

@@ -17,7 +17,7 @@
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="2569.0" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
+<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="2127.0" style="-fx-background-color: black;" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.SeasonController">
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="1080.0" fitWidth="2175.0" pickOnBounds="true" preserveRatio="true" smooth="false" StackPane.alignment="TOP_LEFT">
          <image>
@@ -39,7 +39,7 @@
             <Image url="@../../../img/backgroundShadow.png" />
          </image>
       </ImageView>
-      <ImageView fx:id="backgroundShadow2" fitHeight="1080.0" fitWidth="2573.0" pickOnBounds="true">
+      <ImageView fx:id="backgroundShadow2" fitHeight="1080.0" fitWidth="2124.0" pickOnBounds="true">
          <effect>
             <ColorAdjust contrast="0.21" />
          </effect>
@@ -47,7 +47,7 @@
             <Image url="@../../../img/backgroundShadow.png" />
          </image>
       </ImageView>
-      <BorderPane prefHeight="200.0" prefWidth="200.0">
+      <BorderPane>
          <left>
             <Pane fx:id="fill" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
          </left>
@@ -55,7 +55,7 @@
             <Pane fx:id="shade" prefHeight="1030.0" prefWidth="331.0" BorderPane.alignment="CENTER" />
          </center>
       </BorderPane>
-      <BorderPane fx:id="mainPane" prefWidth="1280.0">
+      <BorderPane fx:id="mainPane">
          <right>
             <Button fx:id="nextSeasonButton" contentDisplay="CENTER" graphicTextGap="0.0" mnemonicParsing="false" onMouseClicked="#nextSeason" styleClass="fullscreenButtonTransparent" stylesheets="@styles.css" BorderPane.alignment="CENTER">
                <graphic>
@@ -97,16 +97,16 @@
             </Button>
          </left>
          <StackPane.margin>
-            <Insets bottom="100.0" />
+            <Insets />
          </StackPane.margin>
          <center>
             <VBox alignment="BOTTOM_LEFT" BorderPane.alignment="CENTER">
                <children>
-                  <VBox fx:id="infoBox" alignment="BOTTOM_LEFT" prefHeight="310.0" prefWidth="1108.0" spacing="5.0" stylesheets="@styles.css">
+                  <VBox fx:id="infoBox" alignment="BOTTOM_LEFT" prefHeight="310.0" prefWidth="1108.0" spacing="10.0" stylesheets="@styles.css">
                      <children>
                         <StackPane alignment="BOTTOM_LEFT">
                            <children>
-                              <ImageView fx:id="logo" fitHeight="301.0" fitWidth="631.0" pickOnBounds="true" preserveRatio="true" />
+                              <ImageView fx:id="logo" fitWidth="1200.0" pickOnBounds="true" preserveRatio="true" />
                               <Label fx:id="seriesTitle" alignment="CENTER" stylesheets="@styles.css" text="Series Title" textFill="WHITE">
                                  <effect>
                                     <DropShadow />
@@ -118,7 +118,7 @@
                               </Label>
                            </children>
                            <VBox.margin>
-                              <Insets bottom="5.0" />
+                              <Insets bottom="15.0" />
                            </VBox.margin>
                         </StackPane>
                         <Label fx:id="episodeName" stylesheets="@styles.css" text="Episode Name" textFill="WHITE">
@@ -192,9 +192,9 @@
                               </Label>
                            </children>
                         </HBox>
-                        <Button fx:id="detailsButton" alignment="TOP_LEFT" graphicTextGap="0.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" prefHeight="118.0" prefWidth="699.0" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
+                        <Button fx:id="detailsButton" alignment="TOP_LEFT" graphicTextGap="0.0" maxHeight="184.0" maxWidth="1005.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#openDetails" styleClass="overviewButton" stylesheets="@styles.css" textFill="WHITE" translateX="-3.0" wrapText="true">
                            <graphic>
-                              <Label fx:id="overviewField" alignment="TOP_LEFT" prefHeight="135.0" prefWidth="689.0" text="Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, " textFill="WHITE" wrapText="true">
+                              <Label fx:id="overviewField" alignment="TOP_LEFT" maxHeight="184.0" maxWidth="1005.0" text="Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, Sinopsis del episodio en cuestión, " textFill="WHITE" wrapText="true">
                                  <styleClass>
                                     <String fx:value="large-text" />
                                  </styleClass>
@@ -211,17 +211,10 @@
                            </VBox.margin>
                         </Button>
                      </children>
-                     <padding>
-                        <Insets left="130.0" />
-                     </padding>
                   </VBox>
                   <ScrollPane fx:id="episodeScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER">
                      <content>
-                        <HBox fx:id="cardContainer" alignment="CENTER_LEFT" fillHeight="false" spacing="50.0">
-                           <padding>
-                              <Insets bottom="20.0" left="130.0" right="50.0" top="20.0" />
-                           </padding>
-                        </HBox>
+                        <HBox fx:id="cardContainer" alignment="CENTER_LEFT" fillHeight="false" spacing="50.0" />
                      </content>
                      <VBox.margin>
                         <Insets bottom="10.0" top="10.0" />
@@ -326,7 +319,7 @@
                         </Button>
                      </children>
                      <VBox.margin>
-                        <Insets left="130.0" top="20.0" />
+                        <Insets />
                      </VBox.margin>
                   </HBox>
                </children>

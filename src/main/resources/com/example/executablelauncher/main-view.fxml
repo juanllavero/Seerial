@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1030.0" prefWidth="1719.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.Controller">
+<StackPane fx:id="mainBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.executablelauncher.Controller">
    <children>
       <ImageView fx:id="backgroundImage" fitHeight="1011.0" fitWidth="1688.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="TOP_RIGHT" />
       <StackPane fx:id="mainViewBundle" visible="false" StackPane.alignment="CENTER">
@@ -140,7 +140,7 @@
                            <children>
                               <StackPane>
                                  <children>
-                                    <ImageView fx:id="logoImage" fitHeight="225.0" fitWidth="326.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT" />
+                                    <ImageView fx:id="logoImage" fitWidth="800.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER_LEFT" />
                                     <Label fx:id="titleText" stylesheets="@styles.css" text="Show's Name" textFill="WHITE" wrapText="true" StackPane.alignment="BOTTOM_LEFT">
                                        <font>
                                           <Font name="SansSerif Bold" />
@@ -209,24 +209,20 @@
                               </Label>
                            </children>
                            <padding>
-                              <Insets bottom="10.0" left="100.0" right="100.0" />
+                              <Insets bottom="10.0" />
                            </padding>
                            <BorderPane.margin>
-                              <Insets left="20.0" />
+                              <Insets />
                            </BorderPane.margin>
                         </VBox>
                      </center>
                      <bottom>
                         <ScrollPane fx:id="continueWatchingScroll" focusTraversable="false" hbarPolicy="NEVER" styleClass="transparent" stylesheets="@styles.css" vbarPolicy="NEVER" BorderPane.alignment="CENTER">
                            <content>
-                              <HBox fx:id="continueWatchingBox" spacing="50.0">
-                                 <padding>
-                                    <Insets bottom="30.0" left="100.0" right="100.0" top="30.0" />
-                                 </padding>
-                              </HBox>
+                              <HBox fx:id="continueWatchingBox" spacing="50.0" />
                            </content>
                            <BorderPane.margin>
-                              <Insets bottom="50.0" left="20.0" right="20.0" />
+                              <Insets />
                            </BorderPane.margin>
                         </ScrollPane>
                      </bottom>

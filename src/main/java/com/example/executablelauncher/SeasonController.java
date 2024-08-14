@@ -48,6 +48,7 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -218,6 +219,12 @@ public class SeasonController {
         double screenHeight = Screen.getPrimary().getBounds().getHeight();
         double screenWidth = Screen.getPrimary().getBounds().getWidth();
 
+        //Set padding to resize content with resolution
+        mainPane.setPadding(new Insets(0, 0, screenHeight * 0.05, 0));
+        infoBox.setPadding(new Insets(0, 0, 0, screenHeight * 0.05));
+        cardContainer.setPadding(new Insets(20, screenHeight * 0.05, 20, screenHeight * 0.05));
+        ((HBox) playButton.getParent()).setPadding(new Insets(20, 0, 0, screenHeight * 0.05));
+
         //Fit all elements to screen size
         mainBox.setPrefWidth(screenWidth);
         mainBox.setPrefHeight(screenHeight);
@@ -237,6 +244,8 @@ public class SeasonController {
                 episodeButtons.get(episodes.indexOf(selectedEpisode)).requestFocus();
         });
 
+        detailsButton.setMaxWidth(screenWidth / 2);
+        overviewField.setMaxWidth(screenWidth / 2);
         detailsText.setPrefWidth(screenWidth / 2);
         detailsBox.setVisible(false);
 
@@ -481,12 +490,11 @@ public class SeasonController {
             seriesTitle.setVisible(true);
             logo.setVisible(false);
         }else if (logoFile.exists()){
-            Image img;
-            img = new Image("file:" + logoSrc, screenHeight * 0.4, screenHeight * 0.2, true, true);
-
-            logo.setImage(img);
-            logo.setFitWidth(screenHeight * 0.4);
-            logo.setFitHeight(screenHeight * 0.2);
+            try{
+                setLogoImage(logo, logoFile, true);
+            } catch (MalformedURLException e) {
+                System.err.println("UpdateInfo: logo image could not be created");
+            }
 
             seriesTitle.setVisible(false);
             logo.setVisible(true);
