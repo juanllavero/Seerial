@@ -1,6 +1,15 @@
 # <img src="https://github.com/juanllavero/Seerial/assets/33575454/fe9ef4f9-4fe5-4df3-a358-eefc389f4932" align="top_left" height="40" width="40"> Seerial
 A video library manager with an embedded video player. It features a desktop main application that is designed as a content manager that lets you add, edit and remove video content, analyzing your files automatically and downloading the content metadata; and a fullscreen mode controlled by keyboard that acts as the typical TV application to watch the content previoulsy set in the desktop mode.
 
+## Demos from the latest release
+This section features a couple of demo videos showing some of the functionalities of the application.
+### Desktop Mode Demo 1
+[![Desktop Mode Demo 1](https://img.youtube.com/vi/9x7BMvfJzlc/0.jpg)](https://www.youtube.com/watch?v=9x7BMvfJzlc)
+### Desktop Mode Demo 2
+[![Desktop Mode Demo 2](https://img.youtube.com/vi/bTsA_tDtOLs/0.jpg)](https://www.youtube.com/watch?v=bTsA_tDtOLs)
+### Fullscreen Mode Demo
+[![Fullscreen Mode Demo](https://img.youtube.com/vi/CpIguBXi0P4/0.jpg)](https://www.youtube.com/watch?v=CpIguBXi0P4)
+
 ## Folder structure and naming
 ### Shows
 Folder structure:
