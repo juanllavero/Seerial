@@ -4,11 +4,11 @@ A video library manager with an embedded video player. It features a desktop mai
 ## Demos from the latest release
 This section features a couple of demo videos showing some of the functionalities of the application.
 ### Desktop Mode Demo 1
-[![Desktop Mode Demo 1](https://img.youtube.com/vi/9x7BMvfJzlc/0.jpg)](https://www.youtube.com/watch?v=9x7BMvfJzlc)
+[![Desktop Mode Demo 1](https://img.youtube.com/vi/9x7BMvfJzlc/1.jpg)](https://www.youtube.com/watch?v=9x7BMvfJzlc)
 ### Desktop Mode Demo 2
-[![Desktop Mode Demo 2](https://img.youtube.com/vi/bTsA_tDtOLs/0.jpg)](https://www.youtube.com/watch?v=bTsA_tDtOLs)
+[![Desktop Mode Demo 2](https://img.youtube.com/vi/bTsA_tDtOLs/1.jpg)](https://www.youtube.com/watch?v=bTsA_tDtOLs)
 ### Fullscreen Mode Demo
-[![Fullscreen Mode Demo](https://img.youtube.com/vi/CpIguBXi0P4/0.jpg)](https://www.youtube.com/watch?v=CpIguBXi0P4)
+[![Fullscreen Mode Demo](https://img.youtube.com/vi/CpIguBXi0P4/1.jpg)](https://www.youtube.com/watch?v=CpIguBXi0P4)
 
 ## Folder structure and naming
 ### Shows
